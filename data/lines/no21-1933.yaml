@@ -1,0 +1,211 @@
+# DRAFT facts file for Ghost Line. Generated 2026-11-01 by scratch/write_facts.py from scratch/out/trace_report.json.
+# Values marked from the scans were read by eye (plan section 3). OSM way IDs were matched by script:
+# open https://www.openstreetmap.org/way/<id> for each leg, confirm it is the right street and stretch,
+# then set checked_by_human: true. Coordinates are [lon, lat]. OSM data (c) OpenStreetMap contributors, ODbL.
+line: no21-1933
+timing_minutes_checked: not_applicable   # the 1933 directory (id/65) gives no timing minutes
+departures_checked: not_applicable       # the 1933 directory gives no midday departures
+street_order_checked: false              # street order against id/65 not yet confirmed
+street_order_checked_date: "2026-11-01"  # date of this status
+mode: streetcar
+effective: "1933"
+source: https://collections.digitalmaryland.org/digital/collection/btjk/id/72
+pages:
+  route_text: https://collections.digitalmaryland.org/digital/collection/btjk/id/65
+timing_points: []          # the 1933 directory gives no timing points
+midday_departures: null    # "then at regular intervals": no 1933 wait may ever be shown
+streets:   # route text id/65
+  eastbound: [Pratt, Gilmor, Saratoga, Schroeder, Harlem Ave, Dolphin, Brevard (historic), Preston, Caroline, Lancaster, Broadway (to Shakespeare)]
+  westbound: [Shakespeare, Bond, Eastern Ave, Caroline, Preston, Brevard (historic), Dolphin, Harlem Ave, Schroeder, Saratoga, Gilmor, Lombard, Frederick Ave, Pratt (to Smallwood)]
+terminals:
+  west: {name: "Pratt & Smallwood", lonlat: [-76.651281, 39.284951]}
+  east_layover: {name: "Broadway & Shakespeare", lonlat: [-76.593459, 39.282118]}
+legs:
+  eastbound:
+    - street: "Pratt Street"
+      method: osm
+      osm_ways: [6005196, 98055830, 47994360]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.651281, 39.284951]
+      clip_to_lonlat: [-76.642196, 39.285382]
+      length_m: 785.3
+      checked_by_human: false
+    - street: "Gilmor Street"
+      method: osm
+      osm_ways: [1289127441, 98106786, 6003944, 949415763, 6004033, 98106798]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.642196, 39.285382]
+      clip_to_lonlat: [-76.64258, 39.292104]
+      length_m: 747.0
+      checked_by_human: false
+    - street: "Saratoga Street"
+      method: osm
+      osm_ways: [196920693, 98102283]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.64258, 39.292104]
+      clip_to_lonlat: [-76.633986, 39.292455]
+      length_m: 742.5
+      checked_by_human: false
+    - street: "Schroeder Street"
+      method: osm
+      osm_ways: [1458338359, 498401537, 24774507, 498403020, 24774508, 539730305]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.633986, 39.292455]
+      clip_to_lonlat: [-76.634257, 39.296834]
+      length_m: 486.8
+      checked_by_human: false
+    - street: "Harlem Avenue"
+      method: osm
+      osm_ways: [114055283]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.634257, 39.296834]
+      clip_to_lonlat: [-76.633241, 39.296871]
+      length_m: 87.7
+      checked_by_human: false
+    - street: "Dolphin Street"
+      method: osm
+      osm_ways: [197613648, 851740669, 73532460, 80318085, 6004399, 1049873249, 195059434, 998156156, 335291137, 547763505]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.633241, 39.296871]
+      clip_to_lonlat: [-76.624832, 39.303371]
+      length_m: 1026.2
+      checked_by_human: false
+    - street: "Dolphin Street (historic NE end)"
+      method: inferred
+      points_lonlat: [[-76.624832, 39.303371], [-76.621738, 39.305759]]
+      length_m: 376.1
+      note: "straight-line extension; same historical street as 1938, derived independently from the 1933 text"
+      checked_by_human: false
+    - street: "Brevard Street (historic)"
+      method: inferred
+      points_lonlat: [[-76.621738, 39.305759], [-76.620068, 39.304363], [-76.619962, 39.304366]]
+      length_m: 220.7
+      note: "Historic Brevard St: no through street today. Drawn on the line of the surviving OSM 'Brevard Street' fragment, which the 1935 Cram base map of the 1937 HOLC map shows parallel to Park Ave. Dolphin extended straight NE past today's curve to meet it."
+      checked_by_human: false
+    - street: "Preston Street"
+      method: osm
+      osm_ways: [424993943, 548206013, 548205996, 548205997, 6011072, 548206000, 24709979, 548206003, 1056065531, 548206004, 548206007, 548206008, 653661105, 399096871, 69545953, 1057047343, 1377763599, 1377763600, 98289486, 1378282512, 1378282514, 1378282510, 981899269, 192463117, 1055612495, 197613650]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.619962, 39.304366]
+      clip_to_lonlat: [-76.598036, 39.305223]
+      length_m: 1893.6
+      checked_by_human: false
+    - street: "Caroline Street"
+      method: osm
+      osm_ways: [197613659, 125437858, 1391226922, 1391226924, 1391226923, 98289586, 98289577, 870310868, 6021497, 69489845, 586063248, 586050815, 202502984, 197613672, 197613671, 98040514, 548256330]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.598036, 39.305223]
+      clip_to_lonlat: [-76.596558, 39.282425]
+      length_m: 2534.2
+      checked_by_human: false
+    - street: "Lancaster Street"
+      method: osm
+      osm_ways: [115211492]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.596558, 39.282425]
+      clip_to_lonlat: [-76.59347, 39.282557]
+      length_m: 266.8
+      checked_by_human: false
+    - street: "Broadway"
+      method: osm
+      osm_ways: [86092298]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.59347, 39.282557]
+      clip_to_lonlat: [-76.593459, 39.282118]
+      length_m: 49.2
+      checked_by_human: false
+  westbound:
+    - street: "Shakespeare Street"
+      method: osm
+      osm_ways: [6008156]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.593459, 39.282118]
+      clip_to_lonlat: [-76.595099, 39.282049]
+      length_m: 141.7
+      checked_by_human: false
+    - street: "Bond Street"
+      method: osm
+      osm_ways: [114769285, 98040496, 772594355]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.595099, 39.282049]
+      clip_to_lonlat: [-76.595353, 39.285494]
+      length_m: 383.1
+      checked_by_human: false
+    - street: "Eastern Avenue"
+      method: osm
+      osm_ways: [1458338135, 197613651]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.595353, 39.285494]
+      clip_to_lonlat: [-76.596765, 39.285435]
+      length_m: 122.0
+      checked_by_human: false
+    - street: "Caroline Street"
+      method: osm
+      osm_ways: [202502984, 586050815, 586063248, 69489845, 6021497, 870310868, 98289577, 98289586, 1391226923, 1391226924, 1391226922, 125437858, 197613659]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.596765, 39.285435]
+      clip_to_lonlat: [-76.598036, 39.305223]
+      length_m: 2199.5
+      checked_by_human: false
+    - street: "Preston Street"
+      method: osm
+      osm_ways: [197613650, 1055612495, 192463117, 981899269, 1378282510, 1378282514, 1378282512, 98289486, 1377763600, 1377763599, 1057047343, 69545953, 399096871, 653661105, 548206008, 548206007, 548206004, 1056065531, 548206003, 24709979, 548206000, 6011072, 548205997, 548205996, 548206013, 424993943]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.598036, 39.305223]
+      clip_to_lonlat: [-76.619962, 39.304366]
+      length_m: 1893.6
+      checked_by_human: false
+    - street: "Brevard Street (historic)"
+      method: inferred
+      points_lonlat: [[-76.619962, 39.304366], [-76.620068, 39.304363], [-76.621738, 39.305759]]
+      length_m: 220.7
+      note: "Historic Brevard St: no through street today. Drawn on the line of the surviving OSM 'Brevard Street' fragment, which the 1935 Cram base map of the 1937 HOLC map shows parallel to Park Ave. Dolphin extended straight NE past today's curve to meet it."
+      checked_by_human: false
+    - street: "Dolphin Street (historic NE end)"
+      method: inferred
+      points_lonlat: [[-76.621738, 39.305759], [-76.624832, 39.303371]]
+      length_m: 376.1
+      note: "straight-line extension"
+      checked_by_human: false
+    - street: "Dolphin Street"
+      method: osm
+      osm_ways: [547763505, 335291137, 998156156, 195059434, 1049873249, 6004399, 80318085, 73532460, 851740669, 197613648]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.624832, 39.303371]
+      clip_to_lonlat: [-76.633241, 39.296871]
+      length_m: 1026.2
+      checked_by_human: false
+    - street: "Harlem Avenue"
+      method: osm
+      osm_ways: [114055283]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.633241, 39.296871]
+      clip_to_lonlat: [-76.634257, 39.296834]
+      length_m: 87.7
+      checked_by_human: false
+    - street: "Schroeder Street"
+      method: osm
+      osm_ways: [539730305, 24774508, 498403020, 24774507, 498401537, 1458338359]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.634257, 39.296834]
+      clip_to_lonlat: [-76.633986, 39.292455]
+      length_m: 486.8
+      checked_by_human: false
+    - street: "Saratoga Street"
+      method: osm
+      osm_ways: [98102283, 196920693]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.633986, 39.292455]
+      clip_to_lonlat: [-76.64258, 39.292104]
+      length_m: 742.5
+      checked_by_human: false
+    - street: "Gilmor Street"
+      method: osm
+      osm_ways: [98106798, 6004033, 949415763, 6003944]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.64258, 39.292104]
+      clip_to_lonlat: [-76.642259, 39.286373]
+      length_m: 636.9
+      checked_by_human: false
+    - street: "Lombard Street"
+      method: osm
+      osm_ways: [98106794, 71682813, 98055833]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.642259, 39.286373]
+      clip_to_lonlat: [-76.648559, 39.286228]
+      length_m: 547.0
+      checked_by_human: false
+    - street: "Frederick Avenue"
+      method: osm
+      osm_ways: [11308776, 953001147]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.648559, 39.286228]
+      clip_to_lonlat: [-76.652683, 39.284844]
+      length_m: 387.6
+      checked_by_human: false
+    - street: "Pratt Street"
+      method: osm
+      osm_ways: [6005196]   # travel order; "gap" = bridged break
+      clip_from_lonlat: [-76.652683, 39.284844]
+      clip_to_lonlat: [-76.651281, 39.284951]
+      length_m: 121.7
+      note: "closes the loop to Pratt & Smallwood along today's Pratt St; the exact 1933 terminal approach is unresolved"
+      checked_by_human: false
