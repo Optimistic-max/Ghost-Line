@@ -124,7 +124,7 @@ The race plays at 1 second per 4 scheduled minutes, capped so no race lasts more
 | **Inferred corner** | The pair includes Brevard & Preston | A chip "Inferred corner" by the name, and one line: "Brevard Street is gone. This corner's position is our best reading of the 1938 diagram, so times to and from it are less certain." The route there is dashed. |
 | **Share link opened** | URL carries a valid pair | A banner for 5 s: "Shared race: Preston & Caroline → Aliceanna & Bond." The start time follows the normal default; the link carries no time. |
 | **Bad share link** | URL pair unknown, or origin = destination | "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." |
-| **Data error** | A data file failed to load or failed its shape check | "The timetable data didn't load. Check your connection and try again." plus a Retry button. No numbers are shown at all. |
+| **Data error** | A data file failed to load or failed its shape check | "The timetable data didn't load. Check your connection and try again." plus a Retry button. **No number appears anywhere on the screen**: no times, no totals, no counts, no "No. 21, 1938" in the top bar, and the trolley is drawn without its route number. Corner names stay. |
 | **Map unavailable** | Tiles or WebGL unavailable | The map area shows the bundled route drawing. The race is unaffected. Small text: "Map unavailable. Showing the route diagram." |
 
 The "no one-seat ride" state cannot be reached with the pinned feed at 400 m [C]. Build it and test it with the fake fixture line.
@@ -216,6 +216,21 @@ Tests to add: the six rows above as examples, and these properties for any list 
 ### 2.11 Counts are read, never typed
 
 Every count on screen comes from `summary.json` at run time: the races, the wins on each side, the photo finishes, the ride verdicts, and the "When today wins" list. The numbers in this brief and in the mockups (5,582 of 5,666 and the rest) are planning values that show the format. They must not appear in the code, in copy strings or in tests of the real data path. The test for this swaps in a `summary.json` with different numbers and checks the screen shows those.
+
+### 2.12 Labels that must always show, and four more states
+
+**Walks say "estimate" every time.** In the phase legend a walk reads "Walk 2 min · estimate". The status line reads "Walking to the stop 2 min (estimate)". The result box says "walking included (estimated)", for example "Trolley 15 min. Today's bus 45 min, walking included (estimated)."; on a phone this line may wrap to two lines. The spoken summary says "including 6 minutes of walking, estimated".
+
+**The slider shows its range.** Small muted text under the two ends of the track: "9:00" on the left and "13:52" on the right (about 9.5 px, never as large as the start time).
+
+Four states drawn in the second round (mockups 19 to 26):
+
+| State | Must contain |
+| --- | --- |
+| **Corner picker** | Title "Choose two corners". One line saying which step you are on ("Choose where the ride starts", then "Start is set. Now choose where the ride ends."). Five full-width buttons, west to east. The chosen start is outlined and tagged "Start". Brevard & Preston carries the "inferred" chip. A note: "Corners are listed west to east along the 1938 line. Brevard & Preston's position is inferred." A Cancel button. Choosing the same corner twice is not possible: the start is disabled in the second step. |
+| **Bad share link** | A banner: "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." The normal race for the default pair runs underneath; the error never replaces it. |
+| **No one-seat ride** | The 1938 lane with its time. In place of the bus lane: "No single scheduled bus links these corners on this weekday schedule. Routes that stop nearby: {list}." Result box: "No one-seat ride today" in `--ink`, then "Trolley {n} min. No winner is called." No bus total, no bus vehicle, no margin. This state cannot happen with the pinned feed, so it is only ever shown from the test fixture, under a visible tag: "Test fixture: a made-up line and made-up numbers. Not Baltimore data." The fixture has no map. |
+| **Map unavailable** | The map area shows the bundled route drawing: the route, its street names and the corner dots on a plain background, with "Map unavailable. Showing the route diagram." The race card is unchanged. |
 
 ---
 
@@ -327,7 +342,9 @@ Numbers in the pictures are planning values. The built site reads every number f
 
 This part was added after a second round of mockups. **Where it differs from sections 2.1 and 3.1 to 3.9 above, this part wins.** Palette B was chosen on Nov 15; every colour value in section 3.2 is replaced by 3A.4.
 
-Phone sizes now: top bar 40 px, map 150 px, race card from 181 px down, buttons pinned 6 px above the bottom.
+Phone sizes now: top bar 40 px, map 150 px, race card from 181 px down, buttons pinned 6 px above the bottom. If the card's content is taller than the screen (on a 667 px tall phone this happens in the two notice states, by about 14 px), the card scrolls inside itself and the two buttons stay pinned on a solid `--panel` strip, so text passes under them cleanly.
+
+**The UI direction was frozen on Nov 15 after this change. No further design changes until the race-screen spec is built.**
 
 ### 3A.1 Desktop layout (1280 px wide and up)
 
@@ -335,7 +352,8 @@ The site is one web page that must work on a phone and on a laptop. Mockups 13 t
 
 | Zone | Position | Contents |
 | --- | --- | --- |
-| Top bar | over the map area, 56 px high | Wordmark (30 px), then "No. 21, 1938 · Baltimore's trackless trolley, raced against today's scheduled bus" |
+| Top bar | over the map area, 56 px high | Wordmark (30 px), then "No. 21, 1938" |
+| Headline | over the top left of the map, under the top bar | "Same ride, longer wait." at 54 px in the display face, `--ink`, then one muted 14 px line: "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners." The map is positioned so no route or label sits under it. The headline is about the whole line and does not change with the result. |
 | Map | left, from 56 px down, everything except the race column | The Baltimore map (3A.3). It is large here, so it carries street names, neighbourhood names and all five corner names. |
 | Race column | right, fixed 440 px wide, full height, `--panel` background with a hairline on its left edge, 28 px side padding | Info button top right. Then exactly the same content, in the same order, as the phone's race card: pair row, slider, schedule line, two lanes, result box, honest line, departures board, then the two buttons directly under the content (not pinned to the bottom, so there is no empty band above them), then a footer line: "About and credits" on the left, "Open source. Built in Kiro." on the right. |
 | Sheets | slide in over the race column only (not from the bottom) | Sources, Corners, About and credits. The map dims behind a scrim. |
@@ -365,18 +383,22 @@ Sizes: on a phone, 150 px wide while racing and 104 px after the finish; on desk
 
 It is an original illustration in the general style of the period. It is not a drawing of one specific vehicle model, and it must not be traced from a photograph or a scan. Say "illustration" in the credits.
 
-### 3A.3 The map (replaces 3.6 where they differ)
+### 3A.3 The map (replaces 3.6)
 
-- **Base:** a quiet grid of real streets in `--street`, a few of them named in small muted text on desktop (North Ave, Franklin St, Baltimore St, Pratt St, Fulton Ave, Howard St, Charles St, Broadway).
-- **Harbour:** the water south of Pratt Street and Fells Point, filled `--water` with a hairline shore, labelled "Harbor" in italic serif. It is the one thing that says Baltimore at a glance.
-- **Neighbourhood names** on desktop only, wide-spaced and faint: Sandtown, Upton, Mount Vernon, Oldtown, Inner Harbor, Fells Point.
-- **The 1938 line** is the brightest thing on the map: a `--ghost` line with a blurred copy beneath it. Its streets are named along it in `--ghost` condensed type: Gilmor St, Lanvale St, Dolphin St, Preston St, Caroline St.
-- **Corners:** all five named on desktop; on a phone only the two chosen ones. The origin is a filled dot, the destination a ring. The inferred corner has a dashed outline and "(inferred)" after its name; the inferred stretch is dashed.
-- **Phone map:** 150 px tall. It shows the grid, the route with its street names, the two corner names and the top of the harbour. When the inferred corner is one of the chosen pair, the Dolphin St and Preston St labels are hidden to make room for its name.
-- **Map marker:** stops just short of the destination dot so it never covers a corner name.
-- **Faint map text** (street and neighbourhood names in `--muted`) is drawn at 80% opacity or more, which measures 5.09:1 on `--night`. Do not go fainter.
+The mockup map is now drawn from real geometry: the streets are the OpenStreetMap ways saved during planning, and the route is the saved 1938 trace built from the facts file. Nothing on it is hand-drawn.
 
-**Important for the build:** in the mockups the grid, the harbour outline and the neighbourhood label positions were sketched by hand and are approximate. The built map must take streets and the shoreline from OpenStreetMap data (or the base-map tiles), and each neighbourhood label must be checked against a map before it ships. The 1938 route itself comes from `route.geojson`.
+- **Streets:** every residential and larger street as a hairline in `--street`; main roads slightly brighter (`--street2`, `#40344F`) and about twice as thick. No fills, no blocks.
+- **Street names off the route** (desktop only): North Ave, Franklin St, Baltimore St, Pratt St, Fulton Ave, Howard St, Charles St, Broadway, in muted 11 px text. Each is placed on the street's own geometry.
+- **The harbour** is not outlined. It shows as the area with no streets, with one italic "Harbor" label on desktop. No shoreline is drawn because no shoreline data was saved; if the build has real water geometry it may fill it in `--water`.
+- **No neighbourhood names.** They were removed: none was verified.
+- **The 1938 line** is the brightest thing on the map: a `--ghost` line with a blurred copy beneath it. Its streets are named along it in `--ghost` condensed type with a dark outline so they stay readable over the street lines: Gilmor St, Lanvale St, Dolphin St, Preston St, Caroline St.
+- **Corners:** all five named on desktop; on a phone only the two chosen ones. The origin is a filled dot, the destination a ring. The inferred corner has a dashed outline and "(inferred)" after its name; the inferred stretch is dashed. Each name sits beside its own dot.
+- **Phone map:** 150 px tall. Streets, the route with its street names and the two corner names. When the inferred corner is one of the chosen pair, the Dolphin St and Preston St labels are hidden to make room for its name.
+- **Map marker:** the simplified trolley; it stops just short of the destination dot so it never covers a corner name.
+- **Faint map text** is never below 80% opacity (5.09:1 on `--night`).
+- **Credit line** on the map: "Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred."
+
+For the build: take streets from the base-map tiles or from OpenStreetMap data, and the route from `route.geojson`. The fallback when tiles or WebGL fail is the bundled route drawing (section 2.12, "Map unavailable").
 
 ### 3A.4 Palette: B, "Gaslight and brick" (chosen Nov 15)
 
@@ -437,7 +459,11 @@ Before and during a race, the space under the lanes holds a small board (mockups
 
 PNGs cannot show this, so it is written out. Durations are real milliseconds unless they say "scheduled".
 
-**Race clock.** One clock drives everything. It is shown as the time and the word "scheduled" only ("10:08 scheduled"); the playback speed is not printed on screen. 1 real second = 4 scheduled minutes, so a 45-minute trip plays in 11.25 s. If the longer trip would take more than 12 s, speed up so that it takes exactly 12 s. Movement is linear in time: no easing inside a phase.
+**Race clock.** One clock drives everything, and both sides start from the same instant, including the clamped start in the "before the midday table" state. Movement uses the exact stored durations, never the rounded minutes shown on screen. The race never waits for the map.
+
+Easing curves: ease-out `cubic-bezier(.16,1,.3,1)`; ease-in `cubic-bezier(.4,0,1,1)`; ease-in-out `cubic-bezier(.4,0,.2,1)`.
+
+One clock drives everything. It is shown as the time and the word "scheduled" only ("10:08 scheduled"); the playback speed is not printed on screen. 1 real second = 4 scheduled minutes, so a 45-minute trip plays in 11.25 s. If the longer trip would take more than 12 s, speed up so that it takes exactly 12 s. Movement is linear in time: no easing inside a phase.
 
 | Moment | What moves | Timing and easing |
 | --- | --- | --- |
@@ -450,15 +476,15 @@ PNGs cannot show this, so it is written out. Durations are real milliseconds unl
 | Bus | Slides at clock speed. No bob, no glow, no sparks. | Linear. |
 | Walking | The walk segment fills at clock speed; a small dot travels the dotted segment. The bus does not move during a walk. | Linear. |
 | Map marker | The small trolley moves along the route in step with the lane, only during the ride phase. | Linear. |
-| First arrival | The winner's bar flashes to full brightness, its vehicle's glow swells once, and its total appears. | Flash 200 ms; glow swell to 140% and back over 600 ms, ease-out. |
-| The finish moment | The result box arrives like a roller sign turning: it scales from 96% to 100% and its text rolls up 8 px into place. Then the honest line fades in. | Box 260 ms, ease-out; honest line 200 ms, starting 150 ms later. |
-| Slower side | Keeps running to its real finish at clock speed, dimmed to 70%. "Skip to result" stays visible until it finishes. | Linear. |
-| Photo finish | Both lanes flash together; the box appears in `--ink`. No glow swell for either side. | Same timings. |
-| Skip to result | Both lanes jump to finished; the result box appears with its normal entrance. | Immediate, then 260 ms. |
-| Slider moved | The running race stops at once. The new race starts 300 ms after the thumb is released, not while dragging. While dragging, only the time label and the departures board update. | No animation while dragging. |
-| Sheets | Phone: slide up from the bottom. Desktop: slide in from the right edge of the race column. The scrim fades. | 220 ms, ease-out; closing 160 ms, ease-in. |
-| Share banner | Slides down, stays, slides up. | 200 ms in, 5,000 ms hold, 200 ms out. |
-| Press feedback | Buttons and number buttons darken slightly while pressed. | 80 ms. |
+| First arrival | The end of the arriving side's bar brightens and settles, and its total appears. **The treatment is identical whichever side arrives first**: no extra glow, size or sound for a trolley win. The other side keeps racing. | 200 ms emphasis, then a 600 ms ease-out settle. |
+| The finish moment | Same place, size and weight whichever side won. The result box arrives like a roller sign turning: it scales from 96% to 100% and its text rolls up 8 px into place. Then the honest line fades in. | Box 260 ms, ease-out; honest line 200 ms, starting 150 ms later. |
+| Slower side | Keeps running to its real finish at clock speed. Its vehicle drawing may dim to 70%; its text and numbers keep full contrast. | Linear. |
+| Photo finish | Both bar ends get the same 200 ms emphasis at the same moment. The result box appears in `--ink`. Nothing winner-specific happens for either side. | Same timings. |
+| Skip to result | Reachable by tap and keyboard for as long as anything is moving. Both lanes jump to finished; the result box appears with its normal entrance. | Immediate, then 260 ms. |
+| Slider moved | The running race stops immediately on the first movement of the thumb or a press of minus or plus. While dragging, only the time label and the departures board update. The new race starts 300 ms after release (or 300 ms after the last minus or plus press). | No animation while dragging. |
+| Sheets | Phone: slide up from the bottom. Desktop: slide in from the right edge of the race column. The scrim fades. On close, focus returns to the control that opened the sheet. | 220 ms, ease-out; closing 160 ms, ease-in. |
+| Share banner | Slides down, stays, slides up. It names the pair only, never a time. | 200 ms in, 5,000 ms hold, 200 ms out. |
+| Press feedback | Buttons and number buttons change opacity while pressed. Nothing moves or resizes. | 80 ms. |
 
 Rules:
 
@@ -471,14 +497,14 @@ Rules:
 
 ### 3A.7 Mockup list (replaces 3.9)
 
-All pictures use palette B.
+All pictures use palette B and the real street map.
 
 | File | State |
 | --- | --- |
 | `01` to `12` | Phone: first load, racing, 1938 wins, today wins, photo finish, before the midday table, inferred corner, share link opened, data error, sources sheet, credits sheet, reduced motion |
-| `13-desktop-firstload.png` | Desktop, first load |
-| `14-desktop-racing.png` | Desktop, racing |
-| `15-desktop-wins1938.png` | Desktop, 1938 wins |
-| `16-desktop-todaywins.png` | Desktop, today wins |
-| `17-desktop-sources.png` | Desktop, sources panel |
+| `13` to `17` | Desktop: first load, racing, 1938 wins, today wins, sources panel |
 | `18-trolley-sheet.png` | The trolley at four sizes, with the bus |
+| `19-corners.png`, `23-desktop-corners.png` | Corner picker |
+| `20-badshare.png`, `24-desktop-badshare.png` | Bad share link |
+| `21-noseat-fixture.png`, `25-desktop-noseat-fixture.png` | No one-seat ride (test fixture) |
+| `22-mapunavailable.png`, `26-desktop-mapunavailable.png` | Map unavailable |

@@ -41,9 +41,15 @@ intended look on a phone and on a laptop; match them closely.
   (--ink for a photo finish). A win for today looks exactly like a win for 1938.
 - Before and during a race, a departures board sits under the lanes
   (screen-brief.md 3A.5).
-- Map: quiet street grid, the harbour, the 1938 line as the brightest thing,
-  its streets named along it. Streets and shoreline come from OpenStreetMap
-  data, never from the mockup pictures.
+- Map: real streets as hairlines, the 1938 line as the brightest thing, its
+  streets named along it. No neighbourhood names. Streets come from
+  OpenStreetMap data or the base-map tiles; the route from route.geojson.
+- Desktop only: the headline "Same ride, longer wait." sits over the top left
+  of the map (screen-brief.md 3A.1).
+- Every walk time carries the word "estimate" ("Walk 2 min · estimate"). The
+  slider shows "9:00" and "13:52" in small muted text under its two ends.
+- Data error state: no number anywhere on screen, including the route number
+  on the trolley and "No. 21, 1938" in the top bar.
 - Motion follows screen-brief.md 3A.6 exactly: 1 s per 4 scheduled minutes, at
   most 12 s, linear movement, only transform and opacity animated, a visible
   "Skip to result". The clock reads "10:08 scheduled" and nothing more.
