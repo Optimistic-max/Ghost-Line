@@ -4,23 +4,23 @@
 
 - [x] 1. Project scaffolding
   - [x] 1.1 Create pipeline/ package with `__init__.py` and `__main__.py`
-  - [x] 1.2 Create pyproject.toml with dependencies: pandas, pyproj, PyYAML, jsonschema, pytest, hypothesis, requests (requests is removed by correction task C2)
+  - [x] 1.2 Create pyproject.toml with dependencies: pandas, pyproj, PyYAML, jsonschema, pytest, hypothesis, requests (requests is removed by correction task 30)
   - [x] 1.3 Create tests/unit/, tests/property/, tests/golden/ and tests/fixtures/ directories with `__init__.py` files
   - [x] 1.4 Verify `python -m pipeline` runs without import errors
   - [x] 1.5 Verify all required dependencies install
 
 - [x] 2. CLI dispatcher
-  - [x] 2.1 Implement cli.py with argparse dispatcher for all six commands: fetch_osm, validate, build, check, verify, check_sources (fetch_osm is removed by correction task C2)
+  - [x] 2.1 Implement cli.py with argparse dispatcher for all six commands: fetch_osm, validate, build, check, verify, check_sources (fetch_osm is removed by correction task 30)
   - [x] 2.2 Wire `pipeline/__main__.py` to call cli.main()
   - [x] 2.3 Each command stub returns "not implemented" until its task is complete
-  - [x] 2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages (superseded by C2: five commands)
+  - [x] 2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages (superseded by task 30: five commands)
   - Depends on: task 1
 
 - [x] 3. Error handling classes
-  - [~] 3.1 Define PipelineError as base exception class
-  - [~] 3.2 Define FeedError, FactsError, RouteError, ValidationError as subclasses
-  - [~] 3.3 Each class has a clear docstring describing when it is raised
-  - [~] 3.4 All exception types importable from pipeline package
+  - [x] 3.1 Define PipelineError as base exception class
+  - [x] 3.2 Define FeedError, FactsError, RouteError, ValidationError as subclasses
+  - [x] 3.3 Each class has a clear docstring describing when it is raised
+  - [x] 3.4 All exception types importable from pipeline package
   - Depends on: task 1
 
 - [x] 4. JSON schemas
@@ -31,26 +31,26 @@
   - [x] 4.5 Verify each schema is valid JSON Schema (draft 2020-12 or compatible)
   - Depends on: task 1
 
-- [ ] 5. Test fixtures
-  - [~] 5.1 Write tests/fixtures/fake-line.yaml: minimal valid facts file with 2 corners, 1 leg per direction
-  - [~] 5.2 Write tests/fixtures/fake-gtfs/stops.txt, routes.txt, trips.txt, stop_times.txt, calendar.txt, calendar_dates.txt: tiny feed covering edge cases
-  - [~] 5.3 Include in fake-gtfs: a service removed by calendar_dates.txt exception_type 2, a trip reaching dest before origin (invalid), a pair with no trips
-  - [~] 5.4 All fixture files named "fake" to distinguish from real data
+- [x] 5. Test fixtures
+  - [x] 5.1 Write tests/fixtures/fake-line.yaml: minimal valid facts file with 2 corners, 1 leg per direction
+  - [x] 5.2 Write tests/fixtures/fake-gtfs/stops.txt, routes.txt, trips.txt, stop_times.txt, calendar.txt, calendar_dates.txt: tiny feed covering edge cases
+  - [x] 5.3 Include in fake-gtfs: a service removed by calendar_dates.txt exception_type 2, a trip reaching dest before origin (invalid), a pair with no trips
+  - [x] 5.4 All fixture files named "fake" to distinguish from real data
   - Depends on: task 1
 
-- [ ] 6. Property tests infrastructure
-  - [~] 6.1 Verify Hypothesis is installed and importable
-  - [~] 6.2 Create tests/property/conftest.py with shared Hypothesis strategies (e.g., valid time-of-day floats, positive distances)
-  - [~] 6.3 Confirm property test files in module tasks can import and use the strategies
+- [x] 6. Property tests infrastructure
+  - [x] 6.1 Verify Hypothesis is installed and importable
+  - [x] 6.2 Create tests/property/conftest.py with shared Hypothesis strategies (e.g., valid time-of-day floats, positive distances)
+  - [x] 6.3 Confirm property test files in module tasks can import and use the strategies
   - Depends on: task 1
 
-- [ ] 7. GTFS reader utilities (B22, B23)
-  - [~] 7.1 Implement GTFSReader class that opens a GTFS zip and reads named txt files as pandas DataFrames
-  - [~] 7.2 Cache service-date rows from stop_times.txt under raw/cache/ keyed by the first 12 characters of feed SHA-256 + "_" + service_date (B23)
-  - [~] 7.3 Handle missing GTFS files gracefully with clear error messages
-  - [~] 7.4 Implement parse_gtfs_time("25:10:00") → 1510.0 (minutes after midnight; handles hours ≥ 24); GTFS times stored as HH:MM:SS strings in output (B8)
-  - [~] 7.5 When reading stop_times, skip any row where arrival_time and departure_time are both blank; log a message for each skipped row (B22)
-  - [~] 7.6 Write tests/unit/test_gtfs_reader.py using the fake-gtfs fixture; include assertion that the blank-time row is skipped and original timed rows remain intact
+- [x] 7. GTFS reader utilities (B22, B23)
+  - [x] 7.1 Implement GTFSReader class that opens a GTFS zip and reads named txt files as pandas DataFrames
+  - [x] 7.2 Cache service-date rows from stop_times.txt under raw/cache/ keyed by the first 12 characters of feed SHA-256 + "_" + service_date (B23)
+  - [x] 7.3 Handle missing GTFS files gracefully with clear error messages
+  - [x] 7.4 Implement parse_gtfs_time("25:10:00") → 1510.0 (minutes after midnight; handles hours ≥ 24); GTFS times stored as HH:MM:SS strings in output (B8)
+  - [x] 7.5 When reading stop_times, skip any row where arrival_time and departure_time are both blank; log a message for each skipped row (B22)
+  - [x] 7.6 Write tests/unit/test_gtfs_reader.py using the fake-gtfs fixture; include assertion that the blank-time row is skipped and original timed rows remain intact
   - Depends on: task 1
 
 ## Module Implementation (Pipeline Steps)
@@ -154,40 +154,40 @@
 
 ## Correction Tasks
 
-Corrections to finished tasks 1, 2, 4 and 5. Their completed items above stay as history. Prompt 2 in docs/planning/blockB-fixes.md holds the implementation details.
+Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed items above stay as history. Prompt 2 in docs/planning/blockB-fixes.md holds the implementation details.
 
-- [x] C1. Correct JSON schemas (B2, B12, B16; Prompt 2)
-  - [~] C1.1 route.schema.json: each leg requires direction (eastbound or westbound), street, method, note and length_m (nonnegative number); loop legs use eastbound
-  - [~] C1.2 race.schema.json: row description covers every minute 09:00 to 13:52; races minItems and maxItems both 293
-  - [~] C1.3 index.schema.json: replace the sources array with a catalog object keyed by guide1938_diagram, guide1938_timetable, guide1938_route, mta_gtfs, osm and method; each entry requires what, year, where and url; year and url may be null for a documented method; all six entries required
-  - [~] C1.4 race, summary and route schemas: require a top-level sources object mapping blocks to nonempty ID arrays drawn from the six catalog IDs; keep the brief's nested y1938 source URLs
-  - [~] C1.5 Run Draft202012Validator.check_schema on all four schemas
+- [x] 29. Correct JSON schemas (B2, B12, B16; Prompt 2)
+  - [~] 29.1 route.schema.json: each leg requires direction (eastbound or westbound), street, method, note and length_m (nonnegative number); loop legs use eastbound
+  - [~] 29.2 race.schema.json: row description covers every minute 09:00 to 13:52; races minItems and maxItems both 293
+  - [~] 29.3 index.schema.json: replace the sources array with a catalog object keyed by guide1938_diagram, guide1938_timetable, guide1938_route, mta_gtfs, osm and method; each entry requires what, year, where and url; year and url may be null only on the method entry, and every real source must have both; all six entries required
+  - [~] 29.4 race, summary and route schemas: require a top-level sources object mapping blocks to nonempty ID arrays drawn from the six catalog IDs; keep the brief's nested y1938 source URLs
+  - [~] 29.5 Run Draft202012Validator.check_schema on all four schemas
   - Depends on: task 4
 
-- [x] C2. Correct the CLI to five commands (B10, B5, B13; Prompt 2)
-  - [~] C2.1 Remove fetch_osm from CLI registration, handler and stub tests; keep validate, build, check, verify and check_sources
-  - [~] C2.2 Test that top-level help lists all five commands and excludes fetch_osm; test that fetch_osm exits with argparse's unknown-command error
-  - [~] C2.3 Update check_sources help and docstrings: prose scan paths, exclusions, banned-term check, and generated JSON source validation; test top-level help and check_sources --help
-  - [~] C2.4 Remove requests from pyproject.toml; test the dependency list excludes it
+- [x] 30. Correct the CLI to five commands (B10, B5, B13; Prompt 2)
+  - [~] 30.1 Remove fetch_osm from CLI registration, handler and stub tests; keep validate, build, check, verify and check_sources
+  - [~] 30.2 Test that top-level help lists all five commands and excludes fetch_osm; test that fetch_osm exits with argparse's unknown-command error
+  - [~] 30.3 Update check_sources help and docstrings: prose scan paths, exclusions, banned-term check, and generated JSON source validation; test top-level help and check_sources --help
+  - [~] 30.4 Remove requests from pyproject.toml; test the dependency list excludes it
   - Depends on: task 2
 
-- [~] C3. Add the blank-time fixture row (B22; Prompt 2)
-  - [~] C3.1 Add one fake stop_times row with empty arrival_time and departure_time, using an existing fake trip and stop and a fresh stop_sequence
-  - [~] C3.2 Test with csv.DictReader that both cells are empty, the trip and stop references exist, and sequences are unique; assert the original timed rows and the overnight example remain
+- [x] 31. Add the blank-time fixture row (B22; Prompt 2)
+  - [~] 31.1 Add one fake stop_times row with empty arrival_time and departure_time, using an existing fake trip and stop and a fresh stop_sequence
+  - [~] 31.2 Test with csv.DictReader that both cells are empty, the trip and stop references exist, and sequences are unique; assert the original timed rows and the overnight example remain
   - Depends on: task 5
 
-- [x] C4. Apply .gitattributes LF rules (B6; Prompt 3)
-  - [x] C4.1 Add `web/public/data/** text eol=lf` and `data/osm/*.json text eol=lf` to the repository-root .gitattributes, keeping unrelated attributes and avoiding duplicates
-  - [x] C4.2 Verify with `git check-attr text eol` on web/public/data/index.json, web/public/data/race/test.json and data/osm/ways.json
+- [x] 32. Apply .gitattributes LF rules (B6; Prompt 3)
+  - [x] 32.1 Add `web/public/data/** text eol=lf` and `data/osm/*.json text eol=lf` to the repository-root .gitattributes, keeping unrelated attributes and avoiding duplicates
+  - [x] 32.2 Verify with `git check-attr text eol` on web/public/data/index.json, web/public/data/race/test.json and data/osm/ways.json
   - Depends on: none
 
-- [x] C5. Supply the OSM snapshot (B10)
-  - [x] C5.1 Provide the committed data/osm/ways.json dated 2026-11-01. Task 16 reads it and does not fetch.
+- [x] 33. Supply the OSM snapshot (B10)
+  - [x] 33.1 Provide the committed data/osm/ways.json dated 2026-11-01. Task 16 reads it and does not fetch.
   - Depends on: none
 
-- [ ] C6. Record the pending decisions
-  - [~] C6.1 Window-average method and brief corrections: pending Emmanuel
-  - [~] C6.2 Proposed 20 KB gzip limit for race files (B19): pending Emmanuel
+- [ ] 34. Record the pending decisions
+  - [~] 34.1 Window-average method and brief corrections: pending Emmanuel
+  - [~] 34.2 Proposed 20 KB gzip limit for race files (B19): pending Emmanuel
   - Depends on: none
 
 ## Integration and Commands

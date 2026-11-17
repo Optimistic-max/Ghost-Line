@@ -3,4 +3,4 @@ S_A1,Fake Corner A Near Stop 1,39.3002,-76.6198
 S_A2,Fake Corner A Near Stop 2,39.2998,-76.6202
 S_B1,Fake Corner B Near Stop 1,39.3002,-76.6098
 S_B2,Fake Corner B Near Stop 2,39.2998,-76.6102
-S_X1,Isolated Stop No Trips,39.3200,-76.6400
+S_X1,Fake Isolated Stop No Trips,39.3200,-76.6400

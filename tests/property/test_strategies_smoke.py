@@ -27,7 +27,7 @@ def test_time_of_day_in_range(t):
 @given(t=window_time())
 @settings(max_examples=200)
 def test_window_time_in_range(t):
-    assert 540.0 <= t <= 836.0
+    assert 540.0 <= t <= 832.0
 
 
 @given(d=positive_distance_m())

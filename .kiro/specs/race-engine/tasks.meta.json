@@ -313,6 +313,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882818067
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957107325
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957197455
       }
     ],
     "5.2 Write tests/fixtures/fake-gtfs/stops.txt, routes.txt, trips.txt, stop_times.txt, calendar.txt, calendar_dates.txt: tiny feed covering edge cases": [
@@ -320,6 +330,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882819176
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957200079
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957203731
       }
     ],
     "5.3 Include in fake-gtfs: a service removed by calendar_dates.txt exception_type 2, a trip reaching dest before origin (invalid), a pair with no trips": [
@@ -327,6 +347,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882820692
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957200841
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957204630
       }
     ],
     "5.4 All fixture files named \"fake\" to distinguish from real data": [
@@ -334,6 +364,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882822027
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957201392
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957205276
       }
     ],
     "5.5 Depends on: task 1": [
@@ -376,6 +416,11 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882830443
+      },
+      {
+        "executionId": "cdaabfa1-397b-4179-b720-c21df34f7630",
+        "chatSessionId": "sess_3f31690f-9b8b-40be-a9d5-7dbce48ca8c0",
+        "timestamp": 1794957676807
       }
     ],
     "7.2 Cache service-date rows from stop_times.txt under raw/cache/ keyed by service_date + feed SHA-256": [
@@ -1385,6 +1430,11 @@
         "executionId": "cb4714ee-527f-4ab7-bfd7-1048120f5789",
         "chatSessionId": "sess_67dacdb8-d97c-4d1b-a017-c2442777ed04",
         "timestamp": 1794951518225
+      },
+      {
+        "executionId": "be18f910-baf1-477c-bb06-30751a6d7cf4",
+        "chatSessionId": "sess_db56299c-b9ba-48ed-9ef4-687993cc2f6b",
+        "timestamp": 1794957205787
       }
     ],
     "6. Property tests infrastructure": [
@@ -1397,9 +1447,19 @@
         "executionId": "e263ae37-dd56-4d03-b2d7-26aeb11aad04",
         "chatSessionId": "sess_1e79dbe8-0ce6-4b02-b2e5-811df0971039",
         "timestamp": 1794953814257
+      },
+      {
+        "executionId": "fa7bf0a8-aca0-4f2e-9f54-6f3c320d3be6",
+        "chatSessionId": "sess_b9e4ffff-cbab-4e28-beb1-7593a486cbff",
+        "timestamp": 1794957566630
+      },
+      {
+        "executionId": "fa7bf0a8-aca0-4f2e-9f54-6f3c320d3be6",
+        "chatSessionId": "sess_b9e4ffff-cbab-4e28-beb1-7593a486cbff",
+        "timestamp": 1794957615100
       }
     ],
-    "C1. Correct JSON schemas (B2, B12, B16; Prompt 2)": [
+    "29. Correct JSON schemas (B2, B12, B16; Prompt 2)": [
       {
         "executionId": "61e46fef-638f-4460-b343-159aab24c7b1",
         "chatSessionId": "sess_2595d071-b7be-4748-bd1e-671717cc9737",
@@ -1411,7 +1471,7 @@
         "timestamp": 1794955799929
       }
     ],
-    "C2. Correct the CLI to five commands (B10, B5, B13; Prompt 2)": [
+    "30. Correct the CLI to five commands (B10, B5, B13; Prompt 2)": [
       {
         "executionId": "9fed5ab6-55ff-46c4-9268-012e19c5cc88",
         "chatSessionId": "sess_4e81de0d-725b-4f15-809e-e3d0e0b5e572",
@@ -1421,6 +1481,18 @@
         "executionId": "9fed5ab6-55ff-46c4-9268-012e19c5cc88",
         "chatSessionId": "sess_4e81de0d-725b-4f15-809e-e3d0e0b5e572",
         "timestamp": 1794956874381
+      }
+    ],
+    "31. Add the blank-time fixture row (B22; Prompt 2)": [
+      {
+        "executionId": "a2c33dfb-4ee1-47df-bbce-73cc3efd8704",
+        "chatSessionId": "sess_344e09b7-7c5d-43f8-86d1-eadb4e7b348b",
+        "timestamp": 1794957472552
+      },
+      {
+        "executionId": "a2c33dfb-4ee1-47df-bbce-73cc3efd8704",
+        "chatSessionId": "sess_344e09b7-7c5d-43f8-86d1-eadb4e7b348b",
+        "timestamp": 1794957514584
       }
     ]
   }

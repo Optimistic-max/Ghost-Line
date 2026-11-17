@@ -27,14 +27,13 @@ def time_of_day():
 
 def window_time():
     """
-    Float in [540.0, 836.0] — the racing window (09:00–13:56).
+    Float in [540.0, 832.0] — the slider range (09:00–13:52).
 
-    540 = 9 × 60 (first eastbound departure).
-    836 = 13 × 60 + 56 (last westbound departure).
+    540 = 9 × 60. 832 = 13 × 60 + 52 (293 whole-minute rows).
     """
     return st.floats(
         min_value=540.0,
-        max_value=836.0,
+        max_value=832.0,
         allow_nan=False,
         allow_infinity=False,
     ).map(lambda t: round(t, 3))
