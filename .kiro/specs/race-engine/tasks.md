@@ -64,24 +64,24 @@
   - [x] 8.4 Write tests/unit/test_feed_check.py covering missing file, hash mismatch, and valid file cases
   - Depends on: task 3
 
-- [ ] 9. facts module (B4, B5 slug)
-  - [~] 9.1 Implement load_facts(facts_path) that parses data/lines/no21-1938.yaml into a FactsFile dataclass; reads departure patterns, first/last and timing minutes from facts (not hard-coded constants)
-  - [~] 9.2 Validate: at least two timing points; first minutes_from_prev = 0, later values positive whole minutes; both directions have minutes_past_hour/first/last; each leg has street, method, length_m; each leg has osm_ways with clip points or points_lonlat with note
-  - [~] 9.3 Raise FactsError with field name if any required field is missing
-  - [~] 9.4 Parse coordinates as [lon, lat]
-  - [~] 9.5 Implement one slug function: lowercase, replace " & " with "-", then spaces with "-"; test all five real corner names produce correct slugs
-  - [~] 9.6 Write tests/unit/test_facts.py using fake-line.yaml and invalid variants
+- [~] 9. facts module (B4, B5 slug)
+  - [x] 9.1 Implement load_facts(facts_path) that parses data/lines/no21-1938.yaml into a FactsFile dataclass; reads departure patterns, first/last and timing minutes from facts (not hard-coded constants)
+  - [x] 9.2 Validate: at least two timing points; first minutes_from_prev = 0, later values positive whole minutes; both directions have minutes_past_hour/first/last; each leg has street, method, length_m; each leg has osm_ways with clip points or points_lonlat with note
+  - [x] 9.3 Raise FactsError with field name if any required field is missing
+  - [x] 9.4 Parse coordinates as [lon, lat]
+  - [x] 9.5 Implement one slug function: lowercase, replace " & " with "-", then spaces with "-"; test all five real corner names produce correct slugs
+  - [x] 9.6 Write tests/unit/test_facts.py using fake-line.yaml and invalid variants
   - Depends on: tasks 3, 5
 
-- [ ] 10. clock module (B3, B4, B20)
-  - [~] 10.1 Implement terminal_departures(pattern, first, last) using values read from facts (not hard-coded constants)
-  - [~] 10.2 Implement compute_offset(direction, corner_index, minutes) using cumulative sum from facts timing minutes
-  - [~] 10.3 Implement build_clock(facts) returning {direction: {corner_slug: Clock1938}} for all 10 corner-direction pairs
-  - [~] 10.4 Implement next_1938(clock, t) returning {start, dep, wait, before_table} with full precision; no rounding
-  - [~] 10.5 Implement ride_minutes(origin_slug, dest_slug, facts) as sum of timing minutes between corners
-  - [~] 10.6 Write tests/unit/test_clock.py covering all 8 test cases from race-brief.md section 5.1
-  - [~] 10.7 Write tests/golden/test_clock_golden.py: golden cases run without requires_feed (clock tests do not read the zip); skip only if facts or committed data files are absent; always run on dev machine (B20)
-  - [~] 10.8 Write tests/property/test_clock_properties.py covering all P1 properties (40 passes, gaps 7-8, offsets sum to 30, wait ≤ 8, next_1938 in passes, ride symmetry)
+- [x] 10. clock module (B3, B4, B20)
+  - [x] 10.1 Implement terminal_departures(pattern, first, last) using values read from facts (not hard-coded constants)
+  - [x] 10.2 Implement compute_offset(direction, corner_index, minutes) using cumulative sum from facts timing minutes
+  - [x] 10.3 Implement build_clock(facts) returning {direction: {corner_slug: Clock1938}} for all 10 corner-direction pairs
+  - [x] 10.4 Implement next_1938(clock, t) returning {start, dep, wait, before_table} with full precision; no rounding
+  - [x] 10.5 Implement ride_minutes(origin_slug, dest_slug, facts) as sum of timing minutes between corners
+  - [x] 10.6 Write tests/unit/test_clock.py covering all 8 test cases from race-brief.md section 5.1
+  - [x] 10.7 Write tests/golden/test_clock_golden.py: golden cases run without requires_feed (clock tests do not read the zip); skip only if facts or committed data files are absent; always run on dev machine (B20)
+  - [x] 10.8 Write tests/property/test_clock_properties.py covering all P1 properties (40 passes, gaps 7-8, offsets sum to 30, wait ≤ 8, next_1938 in passes, ride symmetry)
   - Depends on: task 9
 
 - [ ] 11. stops module (B3)
@@ -105,6 +105,7 @@
 - [ ] 13. race module (B3, B9, B12, B17)
   - [~] 13.1 Implement next_today(trips, start) exactly per race-brief.md section 5.2: NO_ONE_SEAT_RIDE if trips is empty; NO_MORE_TRIPS_TODAY if trips exist but none catchable; best = smallest (arr + egress_min), tie-break by earlier dep; if NO_MORE_TRIPS_TODAY encountered on real data raise PipelineError naming pair and time (B9)
   - [~] 13.2 Implement race_at_time(t, clock, eligible_trips, ride_1938_min) using same start for both sides; all values full precision
+  - Detail for 13.2: race_at_time receives NO_1938_TRIP from next_1938 as a returned value (see clock.py). With real data this must not happen; raise PipelineError naming the pair and the time.
   - [~] 13.3 Implement compute_result(margin): photo_finish if |margin| < 1.0, else "1938" or "today"
   - [~] 13.4 Implement run_all_races(pairs, clocks, eligible, facts) for all 20 pairs × every whole minute 09:00–13:52 (293 rows); pre-coverage rows repeat the covered_from race result (B12)
   - [~] 13.5 Write tests/unit/test_race.py: unit test for NO_ONE_SEAT_RIDE (empty trips list); unit test for NO_MORE_TRIPS_TODAY (trips exist, none catchable); test cases 5-6 from section 5.2 (made-up trips, by hand) (B9)

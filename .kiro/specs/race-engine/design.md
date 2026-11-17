@@ -262,6 +262,8 @@ def next_1938(clock: Clock1938, t: float) -> dict:
     """
 ```
 
+**Terminal check**: `build_clock` raises `FactsError` if a direction's `from` corner is not that direction's terminal (first timing point eastbound, last westbound).
+
 **Key algorithms**:
 - Terminal departures: every hh:mm satisfying first <= hh:mm <= last and mm in pattern
 - Offsets: cumulative sum of timing minutes in direction of travel (read from facts)

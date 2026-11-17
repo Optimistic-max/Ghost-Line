@@ -1499,6 +1499,30 @@
         "chatSessionId": "sess_344e09b7-7c5d-43f8-86d1-eadb4e7b348b",
         "timestamp": 1794957514584
       }
+    ],
+    "9.1 Implement load_facts(facts_path) that parses data/lines/no21-1938.yaml into a FactsFile dataclass; reads departure patterns, first/last and timing minutes from facts (not hard-coded constants)": [
+      {
+        "executionId": "588c35f0-0376-47b8-80c8-fb40da213ebd",
+        "chatSessionId": "sess_b76bd5b4-2a6f-44e3-a8c0-905ce66261d0",
+        "timestamp": 1794958276315
+      }
+    ],
+    "10. clock module (B3, B4, B20)": [
+      {
+        "executionId": "035d6f26-c289-44a7-b861-4b0491fc1b96",
+        "chatSessionId": "sess_0f3da47d-558a-4731-afca-079192bc2e53",
+        "timestamp": 1794958504248
+      },
+      {
+        "executionId": "055cc341-52ff-4c35-bc3c-8bdd5c911fc3",
+        "chatSessionId": "sess_0f3da47d-558a-4731-afca-079192bc2e53",
+        "timestamp": 1794958695565
+      },
+      {
+        "executionId": "055cc341-52ff-4c35-bc3c-8bdd5c911fc3",
+        "chatSessionId": "sess_0f3da47d-558a-4731-afca-079192bc2e53",
+        "timestamp": 1794958752853
+      }
     ]
   }
 }

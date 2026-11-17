@@ -43,6 +43,7 @@ legs:
         - [-76.6150, 39.3000]
         - [-76.6100, 39.3000]
       length_m: 862.6
+      note: "Fake leg drawn as a straight line; made-up test data"
   westbound:
     - street: "Fake Street"
       method: inferred
@@ -51,3 +52,4 @@ legs:
         - [-76.6150, 39.3000]
         - [-76.6200, 39.3000]
       length_m: 862.6
+      note: "Fake leg drawn as a straight line; made-up test data"
