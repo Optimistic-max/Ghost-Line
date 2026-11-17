@@ -7,7 +7,7 @@ import sys
 def cmd_fetch_osm(args: argparse.Namespace) -> None:
     """One-time fetch of OSM way geometries via Overpass API."""
     print("Command 'fetch_osm' is not yet implemented.")
-    sys.exit(0)
+    sys.exit(1)
 
 
 def cmd_validate(args: argparse.Namespace) -> None:
@@ -16,31 +16,31 @@ def cmd_validate(args: argparse.Namespace) -> None:
     Does not read the feed or touch the network. Completes in under 10 seconds.
     """
     print("Command 'validate' is not yet implemented.")
-    sys.exit(0)
+    sys.exit(1)
 
 
 def cmd_build(args: argparse.Namespace) -> None:
     """Full pipeline build into web/public/data/. Completes in under 60 seconds."""
     print("Command 'build' is not yet implemented.")
-    sys.exit(0)
+    sys.exit(1)
 
 
 def cmd_check(args: argparse.Namespace) -> None:
     """Run the full build, then run pytest. Used by pre-commit hooks."""
     print("Command 'check' is not yet implemented.")
-    sys.exit(0)
+    sys.exit(1)
 
 
 def cmd_verify(args: argparse.Namespace) -> None:
     """Rebuild from raw/ and fail if committed data files differ."""
     print("Command 'verify' is not yet implemented.")
-    sys.exit(0)
+    sys.exit(1)
 
 
 def cmd_check_sources(args: argparse.Namespace) -> None:
     """Fail on banned words and unsourced numbers found in web/ or docs/."""
     print("Command 'check_sources' is not yet implemented.")
-    sys.exit(0)
+    sys.exit(1)
 
 
 def main() -> None:

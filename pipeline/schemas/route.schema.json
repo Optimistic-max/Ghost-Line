@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ghost-line.example/schemas/route.schema.json",
+  "title": "Ghost Line route.geojson",
+  "description": "The 1938 route as a GeoJSON FeatureCollection. Each Feature is one leg, tagged with street, method, and note.",
+  "type": "object",
+  "required": ["type", "features"],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "FeatureCollection"
+    },
+    "features": {
+      "type": "array",
+      "description": "One Feature per route leg, in route order.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/RouteLegFeature"
+      }
+    }
+  },
+  "$defs": {
+    "RouteLegFeature": {
+      "type": "object",
+      "required": ["type", "geometry", "properties"],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Feature"
+        },
+        "geometry": {
+          "$ref": "#/$defs/LineStringGeometry"
+        },
+        "properties": {
+          "$ref": "#/$defs/LegProperties"
+        }
+      }
+    },
+    "LineStringGeometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "LineString"
+        },
+        "coordinates": {
+          "type": "array",
+          "description": "Sequence of [longitude, latitude] positions along the leg.",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/Position"
+          }
+        }
+      }
+    },
+    "Position": {
+      "type": "array",
+      "description": "[longitude, latitude] in WGS-84 decimal degrees. A third element (elevation) is allowed by GeoJSON but not required.",
+      "minItems": 2,
+      "items": { "type": "number" }
+    },
+    "LegProperties": {
+      "type": "object",
+      "required": ["street", "method", "note"],
+      "additionalProperties": true,
+      "properties": {
+        "street": {
+          "type": "string",
+          "description": "Name of the street or segment this leg follows, e.g. 'North Avenue'."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["osm", "osm+gap", "inferred"],
+          "description": "How the leg geometry was obtained. 'osm' = joined directly from OSM ways; 'osm+gap' = joined with one or more declared bridged breaks; 'inferred' = geometry hand-entered because no OSM trace was available."
+        },
+        "note": {
+          "type": ["string", "null"],
+          "description": "Explanatory note for the leg, required when method is 'inferred'; null otherwise."
+        }
+      }
+    }
+  }
+}

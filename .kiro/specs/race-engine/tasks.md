@@ -16,20 +16,20 @@
   - [x] 2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages
   - [x] 2.5 Depends on: task 1
 
-- [ ] 3. Error handling classes
+- [x] 3. Error handling classes
   - [~] 3.1 Define PipelineError as base exception class
   - [~] 3.2 Define FeedError, FactsError, RouteError, ValidationError as subclasses
   - [~] 3.3 Each class has a clear docstring describing when it is raised
   - [~] 3.4 All exception types importable from pipeline package
   - [~] 3.5 Depends on: task 1
 
-- [ ] 4. JSON schemas
-  - [~] 4.1 Write pipeline/schemas/index.schema.json matching the index.json format in race-brief.md section 4
-  - [~] 4.2 Write pipeline/schemas/summary.schema.json matching the summary.json shape in race-brief.md section 4.6
-  - [~] 4.3 Write pipeline/schemas/race.schema.json matching the race file format in race-brief.md section 4.5
-  - [~] 4.4 Write pipeline/schemas/route.schema.json for route.geojson (one Feature per leg, tagged with street, method, note)
-  - [~] 4.5 Verify each schema is valid JSON Schema (draft 2020-12 or compatible)
-  - [~] 4.6 Depends on: task 1
+- [x] 4. JSON schemas
+  - [x] 4.1 Write pipeline/schemas/index.schema.json matching the index.json format in race-brief.md section 4
+  - [x] 4.2 Write pipeline/schemas/summary.schema.json matching the summary.json shape in race-brief.md section 4.6
+  - [x] 4.3 Write pipeline/schemas/race.schema.json matching the race file format in race-brief.md section 4.5
+  - [x] 4.4 Write pipeline/schemas/route.schema.json for route.geojson (one Feature per leg, tagged with street, method, note)
+  - [x] 4.5 Verify each schema is valid JSON Schema (draft 2020-12 or compatible)
+  - [x] 4.6 Depends on: task 1
 
 - [ ] 5. Test fixtures
   - [~] 5.1 Write tests/fixtures/fake-line.yaml: minimal valid facts file with 2 corners, 1 leg per direction

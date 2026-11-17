@@ -211,6 +211,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882812249
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950238988
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950623099
       }
     ],
     "4.2 Write pipeline/schemas/summary.schema.json matching the summary.json shape in race-brief.md section 4.6": [
@@ -218,6 +228,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882813644
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950626066
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950629025
       }
     ],
     "4.3 Write pipeline/schemas/race.schema.json matching the race file format in race-brief.md section 4.5": [
@@ -225,6 +245,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882814913
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950632017
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950634463
       }
     ],
     "4.4 Write pipeline/schemas/route.schema.json for route.geojson (one Feature per leg, tagged with street, method, note)": [
@@ -232,6 +262,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882815896
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950637418
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950640132
       }
     ],
     "4.5 Verify each schema is valid JSON Schema (draft 2020-12 or compatible)": [
@@ -239,6 +279,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882817107
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950644724
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950649442
       }
     ],
     "4.6 Depends on: task 1": [
@@ -246,6 +296,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882817593
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950652828
+      },
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950655668
       }
     ],
     "5.1 Write tests/fixtures/fake-line.yaml: minimal valid facts file with 2 corners, 1 leg per direction": [
@@ -1289,6 +1349,25 @@
         "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
         "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
         "timestamp": 1794949828537
+      }
+    ],
+    "3. Error handling classes": [
+      {
+        "executionId": "4ad2cbee-f043-4661-8659-f5bf93c26f01",
+        "chatSessionId": "sess_8058ef8b-32c6-4811-ad97-d07e4798264c",
+        "timestamp": 1794950144546
+      },
+      {
+        "executionId": "4ad2cbee-f043-4661-8659-f5bf93c26f01",
+        "chatSessionId": "sess_8058ef8b-32c6-4811-ad97-d07e4798264c",
+        "timestamp": 1794950197773
+      }
+    ],
+    "4. JSON schemas": [
+      {
+        "executionId": "c8ef2a3c-f390-4a91-9f51-b941389e8f7b",
+        "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
+        "timestamp": 1794950657041
       }
     ]
   }

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ghost-line.example/schemas/summary.schema.json",
+  "title": "Ghost Line summary.json",
+  "description": "Overall race counts, per-pair ride verdicts, and the list of every race today wins.",
+  "type": "object",
+  "required": [
+    "schema",
+    "definition",
+    "races",
+    "wins_1938",
+    "wins_today",
+    "photo_finishes",
+    "ride_same",
+    "ride_faster_today",
+    "ride_slower_today",
+    "pairs_without_one_seat_ride",
+    "today_wins"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "ghostline.summary.v1"
+    },
+    "definition": {
+      "type": "string",
+      "description": "Human-readable description of the race parameters, e.g. the slider range and photo-finish band."
+    },
+    "races": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of races across all pairs."
+    },
+    "wins_1938": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of races won by the 1938 trolley."
+    },
+    "wins_today": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of races won by today's bus."
+    },
+    "photo_finishes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of races decided within the 1.0-minute photo-finish band."
+    },
+    "ride_same": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of pairs whose ride verdict is 'same'."
+    },
+    "ride_faster_today": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of pairs where today's ride is faster."
+    },
+    "ride_slower_today": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of pairs where today's ride is slower."
+    },
+    "pairs_without_one_seat_ride": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of pairs for which no one-seat trip was found at the configured radius."
+    },
+    "today_wins": {
+      "type": "array",
+      "description": "Every individual race where today wins, one entry per race minute.",
+      "items": {
+        "$ref": "#/$defs/TodayWin"
+      }
+    }
+  },
+  "$defs": {
+    "TodayWin": {
+      "type": "object",
+      "required": ["origin", "dest", "t", "margin"],
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "type": "string",
+          "description": "Slug of the origin corner."
+        },
+        "dest": {
+          "type": "string",
+          "description": "Slug of the destination corner."
+        },
+        "t": {
+          "type": "string",
+          "description": "Slider time in HH:MM format.",
+          "pattern": "^\\d{2}:\\d{2}$"
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Margin of victory in minutes (always positive; the loser's total minus the winner's total)."
+        }
+      }
+    }
+  }
+}

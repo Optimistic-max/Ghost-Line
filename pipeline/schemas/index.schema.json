@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ghost-line.example/schemas/index.schema.json",
+  "title": "Ghost Line index.json",
+  "description": "Line metadata: corners, pairs, service date, feed info, and sources.",
+  "type": "object",
+  "required": [
+    "schema",
+    "line",
+    "mode",
+    "effective",
+    "corners",
+    "pairs",
+    "service_date",
+    "feed_version",
+    "feed_sha256",
+    "sources"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "ghostline.index.v1"
+    },
+    "line": {
+      "type": "string",
+      "description": "Line identifier, e.g. 'no21-1938'."
+    },
+    "mode": {
+      "type": "string",
+      "description": "Transit mode of the 1938 service.",
+      "examples": ["trackless_trolley", "streetcar", "bus"]
+    },
+    "effective": {
+      "type": "string",
+      "description": "Effective date of the 1938 timetable (ISO 8601 date).",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "corners": {
+      "type": "array",
+      "description": "The timing-point corners in route order.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Corner"
+      }
+    },
+    "pairs": {
+      "type": "array",
+      "description": "All directed origin–destination pairs.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Pair"
+      }
+    },
+    "service_date": {
+      "type": "string",
+      "description": "The GTFS service date used for today's trips (ISO 8601 date).",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "feed_version": {
+      "type": "string",
+      "description": "MTA feed version identifier, e.g. '20260821'."
+    },
+    "feed_sha256": {
+      "type": "string",
+      "description": "SHA-256 hex digest of the pinned GTFS zip.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sources": {
+      "type": "array",
+      "description": "Source entries for every numeric or factual claim in this file.",
+      "items": {
+        "$ref": "#/$defs/Source"
+      }
+    }
+  },
+  "$defs": {
+    "Corner": {
+      "type": "object",
+      "required": ["slug", "name", "lonlat", "inferred", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string",
+          "description": "URL-safe hyphenated identifier for the corner.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable intersection name, e.g. 'Westwood & Carey'."
+        },
+        "lonlat": {
+          "type": "array",
+          "description": "Position as [longitude, latitude] in WGS-84.",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "inferred": {
+          "type": "boolean",
+          "description": "True when the position was inferred rather than taken from a primary source."
+        },
+        "note": {
+          "type": ["string", "null"],
+          "description": "Optional explanatory note; null if none."
+        }
+      }
+    },
+    "Pair": {
+      "type": "object",
+      "required": ["origin", "dest"],
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "type": "string",
+          "description": "Slug of the origin corner."
+        },
+        "dest": {
+          "type": "string",
+          "description": "Slug of the destination corner."
+        }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "required": ["field", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Name of the field this source supports."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the primary source document.",
+          "format": "uri"
+        },
+        "note": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

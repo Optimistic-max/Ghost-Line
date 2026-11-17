@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ghost-line.example/schemas/race.schema.json",
+  "title": "Ghost Line race file",
+  "description": "One directed pair: its 1938 clock, eligible trips, and one race row per slider minute.",
+  "type": "object",
+  "required": [
+    "schema",
+    "line",
+    "origin",
+    "dest",
+    "direction",
+    "inferred",
+    "service_date",
+    "feed_version",
+    "feed_sha256",
+    "radius_m",
+    "y1938",
+    "today",
+    "races"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "ghostline.race.v1"
+    },
+    "line": {
+      "type": "string",
+      "description": "Line identifier, e.g. 'no21-1938'."
+    },
+    "origin": {
+      "type": "string",
+      "description": "Slug of the origin corner."
+    },
+    "dest": {
+      "type": "string",
+      "description": "Slug of the destination corner."
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["eastbound", "westbound"],
+      "description": "Direction of travel along the line."
+    },
+    "inferred": {
+      "type": "boolean",
+      "description": "True if either endpoint uses an inferred position."
+    },
+    "service_date": {
+      "type": "string",
+      "description": "GTFS service date (ISO 8601 date).",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "feed_version": {
+      "type": "string",
+      "description": "MTA feed version identifier."
+    },
+    "feed_sha256": {
+      "type": "string",
+      "description": "SHA-256 hex digest of the pinned GTFS zip.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "radius_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Stop search radius in metres."
+    },
+    "y1938": {
+      "$ref": "#/$defs/Clock1938",
+      "description": "1938 timetable data for this pair."
+    },
+    "today": {
+      "$ref": "#/$defs/TodayTrips",
+      "description": "Today's eligible one-seat trips for this pair."
+    },
+    "races": {
+      "type": "array",
+      "description": "One race row per slider minute from covered_from through 13:52.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/RaceRow"
+      }
+    }
+  },
+  "$defs": {
+    "Clock1938": {
+      "type": "object",
+      "required": ["ride_min", "covered_from", "passes", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "ride_min": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "In-vehicle ride time in minutes (sum of inter-corner minutes)."
+        },
+        "covered_from": {
+          "type": "string",
+          "description": "First passing time at the origin corner (HH:MM).",
+          "pattern": "^\\d{2}:\\d{2}$"
+        },
+        "passes": {
+          "type": "array",
+          "description": "All scheduled passing times at the origin corner (HH:MM), strictly increasing.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          }
+        },
+        "sources": {
+          "type": "object",
+          "description": "Source URLs keyed by field name.",
+          "required": ["ride_min", "passes"],
+          "additionalProperties": false,
+          "properties": {
+            "ride_min": {
+              "type": "string",
+              "format": "uri"
+            },
+            "passes": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "TodayTrips": {
+      "type": "object",
+      "required": ["gap_min", "gap_max", "trips"],
+      "additionalProperties": false,
+      "properties": {
+        "gap_min": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Smallest gap in minutes between consecutive eligible departures in [09:00, 14:00)."
+        },
+        "gap_max": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Largest gap in minutes between consecutive eligible departures in [09:00, 14:00)."
+        },
+        "trips": {
+          "type": "array",
+          "description": "Eligible one-seat trips sorted by departure time.",
+          "items": {
+            "$ref": "#/$defs/Trip"
+          }
+        }
+      }
+    },
+    "Trip": {
+      "type": "object",
+      "required": ["i", "trip_id", "route", "headsign", "board", "alight", "dep", "arr", "ride_min"],
+      "additionalProperties": false,
+      "properties": {
+        "i": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0-based index used to reference this trip from race rows."
+        },
+        "trip_id": {
+          "type": "string",
+          "description": "GTFS trip_id."
+        },
+        "route": {
+          "type": "string",
+          "description": "Human-readable route name, e.g. 'CityLink Lime'."
+        },
+        "headsign": {
+          "type": "string",
+          "description": "Trip headsign as it appears in the GTFS feed."
+        },
+        "board": {
+          "$ref": "#/$defs/StopRef",
+          "description": "Boarding stop details."
+        },
+        "alight": {
+          "$ref": "#/$defs/StopRef",
+          "description": "Alighting stop details."
+        },
+        "dep": {
+          "type": "string",
+          "description": "Departure time from the boarding stop (HH:MM:SS; hours may exceed 23 for GTFS overnight trips).",
+          "pattern": "^\\d{2}:\\d{2}:\\d{2}$"
+        },
+        "arr": {
+          "type": "string",
+          "description": "Arrival time at the alighting stop (HH:MM:SS).",
+          "pattern": "^\\d{2}:\\d{2}:\\d{2}$"
+        },
+        "ride_min": {
+          "type": "number",
+          "minimum": 0,
+          "description": "In-vehicle ride time in minutes (arr − dep), stored to 3 decimal places."
+        }
+      }
+    },
+    "StopRef": {
+      "type": "object",
+      "required": ["stop_id", "name", "walk_m", "walk_min"],
+      "additionalProperties": false,
+      "properties": {
+        "stop_id": {
+          "type": "string",
+          "description": "GTFS stop_id."
+        },
+        "name": {
+          "type": "string",
+          "description": "Stop name from GTFS stops.txt."
+        },
+        "walk_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Geodesic walk distance from the corner to this stop, in metres."
+        },
+        "walk_min": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated walk time in minutes (walk_m × 1.3 ÷ 1.2 ÷ 60), to 3 decimal places."
+        }
+      }
+    },
+    "RaceRow": {
+      "type": "object",
+      "required": ["t", "start", "y1938", "result"],
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "type": "string",
+          "description": "Slider time (HH:MM).",
+          "pattern": "^\\d{2}:\\d{2}$"
+        },
+        "start": {
+          "type": "string",
+          "description": "Actual race start time (HH:MM); equals t unless t is before covered_from.",
+          "pattern": "^\\d{2}:\\d{2}$"
+        },
+        "before_table": {
+          "type": "boolean",
+          "description": "True when t is before covered_from (the slider is in the 'before midday table' state)."
+        },
+        "y1938": {
+          "$ref": "#/$defs/Race1938Side"
+        },
+        "today": {
+          "oneOf": [
+            { "$ref": "#/$defs/RaceTodaySide" },
+            { "type": "null" }
+          ],
+          "description": "Today's side of the race, or null when no one-seat ride exists."
+        },
+        "result": {
+          "type": "string",
+          "enum": ["1938", "today", "photo_finish", "no_one_seat_ride"],
+          "description": "Race outcome."
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Absolute difference between the two totals in minutes. Present for '1938', 'today', and 'photo_finish'; absent for 'no_one_seat_ride'."
+        }
+      }
+    },
+    "Race1938Side": {
+      "type": "object",
+      "required": ["dep", "wait", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "dep": {
+          "type": "string",
+          "description": "Departure time of the 1938 car from the origin corner (HH:MM).",
+          "pattern": "^\\d{2}:\\d{2}$"
+        },
+        "wait": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Wait time in minutes from start to the car's departure. Never exceeds 8."
+        },
+        "total": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Total time in minutes (wait + ride_min)."
+        }
+      }
+    },
+    "RaceTodaySide": {
+      "type": "object",
+      "required": ["trip", "wait", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "trip": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Index into the trips array (the 'i' field of the chosen trip)."
+        },
+        "wait": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Wait time in minutes from start to the moment the rider can board (dep − start − access_min)."
+        },
+        "total": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Total time in minutes from start to arrival at the destination corner (arr + egress_min − start)."
+        }
+      }
+    }
+  }
+}
