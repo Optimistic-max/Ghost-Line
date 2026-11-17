@@ -1,0 +1,2 @@
+web/public/data/** text eol=lf
+data/osm/*.json text eol=lf
