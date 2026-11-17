@@ -84,14 +84,15 @@
   - [x] 10.8 Write tests/property/test_clock_properties.py covering all P1 properties (40 passes, gaps 7-8, offsets sum to 30, wait ≤ 8, next_1938 in passes, ride symmetry)
   - Depends on: task 9
 
-- [ ] 11. stops module (B3)
-  - [~] 11.1 Implement geodesic_distance(lonlat1, lonlat2) using pyproj.Geod(ellps="WGS84")
-  - [~] 11.2 Implement compute_walk_time(distance_m) = metres × 1.3 ÷ 1.2 ÷ 60; full precision; label "estimate"; rounding done only at emit
-  - [~] 11.3 Implement find_stops_near_corners(gtfs, corners, radius_m=400.0) returning {corner_slug: [Stop, ...]}; full precision internally
-  - [~] 11.4 Write tests/unit/test_stops.py covering walk formula cases 1-4 from race-brief.md section 5.3
-  - [~] 11.5 Write tests/golden/test_stops_golden.py: cases 5-7 from section 5.3 (stop distances to actual corners); mark requires_feed; skip with visible warning when raw/ absent
-  - [~] 11.6 Write tests/property/test_walk_properties.py covering P2 properties (never negative, symmetric, doubling, max 7.223 min at 400m)
+- [x] 11. stops module (B3)
+  - [x] 11.1 Implement geodesic_distance(lonlat1, lonlat2) using pyproj.Geod(ellps="WGS84")
+  - [x] 11.2 Implement compute_walk_time(distance_m) = metres × 1.3 ÷ 1.2 ÷ 60; full precision; label "estimate"; rounding done only at emit
+  - [x] 11.3 Implement find_stops_near_corners(gtfs, corners, radius_m=400.0) returning {corner_slug: [Stop, ...]}; full precision internally
+  - [x] 11.4 Write tests/unit/test_stops.py covering walk formula cases 1-4 from race-brief.md section 5.3
+  - [x] 11.5 Write tests/golden/test_stops_golden.py: cases 5-7 from section 5.3 (stop distances to actual corners); mark requires_feed; skip with visible warning when raw/ absent
+  - [x] 11.6 Write tests/property/test_walk_properties.py covering P2 properties (never negative, symmetric, doubling, max 7.223 min at 400m)
   - Depends on: tasks 7, 9
+  - Brief corrections: race-brief.md 5.3 case 2: 230.15 -> 4.155; 4.156 is the real-stop value.
 
 - [ ] 12. eligible module (B9)
   - [~] 12.1 Implement active_services(gtfs, date) applying calendar.txt then calendar_dates.txt exceptions

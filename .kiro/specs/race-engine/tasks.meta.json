@@ -608,6 +608,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882863279
+      },
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958795401
+      },
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958862199
       }
     ],
     "11.2 Implement compute_walk_time(distance_m) = metres × 1.3 ÷ 1.2 ÷ 60; store to 3 decimals; label \"estimate\"": [
@@ -629,6 +639,11 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882867977
+      },
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958971595
       }
     ],
     "11.5 Write tests/golden/test_stops_golden.py: cases 5-7 from section 5.3 (stop distances to actual corners); skip with visible warning when raw/ absent": [
@@ -643,6 +658,11 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882869711
+      },
+      {
+        "executionId": "97357475-7651-40e8-9805-0cbc66ad4ff4",
+        "chatSessionId": "sess_4fd34d42-33a5-4b17-9478-bcb632306c53",
+        "timestamp": 1794959431335
       }
     ],
     "11.7 Depends on: tasks 7, 9": [
@@ -1522,6 +1542,54 @@
         "executionId": "055cc341-52ff-4c35-bc3c-8bdd5c911fc3",
         "chatSessionId": "sess_0f3da47d-558a-4731-afca-079192bc2e53",
         "timestamp": 1794958752853
+      }
+    ],
+    "11.2 Implement compute_walk_time(distance_m) = metres × 1.3 ÷ 1.2 ÷ 60; full precision; label \"estimate\"; rounding done only at emit": [
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958864617
+      },
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958903774
+      }
+    ],
+    "11.3 Implement find_stops_near_corners(gtfs, corners, radius_m=400.0) returning {corner_slug: [Stop, ...]}; full precision internally": [
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958906062
+      },
+      {
+        "executionId": "9b8b6ccb-cf53-4fa1-b2c8-b8c1f7639bbd",
+        "chatSessionId": "sess_896466fb-9a99-4e98-9c67-67bb0aada15f",
+        "timestamp": 1794958967803
+      }
+    ],
+    "11. stops module (B3)": [
+      {
+        "executionId": "9f2f5c07-a675-49a8-835e-58e36dd514cb",
+        "chatSessionId": "sess_4fd34d42-33a5-4b17-9478-bcb632306c53",
+        "timestamp": 1794959062563
+      },
+      {
+        "executionId": "97357475-7651-40e8-9805-0cbc66ad4ff4",
+        "chatSessionId": "sess_4fd34d42-33a5-4b17-9478-bcb632306c53",
+        "timestamp": 1794959368451
+      },
+      {
+        "executionId": "97357475-7651-40e8-9805-0cbc66ad4ff4",
+        "chatSessionId": "sess_4fd34d42-33a5-4b17-9478-bcb632306c53",
+        "timestamp": 1794959431854
+      }
+    ],
+    "11.5 Write tests/golden/test_stops_golden.py: cases 5-7 from section 5.3 (stop distances to actual corners); mark requires_feed; skip with visible warning when raw/ absent": [
+      {
+        "executionId": "97357475-7651-40e8-9805-0cbc66ad4ff4",
+        "chatSessionId": "sess_4fd34d42-33a5-4b17-9478-bcb632306c53",
+        "timestamp": 1794959430532
       }
     ]
   }
