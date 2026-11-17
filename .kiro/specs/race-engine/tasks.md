@@ -9,12 +9,12 @@
   - [x] 1.4 Verify `python -m pipeline` runs without import errors
   - [x] 1.5 Verify all required dependencies install
 
-- [ ] 2. CLI dispatcher
-  - [~] 2.1 Implement cli.py with argparse dispatcher for all six commands: fetch_osm, validate, build, check, verify, check_sources
-  - [~] 2.2 Wire `pipeline/__main__.py` to call cli.main()
-  - [~] 2.3 Each command stub returns "not implemented" until its task is complete
-  - [~] 2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages
-  - [~] 2.5 Depends on: task 1
+- [x] 2. CLI dispatcher
+  - [x] 2.1 Implement cli.py with argparse dispatcher for all six commands: fetch_osm, validate, build, check, verify, check_sources
+  - [x] 2.2 Wire `pipeline/__main__.py` to call cli.main()
+  - [x] 2.3 Each command stub returns "not implemented" until its task is complete
+  - [x] 2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages
+  - [x] 2.5 Depends on: task 1
 
 - [ ] 3. Error handling classes
   - [~] 3.1 Define PipelineError as base exception class

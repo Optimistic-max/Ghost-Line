@@ -91,6 +91,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882795091
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949417712
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949744536
       }
     ],
     "2.2 Wire `pipeline/__main__.py` to call cli.main()": [
@@ -98,6 +108,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882796890
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949749090
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949753026
       }
     ],
     "2.3 Each command stub returns \"not implemented\" until its task is complete": [
@@ -105,6 +125,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882798377
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949756779
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949760410
       }
     ],
     "2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages": [
@@ -112,6 +142,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882799893
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949772441
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949808476
       }
     ],
     "2.5 Depends on: task 1": [
@@ -119,6 +159,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882801362
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949814948
+      },
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949824677
       }
     ],
     "3.1 Define PipelineError as base exception class": [
@@ -1232,6 +1282,13 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794884193779
+      }
+    ],
+    "2. CLI dispatcher": [
+      {
+        "executionId": "217a83c3-3a0e-422d-aece-0e2ea9ed812d",
+        "chatSessionId": "sess_ff9561ac-b301-4425-bf34-dab49417072d",
+        "timestamp": 1794949828537
       }
     ]
   }
