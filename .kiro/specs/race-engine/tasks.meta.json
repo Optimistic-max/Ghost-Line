@@ -1369,6 +1369,35 @@
         "chatSessionId": "sess_f083b046-9d17-4d8b-9686-48732d5cd8f8",
         "timestamp": 1794950657041
       }
+    ],
+    "5. Test fixtures": [
+      {
+        "executionId": "0abe0472-a000-4ef1-be48-325c9f547341",
+        "chatSessionId": "sess_909621c3-b497-4327-b207-05d2ea576019",
+        "timestamp": 1794951017241
+      },
+      {
+        "executionId": "cb4714ee-527f-4ab7-bfd7-1048120f5789",
+        "chatSessionId": "sess_67dacdb8-d97c-4d1b-a017-c2442777ed04",
+        "timestamp": 1794951290883
+      },
+      {
+        "executionId": "cb4714ee-527f-4ab7-bfd7-1048120f5789",
+        "chatSessionId": "sess_67dacdb8-d97c-4d1b-a017-c2442777ed04",
+        "timestamp": 1794951518225
+      }
+    ],
+    "6. Property tests infrastructure": [
+      {
+        "executionId": "e6c2ad9e-7b65-416c-bda0-ea906a0be705",
+        "chatSessionId": "sess_1e79dbe8-0ce6-4b02-b2e5-811df0971039",
+        "timestamp": 1794951611016
+      },
+      {
+        "executionId": "e263ae37-dd56-4d03-b2d7-26aeb11aad04",
+        "chatSessionId": "sess_1e79dbe8-0ce6-4b02-b2e5-811df0971039",
+        "timestamp": 1794953814257
+      }
     ]
   }
 }

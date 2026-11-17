@@ -15,7 +15,7 @@ The race engine is a Python 3.12 package organized as a linear pipeline of indep
 pipeline/
 ├── __init__.py
 ├── __main__.py          # Entry point for python -m pipeline
-├── cli.py               # Command dispatcher (validate, build, check, verify, check_sources, fetch_osm)
+├── cli.py               # Command dispatcher (validate, build, check, verify, check_sources)
 ├── feed_check.py        # Step 1: SHA-256 validation
 ├── facts.py             # Step 2: Load and validate facts file
 ├── clock.py             # Step 3: Generate 1938 clock
@@ -23,17 +23,17 @@ pipeline/
 ├── eligible.py          # Step 5: Find one-seat trips per pair
 ├── race.py              # Step 6: Run all races
 ├── summary.py           # Step 7: Per-pair verdicts and totals
-├── route.py             # Step 8: Rebuild route from OSM ways
-├── emit.py              # Step 9: Write and validate JSON files
+├── route.py             # Step 8: Rebuild route from OSM ways snapshot
+├── emit.py              # Step 9: Write and validate JSON files; all rounding here
 ├── check_sources.py     # Source checking utility
-├── fetch_osm.py         # One-time OSM data fetcher via Overpass
-├── display_rounding.py  # Pure function for largest-remainder rounding
 └── schemas/             # JSON Schema files for validation
     ├── index.schema.json
     ├── summary.schema.json
     ├── race.schema.json
     └── route.schema.json
 ```
+
+**Removed modules (B7, B10)**: display_rounding.py belongs in the race-screen spec. fetch_osm.py is not part of the pipeline build; the data/osm/ways.json snapshot is committed.
 
 ## Data Flow
 
@@ -67,11 +67,20 @@ data/osm/ways.json ────────┘        │               │     
                                                     [totals, verdicts]
                                                            │
                                                            v
-                                                         emit
+                                                         emit   ← rounding only here (B3)
                                                            │
                                                            v
                                               web/public/data/*.json
 ```
+
+## Precision Rule (B3)
+
+facts, clock, stops, eligible, race and summary all keep full floating-point precision. emit is the only place where numbers are rounded before writing:
+- Durations and walk minutes → 3 decimals
+- Walk metres → 2 decimals
+- gap_min / gap_max → 3 decimals
+
+No dataclass carries a precision comment. No intermediate module rounds its output.
 
 ## Core Data Structures
 
@@ -95,8 +104,8 @@ class Clock1938:
     corner: str                    # Corner slug
     direction: str                 # "eastbound" or "westbound"
     offset_min: int                # Minutes from terminal
-    passes: list[float]            # Minutes after midnight (40 times)
-    covered_from: float            # First pass time
+    passes: list[float]            # Minutes after midnight (40 times), full precision
+    covered_from: float            # First pass time, full precision
 ```
 
 ### Stop
@@ -106,8 +115,8 @@ class Stop:
     stop_id: str
     name: str
     lonlat: tuple[float, float]
-    walk_m: float                  # Distance in metres (2 decimals)
-    walk_min: float                # Walk time in minutes (3 decimals)
+    walk_m: float                  # Full precision internally; rounded to 2 decimals at emit
+    walk_min: float                # Full precision internally; rounded to 3 decimals at emit
 ```
 
 ### EligibleTrip
@@ -119,59 +128,56 @@ class EligibleTrip:
     headsign: str
     board_stop: Stop               # Includes walk from origin corner
     alight_stop: Stop              # Includes walk to dest corner
-    dep: float                     # Minutes after midnight (3 decimals)
-    arr: float                     # Minutes after midnight (3 decimals)
-    ride_min: float                # arr - dep
-    access_min: float              # board_stop.walk_min
-    egress_min: float              # alight_stop.walk_min
+    dep: float                     # Minutes after midnight, full precision internally
+    arr: float                     # Minutes after midnight, full precision internally
+    dep_str: str                   # HH:MM:SS for output (B8)
+    arr_str: str                   # HH:MM:SS for output (B8)
+    ride_min: float                # arr - dep, full precision
+    access_min: float              # board_stop.walk_min, full precision
+    egress_min: float              # alight_stop.walk_min, full precision
 ```
 
-### RaceRow
+### RaceRow (B7, B8)
 ```python
 @dataclass
 class RaceRow:
     t: str                         # Slider time "HH:MM"
-    start: float                   # Actual start time (minutes after midnight)
+    start: float                   # Actual start time (minutes after midnight, full precision)
     before_table: bool = False
     y1938: Race1938
-    today: RaceToday | None        # None if no_one_seat_ride
+    today: RaceToday | None        # None (null in JSON) when result is no_one_seat_ride, as in the brief
     result: str                    # "1938", "today", "photo_finish", "no_one_seat_ride"
-    margin: float | None           # Absolute difference in minutes
+    margin: float | None           # Absolute difference in minutes, full precision
 
 @dataclass
 class Race1938:
     dep: str                       # "HH:MM"
-    wait: int                      # Rounded for display (whole minutes)
-    ride: int
-    total: int
-    wait_exact: float              # Stored value (3 decimals)
-    total_exact: float
+    wait: float                    # Full precision; rounded to 3 decimals at emit
+    ride: float                    # Full precision
+    total: float                   # Full precision; rounded to 3 decimals at emit
 
 @dataclass
 class RaceToday:
     trip: int                      # Index into trips array
-    access: int                    # Rounded for display
-    wait: int
-    ride: int
-    egress: int
-    total: int
-    access_exact: float            # Stored values
-    wait_exact: float
-    ride_exact: float
-    egress_exact: float
-    total_exact: float
+    access: float                  # Full precision; rounded to 3 decimals at emit
+    wait: float                    # Full precision; rounded to 3 decimals at emit
+    ride: float                    # Full precision; rounded to 3 decimals at emit
+    egress: float                  # Full precision; rounded to 3 decimals at emit
+    total: float                   # Full precision; rounded to 3 decimals at emit
 ```
 
-### RouteLeg
+No *_exact fields. No display-only fields. Stored output fields are t, start, before_table, y1938, today, result, margin. (B7)
+
+### RouteLeg (B2)
 ```python
 @dataclass
 class RouteLeg:
     street: str
-    direction: str                 # "eastbound", "westbound", "loop"
+    direction: str                 # "eastbound" or "westbound" (loop legs use "eastbound")
     method: str                    # "osm", "osm+gap", "inferred"
     coordinates: list[tuple[float, float]]  # [lon, lat] points
     length_m: float
-    note: str | None = None
+    note: str                      # Required; describes the leg (B2)
 ```
 
 ## Module Designs
@@ -193,7 +199,7 @@ def compute_sha256(file_path: Path) -> str:
 
 **Error handling**: Clear error message stating expected vs actual hash, or that file is missing.
 
-### 2. facts.py
+### 2. facts.py (B4)
 
 ```python
 def load_facts(facts_path: Path) -> FactsFile:
@@ -204,59 +210,61 @@ def load_facts(facts_path: Path) -> FactsFile:
     Raises: FactsError if schema invalid or required fields missing
     """
     
+def slugify(name: str) -> str:
+    """
+    One slug function: lowercase, replace ' & ' with '-', then spaces with '-'.
+    
+    Test cases: all five real corner names produce their expected slugs.
+    """
+
 @dataclass
 class FactsFile:
     line: str
     mode: str
     effective: str
     timing_points: list[TimingPoint]
-    midday_departures: dict[str, DeparturePattern]
+    midday_departures: dict[str, DeparturePattern]  # Read from facts, not hard-coded
     legs: dict[str, list[LegSpec]]
     source: str
     pages: dict[str, str]
 ```
 
-**Validation rules**:
-- 5 timing points present
-- 4 minute values between points
-- Both departure patterns present (eastbound, westbound)
-- All leg information complete
+**Validation rules (B4)**:
+- At least two timing points present
+- First point has minutes_from_prev = 0; all subsequent values are positive whole minutes
+- Both directions have minutes_past_hour, first and last
+- Each leg has street, method and length_m
+- Each leg has either osm_ways with clip points or points_lonlat with a note
 
-### 3. clock.py
+### 3. clock.py (B4)
 
 ```python
-PATTERNS = {
-    "eastbound": [0, 7, 15, 22, 30, 37, 45, 52],
-    "westbound": [4, 11, 19, 26, 34, 41, 49, 56]
-}
-
-FIRST = {"eastbound": 540, "westbound": 544}  # 09:00, 09:04 in minutes
-LAST = {"eastbound": 832, "westbound": 836}   # 13:52, 13:56
-
 def build_clock(facts: FactsFile) -> dict[str, dict[str, Clock1938]]:
     """
     Generate 1938 clock for each corner and direction.
+    Reads pattern, first, last and timing minutes from facts (not hard-coded).
     
     Returns: {direction: {corner_slug: Clock1938}}
     """
 
-def terminal_departures(direction: str) -> list[float]:
-    """Generate 40 terminal departure times."""
+def terminal_departures(pattern: list[int], first: float, last: float) -> list[float]:
+    """Generate terminal departure times from facts-sourced pattern/first/last."""
     
 def compute_offset(direction: str, corner_index: int, minutes: list[int]) -> int:
-    """Compute minutes from terminal to corner."""
+    """Compute minutes from terminal to corner using cumulative timing minutes."""
     
 def next_1938(clock: Clock1938, t: float) -> dict:
     """
     Find next 1938 departure at or after time t.
     
     Returns: {start, dep, wait, before_table}
+    All values full precision; rounded only at emit.
     """
 ```
 
 **Key algorithms**:
-- Terminal departures: every hh:mm where hh in 9..13 and mm in PATTERNS[dir]
-- Offsets: cumulative sum of timing minutes in travel direction
+- Terminal departures: every hh:mm satisfying first <= hh:mm <= last and mm in pattern
+- Offsets: cumulative sum of timing minutes in direction of travel (read from facts)
 - Passes: terminal_time + offset for each terminal departure
 - Next departure: smallest pass >= max(t, covered_from)
 
@@ -272,18 +280,19 @@ def find_stops_near_corners(
     Find GTFS stops within radius of each corner.
     
     Returns: {corner_slug: [Stop, ...]}
+    All walk values kept at full precision.
     """
 
 def geodesic_distance(lonlat1: tuple, lonlat2: tuple) -> float:
     """WGS84 geodesic distance in metres using pyproj."""
     
 def compute_walk_time(distance_m: float) -> float:
-    """Walk minutes = metres × 1.3 ÷ 1.2 ÷ 60"""
+    """Walk minutes = metres × 1.3 ÷ 1.2 ÷ 60. Full precision; emit rounds to 3 decimals."""
 ```
 
 **Implementation**:
 - Use pyproj.Geod(ellps="WGS84").inv() for distances
-- Round walk_m to 2 decimals, walk_min to 3 decimals
+- Keep full precision internally; emit rounds walk_m to 2 decimals and walk_min to 3 decimals
 - Label all walks as "estimate"
 
 ### 5. eligible.py
@@ -309,7 +318,6 @@ def find_eligible_trips(
     """
     Find one-seat trips linking two corners.
     
-    From race-brief.md section 5.4:
     For each trip on an active service:
       - Find all (origin_stop, dest_stop) pairs on same trip where:
         - origin_stop in origin_stops (within 400m of origin corner)
@@ -321,20 +329,26 @@ def find_eligible_trips(
       - Emit one record per trip
     
     Returns: List sorted by departure time
+    All walk/ride/access/egress values kept at full precision.
     """
 
 def parse_gtfs_time(time_str: str) -> float:
-    """Parse GTFS time to minutes after midnight (handles hours >= 24)."""
+    """Parse GTFS HH:MM:SS time to minutes after midnight (handles hours >= 24)."""
 ```
 
 **Edge cases**:
 - Trip reaches dest before origin: skip
 - Multiple valid stop pairs on one trip: use shortest walks
 - Service exception type 2 on date: exclude those trips
+- Empty eligible list → NO_ONE_SEAT_RIDE result (B9)
+- Trips exist but none catchable → NO_MORE_TRIPS_TODAY (internal sentinel; raises PipelineError naming pair and time if encountered on real data) (B9)
 
-### 6. race.py
+### 6. race.py (B9)
 
 ```python
+NO_ONE_SEAT_RIDE = "no_one_seat_ride"
+NO_MORE_TRIPS_TODAY = "no_more_trips_today"   # Internal sentinel only
+
 def run_all_races(
     pairs: list[tuple[str, str]],
     clocks: dict[str, dict[str, Clock1938]],
@@ -342,9 +356,10 @@ def run_all_races(
     facts: FactsFile
 ) -> dict[tuple[str, str], list[RaceRow]]:
     """
-    Run races for all pairs at all slider times 09:00 to 13:52.
-    
+    Run races for all pairs at all slider times 09:00 to 13:52 (293 minutes).
+    Pre-coverage rows (t < covered_from) repeat the covered_from race result.
     Returns: {(origin, dest): [RaceRow, ...]}
+    All values full precision.
     """
 
 def race_at_time(
@@ -355,7 +370,6 @@ def race_at_time(
 ) -> RaceRow:
     """
     Run one race at slider time t.
-    
     Both sides start from max(t, covered_from).
     """
 
@@ -363,20 +377,16 @@ def next_today(trips: list[EligibleTrip], start: float) -> dict | None:
     """
     Find best catchable trip after start time.
     
-    From race-brief.md section 5.2:
     1. If trips list is empty: return NO_ONE_SEAT_RIDE
     2. Filter catchable trips: dep >= start + access_min
     3. If no catchable trips: return NO_MORE_TRIPS_TODAY
     4. Best trip = the one with smallest (arr + egress_min)
-       - This is earliest arrival at the destination corner, walking included
-       - "The rider takes the trip that reaches the destination corner first"
-       - On tie: earlier departure
-    
-    Returns: Dict with trip details, or special result code
+       On tie: earlier departure
     
     Unit tests must cover:
     - Empty trips list → NO_ONE_SEAT_RIDE
     - Trips exist but none catchable → NO_MORE_TRIPS_TODAY
+    If NO_MORE_TRIPS_TODAY appears on real data, raise PipelineError naming the pair and time.
     """
 
 def compute_result(margin: float) -> str:
@@ -392,14 +402,6 @@ def ride_minutes(origin_slug: str, dest_slug: str, facts: FactsFile) -> float:
     """Sum timing minutes between two corners."""
 ```
 
-**Property checks in tests**:
-- Both sides always use same start
-- start >= t
-- start = t when t >= covered_from
-- Chosen trip is catchable
-- No other catchable trip arrives earlier
-- Result agrees with stored totals and 1.0-minute band
-
 ### 7. summary.py
 
 ```python
@@ -410,6 +412,8 @@ def compute_summary(
 ) -> Summary:
     """
     Compute per-pair verdicts and overall totals.
+    Count only rows where t >= covered_from (B12).
+    All values full precision; gap_min/gap_max typed as numbers, rounded at emit.
     """
 
 @dataclass
@@ -423,8 +427,8 @@ class PairSummary:
     ride_1938: float
     ride_today_median: float
     ride_verdict: str              # "same", "faster today", "slower today"
-    gap_min: int
-    gap_max: int
+    gap_min: float                 # Full precision; rounded to 3 decimals at emit (B14)
+    gap_max: float                 # Full precision; rounded to 3 decimals at emit (B14)
 
 def ride_verdict(delta: float, ride_1938: float) -> str:
     """
@@ -433,11 +437,11 @@ def ride_verdict(delta: float, ride_1938: float) -> str:
     delta > 0: "slower today"
     """
 
-def find_gaps(trips: list[EligibleTrip], window_start: float, window_end: float) -> tuple[int, int]:
+def find_gaps(trips: list[EligibleTrip], window_start: float, window_end: float) -> tuple[float, float]:
     """
-    Find min and max gaps between consecutive departures in time window.
-    
-    Window: [09:00, 14:00) from boarding stop
+    Find min and max gaps between adjacent sorted departures in time window.
+    Window: [09:00, 14:00) from boarding stop. (B14)
+    Returns floats at full precision; emit rounds to 3 decimals.
     """
 
 def arrival_weighted_wait(gaps: list[float]) -> float | None:
@@ -448,16 +452,24 @@ def arrival_weighted_wait(gaps: list[float]) -> float | None:
     """
 ```
 
-### 8. route.py
+### 8. route.py (B1, B2, B10, B11)
 
 ```python
+def load_ways(ways_path: Path) -> dict[str, list[tuple[float, float]]]:
+    """
+    Read the committed data/osm/ways.json snapshot. Never fetches network.
+    Raises named RouteError if any way ID listed in facts is missing.
+    """
+
 def build_route(
     facts: FactsFile,
     ways: dict[str, list[tuple[float, float]]]
 ) -> dict[str, list[RouteLeg]]:
     """
-    Rebuild 1938 route from OSM ways for each direction.
-    
+    Rebuild 1938 route from OSM ways.
+    Reads only no21-1938.yaml and data/osm/ways.json (B11).
+    Westbound legs form one joined line.
+    Loop + eastbound legs form the other joined line. (B2)
     Returns: {direction: [RouteLeg, ...]}
     """
 
@@ -465,33 +477,44 @@ def build_leg(leg_spec: LegSpec, ways: dict) -> RouteLeg:
     """
     Build one route leg.
     
-    Inferred: use points_lonlat from facts
-    OSM: join ways in order, handle gaps, clip to endpoints
+    Inferred: use points_lonlat from facts.
+    OSM legs (B1):
+      1. Join ways in listed order, orienting each to continue the preceding way.
+      2. Locate vertex nearest clip_from and vertex nearest clip_to on the joined line.
+      3. If those two vertices appear in reversed order along the line, reverse the entire line.
+      4. If clip_from and clip_to map to the same vertex, raise RouteError.
+      5. Clip between the clip_from and clip_to vertices.
+    Loop legs use direction = "eastbound".
+    Each leg output requires direction, street, method, note and length_m. (B2)
     """
 
 def orient_way(way: list[tuple], reference: list[tuple]) -> list[tuple]:
-    """Flip way if needed so it continues from reference endpoint."""
+    """Flip way if needed so it continues from the end of the reference segment."""
 
 def clip_line(line: list[tuple], start_point: tuple, end_point: tuple) -> list[tuple]:
-    """Extract segment between two points along line."""
+    """
+    Extract segment between two points along line.
+    Raises RouteError if start and end map to the same vertex (B1).
+    """
 
 def validate_leg_length(actual: float, expected: float) -> None:
     """Check |actual - expected| <= max(1m, 0.5% of expected)."""
 
-def validate_route(legs: list[RouteLeg], timing_points: list[TimingPoint]) -> None:
-    """
-    - Consecutive legs connect within 1m
-    - Each timing point within 30m of route
-    """
+def validate_route_joins(legs: list[RouteLeg]) -> None:
+    """Verify consecutive legs on the same joined line connect within 1m. (B2)"""
+
+def validate_timing_points(legs: list[RouteLeg], timing_points: list[TimingPoint]) -> None:
+    """Verify each timing point is within 30m of its joined line. (B2)"""
 ```
 
 **Error handling**:
-- Undeclared break > 1m: fail with street name
-- Length mismatch beyond tolerance: fail with actual vs expected
-- clip_to before clip_from: fail
-- Timing point > 30m from route: fail
+- Undeclared break > 1m: raise RouteError with street name
+- Length mismatch beyond tolerance: raise RouteError with actual vs expected
+- Equal clip_from/clip_to vertex: raise RouteError (B1)
+- Missing way ID: raise named RouteError (B10)
+- Timing point > 30m from route: raise RouteError
 
-### 9. emit.py
+### 9. emit.py (B3, B6, B7, B8, B16, B19)
 
 ```python
 def emit_all(
@@ -506,7 +529,12 @@ def emit_all(
     service_date: str,
     output_dir: Path
 ) -> None:
-    """Write all JSON files and validate against schemas."""
+    """
+    Write all JSON files and validate against schemas.
+    All rounding happens here and only here (B3).
+    Files written as UTF-8 without BOM, LF, compact separators, fixed key order (B6).
+    Reports raw and gzip size for each file; fails if any exceeds its approved budget (B19).
+    """
 
 def write_index_json(...)  -> Path
 def write_summary_json(...) -> Path
@@ -516,83 +544,56 @@ def write_route_geojson(...) -> Path
 def validate_against_schema(json_path: Path, schema_path: Path) -> None:
     """Validate JSON file against schema using jsonschema."""
 
-def check_all_numbers_sourced(json_path: Path) -> None:
-    """Verify every numeric field has a source entry."""
+def check_source_coverage(output_dir: Path) -> None:
+    """
+    Verify every numeric field in every output file is covered by its sources mapping.
+    Verify all source IDs resolve to entries in index.sources.
+    Raise ValidationError listing unresolved IDs or uncovered numeric fields. (B16)
+    """
+
+def report_sizes(output_dir: Path) -> None:
+    """
+    Report raw and gzip size for each generated file.
+    Fail build if any file exceeds its approved brief budget (B19).
+    """
 ```
 
-**Output validation**:
+**Output rules**:
 - Each file validated against its JSON schema
-- Source check: every number has source entry
-- All times stored to 3 decimals
-- All distances stored appropriately (walks to 2 decimals)
+- Source coverage check: every numeric field has a source entry; all IDs resolve
+- Rounding applied here only: durations/walk minutes to 3 decimals, walk metres to 2 decimals, gap_min/gap_max to 3 decimals
+- Slider and 1938 clock times → HH:MM strings; GTFS dep/arr → HH:MM:SS strings (B8)
+- Stored race row fields: t, start, before_table, y1938, today, result, margin; no *_exact fields (B7)
+- 293 rows per race file, 09:00–13:52; pre-coverage rows repeat covered_from race (B12)
 
-### 10. display_rounding.py
-
-```python
-def round_for_display(parts: list[float]) -> list[int]:
-    """
-    Largest-remainder method for display rounding.
-    
-    1. Round total to nearest (halves up): shown_total
-    2. Round each part down: floors
-    3. shortage = shown_total - sum(floors)
-    4. Give one minute to the 'shortage' parts with largest fractions
-       (on tie, earlier part gets it)
-    
-    Returns: List of shown parts that sum to shown_total
-    
-    Properties:
-    - sum(result) == round(sum(parts))
-    - All result[i] are whole numbers
-    - |result[i] - parts[i]| <= 1 for all i
-    - Pure function (same input → same output)
-    """
-```
-
-This is a pure, standalone function used by emit.py when writing race files.
-
-### 11. fetch_osm.py
+### 10. check_sources.py (B5)
 
 ```python
-def fetch_osm_ways(facts_path: Path, output_path: Path) -> None:
-    """
-    Fetch OSM way geometries via Overpass API.
-    
-    1. Extract all way IDs from facts file legs
-    2. Query Overpass for those ways
-    3. Write to output_path with download date in metadata
-    
-    This is a one-time command, never run during build.
-    """
-
-def query_overpass(way_ids: list[str]) -> dict[str, list[tuple[float, float]]]:
-    """Query Overpass API for multiple ways."""
-
-def write_ways_json(ways: dict, download_date: str, output_path: Path) -> None:
-    """Write ways with metadata: {download_date, ways: {id: [[lon,lat],...]}}"""
-```
-
-### 12. check_sources.py
-
-```python
-BANNED_WORDS = ["live", "real-time", "realtime", "arriving now", "right now"]
+BANNED_TERMS = ["live", "real-time", "realtime", "arriving now", "right now"]
 ALLOWED_PHRASE = "Scheduled, not live."
+PROSE_PATHS = ["web/index.html", "web/src/**", "docs/*.md", "README.md"]
+PROSE_EXCLUDES = ["docs/planning", "node_modules", "dist", "web/public/data"]
 
-def check_sources_in_files(paths: list[Path]) -> list[str]:
+def check_prose(paths: list[Path]) -> list[str]:
     """
-    Check files for banned words and unsourced numbers.
-    
-    Returns: List of violations (empty if all pass)
+    Scan prose files for banned terms.
+    Match case-insensitively as whole words/phrases.
+    Allow the exact phrase "Scheduled, not live."
+    Test that deliver, olive and lives are not flagged.
+    Returns: List of violations (empty if clean)
     """
 
-def find_banned_words(text: str) -> list[tuple[str, int]]:
-    """Find banned words (respecting ALLOWED_PHRASE exception)."""
-
-def find_unsourced_numbers(json_obj: dict) -> list[str]:
-    """Find numeric fields without source entries."""
+def check_json_sources(paths: list[Path]) -> list[str]:
+    """
+    Validate generated JSON source mappings.
+    Every source ID must resolve; every numeric field must be covered.
+    Returns: List of violations (empty if clean)
+    """
 ```
 
-## CLI Design
+**Separation**: Prose checks (banned terms) and JSON checks (source IDs) are distinct operations. The command runs both. (B5)
+
+## CLI Design (B10)
 
 ```python
 # cli.py
@@ -600,20 +601,41 @@ def main():
     parser = argparse.ArgumentParser(prog="pipeline")
     subparsers = parser.add_subparsers(dest="command")
     
-    # fetch_osm: one-time OSM data fetch
-    # validate: fast checks, no feed
+    # Five commands only (fetch_osm removed) (B10):
+    # validate: fast checks, no feed, checks all existing generated JSON against schemas (B21)
     # build: full pipeline
     # check: build + pytest
-    # verify: rebuild and compare
-    # check_sources: banned words and unsourced numbers
+    # verify: rebuild and compare byte-for-byte; bypasses cache (B23)
+    # check_sources: prose banned terms + JSON source validation
 
-def cmd_fetch_osm(args): ...
 def cmd_validate(args): ...
 def cmd_build(args): ...
 def cmd_check(args): ...
 def cmd_verify(args): ...
 def cmd_check_sources(args): ...
 ```
+
+**Removed**: fetch_osm command and handler. The OSM snapshot is supplied separately and committed. (B10, B13)
+
+## Source Catalog Design (B16)
+
+index.sources is the catalog object keyed by six IDs:
+- guide1938_diagram
+- guide1938_timetable
+- guide1938_route
+- mta_gtfs
+- osm
+- method
+
+Each catalog entry requires: what, year, where, url (year and url may be null for a documented method).
+
+Other output files carry a top-level sources object mapping field blocks to arrays of catalog IDs:
+- race.json: y1938 → [guide1938_diagram, guide1938_timetable]; today → [mta_gtfs, method]; races → [guide1938_diagram, guide1938_timetable, mta_gtfs, method]; radius_m → [method]
+- summary.json: numeric counts and today_wins → race inputs and method
+- route.geojson: features → [guide1938_route, osm, method]
+- index.json: corners → [guide1938_diagram, guide1938_route, osm]
+
+ID arrays must be non-empty and drawn only from the six catalog IDs. All six catalog entries are required. (B16)
 
 ## Testing Strategy
 
@@ -623,21 +645,26 @@ def cmd_check_sources(args): ...
 - Mock external dependencies (file I/O, network)
 
 ### Property Tests (tests/property/)
-- Hypothesis-based tests for all P1-P10 properties
+- Hypothesis-based tests for all P1-P7, P9-P10 properties
 - Generate random inputs within constraints
 - Verify invariants hold
 
 ### Golden Tests (tests/golden/)
-- Test against expected values from race-brief.md
+- Test against expected values from race-brief.md sections 5.1–5.8 (B15)
+- Section 5.9 (display rounding) moves to race-screen spec (B15)
 - **On developer machine**: `python -m pipeline check` always runs golden tests; they must pass
 - **In CI (GitHub Actions)**: Skip gracefully when raw/ missing, with visible warning message
 - **verify command**: Must fail with clear error (not skip) if raw/mta_local_bus.zip is missing
 - Any skip must print a visible warning to stdout
 - Must pass before any commit touching pipeline/ or data/
 
+### requires_feed Marker (B20)
+- Applies only to tests that actually read the pinned zip, including full-build integration
+- Clock 5.1, formula 5.7 and route 5.8 tests run without requires_feed
+
 ### Fixture Data (tests/fixtures/)
 - fake-line.yaml: minimal valid facts file
-- fake-gtfs/: tiny GTFS feed for edge cases
+- fake-gtfs/: tiny GTFS feed for edge cases; includes one row with blank arrival_time and departure_time, which must be ignored with a logged message (B22)
 - All fixtures named "fake" to avoid confusion
 
 ## Error Handling Strategy
@@ -660,6 +687,8 @@ class ValidationError(PipelineError):
     """Output validation failed."""
 ```
 
+If NO_MORE_TRIPS_TODAY is encountered on real data, raise PipelineError naming the pair and the time. (B9)
+
 ### Error Messages
 All error messages must be:
 - **Clear**: State what went wrong
@@ -669,7 +698,7 @@ All error messages must be:
 Examples:
 ```
 FeedError: raw/mta_local_bus.zip not found. 
-  Place the pinned GTFS feed at this path, or run with --skip-feed for testing.
+  Place the pinned GTFS feed at this path.
 
 FeedError: SHA-256 mismatch.
   Expected: 8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694
@@ -684,15 +713,20 @@ RouteError: Length mismatch in Bond Street.
   Expected: 225.9 m ± 1.1 m (0.5%)
   Actual:   228.4 m
   OSM way geometry may have changed. Check ways manually.
+
+RouteError: clip_from and clip_to map to the same vertex in Preston Street.
+
+RouteError: Way ID 123456789 listed in facts but not found in data/osm/ways.json.
 ```
 
 ## Performance Considerations
 
-### Caching Strategy
+### Caching Strategy (B23)
 - Cache service-date rows from stop_times.txt under raw/cache/
-- Key: service_date + feed SHA-256
+- Key: first 12 characters of feed SHA-256 + "_" + service_date
 - Avoids parsing entire stop_times.txt on every build
 - Invalidate cache when feed changes
+- verify command bypasses cache to ensure fresh rebuild
 
 ### Optimization Opportunities
 - Parallel race computation (20 pairs × 293 minutes = 5,860 races)
@@ -717,7 +751,6 @@ dependencies = [
     "pyproj>=3.6",
     "PyYAML>=6.0",
     "jsonschema>=4.20",
-    "requests>=2.31",  # For Overpass queries
 ]
 
 [project.optional-dependencies]
@@ -727,13 +760,15 @@ dev = [
 ]
 ```
 
+requests removed (B10). display_rounding removed from pipeline (B7).
+
 ## File Formats
 
-### data/osm/ways.json
+### data/osm/ways.json (committed snapshot, never fetched during build)
 ```json
 {
   "schema": "ghostline.osm_ways.v1",
-  "download_date": "2026-11-15",
+  "download_date": "2026-11-01",
   "source": "OpenStreetMap via Overpass API",
   "license": "ODbL",
   "ways": {
@@ -743,7 +778,7 @@ dev = [
 }
 ```
 
-### web/public/data/index.json
+### web/public/data/index.json (B16)
 ```json
 {
   "schema": "ghostline.index.v1",
@@ -757,33 +792,42 @@ dev = [
       "lonlat": [-76.643563, 39.309495],
       "inferred": false,
       "note": null
-    },
-    ...
+    }
   ],
   "pairs": [
-    {"origin": "westwood-carey", "dest": "dolphin-myrtle"},
-    ...
+    {"origin": "westwood-carey", "dest": "dolphin-myrtle"}
   ],
   "service_date": "2026-11-04",
   "feed_version": "20260821",
   "feed_sha256": "8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694",
-  "sources": [...]
+  "sources": {
+    "guide1938_diagram": {"what": "...", "year": 1938, "where": "...", "url": "..."},
+    "guide1938_timetable": {"what": "...", "year": 1938, "where": "...", "url": "..."},
+    "guide1938_route": {"what": "...", "year": 1938, "where": "...", "url": "..."},
+    "mta_gtfs": {"what": "...", "year": 2026, "where": "...", "url": "..."},
+    "osm": {"what": "...", "year": null, "where": "...", "url": "..."},
+    "method": {"what": "...", "year": null, "where": "...", "url": null}
+  }
 }
 ```
 
 See race-brief.md section 4.5 for complete race file format.
+
+### inferred flag (B18)
+inferred is true exactly when either endpoint of the pair is brevard-preston. All eight race files involving brevard-preston carry inferred = true; the lead pair and all other files carry inferred = false.
 
 ## Build Reproducibility
 
 To ensure byte-identical output on repeated builds:
 
 1. **Deterministic ordering**: Sort all arrays by a stable key before output
-2. **Fixed precision**: Always format numbers to 3 decimals (or specified precision)
-3. **No timestamps**: Except download_date in ways.json (which doesn't change between builds)
-4. **No randomness**: No random.choice, no hash() for ordering
-5. **Pinned inputs**: Feed SHA-256 locked, OSM ways committed snapshot
+2. **Fixed precision**: Round numbers only in emit, to specified decimals
+3. **Fixed output format**: UTF-8 without BOM, LF, compact separators, fixed key order (B6)
+4. **No timestamps**: Except download_date in ways.json (which doesn't change between builds)
+5. **No randomness**: No random.choice, no hash() for ordering
+6. **Pinned inputs**: Feed SHA-256 locked, OSM ways committed snapshot
 
-Test: Run build twice, compare outputs with `diff` or file hash.
+Test: Run build twice, compare outputs byte-for-byte.
 
 ## Development Workflow
 
@@ -794,13 +838,20 @@ Test: Run build twice, compare outputs with `diff` or file hash.
 5. **Integration test**: Run full pipeline, inspect outputs
 6. **Verify reproducibility**: Build twice, compare outputs
 
+## Pending Items
+- Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)
+- .gitattributes LF enforcement (Prompt 3) (B6)
+- Window-average method: brief corrections remain open
+- 20 KB gzip race file budget: pending Emmanuel's decision (B19)
+- Future reader test for blank stop_times rows (B22)
+
 ## Success Criteria (from Requirements)
 
 The design supports all success criteria:
-- ✓ Modular structure enables isolated testing
-- ✓ Golden tests will verify lead pair values
-- ✓ Property tests will verify all P1-P10 invariants
-- ✓ Source tracking built into data structures
-- ✓ Reproducibility via deterministic pipeline
-- ✓ Error handling with clear messages
-- ✓ Performance targets achievable with caching
+- Modular structure enables isolated testing
+- Golden tests will verify lead pair values (15 min vs 45.156, wait 30.458)
+- Property tests will verify all P1-P7, P9-P10 invariants
+- Source tracking built into data structures
+- Reproducibility via deterministic pipeline and fixed output format
+- Error handling with clear messages
+- Performance targets achievable with caching

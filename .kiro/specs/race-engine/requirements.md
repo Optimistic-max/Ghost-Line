@@ -13,31 +13,30 @@ Build a Python package, pipeline, that turns the 1938 facts file and the pinned 
 - **FR-1.4**: Stop with a clear error message if:
   - File is missing
   - Hash does not match the pinned value
-- **FR-1.5**: Cache service-date rows from stop_times.txt under raw/cache/ for fast rebuilds
+- **FR-1.5**: Cache service-date rows from stop_times.txt under raw/cache/ keyed by the first 12 characters of the feed SHA-256 and the service date (B23)
 
-### 2. Facts Loading and Validation
+### 2. Facts Loading and Validation (B4)
 - **FR-2.1**: Load data/lines/no21-1938.yaml
 - **FR-2.2**: Validate the facts file schema:
-  - All timing points are present (5 corners)
-  - All minute values between timing points are present (4 values: 8, 5, 8, 9)
+  - At least two timing points are present
+  - First timing point has minutes_from_prev = 0; subsequent values are positive whole minutes
+  - Both directions' minutes_past_hour, first and last departure fields are present
   - Departure lists for both directions are present
+  - Each leg includes street, method and length_m
+  - Each leg uses either osm_ways with clip points or points_lonlat with a note
   - All required leg information is present
 - **FR-2.3**: Refuse to run if any required field is missing
 - **FR-2.4**: Parse coordinates as [lon, lat] format
+- **FR-2.5**: One slug function: lowercase, replace " & " with "-", then replace spaces with "-". The five real corner slugs are westwood-carey, dolphin-myrtle, brevard-preston, preston-caroline, aliceanna-bond.
 
-### 3. 1938 Clock Generation
+### 3. 1938 Clock Generation (B4)
 For each of the 5 corners and each direction (eastbound, westbound):
-- **FR-3.1**: Compute terminal departures based on:
-  - Pattern: eastbound [0,7,15,22,30,37,45,52], westbound [4,11,19,26,34,41,49,56]
-  - First departure: eastbound 09:00, westbound 09:04
-  - Last departure: eastbound 13:52, westbound 13:56
-- **FR-3.2**: Calculate offset from terminal for each corner:
-  - Based on cumulative timing minutes in direction of travel
-  - Eastbound: 0, 8, 13, 21, 30 minutes for the 5 corners
-  - Westbound: 30, 22, 17, 9, 0 minutes for the 5 corners
-- **FR-3.3**: Generate list of scheduled passing times for each corner
-- **FR-3.4**: Determine "covered from" time (first scheduled passing time at each corner)
-- **FR-3.5**: For any slider time T, compute:
+- **FR-3.1**: Read departure patterns, first/last and timing minutes from the facts file (not hard-coded constants)
+- **FR-3.2**: Compute terminal departures using the pattern and first/last from facts
+- **FR-3.3**: Calculate offset from terminal for each corner based on cumulative timing minutes
+- **FR-3.4**: Generate list of scheduled passing times for each corner
+- **FR-3.5**: Determine "covered from" time (first scheduled passing time at each corner)
+- **FR-3.6**: For any slider time T, compute:
   - start = max(T, covered_from)
   - Next departure at or after start
   - Wait time = departure - start
@@ -51,7 +50,7 @@ For each corner:
   - 1.3 = street detour factor
   - 1.2 m/s = walking speed
   - All walk times labeled as "estimate"
-- **FR-4.4**: Store walk distance to 2 decimal places (metres) and walk time to 3 decimal places (minutes)
+- **FR-4.4**: Keep full precision in stops module; round only in emit (walk metres to 2 decimals, walk minutes to 3 decimals) (B3)
 
 ### 5. Eligible Trip Discovery
 For each of the 20 directed corner pairs, find one-seat trips on service date 2026-11-04:
@@ -68,25 +67,26 @@ For each of the 20 directed corner pairs, find one-seat trips on service date 20
   - If multiple pairs exist for one trip, select the pair with:
     - Shortest origin walk distance (primary criterion)
     - Shortest destination walk distance (tie-breaker)
-- **FR-5.3**: Parse GTFS times (handle hours ≥ 24, e.g., "25:10:00" = 1510 minutes after midnight)
+- **FR-5.3**: Parse GTFS times as HH:MM:SS strings (handle hours ≥ 24, e.g., "25:10:00" = 1510 minutes after midnight); store internally as full-precision minutes after midnight (B8)
 - **FR-5.4**: Store one record per trip containing:
   - trip_id, route name, headsign
   - Boarding stop: stop_id, name, walk_m, walk_min
   - Alighting stop: stop_id, name, walk_m, walk_min
-  - Departure time (dep), arrival time (arr), ride time in minutes
+  - Departure time (dep) and arrival time (arr) stored as HH:MM:SS strings in output (B8)
+  - ride_min stored as numeric minutes after midnight with full precision internally
 - **FR-5.5**: Sort trips by departure time
 - **FR-5.6**: Record access_min (walk to boarding stop) and egress_min (walk from alighting stop)
 
 ### 6. Race Computation
-For each directed corner pair and each whole minute from 9:00 to 13:52:
+For each directed corner pair and each whole minute from 9:00 to 13:52 (293 slider minutes, 09:00–13:52 inclusive) (B12):
 - **FR-6.1**: Compute 1938 side:
-  - Use next_1938 algorithm from FR-3.5
+  - Use next_1938 algorithm from FR-3.6
   - total = wait + ride (no walk for 1938)
   - ride = sum of timing minutes between corners
 - **FR-6.2**: Compute today side (both sides use the same start time):
   - Filter catchable trips: dep >= start + access_min
-  - If no trips at all: result = no_one_seat_ride
-  - If no catchable trips: result = no_one_seat_ride (or note for future trips)
+  - If trips list is empty: result = NO_ONE_SEAT_RIDE (B9)
+  - If trips exist but none catchable: result = NO_MORE_TRIPS_TODAY (internal sentinel; raises PipelineError naming pair and time if encountered on real data) (B9)
   - Select best trip: earliest (arr + egress_min); tie-break by earlier dep
   - Compute: access, wait = dep - start - access, ride = arr - dep, egress
   - total = arr + egress_min - start
@@ -95,19 +95,20 @@ For each directed corner pair and each whole minute from 9:00 to 13:52:
   - If |margin| < 1.0 minute: result = "photo_finish"
   - Else if margin > 0: result = "1938"
   - Else: result = "today"
-- **FR-6.4**: Store all values to 3 decimal places
+- **FR-6.4**: Keep full precision internally; round only in emit to 3 decimal places (B3)
 - **FR-6.5**: Handle "before the midday table" state correctly (start ≥ T for racing)
+- **FR-6.6**: Pre-coverage slider rows (t < covered_from) repeat the covered_from race result. Count only t >= covered_from in P5 and in summaries. (B12)
 
 ### 7. Summary Generation
 - **FR-7.1**: Per-pair statistics:
-  - Count races, wins_1938, wins_today, photo_finishes for races from covered_from to 13:52
+  - Count races, wins_1938, wins_today, photo_finishes for races from covered_from to 13:52 (count only t >= covered_from) (B12)
   - Calculate median of today ride times
   - Calculate delta = median_today_ride - y1938_ride
   - Determine ride verdict:
     - "same" if |delta| <= max(1.5, 0.15 × y1938_ride)
     - "faster today" if delta < 0
     - "slower today" if delta > 0
-  - Find gap_min and gap_max: smallest and largest gaps between consecutive eligible departures leaving boarding stop in [09:00, 14:00)
+  - Find gap_min and gap_max: smallest and largest gaps between adjacent sorted departures leaving boarding stop in [09:00, 14:00); type as numbers, round at emit to 3 decimals (B14)
 - **FR-7.2**: Overall totals (sum across all 20 pairs):
   - races, wins_1938, wins_today, photo_finishes
   - ride_same, ride_faster_today, ride_slower_today (count of pairs by ride verdict)
@@ -119,38 +120,38 @@ For each directed corner pair and each whole minute from 9:00 to 13:52:
   - Handle empty gap list with clear warning
   - For 1938: gaps are [7, 8, 7, 8] from the pattern
 
-### 8. Route Reconstruction
+### 8. Route Reconstruction (B1, B2)
 - **FR-8.1**: Load OSM way geometries from data/osm/ways.json:
-  - This file is a committed snapshot created by fetch_osm command
+  - This file is the committed 2026-11-01 snapshot; the route module reads it directly
   - Format: way_id → array of [lon, lat] coordinates with download date in metadata
   - Never fetch from network during build (preserves reproducibility)
+  - Missing way IDs raise a named RouteError
   - Credit: © OpenStreetMap contributors, ODbL
-- **FR-8.2**: For each leg in each direction:
+- **FR-8.2**: Westbound legs form one joined line; loop + eastbound legs form the other joined line (B2)
+- **FR-8.3**: For each leg in each direction:
   - If method = "inferred": use points_lonlat from facts file
   - If method = "osm" or "osm+gap":
-    - Join OSM ways in the specified order
+    - Join OSM ways in the listed order, orienting each way to continue from the preceding way (B1)
+    - After joining, locate the vertices nearest to clip_from and clip_to
+    - If those two vertices are in reversed order along the joined line, reverse the entire joined line (B1)
+    - Clip the line between the clip_from vertex and the clip_to vertex
+    - If clip_from and clip_to map to the same vertex, raise RouteError (B1)
     - Handle "gap" markers: allow breaks if marked, record distance of bridged gaps
-    - Orient first way toward next way or toward clip_from
-    - Flip subsequent ways if needed to maintain continuity
     - Error on undeclared breaks > 1m
-    - Clip line between clip_from_lonlat and clip_to_lonlat points
   - Validate leg length: |actual - expected| <= max(1m, 0.5% of expected)
-  - Tag each leg with: street, method (osm/osm+gap/inferred), note
-- **FR-8.3**: Join legs end-to-end:
-  - Verify each pair of consecutive legs connects within 1m
-  - Verify each timing point lies within 30m of the joined route
-- **FR-8.4**: Output as GeoJSON:
-  - One Feature per leg
-  - Properties include street name, method, note
+  - Each GeoJSON leg requires direction, street, method, note and length_m; loop legs use direction = "eastbound" (B2)
+- **FR-8.4**: Check joins within the two joined lines (westbound; loop + eastbound):
+  - Consecutive legs connect within 1m (B2)
+  - Each timing point lies within 30m of the joined line it belongs to (B2)
 - **FR-8.5**: Fail loudly on:
   - Undeclared break in a street
   - Length mismatch beyond tolerance
-  - clip_to comes before clip_from along the line
+  - Equal clip_from/clip_to vertices (RouteError) (B1)
   - Timing points too far from route
 
 ### 9. Output Generation and Validation
 - **FR-9.1**: Write files to web/public/data/:
-  - index.json: Line metadata, 5 corners, 20 pairs, service date, feed version and hash, source list
+  - index.json: Line metadata, 5 corners, 20 pairs, service date, feed version and hash, source catalog
   - summary.json: Honest-line counts, per-pair ride verdicts, today-wins list
   - race/{origin}__{dest}.json: One file per pair (20 files)
   - route.geojson: 1938 route geometry by leg
@@ -158,47 +159,41 @@ For each directed corner pair and each whole minute from 9:00 to 13:52:
 - **FR-9.3**: Corner slugs (fixed): westwood-carey, dolphin-myrtle, brevard-preston, preston-caroline, aliceanna-bond
 - **FR-9.4**: Direction implied by slug order in filename
 - **FR-9.5**: Validate each generated file against its JSON schema
-- **FR-9.6**: Source check: every number field has a corresponding source entry
-- **FR-9.7**: Store times as minutes after midnight (decimals to 3 places)
-- **FR-9.8**: Store distances in meters (to 2 decimal places for walks)
+- **FR-9.6**: Source check: every numeric field has a corresponding source ID; emit raises ValidationError listing unresolved IDs or uncovered numeric fields (B16)
+- **FR-9.7**: Store slider and 1938 clock times as HH:MM strings; store GTFS departure/arrival as HH:MM:SS strings (including hours above 23); store durations and walk minutes as numeric full-precision values internally, rounded to 3 decimals at emit; store walk distances in metres rounded to 2 decimals at emit (B8)
+- **FR-9.8**: Stored race rows use fields: t, start, before_table, y1938, today, result, margin. Numeric durations are stored as numbers. No display-only or *_exact fields. Null/absence conventions follow the brief. (B7)
 - **FR-9.9**: Each race file includes:
-  - 1938 clock: ride_min, covered_from, passes array
-  - Today: gap_min, gap_max, trips array with all eligible trips
-  - Races array: one row per minute from 9:00 to 13:52
-- **FR-9.10**: Display rounding values computed per largest-remainder method:
-  - Round total to nearest whole minute (halves up)
-  - Round each part down
-  - Allocate remaining minutes to parts with largest fractions
-  - On tie, earlier phase gets the minute
-  - Shown parts must sum to shown total
-  - Every shown part within 1 minute of stored value
-  - Shown margin = difference of two shown totals
+  - 1938 clock: ride_min, covered_from (HH:MM), passes array (HH:MM strings)
+  - Today: gap_min, gap_max (numeric, 3 decimals at emit), trips array with all eligible trips; dep/arr as HH:MM:SS
+  - Races array: 293 rows, one per minute from 09:00 to 13:52 (B12)
+- **FR-9.10**: Output files use UTF-8 without BOM, LF line endings, compact JSON separators, and a fixed key order. The verify command checks files byte-for-byte. (B6)
+- **FR-9.11**: index.sources is the source-ID catalog; other files' top-level sources objects map blocks/fields to ID arrays. The six catalog IDs are: guide1938_diagram, guide1938_timetable, guide1938_route, mta_gtfs, osm, method. Each catalog entry requires what, year, where and url (null allowed for year/url for a documented method). All six entries are required in index.sources. (B16)
+- **FR-9.12**: Emit checks that every numeric field in every output file is covered by the sources mapping, and that all source IDs resolve to entries in index.sources. (B16)
 
-### 10. Commands
-- **FR-10.1**: `python -m pipeline fetch_osm`
-  - One-time command to fetch OSM way geometries via Overpass API
-  - Queries for all way IDs listed in facts file
-  - Writes data/osm/ways.json with download date in metadata
-  - This snapshot is committed to the repository
-  - Never run automatically; only when updating OSM data
-- **FR-10.2**: `python -m pipeline validate`
-  - Fast checks: facts schema, 1938 clock, JSON schemas, copy rules
+### 10. Commands (B10, B13)
+The five pipeline commands are: validate, build, check, verify, check_sources.
+
+- **FR-10.1**: `python -m pipeline validate`
+  - Fast checks: facts schema, 1938 clock, every existing generated JSON/GeoJSON file against its schema (without reading the feed), copy rules (B21)
   - Must not read the feed or touch the network
   - Must complete in under 10 seconds
-- **FR-10.3**: `python -m pipeline build`
+- **FR-10.2**: `python -m pipeline build`
   - Full build into web/public/data/
   - Must complete in under 60 seconds
-  - Execute all 9 pipeline steps in order
-- **FR-10.4**: `python -m pipeline check`
+  - Execute all pipeline steps in order
+- **FR-10.3**: `python -m pipeline check`
   - Run build, then run pytest
   - Used by hooks
-- **FR-10.5**: `python -m pipeline verify`
-  - Rebuild from raw/ and fail if committed data files differ
+- **FR-10.4**: `python -m pipeline verify`
+  - Rebuild from raw/ and fail if committed data files differ (byte-for-byte)
   - Ensures reproducibility
-- **FR-10.6**: `python -m pipeline check_sources`
-  - Fail on banned words: live, real-time, realtime, "arriving now", "right now" (except in fixed phrase "Scheduled, not live.")
-  - Fail on any unsourced number in web/ or docs/
-- **FR-10.7**: Each command provides clear error messages on failure
+  - Bypasses the stop_times cache when rebuilding (B23)
+- **FR-10.5**: `python -m pipeline check_sources`
+  - Scan prose in web/index.html, web/src/**, docs/*.md and README.md
+  - Exclude docs/planning, node_modules, dist and web/public/data
+  - Prose check: fail on banned terms (live, real-time, realtime, arriving now, right now) matched case-insensitively as whole words/phrases; allow the exact phrase "Scheduled, not live."
+  - JSON check: validate generated JSON source mappings (every ID resolves; every numeric field covered) (B5, B16)
+- **FR-10.6**: Each command provides clear error messages on failure
 
 ## Correctness Properties (Property Tests Required)
 
@@ -238,9 +233,12 @@ For each directed corner pair and each whole minute from 9:00 to 13:52:
 - No other catchable bus reaches destination corner earlier
 - Starting later never gets you there earlier (arrival time non-decreasing in start)
 - Adding a trip to eligible list never makes any total larger
+- total >= access + ride + egress (B17)
+- wait >= 0 (B17)
+- For the same chosen trip, +1 start means -1 total (B17)
 
 ### P5: Summary Properties
-- For every pair: wins_1938 + wins_today + photo_finishes = number_of_races
+- For every pair: wins_1938 + wins_today + photo_finishes = number_of_races (races counted only for t >= covered_from) (B12)
 - Summary totals equal sum of per-pair counts
 - Every entry in today_wins list points to a race with result = "today"
 - No result label is outside the four allowed: "1938", "today", "photo_finish", "no_one_seat_ride"
@@ -258,41 +256,34 @@ For each directed corner pair and each whole minute from 9:00 to 13:52:
 - A leg is never shorter than straight line between its two clip points
 - Total route length equals sum of leg lengths
 - A shared street has same length in both directions
-- Editing a 1938-only leg never changes 1933 route
-
-### P8: Display Rounding Properties
-- Shown parts always sum to shown total
-- Every shown part is within 1 minute of stored value
-- Shown part is always a whole number
-- Whole-number inputs returned unchanged
-- Same input always gives same output (pure function)
-- Shown margin = |shown_total_today - shown_total_1938|
+- Route reads only no21-1938.yaml and data/osm/ways.json (B11)
 
 ### P9: Build Reproducibility
-- Building twice gives byte-identical files (P6 from brief)
+- Building twice gives byte-identical files
 - Every number in output can be recomputed from inputs
 
 ### P10: Data Flow Properties
-- Every number in a race row can be recomputed from trips table and 1938 clock in same file
+- Every number in a race row can be recomputed from trips table and 1938 clock in same file, using absolute tolerance 0.002 (recomputation works from stored 3-decimal numbers) (B17)
 - No number shown without corresponding source entry
 
 ## Golden Test Values
 
-All golden test values are from race-brief.md sections 5.1-5.9.
+All golden test values are from race-brief.md sections 5.1-5.8.
 
 **CRITICAL RULE**: If the pipeline's computed result differs from any expected value in race-brief.md, the test must fail and you must stop and report the difference to Emmanuel. Never change code just to hit an expected value. Never edit an expected value, a facts file, or a test to make a check pass.
 
 ### Key Golden Values to Verify:
-- Lead pair (Preston & Caroline → Aliceanna & Bond) at 10:00: 1938 total 15 min, today total 45.156 min
+- Lead pair (Preston & Caroline → Aliceanna & Bond) at 10:00: 1938 total 15 min, today wait 30.458, today total 45.156 (from unrounded walks) (B3)
 - Exactly one service is active on 2026-11-04, and its service_id is 2251
 - Preston & Caroline → Aliceanna & Bond: 36 eligible trips, all CityLink Lime HARBOR EAST, board 8564, alight 9486
 - All 20 pairs at 400m: none is empty
 - Total across all 20 pairs: 5,666 races, 5,582 wins_1938, 25 wins_today, 59 photo_finishes
 - Ride verdicts: 17 same, 3 faster today, 0 slower today
+- Lead-pair gap_min 34.0, gap_max 39.0 (B14)
 - 1938 westbound all 14 legs joined: 8,401.0 m ± 0.5%
 - 1938 loop + eastbound (Westwood & Carey to Aliceanna & Bond): 249.2 + 8,160.7 = 8,409.9 m ± 0.5%
 
-See race-brief.md sections 5.1 through 5.9 for complete test tables.
+See race-brief.md sections 5.1 through 5.8 for complete test tables. (Table 5.9, display rounding, moves to race-screen spec.) (B15)
 
 ## Technical Constraints
 
@@ -302,9 +293,9 @@ See race-brief.md sections 5.1 through 5.9 for complete test tables.
 - Development on Windows
 
 ### Data Constraints
-- Times: minutes after midnight as decimals (10:32:43 = 632.717)
-- Store to 3 decimal places
-- Round only for display (per largest-remainder method)
+- Times: minutes after midnight as decimals internally; HH:MM for slider/1938 clock output; HH:MM:SS for GTFS times (B8)
+- Keep full precision in facts, clock, stops, eligible, race and summary modules (B3)
+- Round only in emit: durations and walk minutes to 3 decimals, walk metres to 2 decimals (B3)
 - Distances: WGS84 geodesic using pyproj.Geod(ellps="WGS84")
 - Coordinates: [lon, lat] format
 - Photo-finish band: 1.0 minute (single constant)
@@ -317,12 +308,20 @@ See race-brief.md sections 5.1 through 5.9 for complete test tables.
 - raw/ is git-ignored (never commit the feed)
 - web/public/data/ is generated (committed for GitHub Pages)
 - Generated JSON must be committed for hosted builds (feed not available in CI)
+- Generated files: UTF-8 without BOM, LF, compact separators, fixed key order (B6)
+- .gitattributes rules for LF enforcement are a separate pending task (B6)
+
+### File Size Budgets (B19)
+- Emit reports raw and gzip size for each output file
+- Approved brief budgets: index.json 6 KB, summary.json 6 KB, each race file 45 KB, route.geojson 40 KB (uncompressed)
+- Build fails if any file exceeds its approved budget
+- The proposed 20 KB gzip limit on race files is pending Emmanuel's decision
 
 ## Test Requirements
 
 ### Test Organization
 - tests/unit/: Unit tests for individual functions
-- tests/property/: Hypothesis property tests (all P1-P10 above)
+- tests/property/: Hypothesis property tests (all P1-P7, P9-P10 above)
 - tests/golden/: Tests against expected values from race-brief.md
 - tests/fixtures/: Fake line and fake GTFS for edge cases
 
@@ -330,15 +329,20 @@ See race-brief.md sections 5.1 through 5.9 for complete test tables.
 - Skip with clear message when raw/ is missing (for hosted builds)
 - Must pass locally before any commit touching pipeline/ or data/
 
+### requires_feed Marker (B20)
+- Applies only to tests that actually read the pinned zip, including full-build integration tests
+- Clock module tests (5.1), formula tests (5.7) and route tests (5.8) run without requires_feed
+
 ### Edge Cases to Test
 - Service removed by calendar_dates.txt exception_type 2
 - Trip reaching destination before origin (invalid, skip)
-- Empty trips list (no_one_seat_ride)
+- Empty trips list (NO_ONE_SEAT_RIDE) (B9)
+- Trips present but none catchable (NO_MORE_TRIPS_TODAY unit test) (B9)
 - Before the midday table state
 - Gaps in OSM ways (declared vs undeclared)
 - Inferred route sections
 - Empty gap list in arrival-weighted wait
-- Bad input to display rounding
+- Blank arrival/departure in stop_times fixture row: ignored with a logged message (B22)
 
 ## Not In Scope
 - Web site implementation
@@ -348,7 +352,15 @@ See race-brief.md sections 5.1 through 5.9 for complete test tables.
 - Transfers between routes
 - Real-time or live data
 - Automatic feed downloads
+- fetch_osm command (B10)
+- display_rounding module (B7); display rounding belongs in race-screen spec
 - 1933 line processing (only 1938 for this spec)
+
+## Pending Decisions / Open Items
+- .gitattributes LF enforcement rules (Prompt 3 task) (B6)
+- Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)
+- Window-average method (brief corrections remain open)
+- 20 KB gzip limit on race files: pending Emmanuel's decision (B19)
 
 ## Success Criteria
 
@@ -356,7 +368,7 @@ The spec is complete when:
 1. `python -m pipeline check` passes on developer machine with feed present
 2. Hosted test run passes with feed absent (golden tests skip gracefully)
 3. Lead pair's race at 10:00 reads 15 minutes vs 45.156 minutes
-4. All golden test values match expected values from race-brief.md
+4. All golden test values match expected values from race-brief.md sections 5.1–5.8
 5. All property tests pass
 6. Build is reproducible (identical files on repeat builds)
 7. Every output number has a source entry
