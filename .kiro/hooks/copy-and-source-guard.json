@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "copy-and-source-guard",
+      "description": "Fail on a banned word or unsourced number after saving a .ts, .html, .css, .md or .json file under web/ or docs/ (not docs/planning/). Editor only.",
+      "enabled": false,
+      "trigger": "PostFileSave",
+      "matcher": "(^|[/\\\\])(web|docs)[/\\\\](?!planning[/\\\\]).*\\.(ts|html|css|md|json)$",
+      "action": {
+        "type": "command",
+        "command": "python -m pipeline check_sources"
+      },
+      "timeout": 60
+    }
+  ]
+}

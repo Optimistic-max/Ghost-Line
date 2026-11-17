@@ -1,5 +1,7 @@
 ﻿# Race Engine: Tasks
 
+> Hooks (editor only, never in the deployed app), all created with `"enabled": false` in .kiro/hooks/: enable `validate-after-agent-edit` after task 20 (validate), `rebuild-and-test-when-agent-stops` after task 22 (check), `copy-and-source-guard` after task 24 (check_sources).
+
 ## Setup and Infrastructure
 
 - [x] 1. Project scaffolding

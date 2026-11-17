@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "rebuild-and-test-when-agent-stops",
+      "description": "Rebuild data and run pytest when the agent finishes. Editor only.",
+      "enabled": false,
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": "python -m pipeline check"
+      },
+      "timeout": 300
+    }
+  ]
+}
