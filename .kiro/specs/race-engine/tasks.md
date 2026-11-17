@@ -1,4 +1,4 @@
-# Race Engine: Tasks
+﻿# Race Engine: Tasks
 
 ## Setup and Infrastructure
 
@@ -55,11 +55,11 @@
 
 ## Module Implementation (Pipeline Steps)
 
-- [ ] 8. feed_check module
-  - [~] 8.1 Implement check_feed(feed_path) that computes SHA-256 of raw/mta_local_bus.zip and returns the hash
-  - [~] 8.2 Raise FeedError with clear message if file is missing
-  - [~] 8.3 Raise FeedError with expected vs actual hash if hash does not match `8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694`
-  - [~] 8.4 Write tests/unit/test_feed_check.py covering missing file, hash mismatch, and valid file cases
+- [~] 8. feed_check module
+  - [x] 8.1 Implement check_feed(feed_path) that computes SHA-256 of raw/mta_local_bus.zip and returns the hash
+  - [x] 8.2 Raise FeedError with clear message if file is missing
+  - [x] 8.3 Raise FeedError with expected vs actual hash if hash does not match `8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694`
+  - [x] 8.4 Write tests/unit/test_feed_check.py covering missing file, hash mismatch, and valid file cases
   - Depends on: task 3
 
 - [ ] 9. facts module (B4, B5 slug)
