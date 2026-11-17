@@ -2,528 +2,234 @@
 
 ## Setup and Infrastructure
 
-### TASK-001: Project scaffolding
-**Status**: staged  
-**Description**: Create pipeline package structure, pyproject.toml with dependencies, and __init__.py files.  
-**Depends on**: none  
-**Files**: 
-- pipeline/__init__.py
-- pipeline/__main__.py
-- pyproject.toml
-- tests/unit/__init__.py
-- tests/property/__init__.py
-- tests/golden/__init__.py
-- tests/fixtures/
+- [x] 1. Project scaffolding
+  - [x] 1.1 Create pipeline/ package with `__init__.py` and `__main__.py`
+  - [x] 1.2 Create pyproject.toml with dependencies: pandas, pyproj, PyYAML, jsonschema, pytest, hypothesis, requests
+  - [x] 1.3 Create tests/unit/, tests/property/, tests/golden/ and tests/fixtures/ directories with `__init__.py` files
+  - [x] 1.4 Verify `python -m pipeline` runs without import errors
+  - [x] 1.5 Verify all required dependencies install
 
-**Acceptance**:
-- `python -m pipeline` runs without import errors
-- All required dependencies install: pandas, pyproj, PyYAML, jsonschema, pytest, hypothesis, requests
+- [ ] 2. CLI dispatcher
+  - [~] 2.1 Implement cli.py with argparse dispatcher for all six commands: fetch_osm, validate, build, check, verify, check_sources
+  - [~] 2.2 Wire `pipeline/__main__.py` to call cli.main()
+  - [~] 2.3 Each command stub returns "not implemented" until its task is complete
+  - [~] 2.4 Verify `python -m pipeline --help` shows all six commands with clear usage messages
+  - [~] 2.5 Depends on: task 1
 
----
+- [ ] 3. Error handling classes
+  - [~] 3.1 Define PipelineError as base exception class
+  - [~] 3.2 Define FeedError, FactsError, RouteError, ValidationError as subclasses
+  - [~] 3.3 Each class has a clear docstring describing when it is raised
+  - [~] 3.4 All exception types importable from pipeline package
+  - [~] 3.5 Depends on: task 1
 
-### TASK-002: CLI dispatcher
-**Status**: staged  
-**Description**: Implement cli.py with command dispatcher for all six commands: fetch_osm, validate, build, check, verify, check_sources.  
-**Depends on**: TASK-001  
-**Files**: 
-- pipeline/cli.py
+- [ ] 4. JSON schemas
+  - [~] 4.1 Write pipeline/schemas/index.schema.json matching the index.json format in race-brief.md section 4
+  - [~] 4.2 Write pipeline/schemas/summary.schema.json matching the summary.json shape in race-brief.md section 4.6
+  - [~] 4.3 Write pipeline/schemas/race.schema.json matching the race file format in race-brief.md section 4.5
+  - [~] 4.4 Write pipeline/schemas/route.schema.json for route.geojson (one Feature per leg, tagged with street, method, note)
+  - [~] 4.5 Verify each schema is valid JSON Schema (draft 2020-12 or compatible)
+  - [~] 4.6 Depends on: task 1
 
-**Acceptance**:
-- `python -m pipeline --help` shows all six commands
-- Each command can be invoked (will fail with "not implemented" for now)
-- Clear usage messages
+- [ ] 5. Test fixtures
+  - [~] 5.1 Write tests/fixtures/fake-line.yaml: minimal valid facts file with 2 corners, 1 leg per direction
+  - [~] 5.2 Write tests/fixtures/fake-gtfs/stops.txt, routes.txt, trips.txt, stop_times.txt, calendar.txt, calendar_dates.txt: tiny feed covering edge cases
+  - [~] 5.3 Include in fake-gtfs: a service removed by calendar_dates.txt exception_type 2, a trip reaching dest before origin (invalid), a pair with no trips
+  - [~] 5.4 All fixture files named "fake" to distinguish from real data
+  - [~] 5.5 Depends on: task 1
 
----
+- [ ] 6. Property tests infrastructure
+  - [~] 6.1 Verify Hypothesis is installed and importable
+  - [~] 6.2 Create tests/property/conftest.py with shared Hypothesis strategies (e.g., valid time-of-day floats, positive distances)
+  - [~] 6.3 Confirm property test files in module tasks can import and use the strategies
+  - [~] 6.4 Depends on: task 1
 
-### TASK-003: Error handling classes
-**Status**: staged  
-**Description**: Define custom exception types: PipelineError, FeedError, FactsError, RouteError, ValidationError.  
-**Depends on**: TASK-001  
-**Files**: 
-- pipeline/__init__.py (or pipeline/errors.py)
-
-**Acceptance**:
-- All exception types defined and importable
-- Each has clear docstring
-
----
-
-### TASK-004: JSON schemas
-**Status**: staged  
-**Description**: Write JSON Schema files for index.json, summary.json, race files, and route.geojson based on formats in race-brief.md section 4.  
-**Depends on**: TASK-001  
-**Files**: 
-- pipeline/schemas/index.schema.json
-- pipeline/schemas/summary.schema.json
-- pipeline/schemas/race.schema.json
-- pipeline/schemas/route.schema.json
-
-**Acceptance**:
-- Each schema is valid JSON Schema (draft 2020-12 or compatible)
-- Schemas match output formats from design.md
-
----
-
-### TASK-005: Test fixtures
-**Status**: staged  
-**Description**: Create minimal fake fixtures for edge case testing.  
-**Depends on**: TASK-001  
-**Files**: 
-- tests/fixtures/fake-line.yaml
-- tests/fixtures/fake-gtfs/calendar.txt
-- tests/fixtures/fake-gtfs/calendar_dates.txt
-- tests/fixtures/fake-gtfs/routes.txt
-- tests/fixtures/fake-gtfs/trips.txt
-- tests/fixtures/fake-gtfs/stops.txt
-- tests/fixtures/fake-gtfs/stop_times.txt
-
-**Acceptance**:
-- fake-line.yaml: minimal valid facts file (2 corners, 1 leg each direction)
-- fake-gtfs: tiny feed with edge cases (service exception, trip reaching dest before origin, no trips)
-- All fixtures named "fake" to avoid confusion
-- Used by unit tests for edge cases (e.g., no_one_seat_ride state)
-
----
-
-### TASK-006: Property tests infrastructure
-**Status**: staged  
-**Description**: Set up Hypothesis test infrastructure for property testing.  
-**Depends on**: TASK-001  
-**Files**: 
-- tests/property/conftest.py (if needed for shared strategies)
-
-**Acceptance**:
-- Hypothesis installed and importable
-- Property test infrastructure ready for use in module tasks
-- Shared test strategies defined if needed
-
----
-
-### TASK-007: GTFS reader utilities
-**Status**: staged  
-**Description**: Helper class to read GTFS zip, cache stop_times, handle standard GTFS parsing.  
-**Depends on**: TASK-001  
-**Files**: 
-- pipeline/gtfs_reader.py
-- tests/unit/test_gtfs_reader.py
-
-**Acceptance**:
-- `GTFSReader(path)` opens zip, reads txt files as DataFrames
-- Caches service-date rows from stop_times.txt under raw/cache/
-- Cache key: service_date + feed SHA-256
-- Handles missing files gracefully
-- Unit tests with minimal GTFS fixture
-
----
+- [ ] 7. GTFS reader utilities
+  - [~] 7.1 Implement GTFSReader class that opens a GTFS zip and reads named txt files as pandas DataFrames
+  - [~] 7.2 Cache service-date rows from stop_times.txt under raw/cache/ keyed by service_date + feed SHA-256
+  - [~] 7.3 Handle missing GTFS files gracefully with clear error messages
+  - [~] 7.4 Implement parse_gtfs_time("25:10:00") → 1510.0 (minutes after midnight; handles hours ≥ 24)
+  - [~] 7.5 Write tests/unit/test_gtfs_reader.py using the fake-gtfs fixture
+  - [~] 7.6 Depends on: task 1
 
 ## Module Implementation (Pipeline Steps)
 
-### TASK-008: feed_check module
-**Status**: staged  
-**Description**: Implement feed SHA-256 validation. Check raw/mta_local_bus.zip exists and matches pinned hash.  
-**Depends on**: TASK-003  
-**Files**: 
-- pipeline/feed_check.py
-- tests/unit/test_feed_check.py
+- [ ] 8. feed_check module
+  - [~] 8.1 Implement check_feed(feed_path) that computes SHA-256 of raw/mta_local_bus.zip and returns the hash
+  - [~] 8.2 Raise FeedError with clear message if file is missing
+  - [~] 8.3 Raise FeedError with expected vs actual hash if hash does not match `8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694`
+  - [~] 8.4 Write tests/unit/test_feed_check.py covering missing file, hash mismatch, and valid file cases
+  - [~] 8.5 Depends on: task 3
 
-**Acceptance**:
-- `check_feed(Path("raw/mta_local_bus.zip"))` returns SHA-256 hash
-- Raises FeedError with clear message if file missing
-- Raises FeedError if hash doesn't match pinned value `8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694`
-- Unit tests pass
+- [ ] 9. facts module
+  - [~] 9.1 Implement load_facts(facts_path) that parses data/lines/no21-1938.yaml into a FactsFile dataclass
+  - [~] 9.2 Validate: 5 timing points present, 4 inter-point minute values, both departure patterns, all leg fields
+  - [~] 9.3 Raise FactsError with field name if any required field is missing
+  - [~] 9.4 Parse coordinates as [lon, lat]
+  - [~] 9.5 Write tests/unit/test_facts.py using fake-line.yaml and invalid variants
+  - [~] 9.6 Depends on: tasks 3, 5
 
----
+- [ ] 10. clock module
+  - [~] 10.1 Implement terminal_departures(direction) returning 40 departure times as minutes after midnight
+  - [~] 10.2 Implement compute_offset(direction, corner_index, minutes) using cumulative sum in direction of travel
+  - [~] 10.3 Implement build_clock(facts) returning {direction: {corner_slug: Clock1938}} for all 10 corner-direction pairs
+  - [~] 10.4 Implement next_1938(clock, t) returning {start, dep, wait, before_table} where start = max(t, covered_from)
+  - [~] 10.5 Implement ride_minutes(origin_slug, dest_slug, facts) as sum of timing minutes between corners
+  - [~] 10.6 Write tests/unit/test_clock.py covering all 8 test cases from race-brief.md section 5.1
+  - [~] 10.7 Write tests/golden/test_clock_golden.py: golden cases skip with visible warning when raw/ absent; always run on dev machine
+  - [~] 10.8 Write tests/property/test_clock_properties.py covering all P1 properties (40 passes, gaps 7-8, offsets sum to 30, wait ≤ 8, next_1938 in passes, ride symmetry)
+  - [~] 10.9 Depends on: task 9
 
-### TASK-009: facts module
-**Status**: staged  
-**Description**: Load and validate data/lines/no21-1938.yaml. Check schema: 5 timing points, 4 minute values, departure patterns, legs.  
-**Depends on**: TASK-003, TASK-005  
-**Files**: 
-- pipeline/facts.py
-- tests/unit/test_facts.py
+- [ ] 11. stops module
+  - [~] 11.1 Implement geodesic_distance(lonlat1, lonlat2) using pyproj.Geod(ellps="WGS84")
+  - [~] 11.2 Implement compute_walk_time(distance_m) = metres × 1.3 ÷ 1.2 ÷ 60; store to 3 decimals; label "estimate"
+  - [~] 11.3 Implement find_stops_near_corners(gtfs, corners, radius_m=400.0) returning {corner_slug: [Stop, ...]}
+  - [~] 11.4 Write tests/unit/test_stops.py covering walk formula cases 1-4 from race-brief.md section 5.3
+  - [~] 11.5 Write tests/golden/test_stops_golden.py: cases 5-7 from section 5.3 (stop distances to actual corners); skip with visible warning when raw/ absent
+  - [~] 11.6 Write tests/property/test_walk_properties.py covering P2 properties (never negative, symmetric, doubling, max 7.223 min at 400m)
+  - [~] 11.7 Depends on: tasks 7, 9
 
-**Acceptance**:
-- `load_facts(Path("data/lines/no21-1938.yaml"))` returns FactsFile dataclass
-- Validates all required fields present
-- Raises FactsError on missing timing point, minute, or departure
-- Unit tests with valid and invalid fixtures pass
+- [ ] 12. eligible module
+  - [~] 12.1 Implement active_services(gtfs, date) applying calendar.txt then calendar_dates.txt exceptions
+  - [~] 12.2 Implement find_eligible_trips(gtfs, origin_slug, dest_slug, origin_stops, dest_stops, service_ids) per race-brief.md section 5.4: for each trip pick the stop pair with shortest origin walk (tie: shortest dest walk), emit one record per trip, sort by dep
+  - [~] 12.3 Correctly skip trips where dest.stop_sequence ≤ origin.stop_sequence
+  - [~] 12.4 Write tests/unit/test_eligible.py using fake-gtfs: covers service removed by exception_type 2, trip reaching dest before origin, pair with no trips
+  - [~] 12.5 Write tests/golden/test_eligible_golden.py: test cases 1-6 from race-brief.md section 5.4; skip with visible warning when raw/ absent
+  - [~] 12.6 Write tests/property/test_eligible_properties.py covering P3 properties (one record per trip, alight > board sequence, dep ≤ arr, both walks ≤ radius, smaller radius never adds trips, two directions never share a trip)
+  - [~] 12.7 Depends on: task 11
 
----
+- [ ] 13. race module
+  - [~] 13.1 Implement next_today(trips, start) exactly per race-brief.md section 5.2: NO_ONE_SEAT_RIDE if trips is empty; NO_MORE_TRIPS_TODAY if trips exist but none catchable (dep ≥ start + access_min); best = smallest (arr + egress_min), tie-break by earlier dep
+  - [~] 13.2 Implement race_at_time(t, clock, eligible_trips, ride_1938_min) using same start for both sides
+  - [~] 13.3 Implement compute_result(margin): photo_finish if |margin| < 1.0, else "1938" or "today"
+  - [~] 13.4 Implement run_all_races(pairs, clocks, eligible, facts) for all 20 pairs × every whole minute 09:00-13:52
+  - [~] 13.5 Write tests/unit/test_race.py: unit test for NO_ONE_SEAT_RIDE (empty trips list); unit test for NO_MORE_TRIPS_TODAY (trips exist, none catchable); test cases 5-6 from section 5.2 (made-up trips, by hand)
+  - [~] 13.6 Write tests/golden/test_race_golden.py: test cases 1-8 from race-brief.md section 5.5; skip with visible warning when raw/ absent
+  - [~] 13.7 Write tests/property/test_race_properties.py covering P4 properties (same start, start ≥ t, catchable, earliest arrival, monotonic, etc.)
+  - [~] 13.8 Depends on: tasks 10, 12
 
-### TASK-010: clock module
-**Status**: staged  
-**Description**: Generate 1938 clock for each corner and direction. Implement terminal_departures, compute_offset, next_1938.  
-**Depends on**: TASK-009  
-**Files**: 
-- pipeline/clock.py
-- tests/unit/test_clock.py
-- tests/property/test_clock_properties.py
-- tests/golden/test_clock_golden.py
+- [ ] 14. summary module
+  - [~] 14.1 Implement ride_verdict(delta, ride_1938): "same" if |delta| ≤ max(1.5, 0.15 × ride_1938), else "faster today" or "slower today"
+  - [~] 14.2 Implement find_gaps(trips, window_start, window_end) returning (gap_min, gap_max) over consecutive departures from boarding stop in [09:00, 14:00)
+  - [~] 14.3 Implement arrival_weighted_wait(gaps) = sum(g² for g in gaps) / (2 × sum(gaps)); return None with visible warning if gaps empty or sum zero
+  - [~] 14.4 Implement compute_summary(races, eligible, facts) computing per-pair counts, ride verdicts, gaps, and overall totals
+  - [~] 14.5 Write tests/unit/test_summary.py: test cases 1-5 from race-brief.md section 5.7 (arrival-weighted wait)
+  - [~] 14.6 Write tests/golden/test_summary_golden.py: per-pair table and totals from section 5.6; skip with visible warning when raw/ absent
+  - [~] 14.7 Write tests/property/test_summary_properties.py covering P5 and P6 properties
+  - [~] 14.8 Depends on: task 13
 
-**Acceptance**:
-- `build_clock(facts)` returns clock dict for all corners/directions
-- Each corner has exactly 40 passes
-- Unit tests pass
-- Golden test case 3: Preston & Caroline eastbound at 10:00 → dep 10:06, wait 6
-- Golden test case 7: Preston & Caroline to Aliceanna & Bond ride = 9 minutes
-- Property tests P1 all pass (gaps 7-8, offsets sum to 30, wait ≤ 8, etc.)
+- [ ] 15. fetch_osm module
+  - [~] 15.1 Implement extraction of all OSM way IDs from facts file legs
+  - [~] 15.2 Implement query_overpass(way_ids) querying Overpass API and returning {way_id: [[lon, lat], ...]}
+  - [~] 15.3 Implement write_ways_json(ways, download_date, output_path) writing data/osm/ways.json with schema, download_date, source, license (ODbL)
+  - [~] 15.4 Fail gracefully on network error with a clear message; never run automatically during build
+  - [~] 15.5 Write tests/unit/test_fetch_osm.py mocking the Overpass call; test way ID extraction and output format
+  - [~] 15.6 Depends on: task 9
 
----
+- [ ] 16. route module
+  - [~] 16.1 Implement load_ways(ways_path) reading data/osm/ways.json snapshot (never fetches network)
+  - [~] 16.2 Implement orient_way(way, reference) flipping a way if its last point is nearer the end of the reference than its first
+  - [~] 16.3 Implement clip_line(line, start_point, end_point) extracting the segment between nearest points; error if clip_to comes before clip_from
+  - [~] 16.4 Implement build_leg(leg_spec, ways): inferred legs use points_lonlat; OSM legs join ways in order, handle "gap" markers (declared breaks), validate bridged_gaps_m within 1 m, clip to endpoints
+  - [~] 16.5 Raise RouteError with street name on undeclared break > 1 m; raise RouteError with actual vs expected on length mismatch beyond max(1 m, 0.5%)
+  - [~] 16.6 Implement build_route(facts, ways) joining legs, verifying consecutive legs connect within 1 m, verifying each timing point within 30 m of route
+  - [~] 16.7 Write tests/unit/test_route.py: test inferred leg, declared gap, undeclared break error, length mismatch error, clip order error
+  - [~] 16.8 Write tests/golden/test_route_golden.py: test cases 1-6 from race-brief.md section 5.8; skip with visible warning when raw/ absent
+  - [~] 16.9 Write tests/property/test_route_properties.py covering P7 properties (flipping way preserves line, leg ≥ straight line, etc.)
+  - [~] 16.10 Depends on: task 15
 
-### TASK-011: stops module
-**Status**: staged  
-**Description**: Find GTFS stops within 400m radius of each corner. Compute geodesic distances and walk times.  
-**Depends on**: TASK-009, TASK-007  
-**Files**: 
-- pipeline/stops.py
-- tests/unit/test_stops.py
-- tests/property/test_walk_properties.py
-- tests/golden/test_stops_golden.py
+- [ ] 17. display_rounding module
+  - [~] 17.1 Implement round_for_display(parts) using largest-remainder method: round total to nearest whole (halves up); floor each part; give remaining minutes to parts with largest fractions, earlier phase wins ties
+  - [~] 17.2 Verify the function is pure (same input always gives same output) and stateless
+  - [~] 17.3 Write tests/unit/test_display_rounding.py covering all six rows of the table in screen-brief.md section 2.10
+  - [~] 17.4 Write tests/property/test_rounding_properties.py covering P8 properties (parts sum to total, each within 1 min, whole numbers, whole-number inputs unchanged, pure)
+  - [~] 17.5 Depends on: none
 
-**Acceptance**:
-- `find_stops_near_corners(gtfs, corners, 400.0)` returns stops dict
-- Uses pyproj.Geod(ellps="WGS84") for distances
-- Walk formula: metres × 1.3 ÷ 1.2 ÷ 60
-- Unit tests pass
-- Golden test 5: Preston & Caroline to stop 8564 = 125.07 ± 0.1 m
-- Golden test 1: 125.07 m → 2.258 min
-- Property tests P2 all pass (never negative, symmetric, doubling, max 7.223 min at 400m)
+- [ ] 18. emit module
+  - [~] 18.1 Implement write_index_json(facts, pairs, feed_sha256, feed_version, service_date, output_dir)
+  - [~] 18.2 Implement write_summary_json(summary, output_dir)
+  - [~] 18.3 Implement write_race_files(clocks, eligible, races, output_dir) applying display_rounding to each race row's stored values
+  - [~] 18.4 Implement write_route_geojson(route_legs, output_dir)
+  - [~] 18.5 Validate every output file against its JSON schema using jsonschema; raise ValidationError on failure
+  - [~] 18.6 Check every numeric field has a source entry; raise ValidationError listing any unsourced fields
+  - [~] 18.7 Write tests/unit/test_emit.py verifying file structure, schema validation, and source check with fake data
+  - [~] 18.8 Write tests/golden/test_emit_golden.py: verify lead pair race file matches section 4.5 format and values; skip with visible warning when raw/ absent
+  - [~] 18.9 Depends on: tasks 4, 10, 13, 14, 16, 17
 
----
-
-### TASK-012: eligible module
-**Status**: staged  
-**Description**: Find one-seat trips per directed pair. Implement active_services, find_eligible_trips, parse_gtfs_time.  
-**Depends on**: TASK-011  
-**Files**: 
-- pipeline/eligible.py
-- tests/unit/test_eligible.py
-- tests/property/test_eligible_properties.py
-- tests/golden/test_eligible_golden.py
-
-**Acceptance**:
-- `active_services(gtfs, date(2026,11,4))` returns exactly service_id 2251
-- `find_eligible_trips(...)` for lead pair returns 36 trips, all CityLink Lime HARBOR EAST
-- Handles GTFS times ≥ 24 hours correctly
-- For each trip: picks stop pair with shortest origin walk (tie: shortest dest walk)
-- Unit tests pass
-- Golden test 2: 36 trips board 8564 alight 9486
-- Property tests P3 all pass (one per trip, alight > board, both walks ≤ 400m, etc.)
-
----
-
-### TASK-013: race module
-**Status**: staged  
-**Description**: Run all races for all pairs at all slider times. Implement race_at_time, next_today, compute_result, ride_minutes.  
-**Depends on**: TASK-010, TASK-012  
-**Files**: 
-- pipeline/race.py
-- tests/unit/test_race.py
-- tests/property/test_race_properties.py
-- tests/golden/test_race_golden.py
-
-**Acceptance**:
-- `run_all_races(pairs, clocks, eligible, facts)` returns race rows for all 20 pairs
-- `next_today` returns two distinct results:
-  - NO_ONE_SEAT_RIDE when trips list is empty (pair has zero eligible trips)
-  - NO_MORE_TRIPS_TODAY when trips exist but none catchable after start
-  - Unit test for each case required
-- Unit tests pass
-- Golden test: lead pair at 10:00 → 1938 total 15, today 45.156, result "1938", margin 30.156
-- Golden test table row 8: Westwood & Carey → Preston & Caroline at 11:23 → today wins by 4.025
-- Both sides always start from same time (max of slider time and covered_from)
-- Photo finish when |margin| < 1.0
-- Property tests P4 all pass (same start, start ≥ t, catchable, earliest arrival, monotonic, etc.)
-
----
-
-### TASK-014: summary module
-**Status**: staged  
-**Description**: Compute per-pair verdicts and overall totals. Implement ride_verdict, find_gaps, arrival_weighted_wait.  
-**Depends on**: TASK-013  
-**Files**: 
-- pipeline/summary.py
-- tests/unit/test_summary.py
-- tests/property/test_summary_properties.py
-- tests/golden/test_summary_golden.py
-
-**Acceptance**:
-- `compute_summary(races, eligible, facts)` returns Summary with all counts
-- Unit tests pass
-- Golden: 5,666 total races, 5,582 wins_1938, 25 wins_today, 59 photo_finishes
-- Golden: 17 pairs "same" ride, 3 "faster today", 0 "slower today"
-- Golden: lead pair gaps 34-39 minutes
-- Arrival-weighted wait for [7,8,7,8] = 3.767 minutes
-- Property tests P5 all pass (counts add up, today_wins list accurate, etc.)
-- Property tests P6 all pass (equal gaps → g/2, never below mean/2, order-independent, etc.)
-
----
-
-### TASK-015: fetch_osm module
-**Status**: staged  
-**Description**: One-time command to fetch OSM way geometries via Overpass API. Writes data/osm/ways.json with download date.  
-**Depends on**: TASK-009  
-**Files**: 
-- pipeline/fetch_osm.py
-- tests/unit/test_fetch_osm.py
-
-**Acceptance**:
-- `python -m pipeline fetch_osm` extracts way IDs from facts file
-- Queries Overpass API for those ways
-- Writes data/osm/ways.json with: schema, download_date, source, license (ODbL), ways dict
-- Format: {"way_id": [[lon, lat], ...]}
-- Fails gracefully on network error with clear message
-
----
-
-### TASK-016: route module
-**Status**: staged  
-**Description**: Rebuild 1938 route from OSM ways. Implement build_route, build_leg, orient_way, clip_line, validate_leg_length, validate_route.  
-**Depends on**: TASK-015  
-**Files**: 
-- pipeline/route.py
-- tests/unit/test_route.py
-- tests/property/test_route_properties.py
-- tests/golden/test_route_golden.py
-
-**Acceptance**:
-- `build_route(facts, ways)` returns route legs for each direction
-- Handles inferred legs (use points_lonlat)
-- Handles OSM legs (join ways, flip if needed, clip to endpoints)
-- Handles gaps (declared with "gap" marker and bridged_gaps_m)
-- Unit tests pass
-- Golden: Aliceanna Street eastbound 123.8 m ± 0.5%
-- Golden: Lanvale Street one bridged gap 26.2 m ± 1 m
-- Golden: westbound 14 legs = 8,401.0 m ± 0.5%
-- Golden: loop + eastbound = 8,409.9 m ± 0.5%
-- Fails loudly on undeclared break, length mismatch, timing point > 30m from route
-- Property tests P7 all pass (flipping way preserves line, leg ≥ straight line, etc.)
-
----
-
-### TASK-017: display_rounding module
-**Status**: staged  
-**Description**: Implement largest-remainder rounding for display. Pure function that makes parts sum to total.  
-**Depends on**: none  
-**Files**: 
-- pipeline/display_rounding.py
-- tests/unit/test_display_rounding.py
-- tests/property/test_rounding_properties.py
-
-**Acceptance**:
-- `round_for_display([2.258, 30.458, 8.283, 4.156])` returns `[2, 31, 8, 4]` (sums to 45)
-- Unit tests pass
-- Golden test table from screen-brief.md section 2.10 all pass
-- Property tests P8 all pass (parts sum to total, each within 1 min, whole numbers, pure function)
-
----
-
-### TASK-018: emit module
-**Status**: staged  
-**Description**: Write all JSON output files to web/public/data/. Validate against schemas. Check all numbers sourced.  
-**Depends on**: TASK-004, TASK-010, TASK-013, TASK-014, TASK-016, TASK-017  
-**Files**: 
-- pipeline/emit.py
-- tests/unit/test_emit.py
-- tests/golden/test_emit_golden.py
-
-**Acceptance**:
-- `emit_all(...)` writes 5 files: index.json, summary.json, 20 race files, route.geojson
-- Each file validates against its schema
-- Source check passes: every number has source entry
-- Display rounding applied to race rows (shown values add up to shown totals)
-- Times stored to 3 decimals, walks to 2 decimals
-- Unit tests pass
-- Golden: Race file matches format from race-brief.md section 4.5
-- Golden: lead pair race file structure matches expected
-
----
-
-### TASK-019: check_sources module
-**Status**: staged  
-**Description**: Check for banned words and unsourced numbers in web/ and docs/.  
-**Depends on**: none  
-**Files**: 
-- pipeline/check_sources.py
-- tests/unit/test_check_sources.py
-
-**Acceptance**:
-- Finds banned words: "live", "real-time", "realtime", "arriving now", "right now"
-- Allows exception: "Scheduled, not live."
-- Finds numeric fields in JSON without source entries
-- Returns list of violations (empty if all pass)
-- Unit tests cover both violations and clean files
-
----
+- [ ] 19. check_sources module
+  - [~] 19.1 Implement find_banned_words(text) detecting: "live", "real-time", "realtime", "arriving now", "right now"; allow the fixed phrase "Scheduled, not live."
+  - [~] 19.2 Implement find_unsourced_numbers(json_obj) detecting numeric fields without a corresponding source entry
+  - [~] 19.3 Implement check_sources_in_files(paths) returning a list of violations (empty if clean)
+  - [~] 19.4 Write tests/unit/test_check_sources.py covering files with violations and clean files for each rule
+  - [~] 19.5 Depends on: none
 
 ## Integration and Commands
 
-### TASK-020: validate command
-**Status**: staged  
-**Description**: Implement fast validation: facts schema, 1938 clock, JSON schemas, copy rules. No feed, no network.  
-**Depends on**: TASK-009, TASK-010, TASK-004, TASK-019  
-**Files**: 
-- pipeline/cli.py (cmd_validate)
+- [ ] 20. validate command
+  - [~] 20.1 Wire cmd_validate to: load and validate facts file; build clock and verify it; validate JSON schema files are well-formed; run check_sources on web/ and docs/
+  - [~] 20.2 Confirm command does not read the feed or touch the network
+  - [~] 20.3 Verify command completes in under 10 seconds
+  - [~] 20.4 All failures produce clear error messages
+  - [~] 20.5 Depends on: tasks 9, 10, 4, 19
 
-**Acceptance**:
-- `python -m pipeline validate` runs in under 10 seconds
-- Checks facts file schema
-- Checks 1938 clock generates correctly
-- Validates JSON schemas are valid
-- Runs check_sources
-- Does not read feed or touch network
-- Clear error messages on any failure
+- [ ] 21. build command
+  - [~] 21.1 Wire cmd_build to run all 9 pipeline steps in order: feed_check → facts → clock → stops → eligible → race → summary → route → emit
+  - [~] 21.2 Pass each step's output as input to the next
+  - [~] 21.3 Fail fast on any step error, printing which step failed
+  - [~] 21.4 Print progress messages for each completed step
+  - [~] 21.5 Verify command completes in under 60 seconds with the pinned feed
+  - [~] 21.6 Depends on: tasks 8, 9, 10, 11, 12, 13, 14, 16, 18
 
----
+- [ ] 22. check command
+  - [~] 22.1 Wire cmd_check to run build (task 21) then run pytest
+  - [~] 22.2 Confirm golden tests always run on developer machine (feed present); confirm they skip with visible warning in CI when raw/ absent
+  - [~] 22.3 Return pytest exit code as the command exit code
+  - [~] 22.4 Depends on: task 21
 
-### TASK-021: build command
-**Status**: staged  
-**Description**: Implement full pipeline build. Execute all 9 steps in order and write JSON files.  
-**Depends on**: TASK-008, TASK-009, TASK-010, TASK-011, TASK-012, TASK-013, TASK-014, TASK-016, TASK-018  
-**Files**: 
-- pipeline/cli.py (cmd_build)
+- [ ] 23. verify command
+  - [~] 23.1 Wire cmd_verify to rebuild into a temp directory and compare outputs against committed web/public/data/ files byte-for-byte
+  - [~] 23.2 Fail with clear error listing differing files if any output differs
+  - [~] 23.3 Fail with clear error (not skip) if raw/mta_local_bus.zip is missing
+  - [~] 23.4 Depends on: task 21
 
-**Acceptance**:
-- `python -m pipeline build` runs all 9 steps in order
-- Completes in under 60 seconds
-- Writes all 23 JSON files to web/public/data/
-- Each step's output passed to next step
-- Fails fast on any step error
-- Progress messages to stdout
-
----
-
-### TASK-022: check command
-**Status**: staged  
-**Description**: Run build then pytest. Used by hooks.  
-**Depends on**: TASK-021  
-**Files**: 
-- pipeline/cli.py (cmd_check)
-
-**Acceptance**:
-- `python -m pipeline check` runs build then pytest
-- On developer machine: always runs golden tests
-- Golden tests pass with feed present
-- Unit and property tests always run
-- Returns pytest exit code
-
----
-
-### TASK-023: verify command
-**Status**: staged  
-**Description**: Rebuild from raw/ and fail if committed data differs. Ensures reproducibility.  
-**Depends on**: TASK-021  
-**Files**: 
-- pipeline/cli.py (cmd_verify)
-
-**Acceptance**:
-- `python -m pipeline verify` rebuilds into temp directory
-- Compares temp outputs to committed web/public/data/ files
-- Fails with clear error showing which files differ
-- Must fail (not skip) if raw/mta_local_bus.zip missing
-- Tests property P9: build reproducibility
-
----
-
-### TASK-024: check_sources command
-**Status**: staged  
-**Description**: Run source checking on web/ and docs/.  
-**Depends on**: TASK-019  
-**Files**: 
-- pipeline/cli.py (cmd_check_sources)
-
-**Acceptance**:
-- `python -m pipeline check_sources` scans web/ and docs/
-- Reports banned words with file and line number
-- Reports unsourced numbers in JSON files
-- Exit code 0 if clean, 1 if violations found
-- Clear summary of findings
-
----
+- [ ] 24. check_sources command
+  - [~] 24.1 Wire cmd_check_sources to run check_sources_in_files on all files in web/ and docs/
+  - [~] 24.2 Report each violation with file path and line number
+  - [~] 24.3 Exit 0 if clean, exit 1 if any violations found
+  - [~] 24.4 Depends on: task 19
 
 ## Testing Infrastructure
 
-### TASK-025: Golden tests verification
-**Status**: staged  
-**Description**: Verify all golden tests from race-brief.md are present and configure skip behavior for CI vs dev machine.  
-**Depends on**: TASK-010, TASK-011, TASK-012, TASK-013, TASK-014, TASK-016, TASK-018  
-**Files**: 
-- tests/golden/ (configuration, pytest markers)
-- tests/conftest.py
-
-**Acceptance**:
-- All test tables from race-brief.md sections 5.1-5.9 have corresponding golden tests (written in module tasks 010-018)
-- Tests detect CI environment (via env var or pytest mark)
-- In CI: skip gracefully with visible warning when raw/ missing
-- On dev machine: always run, must pass
-- `verify` command fails (not skips) if raw/ missing
-- All expected values match computed values
-
----
+- [ ] 25. Golden tests verification
+  - [~] 25.1 Add tests/conftest.py with a pytest marker `requires_feed` and a skip condition: skip with visible warning when raw/mta_local_bus.zip is absent (CI); always run when feed is present (dev machine)
+  - [~] 25.2 Confirm that all golden test files in module tasks 10-18 use the `requires_feed` marker
+  - [~] 25.3 Confirm that verify command (task 23) fails, not skips, when feed is absent
+  - [~] 25.4 Confirm all test tables from race-brief.md sections 5.1-5.9 have a corresponding assertion in a golden test file
+  - [~] 25.5 Depends on: tasks 10, 11, 12, 13, 14, 16, 18
 
 ## Final Integration
 
-### TASK-026: End-to-end integration test
-**Status**: staged  
-**Description**: Full pipeline test with real no21-1938.yaml and pinned feed.  
-**Depends on**: TASK-021, TASK-025  
-**Files**: 
-- tests/test_integration.py
+- [ ] 26. End-to-end integration test
+  - [~] 26.1 Write tests/test_integration.py that runs a full build and spot-checks outputs
+  - [~] 26.2 Verify all 23 output files are created (index.json, summary.json, 20 race files, route.geojson)
+  - [~] 26.3 Verify lead pair race file at t=10:00 reads 1938 total 15, today total 45.156, result "1938"
+  - [~] 26.4 Verify summary.json totals: 5,666 races, 5,582 wins_1938, 25 wins_today, 59 photo_finishes
+  - [~] 26.5 Run build twice and confirm all output files are byte-identical (property P9)
+  - [~] 26.6 Confirm build completes in under 60 seconds
+  - [~] 26.7 Depends on: tasks 21, 25
 
-**Acceptance**:
-- Runs full build with real data
-- Verifies all 23 output files created
-- Spot-checks lead pair values: 15 vs 45.156 at 10:00
-- Verifies 5,666 total races, 5,582 vs 25 vs 59
-- Confirms build completes in under 60 seconds
-- Tests build reproducibility (P9): run twice, compare outputs
+- [ ] 27. Documentation and README
+  - [~] 27.1 Write pipeline/README.md with installation instructions (Python 3.12, pip install -e .)
+  - [~] 27.2 Document all six commands with usage examples
+  - [~] 27.3 Add notes on feed pinning (SHA-256, never commit raw/), OSM data (fetch_osm is one-time, commit ways.json), and golden test behaviour
+  - [~] 27.4 Link to docs/planning/race-brief.md and .kiro/specs/race-engine/design.md
+  - [~] 27.5 Depends on: task 2
 
----
-
-### TASK-027: Documentation and README
-**Status**: staged  
-**Description**: Write pipeline README with setup instructions, command usage, and examples.  
-**Depends on**: TASK-002  
-**Files**: 
-- pipeline/README.md
-
-**Acceptance**:
-- Installation instructions (Python 3.12, dependencies)
-- Command reference for all six commands
-- Example usage for common workflows
-- Notes on feed pinning and OSM data
-- Link to race-brief.md and design.md
-
----
-
-### TASK-028: Final validation
-**Status**: staged  
-**Description**: Run all commands and verify success criteria from requirements.md.  
-**Depends on**: TASK-022, TASK-023, TASK-024, TASK-026  
-**Files**: none (validation only)
-
-**Acceptance**:
-- `python -m pipeline check` passes on developer machine with feed present
-- Lead pair's race at 10:00 reads 15 minutes vs 45.156 minutes
-- All golden test values match expected values from race-brief.md
-- All property tests pass
-- Build is reproducible (identical files on repeat builds)
-- Every output number has a source entry
-- verify command confirms no drift between committed and fresh builds
-
----
-
-## Task Summary
-
-**Total tasks**: 28  
-**Categories**:
-- Setup and infrastructure: 7 tasks (001-007)
-- Module implementation: 12 tasks (008-019)
-- Integration and commands: 5 tasks (020-024)
-- Testing infrastructure: 1 task (025)
-- Final integration: 3 tasks (026-028)
-
-**Critical path**: 
-001 → 002 → 003 → 009 → 010 → 012 → 013 → 014 → 016 → 018 → 021 → 022 → 026 → 028
-
-**Estimated total**: 28 tasks covering requirements, design, implementation, testing, and validation.
+- [ ] 28. Final validation
+  - [~] 28.1 Run `python -m pipeline check` with feed present and confirm it passes
+  - [~] 28.2 Confirm lead pair race at t=10:00 reads 15 minutes vs 45.156 minutes
+  - [~] 28.3 Confirm all 28 golden test cases from race-brief.md match computed values
+  - [~] 28.4 Confirm all property tests pass
+  - [~] 28.5 Confirm `python -m pipeline verify` passes (committed files match a fresh build)
+  - [~] 28.6 Confirm `python -m pipeline check_sources` exits 0
+  - [~] 28.7 Depends on: tasks 22, 23, 24, 26
