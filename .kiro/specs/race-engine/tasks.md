@@ -156,7 +156,7 @@
 
 Corrections to finished tasks 1, 2, 4 and 5. Their completed items above stay as history. Prompt 2 in docs/planning/blockB-fixes.md holds the implementation details.
 
-- [ ] C1. Correct JSON schemas (B2, B12, B16; Prompt 2)
+- [x] C1. Correct JSON schemas (B2, B12, B16; Prompt 2)
   - [~] C1.1 route.schema.json: each leg requires direction (eastbound or westbound), street, method, note and length_m (nonnegative number); loop legs use eastbound
   - [~] C1.2 race.schema.json: row description covers every minute 09:00 to 13:52; races minItems and maxItems both 293
   - [~] C1.3 index.schema.json: replace the sources array with a catalog object keyed by guide1938_diagram, guide1938_timetable, guide1938_route, mta_gtfs, osm and method; each entry requires what, year, where and url; year and url may be null for a documented method; all six entries required
@@ -164,14 +164,14 @@ Corrections to finished tasks 1, 2, 4 and 5. Their completed items above stay as
   - [~] C1.5 Run Draft202012Validator.check_schema on all four schemas
   - Depends on: task 4
 
-- [ ] C2. Correct the CLI to five commands (B10, B5, B13; Prompt 2)
+- [x] C2. Correct the CLI to five commands (B10, B5, B13; Prompt 2)
   - [~] C2.1 Remove fetch_osm from CLI registration, handler and stub tests; keep validate, build, check, verify and check_sources
   - [~] C2.2 Test that top-level help lists all five commands and excludes fetch_osm; test that fetch_osm exits with argparse's unknown-command error
   - [~] C2.3 Update check_sources help and docstrings: prose scan paths, exclusions, banned-term check, and generated JSON source validation; test top-level help and check_sources --help
   - [~] C2.4 Remove requests from pyproject.toml; test the dependency list excludes it
   - Depends on: task 2
 
-- [ ] C3. Add the blank-time fixture row (B22; Prompt 2)
+- [~] C3. Add the blank-time fixture row (B22; Prompt 2)
   - [~] C3.1 Add one fake stop_times row with empty arrival_time and departure_time, using an existing fake trip and stop and a fresh stop_sequence
   - [~] C3.2 Test with csv.DictReader that both cells are empty, the trip and stop references exist, and sequences are unique; assert the original timed rows and the overnight example remain
   - Depends on: task 5

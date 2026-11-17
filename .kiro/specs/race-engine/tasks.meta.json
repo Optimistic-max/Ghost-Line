@@ -1398,6 +1398,30 @@
         "chatSessionId": "sess_1e79dbe8-0ce6-4b02-b2e5-811df0971039",
         "timestamp": 1794953814257
       }
+    ],
+    "C1. Correct JSON schemas (B2, B12, B16; Prompt 2)": [
+      {
+        "executionId": "61e46fef-638f-4460-b343-159aab24c7b1",
+        "chatSessionId": "sess_2595d071-b7be-4748-bd1e-671717cc9737",
+        "timestamp": 1794955710240
+      },
+      {
+        "executionId": "61e46fef-638f-4460-b343-159aab24c7b1",
+        "chatSessionId": "sess_2595d071-b7be-4748-bd1e-671717cc9737",
+        "timestamp": 1794955799929
+      }
+    ],
+    "C2. Correct the CLI to five commands (B10, B5, B13; Prompt 2)": [
+      {
+        "executionId": "9fed5ab6-55ff-46c4-9268-012e19c5cc88",
+        "chatSessionId": "sess_4e81de0d-725b-4f15-809e-e3d0e0b5e572",
+        "timestamp": 1794955820696
+      },
+      {
+        "executionId": "9fed5ab6-55ff-46c4-9268-012e19c5cc88",
+        "chatSessionId": "sess_4e81de0d-725b-4f15-809e-e3d0e0b5e572",
+        "timestamp": 1794956874381
+      }
     ]
   }
 }
