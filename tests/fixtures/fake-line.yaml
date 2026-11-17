@@ -1,0 +1,53 @@
+# Minimal valid facts file for unit and property tests.
+# Two corners, one leg per direction, inferred geometry only (no OSM ways needed).
+# Coordinates are in Baltimore area but far enough apart to have distinct stops.
+# Named "fake" to distinguish from real data.
+line: fake-no21
+mode: trackless_trolley
+effective: "1938-01-01"
+source: https://example.com/fake-source
+pages:
+  route_text: https://example.com/fake-route
+  timetable: https://example.com/fake-timetable
+timing_points:
+  # eastbound order; minutes from previous point
+  - name: "Fake Corner A"
+    slug: fake-corner-a
+    lonlat: [-76.6200, 39.3000]
+    minutes: 0
+    source: https://example.com/fake-source
+  - name: "Fake Corner B"
+    slug: fake-corner-b
+    lonlat: [-76.6100, 39.3000]
+    minutes: 5
+    source: https://example.com/fake-source
+midday_departures:
+  eastbound:
+    from: "Fake Corner A"
+    minutes_past_hour: [0, 30]
+    first: "09:00"
+    last: "13:30"
+    source: https://example.com/fake-source
+  westbound:
+    from: "Fake Corner B"
+    minutes_past_hour: [5, 35]
+    first: "09:05"
+    last: "13:35"
+    source: https://example.com/fake-source
+legs:
+  eastbound:
+    - street: "Fake Street"
+      method: inferred
+      points_lonlat:
+        - [-76.6200, 39.3000]
+        - [-76.6150, 39.3000]
+        - [-76.6100, 39.3000]
+      length_m: 893.0
+  westbound:
+    - street: "Fake Street"
+      method: inferred
+      points_lonlat:
+        - [-76.6100, 39.3000]
+        - [-76.6150, 39.3000]
+        - [-76.6200, 39.3000]
+      length_m: 893.0

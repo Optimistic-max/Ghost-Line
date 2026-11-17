@@ -67,10 +67,33 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "sources": {
-      "type": "array",
-      "description": "Source entries for every numeric or factual claim in this file.",
-      "items": {
-        "$ref": "#/$defs/Source"
+      "type": "object",
+      "description": "Source-ID catalog for the whole data set. Other generated files carry a top-level 'sources' object that maps their blocks to arrays of these IDs. Coverage in this file: corners (slug, name, lonlat, inferred, note) are covered by guide1938_diagram, guide1938_route and osm, and by the existing inference notes on each corner; effective is covered by guide1938_timetable; service_date, feed_version and feed_sha256 are covered by mta_gtfs; pairs is derived from corners and covered by method. Whether every ID used elsewhere resolves here, and recursive numeric coverage, are checked by the emitter and check_sources, not by this schema.",
+      "required": [
+        "guide1938_diagram",
+        "guide1938_timetable",
+        "guide1938_route",
+        "mta_gtfs",
+        "osm",
+        "method"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "guide1938_diagram": { "$ref": "#/$defs/SourceEntry" },
+        "guide1938_timetable": { "$ref": "#/$defs/SourceEntry" },
+        "guide1938_route": { "$ref": "#/$defs/SourceEntry" },
+        "mta_gtfs": {
+          "$ref": "#/$defs/SourceEntry",
+          "description": "MDOT MTA local bus GTFS. The entry's 'where' must state feed_version 20260821, the pinned SHA-256 and service date 2026-11-04 (weekday schedule, service_id 2251)."
+        },
+        "osm": {
+          "$ref": "#/$defs/SourceEntry",
+          "description": "OpenStreetMap contributors, ODbL. The entry's 'where' must state the data/osm/ways.json snapshot date (2026-11-01)."
+        },
+        "method": {
+          "$ref": "#/$defs/MethodEntry",
+          "description": "Computation method documented in the project (walk formula, 400 m radius, 1.0-minute photo-finish band). year and url may be null."
+        }
       }
     }
   },
@@ -121,21 +144,49 @@
         }
       }
     },
-    "Source": {
+    "SourceEntry": {
       "type": "object",
-      "required": ["field", "url"],
+      "required": ["what", "year", "where", "url"],
       "additionalProperties": false,
       "properties": {
-        "field": {
+        "what": {
           "type": "string",
-          "description": "Name of the field this source supports."
+          "minLength": 1,
+          "description": "What the source is."
+        },
+        "year": {
+          "type": "integer",
+          "description": "Year of the source."
+        },
+        "where": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Page, feed or file within the source."
         },
         "url": {
           "type": "string",
-          "description": "URL of the primary source document.",
-          "format": "uri"
+          "minLength": 1,
+          "description": "Link to the source."
+        }
+      }
+    },
+    "MethodEntry": {
+      "type": "object",
+      "required": ["what", "year", "where", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "what": {
+          "type": "string",
+          "minLength": 1
         },
-        "note": {
+        "year": {
+          "type": ["integer", "null"]
+        },
+        "where": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
           "type": ["string", "null"]
         }
       }

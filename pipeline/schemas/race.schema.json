@@ -17,10 +17,48 @@
     "radius_m",
     "y1938",
     "today",
-    "races"
+    "races",
+    "sources"
   ],
   "additionalProperties": false,
   "properties": {
+    "sources": {
+      "type": "object",
+      "description": "Maps blocks of this file to source-ID arrays from the index.json catalog. y1938 is covered by the 1938 diagram and timetable. today is covered by the MTA GTFS feed and the method. races is derived from y1938 and today and is covered by the diagram, timetable, GTFS feed and method. radius_m is a method parameter. Every other numeric top-level field must be listed here explicitly; the emitter checks coverage and ID resolution.",
+      "required": ["y1938", "today", "races", "radius_m"],
+      "properties": {
+        "y1938": {
+          "$ref": "#/$defs/SourceIds",
+          "allOf": [
+            { "contains": { "const": "guide1938_diagram" } },
+            { "contains": { "const": "guide1938_timetable" } }
+          ]
+        },
+        "today": {
+          "$ref": "#/$defs/SourceIds",
+          "allOf": [
+            { "contains": { "const": "mta_gtfs" } },
+            { "contains": { "const": "method" } }
+          ]
+        },
+        "races": {
+          "$ref": "#/$defs/SourceIds",
+          "allOf": [
+            { "contains": { "const": "guide1938_diagram" } },
+            { "contains": { "const": "guide1938_timetable" } },
+            { "contains": { "const": "mta_gtfs" } },
+            { "contains": { "const": "method" } }
+          ]
+        },
+        "radius_m": {
+          "$ref": "#/$defs/SourceIds",
+          "allOf": [
+            { "contains": { "const": "method" } }
+          ]
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/SourceIds" }
+    },
     "schema": {
       "type": "string",
       "const": "ghostline.race.v1"
@@ -75,14 +113,32 @@
     },
     "races": {
       "type": "array",
-      "description": "One race row per slider minute from covered_from through 13:52.",
-      "minItems": 1,
+      "description": "One race row for every whole minute from 09:00 to 13:52 (293 rows). Rows before covered_from repeat the covered_from race, with start equal to covered_from and before_table true.",
+      "minItems": 293,
+      "maxItems": 293,
       "items": {
         "$ref": "#/$defs/RaceRow"
       }
     }
   },
   "$defs": {
+    "SourceIds": {
+      "type": "array",
+      "description": "Nonempty list of source IDs from the index.json catalog.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "guide1938_diagram",
+          "guide1938_timetable",
+          "guide1938_route",
+          "mta_gtfs",
+          "osm",
+          "method"
+        ]
+      }
+    },
     "Clock1938": {
       "type": "object",
       "required": ["ride_min", "covered_from", "passes", "sources"],

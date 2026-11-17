@@ -4,12 +4,6 @@ import argparse
 import sys
 
 
-def cmd_fetch_osm(args: argparse.Namespace) -> None:
-    """One-time fetch of OSM way geometries via Overpass API."""
-    print("Command 'fetch_osm' is not yet implemented.")
-    sys.exit(1)
-
-
 def cmd_validate(args: argparse.Namespace) -> None:
     """Fast checks: facts schema, 1938 clock, JSON schemas, copy rules.
 
@@ -38,7 +32,16 @@ def cmd_verify(args: argparse.Namespace) -> None:
 
 
 def cmd_check_sources(args: argparse.Namespace) -> None:
-    """Fail on banned words and unsourced numbers found in web/ or docs/."""
+    """Check prose for banned terms and generated JSON for source mappings.
+
+    Prose scan paths: web/index.html, web/src/**, docs/*.md and README.md.
+    Excluded: docs/planning, node_modules, dist and web/public/data.
+    The prose check looks for banned terms only (live, real-time, realtime,
+    arriving now, right now), case-insensitive, whole words or phrases. The
+    exact phrase "Scheduled, not live." is allowed.
+    The JSON check is separate: it validates the generated JSON source
+    mappings (every source ID resolves, every numeric field is covered).
+    """
     print("Command 'check_sources' is not yet implemented.")
     sys.exit(1)
 
@@ -49,13 +52,6 @@ def main() -> None:
         description="Ghost Line race engine — builds JSON data from 1938 facts and MTA feed.",
     )
     subparsers = parser.add_subparsers(dest="command", metavar="COMMAND")
-
-    p_fetch_osm = subparsers.add_parser(
-        "fetch_osm",
-        help="One-time fetch of OSM way geometries via Overpass API.",
-        description="Fetch OSM way geometries for the route via the Overpass API and save them to raw/. Run once before the first build.",
-    )
-    p_fetch_osm.set_defaults(func=cmd_fetch_osm)
 
     p_validate = subparsers.add_parser(
         "validate",
@@ -101,10 +97,16 @@ def main() -> None:
 
     p_check_sources = subparsers.add_parser(
         "check_sources",
-        help="Check for banned words and unsourced numbers in web/ or docs/.",
+        help="Prose: banned terms. Generated JSON: source mappings.",
         description=(
-            "Scan web/ and docs/ for banned words and numbers that lack a source "
-            "citation. Fails with a list of violations on any match."
+            "Two separate checks. Prose check: scan web/index.html, web/src/**, "
+            "docs/*.md and README.md for banned terms (live, real-time, realtime, "
+            "arriving now, right now; case-insensitive, whole words or phrases; "
+            "the exact phrase \"Scheduled, not live.\" is allowed). Excluded from "
+            "the prose scan: docs/planning, node_modules, dist and web/public/data. "
+            "JSON check: validate the generated JSON source mappings (every source "
+            "ID resolves and every numeric field is covered). "
+            "Fails with a list of violations on any match."
         ),
     )
     p_check_sources.set_defaults(func=cmd_check_sources)

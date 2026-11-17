@@ -2,11 +2,27 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ghost-line.example/schemas/route.schema.json",
   "title": "Ghost Line route.geojson",
-  "description": "The 1938 route as a GeoJSON FeatureCollection. Each Feature is one leg, tagged with street, method, and note.",
+  "description": "The 1938 route as a GeoJSON FeatureCollection. Each Feature is one leg, tagged with direction, street, method, note and length_m.",
   "type": "object",
-  "required": ["type", "features"],
+  "required": ["type", "features", "sources"],
   "additionalProperties": true,
   "properties": {
+    "sources": {
+      "type": "object",
+      "description": "Maps route blocks to source-ID arrays from the index.json catalog. features is covered by guide1938_route (the 1938 route description), osm (way geometry) and method (joining and clipping). Inferred geometry is explained by each leg's existing note. The emitter checks ID resolution and coverage of any additional numeric field.",
+      "required": ["features"],
+      "properties": {
+        "features": {
+          "$ref": "#/$defs/SourceIds",
+          "allOf": [
+            { "contains": { "const": "guide1938_route" } },
+            { "contains": { "const": "osm" } },
+            { "contains": { "const": "method" } }
+          ]
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/SourceIds" }
+    },
     "type": {
       "type": "string",
       "const": "FeatureCollection"
@@ -21,6 +37,23 @@
     }
   },
   "$defs": {
+    "SourceIds": {
+      "type": "array",
+      "description": "Nonempty list of source IDs from the index.json catalog.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "guide1938_diagram",
+          "guide1938_timetable",
+          "guide1938_route",
+          "mta_gtfs",
+          "osm",
+          "method"
+        ]
+      }
+    },
     "RouteLegFeature": {
       "type": "object",
       "required": ["type", "geometry", "properties"],
@@ -65,9 +98,19 @@
     },
     "LegProperties": {
       "type": "object",
-      "required": ["street", "method", "note"],
+      "required": ["direction", "street", "method", "note", "length_m"],
       "additionalProperties": true,
       "properties": {
+        "direction": {
+          "type": "string",
+          "enum": ["eastbound", "westbound"],
+          "description": "Line this leg belongs to. Westbound legs form one line; loop legs and eastbound legs form the other, so loop legs use 'eastbound'."
+        },
+        "length_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Leg length in metres (WGS84 geodesic). Covered by the 'features' source mapping."
+        },
         "street": {
           "type": "string",
           "description": "Name of the street or segment this leg follows, e.g. 'North Avenue'."

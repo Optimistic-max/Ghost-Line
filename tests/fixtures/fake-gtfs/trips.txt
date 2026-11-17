@@ -1,0 +1,6 @@
+route_id,service_id,trip_id,trip_headsign,direction_id
+FAKE1,1001,T1,Fake Corner B,0
+FAKE1,1001,T2,Fake Corner B,0
+FAKE1,1002,T3,Fake Corner B,0
+FAKE1,1003,T4,Fake Corner B Reversed,0
+FAKE1,1001,T5,Fake Corner B Late,0

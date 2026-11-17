@@ -15,10 +15,38 @@
     "ride_faster_today",
     "ride_slower_today",
     "pairs_without_one_seat_ride",
-    "today_wins"
+    "today_wins",
+    "sources"
   ],
   "additionalProperties": false,
   "properties": {
+    "sources": {
+      "type": "object",
+      "description": "Maps each numeric count and today_wins to source-ID arrays from the index.json catalog. Every count is derived from the race files, so each mapping lists the race inputs (guide1938_diagram, guide1938_timetable, mta_gtfs) and method. The emitter checks ID resolution and coverage of any additional numeric field.",
+      "required": [
+        "races",
+        "wins_1938",
+        "wins_today",
+        "photo_finishes",
+        "ride_same",
+        "ride_faster_today",
+        "ride_slower_today",
+        "pairs_without_one_seat_ride",
+        "today_wins"
+      ],
+      "properties": {
+        "races": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "wins_1938": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "wins_today": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "photo_finishes": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "ride_same": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "ride_faster_today": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "ride_slower_today": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "pairs_without_one_seat_ride": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "today_wins": { "$ref": "#/$defs/RaceDerivedSourceIds" }
+      },
+      "additionalProperties": { "$ref": "#/$defs/SourceIds" }
+    },
     "schema": {
       "type": "string",
       "const": "ghostline.summary.v1"
@@ -76,6 +104,33 @@
     }
   },
   "$defs": {
+    "SourceIds": {
+      "type": "array",
+      "description": "Nonempty list of source IDs from the index.json catalog.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "guide1938_diagram",
+          "guide1938_timetable",
+          "guide1938_route",
+          "mta_gtfs",
+          "osm",
+          "method"
+        ]
+      }
+    },
+    "RaceDerivedSourceIds": {
+      "$ref": "#/$defs/SourceIds",
+      "description": "A value derived from the race rows. Must include the race inputs and the method.",
+      "allOf": [
+        { "contains": { "const": "guide1938_diagram" } },
+        { "contains": { "const": "guide1938_timetable" } },
+        { "contains": { "const": "mta_gtfs" } },
+        { "contains": { "const": "method" } }
+      ]
+    },
     "TodayWin": {
       "type": "object",
       "required": ["origin", "dest", "t", "margin"],
