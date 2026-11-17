@@ -176,13 +176,13 @@ Corrections to finished tasks 1, 2, 4 and 5. Their completed items above stay as
   - [~] C3.2 Test with csv.DictReader that both cells are empty, the trip and stop references exist, and sequences are unique; assert the original timed rows and the overnight example remain
   - Depends on: task 5
 
-- [ ] C4. Apply .gitattributes LF rules (B6; Prompt 3) (pending)
-  - [~] C4.1 Add `web/public/data/** text eol=lf` and `data/osm/*.json text eol=lf` to the repository-root .gitattributes, keeping unrelated attributes and avoiding duplicates
-  - [~] C4.2 Verify with `git check-attr text eol` on web/public/data/index.json, web/public/data/race/test.json and data/osm/ways.json
+- [x] C4. Apply .gitattributes LF rules (B6; Prompt 3)
+  - [x] C4.1 Add `web/public/data/** text eol=lf` and `data/osm/*.json text eol=lf` to the repository-root .gitattributes, keeping unrelated attributes and avoiding duplicates
+  - [x] C4.2 Verify with `git check-attr text eol` on web/public/data/index.json, web/public/data/race/test.json and data/osm/ways.json
   - Depends on: none
 
-- [ ] C5. Supply the OSM snapshot (B10) (pending)
-  - [~] C5.1 Provide the committed data/osm/ways.json dated 2026-11-01. Task 16 reads it and does not fetch.
+- [x] C5. Supply the OSM snapshot (B10)
+  - [x] C5.1 Provide the committed data/osm/ways.json dated 2026-11-01. Task 16 reads it and does not fetch.
   - Depends on: none
 
 - [ ] C6. Record the pending decisions
