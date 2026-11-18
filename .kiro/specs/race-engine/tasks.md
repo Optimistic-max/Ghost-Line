@@ -94,24 +94,24 @@
   - Depends on: tasks 7, 9
   - Brief corrections: race-brief.md 5.3 case 2: 230.15 -> 4.155; 4.156 is the real-stop value.
 
-- [ ] 12. eligible module (B9)
-  - [~] 12.1 Implement active_services(gtfs, date) applying calendar.txt then calendar_dates.txt exceptions
-  - [~] 12.2 Implement find_eligible_trips(gtfs, origin_slug, dest_slug, origin_stops, dest_stops, service_ids, date) per race-brief.md section 5.4; full precision; dep/arr stored as HH:MM:SS strings in output (B8)
-  - [~] 12.3 Correctly skip trips where dest.stop_sequence ≤ origin.stop_sequence
-  - [~] 12.4 Write tests/unit/test_eligible.py using fake-gtfs: covers service removed by exception_type 2, trip reaching dest before origin, pair with no trips (NO_ONE_SEAT_RIDE) (B9)
-  - [~] 12.5 Write tests/golden/test_eligible_golden.py: test cases 1-6 from race-brief.md section 5.4; mark requires_feed; skip with visible warning when raw/ absent
-  - [~] 12.6 Write tests/property/test_eligible_properties.py covering P3 properties (one record per trip, alight > board sequence, dep ≤ arr, both walks ≤ radius, smaller radius never adds trips, two directions never share a trip)
+- [x] 12. eligible module (B9)
+  - [x] 12.1 Implement active_services(gtfs, date) applying calendar.txt then calendar_dates.txt exceptions
+  - [x] 12.2 Implement find_eligible_trips(gtfs, origin_slug, dest_slug, origin_stops, dest_stops, service_ids, date) per race-brief.md section 5.4; full precision; dep/arr stored as HH:MM:SS strings in output (B8)
+  - [x] 12.3 Correctly skip trips where dest.stop_sequence ≤ origin.stop_sequence
+  - [x] 12.4 Write tests/unit/test_eligible.py using fake-gtfs: covers service removed by exception_type 2, trip reaching dest before origin, pair with no trips (NO_ONE_SEAT_RIDE) (B9)
+  - [x] 12.5 Write tests/golden/test_eligible_golden.py: test cases 1-6 from race-brief.md section 5.4; mark requires_feed; skip with visible warning when raw/ absent
+  - [x] 12.6 Write tests/property/test_eligible_properties.py covering P3 properties (one record per trip, alight > board sequence, dep ≤ arr, both walks ≤ radius, smaller radius never adds trips, two directions never share a trip)
   - Depends on: task 11
 
-- [ ] 13. race module (B3, B9, B12, B17)
-  - [~] 13.1 Implement next_today(trips, start) exactly per race-brief.md section 5.2: NO_ONE_SEAT_RIDE if trips is empty; NO_MORE_TRIPS_TODAY if trips exist but none catchable; best = smallest (arr + egress_min), tie-break by earlier dep; if NO_MORE_TRIPS_TODAY encountered on real data raise PipelineError naming pair and time (B9)
-  - [~] 13.2 Implement race_at_time(t, clock, eligible_trips, ride_1938_min) using same start for both sides; all values full precision
+- [x] 13. race module (B3, B9, B12, B17)
+  - [x] 13.1 Implement next_today(trips, start) exactly per race-brief.md section 5.2: NO_ONE_SEAT_RIDE if trips is empty; NO_MORE_TRIPS_TODAY if trips exist but none catchable; best = smallest (arr + egress_min), tie-break by earlier dep; if NO_MORE_TRIPS_TODAY encountered on real data raise PipelineError naming pair and time (B9)
+  - [x] 13.2 Implement race_at_time(t, clock, eligible_trips, ride_1938_min) using same start for both sides; all values full precision
   - Detail for 13.2: race_at_time receives NO_1938_TRIP from next_1938 as a returned value (see clock.py). With real data this must not happen; raise PipelineError naming the pair and the time.
-  - [~] 13.3 Implement compute_result(margin): photo_finish if |margin| < 1.0, else "1938" or "today"
-  - [~] 13.4 Implement run_all_races(pairs, clocks, eligible, facts) for all 20 pairs × every whole minute 09:00–13:52 (293 rows); pre-coverage rows repeat the covered_from race result (B12)
-  - [~] 13.5 Write tests/unit/test_race.py: unit test for NO_ONE_SEAT_RIDE (empty trips list); unit test for NO_MORE_TRIPS_TODAY (trips exist, none catchable); test cases 5-6 from section 5.2 (made-up trips, by hand) (B9)
-  - [~] 13.6 Write tests/golden/test_race_golden.py: test cases 1-8 from race-brief.md section 5.5, including the lead 10:00 check (wait 30.458, total 45.156, computed from unrounded walks; rounding to 3 decimals happens at emit) (B3); mark requires_feed; skip with visible warning when raw/ absent
-  - [~] 13.7 Write tests/property/test_race_properties.py covering P4 properties including total >= access + ride + egress, wait >= 0, +1 start → -1 total for same trip (B17)
+  - [x] 13.3 Implement compute_result(margin): photo_finish if |margin| < 1.0, else "1938" or "today"
+  - [x] 13.4 Implement run_all_races(pairs, clocks, eligible, facts) for all 20 pairs × every whole minute 09:00–13:52 (293 rows); pre-coverage rows repeat the covered_from race result (B12)
+  - [x] 13.5 Write tests/unit/test_race.py: unit test for NO_ONE_SEAT_RIDE (empty trips list); unit test for NO_MORE_TRIPS_TODAY (trips exist, none catchable); test cases 5-6 from section 5.2 (made-up trips, by hand) (B9)
+  - [x] 13.6 Write tests/golden/test_race_golden.py: test cases 1-8 from race-brief.md section 5.5, including the lead 10:00 check (wait 30.458, total 45.156, computed from unrounded walks; rounding to 3 decimals happens at emit) (B3); mark requires_feed; skip with visible warning when raw/ absent
+  - [x] 13.7 Write tests/property/test_race_properties.py covering P4 properties including total >= access + ride + egress, wait >= 0, +1 start → -1 total for same trip (B17)
   - Depends on: tasks 10, 12
 
 - [ ] 14. summary module (B3, B12, B14)

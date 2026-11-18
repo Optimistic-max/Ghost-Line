@@ -677,6 +677,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882873058
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794959787433
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794959840575
       }
     ],
     "12.2 Implement find_eligible_trips(gtfs, origin_slug, dest_slug, origin_stops, dest_stops, service_ids) per race-brief.md section 5.4: for each trip pick the stop pair with shortest origin walk (tie: shortest dest walk), emit one record per trip, sort by dep": [
@@ -691,6 +701,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882874887
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794959964896
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960011209
       }
     ],
     "12.4 Write tests/unit/test_eligible.py using fake-gtfs: covers service removed by exception_type 2, trip reaching dest before origin, pair with no trips": [
@@ -712,6 +732,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882881591
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960250633
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960366867
       }
     ],
     "12.7 Depends on: task 11": [
@@ -740,6 +770,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882887422
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960532469
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960548327
       }
     ],
     "13.4 Implement run_all_races(pairs, clocks, eligible, facts) for all 20 pairs × every whole minute 09:00-13:52": [
@@ -1590,6 +1630,128 @@
         "executionId": "97357475-7651-40e8-9805-0cbc66ad4ff4",
         "chatSessionId": "sess_4fd34d42-33a5-4b17-9478-bcb632306c53",
         "timestamp": 1794959430532
+      }
+    ],
+    "12.2 Implement find_eligible_trips(gtfs, origin_slug, dest_slug, origin_stops, dest_stops, service_ids, date) per race-brief.md section 5.4; full precision; dep/arr stored as HH:MM:SS strings in output (B8)": [
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794959843597
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794959960550
+      }
+    ],
+    "12.4 Write tests/unit/test_eligible.py using fake-gtfs: covers service removed by exception_type 2, trip reaching dest before origin, pair with no trips (NO_ONE_SEAT_RIDE) (B9)": [
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960013971
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960167609
+      }
+    ],
+    "12.5 Write tests/golden/test_eligible_golden.py: test cases 1-6 from race-brief.md section 5.4; mark requires_feed; skip with visible warning when raw/ absent": [
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960171017
+      },
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960247566
+      }
+    ],
+    "12. eligible module (B9)": [
+      {
+        "executionId": "c8b4da17-74cd-4b05-975d-ade80e6d720b",
+        "chatSessionId": "sess_9fd826c3-50a2-4e01-adee-9ed3d3fd1b14",
+        "timestamp": 1794960367458
+      }
+    ],
+    "13.1 Implement next_today(trips, start) exactly per race-brief.md section 5.2: NO_ONE_SEAT_RIDE if trips is empty; NO_MORE_TRIPS_TODAY if trips exist but none catchable; best = smallest (arr + egress_min), tie-break by earlier dep; if NO_MORE_TRIPS_TODAY encountered on real data raise PipelineError naming pair and time (B9)": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960410038
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960466473
+      }
+    ],
+    "13.2 Implement race_at_time(t, clock, eligible_trips, ride_1938_min) using same start for both sides; all values full precision": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960469207
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960528705
+      }
+    ],
+    "13.4 Implement run_all_races(pairs, clocks, eligible, facts) for all 20 pairs × every whole minute 09:00–13:52 (293 rows); pre-coverage rows repeat the covered_from race result (B12)": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960550751
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960682357
+      }
+    ],
+    "13.5 Write tests/unit/test_race.py: unit test for NO_ONE_SEAT_RIDE (empty trips list); unit test for NO_MORE_TRIPS_TODAY (trips exist, none catchable); test cases 5-6 from section 5.2 (made-up trips, by hand) (B9)": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794960686222
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794963174885
+      }
+    ],
+    "13.6 Write tests/golden/test_race_golden.py: test cases 1-8 from race-brief.md section 5.5, including the lead 10:00 check (wait 30.458, total 45.156, computed from unrounded walks; rounding to 3 decimals happens at emit) (B3); mark requires_feed; skip with visible warning when raw/ absent": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794963179516
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794965716635
+      }
+    ],
+    "13.7 Write tests/property/test_race_properties.py covering P4 properties including total >= access + ride + egress, wait >= 0, +1 start → -1 total for same trip (B17)": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794965719166
+      },
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794966330868
+      }
+    ],
+    "13. race module (B3, B9, B12, B17)": [
+      {
+        "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
+        "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
+        "timestamp": 1794966331863
       }
     ]
   }

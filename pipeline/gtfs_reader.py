@@ -107,16 +107,27 @@ class GTFSReader:
             return self._drop_blank_times(df)
 
         path = self.cache_path(service_date)
+        wanted = set(trip_ids) if trip_ids is not None else None
+        cached_ids: set[str] = set()
         if use_cache and path.is_file():
-            return pd.read_csv(path, dtype=str, keep_default_na=False)
+            cached = pd.read_csv(path, dtype=str, keep_default_na=False)
+            cached_ids = set(cached["trip_id"])
+            # A cache written before the blank-row rule existed may still hold
+            # blank rows, so the rule is applied on every read.
+            if wanted is None or wanted <= cached_ids:
+                return self._drop_blank_times(cached).reset_index(drop=True)
+            # The cache holds only some of the requested trips: rebuild it
+            # from the zip with the union, so a call for other services is
+            # never answered from a partial cache.
+            wanted |= cached_ids
 
-        if trip_ids is None:
+        if wanted is None:
             raise FeedError(
                 "trip_ids are required to read stop_times for a service date "
                 "when no cache file exists"
             )
         df = self.read_table("stop_times.txt")
-        df = df[df["trip_id"].isin(set(trip_ids))]
+        df = df[df["trip_id"].isin(wanted)]
         df = self._drop_blank_times(df).reset_index(drop=True)
         if use_cache:
             path.parent.mkdir(parents=True, exist_ok=True)
