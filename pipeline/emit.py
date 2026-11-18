@@ -15,18 +15,20 @@ import functools
 import gzip
 import json
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from jsonschema import Draft202012Validator
 
 from pipeline.clock import Clock1938, ride_minutes
-from pipeline.eligible import EligibleTrip
 from pipeline.errors import ValidationError
 from pipeline.facts import FactsFile
 from pipeline.race import PHOTO_FINISH_MIN, SLIDER_FIRST_MIN, SLIDER_LAST_MIN, RaceRow
 from pipeline.route import RouteLeg
 from pipeline.stops import DEFAULT_STOP_RADIUS_M, Stop
 from pipeline.summary import GAP_WINDOW_END, GAP_WINDOW_START, Summary, find_gaps
+
+if TYPE_CHECKING:  # annotation only; keeps pandas out of validate
+    from pipeline.eligible import EligibleTrip
 
 SCHEMA_DIR = Path(__file__).resolve().parent / "schemas"
 DECIMALS = 3

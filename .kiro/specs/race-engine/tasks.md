@@ -217,10 +217,10 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 22.3 Return pytest exit code as the command exit code
   - Depends on: task 21
 
-- [ ] 23. verify command (B23)
-  - [~] 23.1 Wire cmd_verify to rebuild into a temp directory (bypassing cache) and compare outputs against committed web/public/data/ files byte-for-byte (B23)
-  - [~] 23.2 Fail with clear error listing differing files if any output differs
-  - [~] 23.3 Fail with clear error (not skip) if raw/mta_local_bus.zip is missing
+- [x] 23. verify command (B23)
+  - [x] 23.1 Wire cmd_verify to rebuild into a temp directory (bypassing cache) and compare outputs against committed web/public/data/ files byte-for-byte (B23)
+  - [x] 23.2 Fail with clear error listing differing files if any output differs
+  - [x] 23.3 Fail with clear error (not skip) if raw/mta_local_bus.zip is missing
   - Depends on: task 21
 
 - [ ] 24. check_sources command (B5)

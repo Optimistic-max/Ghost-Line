@@ -7,11 +7,14 @@ All values keep full precision. Nothing is rounded here.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from pipeline.clock import NO_1938_TRIP, Clock1938, next_1938, ride_minutes
-from pipeline.eligible import EligibleTrip
 from pipeline.errors import PipelineError
 from pipeline.facts import FactsFile
+
+if TYPE_CHECKING:  # annotation only; keeps pandas out of the import chain
+    from pipeline.eligible import EligibleTrip
 
 # The one photo-finish band, in minutes. Defined once, here.
 PHOTO_FINISH_MIN = 1.0

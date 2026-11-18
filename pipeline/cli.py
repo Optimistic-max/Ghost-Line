@@ -284,10 +284,57 @@ def cmd_check(args: argparse.Namespace) -> None:
         sys.exit(code)
 
 
+def run_verify(root: Path, say=print) -> list[str]:
+    """Rebuild from the pinned feed into a temporary folder and compare it with
+    the files in <root>/web/public/data, byte for byte (B23).
+
+    The rebuild uses a new empty stop_times cache in a temporary folder, so it
+    bypasses raw/cache and writes nothing under raw/ or web/. Returns one line
+    per differing, missing or unexpected file; empty means the committed files
+    match. A missing or wrong feed raises BuildError (verify never skips).
+    """
+    import tempfile
+
+    root = Path(root)
+    committed = root / DATA_REL
+    with tempfile.TemporaryDirectory(prefix="ghostline-verify-") as tmp:
+        tmp = Path(tmp)
+        run_build(root, output_dir=tmp / "out", cache_dir=tmp / "cache", say=say)
+        fresh = {p.relative_to(tmp / "out").as_posix(): p for p in (tmp / "out").rglob("*") if p.is_file()}
+        existing = (
+            {p.relative_to(committed).as_posix(): p for p in committed.rglob("*") if p.is_file()}
+            if committed.is_dir()
+            else {}
+        )
+        problems: list[str] = []
+        for name in sorted(fresh):
+            if name not in existing:
+                problems.append(f"{name}: missing from {DATA_REL}")
+            elif fresh[name].read_bytes() != existing[name].read_bytes():
+                problems.append(f"{name}: differs from a fresh build")
+        for name in sorted(set(existing) - set(fresh)):
+            problems.append(f"{name}: in {DATA_REL} but a fresh build does not write it")
+    return problems
+
+
 def cmd_verify(args: argparse.Namespace) -> None:
-    """Rebuild from raw/ and fail if committed data files differ."""
-    print("Command 'verify' is not yet implemented.")
-    sys.exit(1)
+    """Rebuild from raw/ and fail if committed data files differ.
+
+    Rebuilds into a temporary folder with a fresh cache and compares every
+    file byte for byte with web/public/data. Fails (never skips) if
+    raw/mta_local_bus.zip is missing or is not the pinned feed.
+    """
+    try:
+        problems = run_verify(ROOT)
+    except BuildError as exc:
+        print(f"verify: FAILED: {exc}")
+        sys.exit(1)
+    if problems:
+        print(f"verify: FAILED, {len(problems)} file(s) differ from a fresh build:")
+        for p in problems:
+            print(f"  {p}")
+        sys.exit(1)
+    print("verify: OK (web/public/data matches a fresh build)")
 
 
 def cmd_check_sources(args: argparse.Namespace) -> None:
