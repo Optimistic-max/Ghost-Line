@@ -203,12 +203,12 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 20.4 All failures produce clear error messages
   - Depends on: tasks 9, 10, 4, 19
 
-- [ ] 21. build command
-  - [~] 21.1 Wire cmd_build to run all pipeline steps in order: feed_check → facts → clock → stops → eligible → race → summary → route → emit
-  - [~] 21.2 Pass each step's output as input to the next
-  - [~] 21.3 Fail fast on any step error, printing which step failed
-  - [~] 21.4 Print progress messages for each completed step
-  - [~] 21.5 Verify command completes in under 60 seconds with the pinned feed
+- [x] 21. build command
+  - [x] 21.1 Wire cmd_build to run all pipeline steps in order: feed_check → facts → clock → stops → eligible → race → summary → route → emit
+  - [x] 21.2 Pass each step's output as input to the next
+  - [x] 21.3 Fail fast on any step error, printing which step failed
+  - [x] 21.4 Print progress messages for each completed step
+  - [x] 21.5 Verify command completes in under 60 seconds with the pinned feed
   - Depends on: tasks 8, 9, 10, 11, 12, 13, 14, 16, 18
 
 - [ ] 22. check command

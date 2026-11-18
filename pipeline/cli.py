@@ -121,10 +121,133 @@ def cmd_validate(args: argparse.Namespace) -> None:
     print("validate: OK (facts, 1938 clock, generated JSON schemas, prose banned terms)")
 
 
+class BuildError(Exception):
+    """A build step failed. The message names the step."""
+
+    def __init__(self, step: str, cause: Exception):
+        self.step = step
+        self.cause = cause
+        super().__init__(f"step '{step}' failed: {cause}")
+
+
+BUILD_STEPS = ("feed_check", "facts", "clock", "stops", "eligible", "race", "summary", "route", "emit")
+FEED_REL = "raw/mta_local_bus.zip"
+FEED_VERSION = "20260821"
+SERVICE_DATE = "2026-11-04"
+OSM_REL = "data/osm/ways.json"
+
+
+def run_build(root: Path, output_dir: Path | None = None, cache_dir: Path | None = None, say=print) -> dict:
+    """Run every pipeline step in order and write the generated files.
+
+    Steps: feed_check, facts, clock, stops, eligible, race, summary, route,
+    emit. Each step's output feeds the next. The first failure stops the build
+    and raises BuildError naming the step. A progress line is printed through
+    say() after each step.
+
+    output_dir defaults to <root>/web/public/data. cache_dir defaults to
+    <root>/raw/cache (the service-date stop_times cache). Returns the main
+    objects (facts, races, summary, size rows) for callers that need them.
+    Never downloads anything.
+    """
+    import datetime
+    import itertools
+
+    import pipeline.clock as clock_mod
+    import pipeline.eligible as eligible_mod
+    import pipeline.emit as emit_mod
+    import pipeline.facts as facts_mod
+    import pipeline.feed_check as feed_mod
+    import pipeline.gtfs_reader as reader_mod
+    import pipeline.race as race_mod
+    import pipeline.route as route_mod
+    import pipeline.stops as stops_mod
+    import pipeline.summary as summary_mod
+
+    root = Path(root)
+    output_dir = Path(output_dir) if output_dir is not None else root / DATA_REL
+    cache_dir = Path(cache_dir) if cache_dir is not None else root / "raw" / "cache"
+    date = datetime.date.fromisoformat(SERVICE_DATE)
+    state: dict = {}
+    total = len(BUILD_STEPS)
+
+    def run(number: int, name: str, fn, describe) -> None:
+        try:
+            fn()
+        except Exception as exc:  # fail fast, name the step
+            raise BuildError(name, exc) from exc
+        say(f"build: [{number}/{total}] {name}: {describe()}")
+
+    def do_feed():
+        state["sha"] = feed_mod.check_feed(root / FEED_REL)
+        state["gtfs"] = reader_mod.GTFSReader(root / FEED_REL, cache_dir=cache_dir)
+
+    def do_facts():
+        state["facts"] = facts_mod.load_facts(root / FACTS_REL)
+
+    def do_clock():
+        state["clocks"] = clock_mod.build_clock(state["facts"])
+        problems = verify_clock(state["facts"], state["clocks"])
+        if problems:
+            raise ValueError("; ".join(problems))
+
+    def do_stops():
+        state["stops"] = stops_mod.find_stops_near_corners(
+            state["gtfs"], state["facts"].timing_points, radius_m=stops_mod.DEFAULT_STOP_RADIUS_M
+        )
+        state["slugs"] = [p.slug for p in state["facts"].timing_points]
+        state["pairs"] = list(itertools.permutations(state["slugs"], 2))
+
+    def do_eligible():
+        services = eligible_mod.active_services(state["gtfs"], date)
+        state["services"] = services
+        stops = state["stops"]
+        state["eligible"] = {
+            (o, d): eligible_mod.find_eligible_trips(state["gtfs"], o, d, stops[o], stops[d], services, date)
+            for o, d in state["pairs"]
+        }
+
+    def do_race():
+        state["races"] = race_mod.run_all_races(state["pairs"], state["clocks"], state["eligible"], state["facts"])
+
+    def do_summary():
+        state["summary"] = summary_mod.compute_summary(state["races"], state["eligible"], state["facts"])
+
+    def do_route():
+        ways = route_mod.load_ways(root / OSM_REL, state["facts"])
+        state["route"] = route_mod.build_route(state["facts"], ways)
+
+    def do_emit():
+        state["sizes"] = emit_mod.emit_all(
+            state["facts"], state["races"], state["eligible"], state["summary"], state["route"],
+            state["clocks"], state["sha"], FEED_VERSION, SERVICE_DATE, output_dir,
+        )
+
+    run(1, "feed_check", do_feed, lambda: f"feed {FEED_REL} matches the pinned SHA-256")
+    run(2, "facts", do_facts, lambda: f"{len(state['facts'].timing_points)} corners")
+    run(3, "clock", do_clock, lambda: "1938 clock built and verified")
+    run(4, "stops", do_stops, lambda: f"{sum(len(v) for v in state['stops'].values())} stops near corners")
+    run(5, "eligible", do_eligible,
+        lambda: f"{sum(len(v) for v in state['eligible'].values())} one-seat trips over {len(state['pairs'])} pairs")
+    run(6, "race", do_race, lambda: f"{sum(len(v) for v in state['races'].values())} races")
+    run(7, "summary", do_summary, lambda: f"{state['summary'].races} counted races")
+    run(8, "route", do_route, lambda: f"{sum(len(v) for v in state['route'].values())} route legs")
+    run(9, "emit", do_emit, lambda: f"{len(state['sizes'])} files written to {output_dir}")
+    return state
+
+
 def cmd_build(args: argparse.Namespace) -> None:
-    """Full pipeline build into web/public/data/. Completes in under 60 seconds."""
-    print("Command 'build' is not yet implemented.")
-    sys.exit(1)
+    """Full pipeline build into web/public/data/. Completes in under 60 seconds.
+
+    Runs feed_check, facts, clock, stops, eligible, race, summary, route and
+    emit in order. Stops at the first failing step and says which one.
+    """
+    try:
+        run_build(ROOT)
+    except BuildError as exc:
+        print(f"build: FAILED: {exc}")
+        sys.exit(1)
+    print("build: OK")
 
 
 def cmd_check(args: argparse.Namespace) -> None:
