@@ -448,11 +448,12 @@ def ride_verdict(delta: float, ride_1938: float) -> str:
     delta > 0: "slower today"
     """
 
-def find_gaps(trips: list[EligibleTrip], window_start: float, window_end: float) -> tuple[float, float] | None:
+def find_gaps(trips: list[EligibleTrip], window_start: float, window_end: float) -> tuple[float, float]:
     """
     Find min and max gaps between adjacent sorted departures in time window.
     Window: [09:00, 14:00) from boarding stop. (B14)
-    Returns None when fewer than two departures fall in the window.
+    Raises ValueError when fewer than two departures fall in the window;
+    compute_summary catches it and stores None for gap_min and gap_max.
     Returns floats at full precision; emit rounds to 3 decimals.
     """
 

@@ -41,6 +41,17 @@ inclusion: always
 - Cache the service-date rows of stop_times under raw/cache/ so builds are fast.
 - Never read a real-time or vehicle-position feed.
 
+## Source URLs
+
+Links for the index.json source catalog. pipeline/emit.py reads them from one
+constants block that cites this list. Do not add a URL anywhere else.
+
+- mta_gtfs: https://feeds.mta.maryland.gov/gtfs/local-bus
+  The pinned feed's source, from the Nov 1 v2 plan. Link only: the build never
+  downloads from it.
+- osm: https://www.openstreetmap.org/copyright
+  OSM's required attribution page.
+
 ## Numbers
 
 - Times are minutes after midnight, as decimals. GTFS hours can pass 24.
