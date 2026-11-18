@@ -37,6 +37,7 @@ def built(tmp_path_factory):
     return out, state, lines, time.perf_counter() - started
 
 
+@pytest.mark.timing
 def test_build_finishes_in_under_60_seconds_even_without_a_cache(built):
     _, _, _, elapsed = built
     print(f"full build without cache: {elapsed:.1f} s")

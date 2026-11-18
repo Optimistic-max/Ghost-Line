@@ -169,6 +169,7 @@ def test_validate_is_wired_into_the_command_line(root, monkeypatch, capsys):
 # --- no feed, no network, under 10 seconds (20.2, 20.3) ----------------------
 
 
+@pytest.mark.timing
 def test_validate_on_this_repository_reads_no_feed_uses_no_network_and_is_fast(monkeypatch):
     def no_network(*a, **k):
         raise AssertionError("validate must not touch the network")

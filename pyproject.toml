@@ -23,3 +23,9 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pipeline*"]
+
+[tool.pytest.ini_options]
+markers = [
+    "requires_feed: reads the pinned feed zip in raw/; skipped with a visible warning when it is absent",
+    "timing: asserts a wall-clock limit; can fail on a loaded machine, so the editor hook leaves it out",
+]
