@@ -240,14 +240,14 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
 
 ## Final Integration
 
-- [ ] 26. End-to-end integration test (B12, B18)
-  - [~] 26.1 Write tests/test_integration.py that runs a full build and spot-checks outputs; mark requires_feed (B20)
-  - [~] 26.2 Verify all 23 output files are created (index.json, summary.json, 20 race files, route.geojson)
-  - [~] 26.3 Verify lead pair race file at t=10:00 reads 1938 total 15, today total 45.156, result "1938"
-  - [~] 26.4 Verify summary.json totals: 5,666 races, 5,582 wins_1938, 25 wins_today, 59 photo_finishes
-  - [~] 26.5 Run build twice and confirm all output files are byte-identical (property P9)
-  - [~] 26.6 Confirm build completes in under 60 seconds
-  - [~] 26.7 Verify inferred = true for all eight race files involving brevard-preston; false for the lead pair and all others (B18)
+- [x] 26. End-to-end integration test (B12, B18)
+  - [x] 26.1 Write tests/test_integration.py that runs a full build and spot-checks outputs; mark requires_feed (B20)
+  - [x] 26.2 Verify all 23 output files are created (index.json, summary.json, 20 race files, route.geojson)
+  - [x] 26.3 Verify lead pair race file at t=10:00 reads 1938 total 15, today total 45.156, result "1938"
+  - [x] 26.4 Verify summary.json totals: 5,666 races, 5,582 wins_1938, 25 wins_today, 59 photo_finishes
+  - [x] 26.5 Run build twice and confirm all output files are byte-identical (property P9)
+  - [x] 26.6 Confirm build completes in under 60 seconds
+  - [x] 26.7 Verify inferred = true for all eight race files involving brevard-preston; false for the lead pair and all others (B18)
   - Depends on: tasks 21, 25
 
 - [ ] 27. Documentation and README (B10)

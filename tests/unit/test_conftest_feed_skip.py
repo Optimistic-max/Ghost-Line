@@ -99,9 +99,12 @@ def test_clock_and_route_golden_tests_run_without_the_feed(name):
     assert not marked and not reads_zip
 
 
+ALLOWED_OUTSIDE_GOLDEN = {"test_integration.py"}  # task 26.1 marks the integration test requires_feed
+
+
 def test_no_test_outside_the_golden_folder_uses_the_marker():
     for path in (REPO / "tests").rglob("test_*.py"):
-        if GOLDEN in path.parents or path.name == Path(__file__).name:
+        if GOLDEN in path.parents or path.name == Path(__file__).name or path.name in ALLOWED_OUTSIDE_GOLDEN:
             continue
         tree = ast.parse(path.read_text(encoding="utf-8-sig"))
         used = [n for n in ast.walk(tree) if isinstance(n, ast.Attribute) and n.attr == "requires_feed"]
