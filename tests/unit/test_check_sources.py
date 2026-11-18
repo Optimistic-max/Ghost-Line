@@ -64,6 +64,38 @@ def test_clean_text_has_no_findings():
     assert find_banned_terms("Scheduled departure 10:32. Weekday schedule.") == []
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        '<div aria-live="polite">Scheduled 10:32</div>',
+        "<div aria-live='assertive'>x</div>",
+        "<div aria-live=polite>x</div>",
+        '<div ARIA-LIVE = "polite">x</div>',
+        'el.setAttribute("aria-live", "polite")',
+        "[aria-live] { color: red }",
+    ],
+)
+def test_aria_live_attribute_is_allowed(text):
+    assert find_banned_terms(text) == []
+
+
+def test_live_in_prose_still_fails_next_to_aria_live():
+    assert find_banned_terms('<p aria-live="polite">The bus is live.</p>') == ["live"]
+    assert find_banned_terms("aria-live and live") == ["live"]
+
+
+def test_aria_live_exception_is_not_a_general_hyphen_exception():
+    assert find_banned_terms("a live-action trolley") == ["live"]
+    assert find_banned_terms("not-aria-live is odd but real-time is not ok") == ["real-time"]
+
+
+def test_aria_live_in_a_file_passes_and_prose_live_fails(tmp_path):
+    ok = write(tmp_path, "web/index.html", '<div aria-live="polite"></div>\n')
+    bad = write(tmp_path, "docs/notes.md", "Service is live.\n")
+    assert check_prose([ok], root=tmp_path) == []
+    assert check_prose([bad], root=tmp_path) == ["docs/notes.md:1: banned term 'live'"]
+
+
 # --- check_prose (19.2) ------------------------------------------------------
 
 

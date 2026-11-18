@@ -30,10 +30,18 @@ JSON_PATHS = ["web/public/data/index.json", "web/public/data/summary.json", "web
 RACE_DIR = "web/public/data/race"
 
 
+# The HTML accessibility attribute aria-live, with or without its value, is allowed.
+_ARIA_LIVE_RE = re.compile(r"""aria-live(\s*=\s*("[^"]*"|'[^']*'|[^\s>]+))?""", re.IGNORECASE)
+
+
 def find_banned_terms(text: str) -> list[str]:
-    """Banned terms found in text, in order, as written. The exact phrase
-    "Scheduled, not live." is allowed and does not count."""
-    return [m.group(0) for m in _BANNED_RE.finditer(text.replace(ALLOWED_PHRASE, ""))]
+    """Banned terms found in text, in order, as written.
+
+    Two exceptions do not count: the exact phrase "Scheduled, not live." and
+    the HTML attribute aria-live (the name alone or with its value).
+    """
+    cleaned = _ARIA_LIVE_RE.sub(" ", text.replace(ALLOWED_PHRASE, ""))
+    return [m.group(0) for m in _BANNED_RE.finditer(cleaned)]
 
 
 def _relative(path: Path, root: Path) -> str:
