@@ -822,6 +822,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882895358
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794966815099
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794966851609
       }
     ],
     "14.2 Implement find_gaps(trips, window_start, window_end) returning (gap_min, gap_max) over consecutive departures from boarding stop in [09:00, 14:00)": [
@@ -836,6 +846,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882897359
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967017960
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967076893
       }
     ],
     "14.4 Implement compute_summary(races, eligible, facts) computing per-pair counts, ride verdicts, gaps, and overall totals": [
@@ -850,6 +870,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882899308
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967156527
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967178902
       }
     ],
     "14.6 Write tests/golden/test_summary_golden.py: per-pair table and totals from section 5.6; skip with visible warning when raw/ absent": [
@@ -864,6 +894,16 @@
         "executionId": "c8cd6c79-7f55-44b0-a90b-c4805317ea4e",
         "chatSessionId": "sess_43dea28a-a61c-4eb2-8c2d-cf0350e29889",
         "timestamp": 1794882903129
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967240352
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967299202
       }
     ],
     "14.8 Depends on: task 13": [
@@ -1752,6 +1792,49 @@
         "executionId": "b1374892-760d-4fe4-878e-68c3ebddb46c",
         "chatSessionId": "sess_47a24cca-9ff7-415a-bb2d-5740918de29f",
         "timestamp": 1794966331863
+      }
+    ],
+    "14.2 Implement find_gaps(trips, window_start, window_end) returning (gap_min, gap_max) as floats over adjacent sorted departures in [09:00, 14:00); emit rounds to 3 decimals; keep existing lead-pair golden gaps 34.0 and 39.0 (B14)": [
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794966854388
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967015222
+      }
+    ],
+    "14.4 Implement compute_summary(races, eligible, facts) computing per-pair counts, ride verdicts, gaps and overall totals; count only rows where t >= covered_from (B12)": [
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967079583
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967152893
+      }
+    ],
+    "14.6 Write tests/golden/test_summary_golden.py: per-pair table and totals from section 5.6; mark requires_feed; skip with visible warning when raw/ absent": [
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967181358
+      },
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967237820
+      }
+    ],
+    "14. summary module (B3, B12, B14)": [
+      {
+        "executionId": "43fcfd5c-33ed-446c-9259-9c6fcdc0381c",
+        "chatSessionId": "sess_295fd030-4b71-4218-93c4-63a45de3a7e0",
+        "timestamp": 1794967299784
       }
     ]
   }

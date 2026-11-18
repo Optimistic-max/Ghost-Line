@@ -114,14 +114,14 @@
   - [x] 13.7 Write tests/property/test_race_properties.py covering P4 properties including total >= access + ride + egress, wait >= 0, +1 start → -1 total for same trip (B17)
   - Depends on: tasks 10, 12
 
-- [ ] 14. summary module (B3, B12, B14)
-  - [~] 14.1 Implement ride_verdict(delta, ride_1938): "same" if |delta| ≤ max(1.5, 0.15 × ride_1938), else "faster today" or "slower today"
-  - [~] 14.2 Implement find_gaps(trips, window_start, window_end) returning (gap_min, gap_max) as floats over adjacent sorted departures in [09:00, 14:00); emit rounds to 3 decimals; keep existing lead-pair golden gaps 34.0 and 39.0 (B14)
-  - [~] 14.3 Implement arrival_weighted_wait(gaps) = sum(g² for g in gaps) / (2 × sum(gaps)); return None with visible warning if gaps empty or sum zero
-  - [~] 14.4 Implement compute_summary(races, eligible, facts) computing per-pair counts, ride verdicts, gaps and overall totals; count only rows where t >= covered_from (B12)
-  - [~] 14.5 Write tests/unit/test_summary.py: test cases 1-5 from race-brief.md section 5.7 (arrival-weighted wait)
-  - [~] 14.6 Write tests/golden/test_summary_golden.py: per-pair table and totals from section 5.6; mark requires_feed; skip with visible warning when raw/ absent
-  - [~] 14.7 Write tests/property/test_summary_properties.py covering P5 and P6 properties
+- [x] 14. summary module (B3, B12, B14)
+  - [x] 14.1 Implement ride_verdict(delta, ride_1938): "same" if |delta| ≤ max(1.5, 0.15 × ride_1938), else "faster today" or "slower today"
+  - [x] 14.2 Implement find_gaps(trips, window_start, window_end) returning (gap_min, gap_max) as floats over adjacent sorted departures in [09:00, 14:00); emit rounds to 3 decimals; keep existing lead-pair golden gaps 34.0 and 39.0 (B14)
+  - [x] 14.3 Implement arrival_weighted_wait(gaps) = sum(g² for g in gaps) / (2 × sum(gaps)); return None with visible warning if gaps empty or sum zero
+  - [x] 14.4 Implement compute_summary(races, eligible, facts) computing per-pair counts, ride verdicts, gaps and overall totals; count only rows where t >= covered_from (B12)
+  - [x] 14.5 Write tests/unit/test_summary.py: test cases 1-5 from race-brief.md section 5.7 (arrival-weighted wait)
+  - [x] 14.6 Write tests/golden/test_summary_golden.py: per-pair table and totals from section 5.6; mark requires_feed; skip with visible warning when raw/ absent
+  - [x] 14.7 Write tests/property/test_summary_properties.py covering P5 and P6 properties
   - Depends on: task 13
 
 - [ ] 16. route module (B1, B2, B10, B11, B20)

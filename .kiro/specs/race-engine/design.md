@@ -427,10 +427,19 @@ class PairSummary:
     wins_today: int
     photo_finishes: int
     ride_1938: float
-    ride_today_median: float
-    ride_verdict: str              # "same", "faster today", "slower today"
-    gap_min: float                 # Full precision; rounded to 3 decimals at emit (B14)
-    gap_max: float                 # Full precision; rounded to 3 decimals at emit (B14)
+    ride_today_median: float | None   # None when there is no one-seat ride today
+    delta: float | None               # ride_today_median - ride_1938; None when median is None
+    ride_verdict: str | None          # "same", "faster today", "slower today"; None when delta is None
+    gap_min: float | None             # None with fewer than two departures; full precision, rounded to 3 decimals at emit (B14)
+    gap_max: float | None             # None with fewer than two departures; full precision, rounded to 3 decimals at emit (B14)
+
+@dataclass
+class TodayWin:
+    """One counted race minute where today wins (result == "today")."""
+    origin: str
+    dest: str
+    t: str                         # slider time "HH:MM"
+    margin: float                  # minutes, absolute, full precision; rounded at emit
 
 def ride_verdict(delta: float, ride_1938: float) -> str:
     """
@@ -439,10 +448,11 @@ def ride_verdict(delta: float, ride_1938: float) -> str:
     delta > 0: "slower today"
     """
 
-def find_gaps(trips: list[EligibleTrip], window_start: float, window_end: float) -> tuple[float, float]:
+def find_gaps(trips: list[EligibleTrip], window_start: float, window_end: float) -> tuple[float, float] | None:
     """
     Find min and max gaps between adjacent sorted departures in time window.
     Window: [09:00, 14:00) from boarding stop. (B14)
+    Returns None when fewer than two departures fall in the window.
     Returns floats at full precision; emit rounds to 3 decimals.
     """
 
