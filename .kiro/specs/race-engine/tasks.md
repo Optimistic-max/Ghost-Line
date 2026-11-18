@@ -231,11 +231,11 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
 
 ## Testing Infrastructure
 
-- [ ] 25. Golden tests verification (B20)
-  - [~] 25.1 Add tests/conftest.py with a pytest marker `requires_feed` and a skip condition: skip with visible warning when raw/mta_local_bus.zip is absent (CI); always run when feed is present (dev machine)
-  - [~] 25.2 Confirm that requires_feed applies only to golden tests that actually read the pinned zip; clock (10.7), formula (14.5) and route (16.8) tests run without it (B20)
-  - [~] 25.3 Confirm that verify command (task 23) fails, not skips, when feed is absent
-  - [~] 25.4 Confirm all test tables from race-brief.md sections 5.1–5.8 have a corresponding assertion in a golden test file; section 5.9 (display rounding) moves to race-screen spec (B15)
+- [x] 25. Golden tests verification (B20)
+  - [x] 25.1 Add tests/conftest.py with a pytest marker `requires_feed` and a skip condition: skip with visible warning when raw/mta_local_bus.zip is absent (CI); always run when feed is present (dev machine)
+  - [x] 25.2 Confirm that requires_feed applies only to golden tests that actually read the pinned zip; clock (10.7), formula (14.5) and route (16.8) tests run without it (B20)
+  - [x] 25.3 Confirm that verify command (task 23) fails, not skips, when feed is absent
+  - [x] 25.4 Confirm all test tables from race-brief.md sections 5.1–5.8 have a corresponding assertion in a golden test file; section 5.9 (display rounding) moves to race-screen spec (B15)
   - Depends on: tasks 10, 11, 12, 13, 14, 16, 18
 
 ## Final Integration
