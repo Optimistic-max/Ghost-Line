@@ -124,16 +124,16 @@
   - [x] 14.7 Write tests/property/test_summary_properties.py covering P5 and P6 properties
   - Depends on: task 13
 
-- [ ] 16. route module (B1, B2, B10, B11, B20)
-  - [~] 16.1 Implement load_ways(ways_path) reading the committed data/osm/ways.json snapshot; raise named RouteError if any way ID listed in facts is missing (B10)
-  - [~] 16.2 Implement orient_way(way, reference) flipping a way if its last point is nearer the end of the reference than its first
-  - [~] 16.3 Implement clip_line(line, start_point, end_point): locate vertex nearest start and vertex nearest end; raise RouteError if they are the same vertex; clip between them (B1)
-  - [~] 16.4 Implement build_leg(leg_spec, ways): inferred legs use points_lonlat; OSM legs join ways in listed order, orient each to continue preceding way, then clip per 16.3 (reversing joined line first if clip vertices are in reversed order) (B1); loop legs use direction = "eastbound" (B2); each output leg has direction, street, method, note and length_m (B2)
-  - [~] 16.5 Raise RouteError with street name on undeclared break > 1 m; raise RouteError with actual vs expected on length mismatch beyond max(1 m, 0.5%)
-  - [~] 16.6 Implement build_route(facts, ways) reading only no21-1938.yaml and data/osm/ways.json (B11); westbound legs joined into one line, loop + eastbound legs joined into the other; verify joins within 1 m; verify timing points within 30 m of their line (B2)
-  - [~] 16.7 Write tests/unit/test_route.py: test inferred leg, declared gap, undeclared break error, length mismatch error, equal-clip-vertex error (B1), missing way ID error (B10)
-  - [~] 16.8 Write tests/golden/test_route_golden.py: test cases 1-6 from race-brief.md section 5.8; run without requires_feed (route tests use the committed ways snapshot, not the feed zip) (B20)
-  - [~] 16.9 Write tests/property/test_route_properties.py covering P7 properties (flipping way preserves line, leg ≥ straight line, lengths add up, shared street same length both directions, reads only 1938 yaml + ways.json) (B11)
+- [x] 16. route module (B1, B2, B10, B11, B20)
+  - [x] 16.1 Implement load_ways(ways_path) reading the committed data/osm/ways.json snapshot; raise named RouteError if any way ID listed in facts is missing (B10)
+  - [x] 16.2 Implement orient_way(way, reference) flipping a way if its last point is nearer the end of the reference than its first
+  - [x] 16.3 Implement clip_line(line, start_point, end_point): locate vertex nearest start and vertex nearest end; raise RouteError if they are the same vertex; clip between them (B1)
+  - [x] 16.4 Implement build_leg(leg_spec, ways): inferred legs use points_lonlat; OSM legs join ways in listed order, orient each to continue preceding way, then clip per 16.3 (reversing joined line first if clip vertices are in reversed order) (B1); loop legs use direction = "eastbound" (B2); each output leg has direction, street, method, note and length_m (B2)
+  - [x] 16.5 Raise RouteError with street name on undeclared break > 1 m; raise RouteError with actual vs expected on length mismatch beyond max(1 m, 0.5%)
+  - [x] 16.6 Implement build_route(facts, ways) reading only no21-1938.yaml and data/osm/ways.json (B11); westbound legs joined into one line, loop + eastbound legs joined into the other; verify joins within 1 m; verify timing points within 30 m of their line (B2)
+  - [x] 16.7 Write tests/unit/test_route.py: test inferred leg, declared gap, undeclared break error, length mismatch error, equal-clip-vertex error (B1), missing way ID error (B10)
+  - [x] 16.8 Write tests/golden/test_route_golden.py: test cases 1-6 from race-brief.md section 5.8; run without requires_feed (route tests use the committed ways snapshot, not the feed zip) (B20)
+  - [x] 16.9 Write tests/property/test_route_properties.py covering P7 properties (flipping way preserves line, leg ≥ straight line, lengths add up, shared street same length both directions, reads only 1938 yaml + ways.json) (B11)
   - Depends on: task 9
 
 - [ ] 18. emit module (B3, B6, B7, B8, B16, B19)
