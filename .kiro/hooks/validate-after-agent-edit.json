@@ -4,7 +4,7 @@
     {
       "name": "validate-after-agent-edit",
       "description": "Run fast pipeline validation after saving a .py, .yaml or .json file under data/, pipeline/ or tests/. Editor only.",
-      "enabled": false,
+      "enabled": true,
       "trigger": "PostFileSave",
       "matcher": "(^|[/\\\\])(data|pipeline|tests)[/\\\\].*\\.(py|yaml|json)$",
       "action": {
