@@ -82,6 +82,83 @@ def test_check_is_wired_into_the_command_line(monkeypatch):
     assert exc.value.code == 4
 
 
+import json  # noqa: E402
+
+
+@pytest.fixture
+def validate_clean(monkeypatch):
+    order = []
+    monkeypatch.setattr(cli, "run_validate", lambda root: order.append("validate") or [])
+    monkeypatch.setattr(cli, "run_build", lambda *a, **k: order.append("build"))
+    return order
+
+
+def test_quick_validates_then_runs_pytest_without_feed_and_timing_tests(validate_clean, tmp_path):
+    runner = Runner(0)
+    assert cli.run_check_quick(tmp_path, say=lambda s: None, runner=runner) == 0
+    (cmd, cwd), = runner.calls
+    assert cmd == [sys.executable, "-m", "pytest", "-q", "-m", "not requires_feed and not timing"]
+    assert cwd == str(tmp_path)
+    assert validate_clean == ["validate"]  # no build
+
+
+@pytest.mark.parametrize("pytest_code", [0, 1, 5])
+def test_quick_returns_pytests_exit_code(validate_clean, tmp_path, pytest_code):
+    assert cli.run_check_quick(tmp_path, say=lambda s: None, runner=Runner(pytest_code)) == pytest_code
+
+
+def test_quick_stops_at_validate_problems_and_does_not_run_pytest(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "run_validate", lambda root: ["facts: made-up problem"])
+    runner = Runner(0)
+    lines = []
+    assert cli.run_check_quick(tmp_path, say=lines.append, runner=runner) == 1
+    assert runner.calls == []
+    assert any("made-up problem" in ln for ln in lines)
+
+
+def test_plain_check_is_still_the_full_build_and_unmarked_pytest(build_ok, tmp_path):
+    runner = Runner(0)
+    cli.run_check(tmp_path, say=lambda s: None, runner=runner)
+    (cmd, _), = runner.calls
+    assert cmd == [sys.executable, "-m", "pytest", "-q"]
+    assert build_ok == ["build"]
+
+
+def test_cmd_check_picks_the_form_from_the_flag(monkeypatch):
+    seen = []
+    monkeypatch.setattr(cli, "run_check", lambda root: seen.append("full") or 0)
+    monkeypatch.setattr(cli, "run_check_quick", lambda root: seen.append("quick") or 0)
+    cli.cmd_check(argparse.Namespace(quick=False))
+    cli.cmd_check(argparse.Namespace(quick=True))
+    cli.cmd_check(argparse.Namespace())  # older callers without the flag get the full check
+    assert seen == ["full", "quick", "full"]
+
+
+def test_quick_flag_is_wired_into_the_command_line(monkeypatch):
+    monkeypatch.setattr(cli, "run_check_quick", lambda root: 7)
+    monkeypatch.setattr(cli, "run_check", lambda root: 0)
+    with patch("sys.argv", ["pipeline", "check", "--quick"]):
+        with pytest.raises(SystemExit) as exc:
+            cli.main()
+    assert exc.value.code == 7
+    with patch("sys.argv", ["pipeline", "check"]):
+        cli.main()  # the full form, stubbed to succeed
+
+
+def test_the_hook_runs_the_quick_form_as_one_command_with_a_300_second_timeout():
+    hook = json.loads((REPO / ".kiro" / "hooks" / "rebuild-and-test-when-agent-stops.json").read_text(encoding="utf-8"))
+    (entry,) = hook["hooks"]
+    assert entry["action"]["command"] == "python -m pipeline check --quick"
+    assert entry["timeout"] == 300 and entry["trigger"] == "Stop" and entry["enabled"] is True
+    assert not any(token in entry["action"]["command"] for token in ("&&", "|", ";"))
+
+
+def test_the_validate_half_of_quick_passes_on_this_repository():
+    """Validate on the real repository is clean, so the quick check can reach pytest."""
+    assert cli.run_validate(REPO) == []
+    assert cli.QUICK_PYTEST_ARGS[-2:] == ["-m", "not requires_feed and not timing"]
+
+
 def test_missing_feed_makes_check_fail_before_pytest(tmp_path):
     runner = Runner(0)
     lines = []

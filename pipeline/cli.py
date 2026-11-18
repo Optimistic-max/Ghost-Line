@@ -274,12 +274,40 @@ def run_check(root: Path, say=print, runner=None) -> int:
     return code
 
 
+QUICK_PYTEST_ARGS = ["-q", "-m", "not requires_feed and not timing"]
+
+
+def run_check_quick(root: Path, say=print, runner=None) -> int:
+    """The quick check for the editor hook: validate, then pytest without the
+    tests that read the feed (requires_feed) or assert a wall-clock limit (timing).
+
+    Returns 1 if validate finds problems (pytest does not run), otherwise
+    pytest's exit code. It does not run the build and does not read the feed.
+    """
+    import subprocess
+
+    runner = runner or subprocess.run
+    problems = run_validate(root)
+    if problems:
+        say(f"check --quick: validate FAILED with {len(problems)} problem(s):")
+        for p in problems:
+            say(f"  {p}")
+        return 1
+    say("check --quick: validate OK, running pytest without requires_feed and timing tests")
+    result = runner([sys.executable, "-m", "pytest", *QUICK_PYTEST_ARGS], cwd=str(root))
+    code = int(result.returncode)
+    say(f"check --quick: pytest exited with {code}")
+    return code
+
+
 def cmd_check(args: argparse.Namespace) -> None:
-    """Run the full build, then run pytest. Used by hooks.
+    """Run the full build, then run pytest. Used before commits.
 
     The exit code is 1 if the build fails, otherwise pytest's exit code.
+    With --quick: run validate, then pytest without the requires_feed and
+    timing tests, and skip the build. That is the form the editor hook uses.
     """
-    code = run_check(ROOT)
+    code = run_check_quick(ROOT) if getattr(args, "quick", False) else run_check(ROOT)
     if code != 0:
         sys.exit(code)
 
@@ -413,6 +441,11 @@ def main() -> None:
             "Run the full build and then execute the pytest suite. "
             "Intended for use by pre-commit and CI hooks."
         ),
+    )
+    p_check.add_argument(
+        "--quick",
+        action="store_true",
+        help="Validate, then pytest without requires_feed and timing tests. No build.",
     )
     p_check.set_defaults(func=cmd_check)
 

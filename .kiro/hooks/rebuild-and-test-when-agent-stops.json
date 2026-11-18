@@ -3,12 +3,12 @@
   "hooks": [
     {
       "name": "rebuild-and-test-when-agent-stops",
-      "description": "Rebuild data and run pytest when the agent finishes. Editor only.",
+      "description": "Quick check when the agent finishes: validate, then pytest without the feed and timing tests. No rebuild. The full check runs before every commit. Editor only.",
       "enabled": true,
       "trigger": "Stop",
       "action": {
         "type": "command",
-        "command": "python -m pipeline check"
+        "command": "python -m pipeline check --quick"
       },
       "timeout": 300
     }
