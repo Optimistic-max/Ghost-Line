@@ -149,11 +149,11 @@
   - [x] 18.10 Write tests/golden/test_emit_golden.py: verify lead pair race file matches section 4.5 format and values; mark requires_feed; skip with visible warning when raw/ absent
   - Depends on: tasks 4, 10, 13, 14, 16
 
-- [ ] 19. check_sources module (B5, B16)
-  - [~] 19.1 Implement find_banned_terms(text): match live, real-time, realtime, arriving now, right now case-insensitively as whole words/phrases; allow the exact phrase "Scheduled, not live."; test deliver, olive and lives are not flagged (B5)
-  - [~] 19.2 Implement check_prose(paths): scan web/index.html, web/src/**, docs/*.md and README.md; exclude docs/planning, node_modules, dist and web/public/data (B5)
-  - [~] 19.3 Implement check_json_sources(paths): validate generated JSON source mappings (every ID resolves; every numeric field covered) (B16)
-  - [~] 19.4 Write tests/unit/test_check_sources.py covering files with violations and clean files for each rule; test prose/JSON distinction; test deliver/olive/lives as allowed (B5)
+- [x] 19. check_sources module (B5, B16)
+  - [x] 19.1 Implement find_banned_terms(text): match live, real-time, realtime, arriving now, right now case-insensitively as whole words/phrases; allow the exact phrase "Scheduled, not live."; test deliver, olive and lives are not flagged (B5)
+  - [x] 19.2 Implement check_prose(paths): scan web/index.html, web/src/**, docs/*.md and README.md; exclude docs/planning, node_modules, dist and web/public/data (B5)
+  - [x] 19.3 Implement check_json_sources(paths): validate generated JSON source mappings (every ID resolves; every numeric field covered) (B16)
+  - [x] 19.4 Write tests/unit/test_check_sources.py covering files with violations and clean files for each rule; test prose/JSON distinction; test deliver/olive/lives as allowed (B5)
   - Depends on: none
 
 ## Correction Tasks
