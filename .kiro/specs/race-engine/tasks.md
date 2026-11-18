@@ -257,11 +257,11 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 27.4 Link to docs/planning/race-brief.md and .kiro/specs/race-engine/design.md
   - Depends on: task 2
 
-- [ ] 28. Final validation (B15)
-  - [~] 28.1 Run `python -m pipeline check` with feed present and confirm it passes
-  - [~] 28.2 Confirm lead pair race at t=10:00 reads 15 minutes vs 45.156 minutes
-  - [~] 28.3 Confirm all golden test cases from race-brief.md sections 5.1–5.8 match computed values (5.9 moves to race-screen) (B15)
-  - [~] 28.4 Confirm all property tests pass
-  - [~] 28.5 Confirm `python -m pipeline verify` passes (committed files match a fresh build)
-  - [~] 28.6 Confirm `python -m pipeline check_sources` exits 0
+- [x] 28. Final validation (B15)
+  - [x] 28.1 Run `python -m pipeline check` with feed present and confirm it passes
+  - [x] 28.2 Confirm lead pair race at t=10:00 reads 15 minutes vs 45.156 minutes
+  - [x] 28.3 Confirm all golden test cases from race-brief.md sections 5.1–5.8 match computed values (5.9 moves to race-screen) (B15)
+  - [x] 28.4 Confirm all property tests pass
+  - [x] 28.5 Confirm `python -m pipeline verify` passes (committed files match a fresh build)
+  - [x] 28.6 Confirm `python -m pipeline check_sources` exits 0
   - Depends on: tasks 22, 23, 24, 26
