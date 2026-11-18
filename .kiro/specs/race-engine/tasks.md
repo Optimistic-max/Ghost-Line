@@ -136,17 +136,17 @@
   - [x] 16.9 Write tests/property/test_route_properties.py covering P7 properties (flipping way preserves line, leg ≥ straight line, lengths add up, shared street same length both directions, reads only 1938 yaml + ways.json) (B11)
   - Depends on: task 9
 
-- [ ] 18. emit module (B3, B6, B7, B8, B16, B19)
-  - [~] 18.1 Implement write_index_json(facts, pairs, feed_sha256, feed_version, service_date, output_dir): sources as catalog object with six required IDs
-  - [~] 18.2 Implement write_summary_json(summary, output_dir): top-level sources mapping counts/today_wins to ID arrays
-  - [~] 18.3 Implement write_race_files(clocks, eligible, races, output_dir): 293 rows per file (B12); slider/1938 times as HH:MM strings; GTFS dep/arr as HH:MM:SS strings; durations rounded to 3 decimals here only (B3, B8); no *_exact fields (B7); top-level sources mapping
-  - [~] 18.4 Implement write_route_geojson(route_legs, output_dir): each leg has direction, street, method, note, length_m; top-level sources mapping
-  - [~] 18.5 All files written as UTF-8 without BOM, LF line endings, compact separators, fixed key order (B6)
-  - [~] 18.6 Validate every output file against its JSON schema using jsonschema; raise ValidationError on failure
-  - [~] 18.7 Check source coverage: every numeric field covered; all IDs resolve to index.sources catalog; raise ValidationError listing unresolved IDs or uncovered fields (B16)
-  - [~] 18.8 Report raw and gzip size for each output file; fail build if any file exceeds its approved brief budget (B19)
-  - [~] 18.9 Write tests/unit/test_emit.py verifying file structure, schema validation, source check and size reporting with fake data
-  - [~] 18.10 Write tests/golden/test_emit_golden.py: verify lead pair race file matches section 4.5 format and values; mark requires_feed; skip with visible warning when raw/ absent
+- [x] 18. emit module (B3, B6, B7, B8, B16, B19)
+  - [x] 18.1 Implement write_index_json(facts, pairs, feed_sha256, feed_version, service_date, output_dir): sources as catalog object with six required IDs
+  - [x] 18.2 Implement write_summary_json(summary, output_dir): top-level sources mapping counts/today_wins to ID arrays
+  - [x] 18.3 Implement write_race_files(clocks, eligible, races, output_dir): 293 rows per file (B12); slider/1938 times as HH:MM strings; GTFS dep/arr as HH:MM:SS strings; durations rounded to 3 decimals here only (B3, B8); no *_exact fields (B7); top-level sources mapping
+  - [x] 18.4 Implement write_route_geojson(route_legs, output_dir): each leg has direction, street, method, note, length_m; top-level sources mapping
+  - [x] 18.5 All files written as UTF-8 without BOM, LF line endings, compact separators, fixed key order (B6)
+  - [x] 18.6 Validate every output file against its JSON schema using jsonschema; raise ValidationError on failure
+  - [x] 18.7 Check source coverage: every numeric field covered; all IDs resolve to index.sources catalog; raise ValidationError listing unresolved IDs or uncovered fields (B16)
+  - [x] 18.8 Report raw and gzip size for each output file; fail build only if a file exceeds its gzip limit: race files 20 KB, index/summary/route 10 KB; raw sizes are reported, not limits (B19)
+  - [x] 18.9 Write tests/unit/test_emit.py verifying file structure, schema validation, source check and size reporting with fake data
+  - [x] 18.10 Write tests/golden/test_emit_golden.py: verify lead pair race file matches section 4.5 format and values; mark requires_feed; skip with visible warning when raw/ absent
   - Depends on: tasks 4, 10, 13, 14, 16
 
 - [ ] 19. check_sources module (B5, B16)

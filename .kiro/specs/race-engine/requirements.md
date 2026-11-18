@@ -313,9 +313,9 @@ See race-brief.md sections 5.1 through 5.8 for complete test tables. (Table 5.9,
 
 ### File Size Budgets (B19)
 - Emit reports raw and gzip size for each output file
-- Approved brief budgets: index.json 6 KB, summary.json 6 KB, each race file 45 KB, route.geojson 40 KB (uncompressed)
-- Build fails if any file exceeds its approved budget
-- The proposed 20 KB gzip limit on race files is pending Emmanuel's decision
+- Every file is limited by gzip size (what the phone downloads); raw sizes are reported, not limited
+- Gzip limits: each race file 20 KB; index.json, summary.json and route.geojson 10 KB each (Emmanuel's decision; all per-file raw limits are removed)
+- Build fails if any file exceeds its gzip limit
 
 ## Test Requirements
 
@@ -360,7 +360,6 @@ See race-brief.md sections 5.1 through 5.8 for complete test tables. (Table 5.9,
 - .gitattributes LF enforcement rules (Prompt 3 task) (B6)
 - Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)
 - Window-average method (brief corrections remain open)
-- 20 KB gzip limit on race files: pending Emmanuel's decision (B19)
 
 ## Success Criteria
 

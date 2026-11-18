@@ -16,6 +16,7 @@
     "ride_slower_today",
     "pairs_without_one_seat_ride",
     "today_wins",
+    "pairs",
     "sources"
   ],
   "additionalProperties": false,
@@ -32,7 +33,8 @@
         "ride_faster_today",
         "ride_slower_today",
         "pairs_without_one_seat_ride",
-        "today_wins"
+        "today_wins",
+        "pairs"
       ],
       "properties": {
         "races": { "$ref": "#/$defs/RaceDerivedSourceIds" },
@@ -43,7 +45,8 @@
         "ride_faster_today": { "$ref": "#/$defs/RaceDerivedSourceIds" },
         "ride_slower_today": { "$ref": "#/$defs/RaceDerivedSourceIds" },
         "pairs_without_one_seat_ride": { "$ref": "#/$defs/RaceDerivedSourceIds" },
-        "today_wins": { "$ref": "#/$defs/RaceDerivedSourceIds" }
+        "today_wins": { "$ref": "#/$defs/RaceDerivedSourceIds" },
+        "pairs": { "$ref": "#/$defs/RaceDerivedSourceIds" }
       },
       "additionalProperties": { "$ref": "#/$defs/SourceIds" }
     },
@@ -101,6 +104,13 @@
       "items": {
         "$ref": "#/$defs/TodayWin"
       }
+    },
+    "pairs": {
+      "type": "array",
+      "description": "One entry per directed pair: race counts and the ride verdict (race-brief 5.6).",
+      "items": {
+        "$ref": "#/$defs/PairVerdict"
+      }
     }
   },
   "$defs": {
@@ -130,6 +140,44 @@
         { "contains": { "const": "mta_gtfs" } },
         { "contains": { "const": "method" } }
       ]
+    },
+    "PairVerdict": {
+      "type": "object",
+      "required": [
+        "origin",
+        "dest",
+        "races",
+        "wins_1938",
+        "wins_today",
+        "photo_finishes",
+        "ride_1938",
+        "ride_today_median",
+        "delta",
+        "ride_verdict"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "origin": { "type": "string", "description": "Slug of the origin corner." },
+        "dest": { "type": "string", "description": "Slug of the destination corner." },
+        "races": { "type": "integer", "minimum": 0, "description": "Races counted for this pair (t >= covered_from)." },
+        "wins_1938": { "type": "integer", "minimum": 0 },
+        "wins_today": { "type": "integer", "minimum": 0 },
+        "photo_finishes": { "type": "integer", "minimum": 0 },
+        "ride_1938": { "type": "number", "exclusiveMinimum": 0, "description": "1938 in-vehicle ride in minutes." },
+        "ride_today_median": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Median of today ride minutes over the counted races; null when there is no one-seat ride."
+        },
+        "delta": {
+          "type": ["number", "null"],
+          "description": "ride_today_median minus ride_1938; null when there is no one-seat ride."
+        },
+        "ride_verdict": {
+          "enum": ["same", "faster today", "slower today", null],
+          "description": "Ride verdict; null when there is no one-seat ride."
+        }
+      }
     },
     "TodayWin": {
       "type": "object",

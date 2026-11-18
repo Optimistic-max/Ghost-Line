@@ -90,12 +90,15 @@ def race_doc(rows=293):
 def summary_doc():
     ids = ["guide1938_diagram", "guide1938_timetable", "mta_gtfs", "method"]
     keys = ["races", "wins_1938", "wins_today", "photo_finishes", "ride_same",
-            "ride_faster_today", "ride_slower_today", "pairs_without_one_seat_ride", "today_wins"]
+            "ride_faster_today", "ride_slower_today", "pairs_without_one_seat_ride", "today_wins", "pairs"]
     return {
         "schema": "ghostline.summary.v1", "definition": "d", "races": 1, "wins_1938": 1,
         "wins_today": 0, "photo_finishes": 0, "ride_same": 17, "ride_faster_today": 3,
         "ride_slower_today": 0, "pairs_without_one_seat_ride": 0,
         "today_wins": [{"origin": "a", "dest": "b", "t": "10:00", "margin": 1.5}],
+        "pairs": [{"origin": "a", "dest": "b", "races": 1, "wins_1938": 1, "wins_today": 0,
+                   "photo_finishes": 0, "ride_1938": 8, "ride_today_median": 6.0, "delta": -2.0,
+                   "ride_verdict": "faster today"}],
         "sources": {k: list(ids) for k in keys},
     }
 

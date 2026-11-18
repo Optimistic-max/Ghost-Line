@@ -185,20 +185,22 @@
       "type": "object",
       "required": ["gap_min", "gap_max", "trips"],
       "additionalProperties": false,
+      "if": { "properties": { "trips": { "minItems": 1 } } },
+      "then": { "properties": { "gap_min": { "type": "number" }, "gap_max": { "type": "number" } } },
       "properties": {
         "gap_min": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
-          "description": "Smallest gap in minutes between consecutive eligible departures in [09:00, 14:00)."
+          "description": "Smallest gap in minutes between consecutive eligible departures in [09:00, 14:00). Null only when trips is empty."
         },
         "gap_max": {
-          "type": "number",
+          "type": ["number", "null"],
           "minimum": 0,
-          "description": "Largest gap in minutes between consecutive eligible departures in [09:00, 14:00)."
+          "description": "Largest gap in minutes between consecutive eligible departures in [09:00, 14:00). Null only when trips is empty."
         },
         "trips": {
           "type": "array",
-          "description": "Eligible one-seat trips sorted by departure time.",
+          "description": "The trips referenced by any race row plus the next 3 trips after the last referenced one, sorted by departure. i is the 0-based index in this list.",
           "items": {
             "$ref": "#/$defs/Trip"
           }

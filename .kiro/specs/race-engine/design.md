@@ -546,7 +546,7 @@ def emit_all(
     Write all JSON files and validate against schemas.
     All rounding happens here and only here (B3).
     Files written as UTF-8 without BOM, LF, compact separators, fixed key order (B6).
-    Reports raw and gzip size for each file; fails if any exceeds its approved budget (B19).
+    Reports raw and gzip size for each file; fails on the budgets in Decision 2 (B19).
     """
 
 def write_index_json(...)  -> Path
@@ -567,7 +567,8 @@ def check_source_coverage(output_dir: Path) -> None:
 def report_sizes(output_dir: Path) -> None:
     """
     Report raw and gzip size for each generated file.
-    Fail build if any file exceeds its approved brief budget (B19).
+    Fail build if any file exceeds its gzip limit (B19, Decision 2).
+    Raw sizes are reported only; they are not limits.
     """
 ```
 
@@ -851,11 +852,18 @@ Test: Run build twice, compare outputs byte-for-byte.
 5. **Integration test**: Run full pipeline, inspect outputs
 6. **Verify reproducibility**: Build twice, compare outputs
 
+## Decisions (Emmanuel, 2026-11-17)
+
+1. **today.trips.** Every trip referenced by any of the 293 race rows, plus the next 3 trips after the last referenced one (for the departures board), sorted by departure. `i` is the 0-based index in that list. `i` is not a golden value; the race-brief 4.5 example index does not apply.
+2. **Size limits.** Every output file is limited by gzip size, which is what the phone downloads. Raw sizes are reported but are not limits. Gzip limits: race files 20 KB each; index.json, summary.json and route.geojson 10 KB each. All per-file raw limits (including the 45 KB race limit) are removed. No compaction of race files. A test reports raw and gzip sizes and fails only over a gzip limit.
+3. **summary.json per-pair section.** summary.schema.json gains `pairs`: one entry per directed pair with origin, dest, races, wins_1938, wins_today, photo_finishes, ride_1938, ride_today_median, delta and ride_verdict (the last three null when there is no one-seat ride). It is emitted from PairSummary and covered by the race-derived source IDs.
+4. **Gap nulls.** today.gap_min and today.gap_max may be null only when today.trips is empty. With trips present but fewer than two departures in the window, emit raises ValidationError.
+5. **PairSummary.delta** is in the field list in section 7.
+
 ## Pending Items
 - Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)
 - .gitattributes LF enforcement (Prompt 3) (B6)
 - Window-average method: brief corrections remain open
-- 20 KB gzip race file budget: pending Emmanuel's decision (B19)
 - Future reader test for blank stop_times rows (B22)
 
 ## Success Criteria (from Requirements)
