@@ -223,10 +223,10 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 23.3 Fail with clear error (not skip) if raw/mta_local_bus.zip is missing
   - Depends on: task 21
 
-- [ ] 24. check_sources command (B5)
-  - [~] 24.1 Wire cmd_check_sources to run check_prose on web/index.html, web/src/**, docs/*.md and README.md (excluding docs/planning, node_modules, dist, web/public/data) and check_json_sources on generated JSON files (B5)
-  - [~] 24.2 Report each violation with file path and line number
-  - [~] 24.3 Exit 0 if clean, exit 1 if any violations found
+- [x] 24. check_sources command (B5)
+  - [x] 24.1 Wire cmd_check_sources to run check_prose on web/index.html, web/src/**, docs/*.md and README.md (excluding docs/planning, node_modules, dist, web/public/data) and check_json_sources on generated JSON files (B5)
+  - [x] 24.2 Report each violation with file path and line number
+  - [x] 24.3 Exit 0 if clean, exit 1 if any violations found
   - Depends on: task 19
 
 ## Testing Infrastructure

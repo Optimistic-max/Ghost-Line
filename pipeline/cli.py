@@ -337,6 +337,27 @@ def cmd_verify(args: argparse.Namespace) -> None:
     print("verify: OK (web/public/data matches a fresh build)")
 
 
+def run_check_sources(root: Path) -> list[str]:
+    """Both source checks for the repository at root. Returns violation lines, empty if clean.
+
+    Prose violations read "prose: <file>:<line>: banned term '<term>'". JSON
+    violations read "json: <label>: <problem>", where the label names the
+    generated file (JSON has no line numbers). The two checks are separate
+    operations and are reported separately.
+    """
+    from pipeline.check_sources import (
+        check_json_sources,
+        check_prose,
+        default_json_paths,
+        default_prose_paths,
+    )
+
+    root = Path(root)
+    prose = [f"prose: {v}" for v in check_prose(default_prose_paths(root), root)]
+    json_problems = [f"json: {v}" for v in check_json_sources(default_json_paths(root))]
+    return prose + json_problems
+
+
 def cmd_check_sources(args: argparse.Namespace) -> None:
     """Check prose for banned terms and generated JSON for source mappings.
 
@@ -348,8 +369,13 @@ def cmd_check_sources(args: argparse.Namespace) -> None:
     The JSON check is separate: it validates the generated JSON source
     mappings (every source ID resolves, every numeric field is covered).
     """
-    print("Command 'check_sources' is not yet implemented.")
-    sys.exit(1)
+    problems = run_check_sources(ROOT)
+    if problems:
+        print(f"check_sources: FAILED with {len(problems)} violation(s):")
+        for p in problems:
+            print(f"  {p}")
+        sys.exit(1)
+    print("check_sources: OK (prose has no banned terms; generated JSON source mappings are complete)")
 
 
 def main() -> None:

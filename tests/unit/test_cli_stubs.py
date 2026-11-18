@@ -1,6 +1,5 @@
 ﻿"""Unit tests: every not-yet-implemented CLI stub must exit non-zero, and the CLI surface is five commands."""
 
-import argparse
 import tomllib
 from pathlib import Path
 from unittest.mock import patch
@@ -8,13 +7,6 @@ from unittest.mock import patch
 import pytest
 
 from pipeline import cli
-
-# Commands that are still stubs. A command leaves this list when its task is
-# done: validate (20), build (21), check (22) and verify (23) are implemented and
-# tested in test_cli_validate.py, test_cli_build.py, test_cli_check.py and test_cli_verify.py.
-STUB_COMMANDS = [
-    ("check_sources",cli.cmd_check_sources),
-]
 
 FIVE_COMMANDS = ["validate", "build", "check", "verify", "check_sources"]
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,28 +21,13 @@ def run_main(argv, capsys):
     return exc_info.value.code, out.out, out.err
 
 
-@pytest.mark.parametrize("name,handler", STUB_COMMANDS, ids=[c[0] for c in STUB_COMMANDS])
-def test_stub_exits_nonzero(name, handler, capsys):
-    """Each stub handler must raise SystemExit with a non-zero code."""
-    args = argparse.Namespace()
-    with pytest.raises(SystemExit) as exc_info:
-        handler(args)
-    assert exc_info.value.code != 0, (
-        f"cmd_{name} exited with 0 — stubs must exit non-zero so hooks "
-        "cannot mistake an unbuilt command for a passing check."
-    )
+def test_no_command_is_a_stub_any_more():
+    """All five commands are implemented (tasks 20 to 24); none may print the stub message."""
+    import inspect
 
-
-@pytest.mark.parametrize("name,handler", STUB_COMMANDS, ids=[c[0] for c in STUB_COMMANDS])
-def test_stub_prints_not_implemented(name, handler, capsys):
-    """Each stub must print a 'not yet implemented' message before exiting."""
-    args = argparse.Namespace()
-    with pytest.raises(SystemExit):
-        handler(args)
-    captured = capsys.readouterr()
-    assert "not yet implemented" in captured.out.lower(), (
-        f"cmd_{name} did not print a 'not yet implemented' message."
-    )
+    for name in FIVE_COMMANDS:
+        handler = getattr(cli, f"cmd_{name}")
+        assert "not yet implemented" not in inspect.getsource(handler).lower(), name
 
 
 def test_top_level_help_lists_five_commands_and_not_fetch_osm(capsys):
