@@ -196,11 +196,11 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
 
 ## Integration and Commands
 
-- [ ] 20. validate command (B21)
-  - [~] 20.1 Wire cmd_validate to: load and validate facts file; build clock and verify it; validate every existing generated JSON/GeoJSON file against its schema without reading the feed (B21); run check_sources on prose paths
-  - [~] 20.2 Confirm command does not read the feed or touch the network
-  - [~] 20.3 Verify command completes in under 10 seconds
-  - [~] 20.4 All failures produce clear error messages
+- [x] 20. validate command (B21)
+  - [x] 20.1 Wire cmd_validate to: load and validate facts file; build clock and verify it; validate every existing generated JSON/GeoJSON file against its schema without reading the feed (B21); run check_sources on prose paths
+  - [x] 20.2 Confirm command does not read the feed or touch the network
+  - [x] 20.3 Verify command completes in under 10 seconds
+  - [x] 20.4 All failures produce clear error messages
   - Depends on: tasks 9, 10, 4, 19
 
 - [ ] 21. build command

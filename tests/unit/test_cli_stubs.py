@@ -9,8 +9,9 @@ import pytest
 
 from pipeline import cli
 
+# Commands that are still stubs. A command leaves this list when its task is
+# done: validate (task 20) is implemented and tested in test_cli_validate.py.
 STUB_COMMANDS = [
-    ("validate",     cli.cmd_validate),
     ("build",        cli.cmd_build),
     ("check",        cli.cmd_check),
     ("verify",       cli.cmd_verify),
