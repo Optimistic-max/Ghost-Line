@@ -211,10 +211,10 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 21.5 Verify command completes in under 60 seconds with the pinned feed
   - Depends on: tasks 8, 9, 10, 11, 12, 13, 14, 16, 18
 
-- [ ] 22. check command
-  - [~] 22.1 Wire cmd_check to run build (task 21) then run pytest
-  - [~] 22.2 Confirm golden tests always run on developer machine (feed present); confirm they skip with visible warning in CI when raw/ absent
-  - [~] 22.3 Return pytest exit code as the command exit code
+- [x] 22. check command
+  - [x] 22.1 Wire cmd_check to run build (task 21) then run pytest
+  - [x] 22.2 Confirm golden tests always run on developer machine (feed present); confirm they skip with visible warning in CI when raw/ absent
+  - [x] 22.3 Return pytest exit code as the command exit code
   - Depends on: task 21
 
 - [ ] 23. verify command (B23)

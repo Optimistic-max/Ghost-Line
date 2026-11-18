@@ -250,10 +250,38 @@ def cmd_build(args: argparse.Namespace) -> None:
     print("build: OK")
 
 
+def run_check(root: Path, say=print, runner=None) -> int:
+    """Build, then run pytest. Returns the exit code: 1 if the build fails,
+    otherwise pytest's own exit code.
+
+    Golden tests run whenever raw/mta_local_bus.zip is present (the developer
+    machine, and always after a successful build) and skip with a visible
+    warning when it is absent (hosted CI). pytest runs in a fresh process in
+    the repository root.
+    """
+    import subprocess
+
+    runner = runner or subprocess.run
+    try:
+        run_build(root, say=say)
+    except BuildError as exc:
+        say(f"check: build FAILED: {exc}")
+        return 1
+    say("check: build OK, running pytest")
+    result = runner([sys.executable, "-m", "pytest", "-q"], cwd=str(root))
+    code = int(result.returncode)
+    say(f"check: pytest exited with {code}")
+    return code
+
+
 def cmd_check(args: argparse.Namespace) -> None:
-    """Run the full build, then run pytest. Used by pre-commit hooks."""
-    print("Command 'check' is not yet implemented.")
-    sys.exit(1)
+    """Run the full build, then run pytest. Used by hooks.
+
+    The exit code is 1 if the build fails, otherwise pytest's exit code.
+    """
+    code = run_check(ROOT)
+    if code != 0:
+        sys.exit(code)
 
 
 def cmd_verify(args: argparse.Namespace) -> None:

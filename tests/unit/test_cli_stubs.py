@@ -10,10 +10,9 @@ import pytest
 from pipeline import cli
 
 # Commands that are still stubs. A command leaves this list when its task is
-# done: validate (task 20) and build (task 21) are implemented and tested in
-# test_cli_validate.py and test_cli_build.py.
+# done: validate (20), build (21) and check (22) are implemented and tested in
+# test_cli_validate.py, test_cli_build.py and test_cli_check.py.
 STUB_COMMANDS = [
-    ("check",        cli.cmd_check),
     ("verify",       cli.cmd_verify),
     ("check_sources",cli.cmd_check_sources),
 ]

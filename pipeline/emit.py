@@ -11,6 +11,7 @@ source mapping (B16). Raw and gzip sizes are reported; only gzip sizes are limit
 
 from __future__ import annotations
 
+import functools
 import gzip
 import json
 from pathlib import Path
@@ -435,13 +436,18 @@ def write_route_geojson(route: dict[str, list[RouteLeg]], output_dir: Path) -> P
 # --- checks ------------------------------------------------------------------
 
 
+@functools.lru_cache(maxsize=None)
+def _validator(schema_path: Path) -> Draft202012Validator:
+    """One validator per schema file; building it is the slow part of validating 23 files."""
+    with open(schema_path, encoding="utf-8") as fh:
+        return Draft202012Validator(json.load(fh))
+
+
 def validate_against_schema(json_path: Path, schema_path: Path) -> None:
     """Validate one file against its schema. Raises ValidationError listing every problem."""
     with open(json_path, encoding="utf-8") as fh:
         doc = json.load(fh)
-    with open(schema_path, encoding="utf-8") as fh:
-        schema = json.load(fh)
-    errors = sorted(Draft202012Validator(schema).iter_errors(doc), key=lambda e: list(e.absolute_path))
+    errors = sorted(_validator(Path(schema_path)).iter_errors(doc), key=lambda e: list(e.absolute_path))
     if errors:
         lines = [f"  at {'/'.join(str(p) for p in e.absolute_path) or '(root)'}: {e.message[:200]}" for e in errors[:20]]
         more = f"\n  ... and {len(errors) - 20} more" if len(errors) > 20 else ""
