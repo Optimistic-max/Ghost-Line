@@ -250,11 +250,11 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 26.7 Verify inferred = true for all eight race files involving brevard-preston; false for the lead pair and all others (B18)
   - Depends on: tasks 21, 25
 
-- [ ] 27. Documentation and README (B10)
-  - [~] 27.1 Write pipeline/README.md with installation instructions (Python 3.12, pip install -e .)
-  - [~] 27.2 Document the five commands with usage examples (fetch_osm excluded) (B10)
-  - [~] 27.3 Add notes on feed pinning (SHA-256, never commit raw/), OSM data (committed snapshot, not fetched during build), and golden test behaviour
-  - [~] 27.4 Link to docs/planning/race-brief.md and .kiro/specs/race-engine/design.md
+- [x] 27. Documentation and README (B10)
+  - [x] 27.1 Write pipeline/README.md with installation instructions (Python 3.12, pip install -e .)
+  - [x] 27.2 Document the five commands with usage examples (fetch_osm excluded) (B10)
+  - [x] 27.3 Add notes on feed pinning (SHA-256, never commit raw/), OSM data (committed snapshot, not fetched during build), and golden test behaviour
+  - [x] 27.4 Link to docs/planning/race-brief.md and .kiro/specs/race-engine/design.md
   - Depends on: task 2
 
 - [ ] 28. Final validation (B15)
