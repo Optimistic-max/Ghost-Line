@@ -20,7 +20,7 @@ This spec needs data the pipeline does not write yet. They are specified as race
 | `route_names` | race file `today` | The distinct display route names of the pair's trips |
 | `trips` (new rule) | race file `today` | Every eligible trip from 09:00 through the third trip after the last trip any race row uses; `i` is the index in that list |
 
-An MIT LICENSE file ("Copyright (c) 2026 Emmanuel" and Emmanuel's surname) is added at the repository root in the same task.
+An MIT LICENSE file ("Copyright (c) 2026 Emmanuel Chukwuemeka") is added at the repository root in the same task (done).
 
 ## Principles (these outrank the detailed requirements)
 
@@ -119,14 +119,14 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R8.2** 1938 times come from the race file's passes (the next listed car is row.y1938.dep; the following ones are the next entries of passes). Bus times come from the race file's `today.trips`, which after task 35 holds every eligible trip from 09:00 through the third after the last one any race uses (the next bus is trips[row.today.trip]; the following ones are the next entries of the list). No time is compared or subtracted to choose them. Four 1938 times and three bus times are shown when that many are listed; fewer when the list ends.
 - **R8.3** The board starts from row.start, so in the before-the-table state it starts at the covered-from time.
 - **R8.4** The board stays visible after the finish on desktop. On a phone it shows only before and during the race.
-- **R8.5** Frequency sentence (copy table), filled from the race file for the pair and direction on screen:
+- **R8.5** Frequency sentence (copy table), always in one full form, filled from the race file for the pair and direction on screen. The window, the date and the 1938 sentence are always present; only the gap part changes:
   - Bus gaps are today.gap_min and today.gap_max rounded to whole minutes, halves up.
-  - If gap_min rounds to 0, only the maximum is shown, in the form "leave up to {max} minutes apart", and this form carries no window, no date and no 1938 sentence.
-  - Otherwise "{min} to {max} minutes apart", or "{gap} minutes apart" when the two rounded values are equal.
-  - The window (this form only) is today.window_from and today.window_to shown in 12-hour form ("9:00 AM", "2:00 PM").
+  - The gap part is "up to {max} minutes apart" when gap_min rounds to 0; otherwise "{min} to {max} minutes apart"; or "{n} minutes apart" when the two rounded values are equal. (The "up to" rule is checked first.)
+  - The window is today.window_from and today.window_to shown in 12-hour form ("9:00 AM", "2:00 PM").
   - The route names are today.route_names, shown as given (for example "CityLink Lime"), joined with " and " when there are two and with commas and "and" when there are more. Headsigns are not shown on the card; they appear only in the Sources sheet.
-  - The 1938 spacing (this form only) is y1938.gap_min and y1938.gap_max rounded the same way: "every {a} or {b} minutes", or "every {a} minutes" when equal.
-  - No fixed number of minutes is ever typed.
+  - The date is service_date shown as "Nov 4, 2026".
+  - The 1938 spacing is y1938.gap_min and y1938.gap_max rounded the same way: "every {a} or {b} minutes", or "every {a} minutes" when the two rounded values are equal.
+  - Every value comes from the data files; no number of minutes is ever typed.
 
 ### R9. Number buttons and the Sources sheet
 - **R9.1** Every number on the card is a button with a dotted underline. This covers the totals, the legend durations, the clock times on the board, the next-car and next-bus times in the status lines, and the honest-line counts. Tapping it opens the Sources sheet scrolled to that number's row.
@@ -201,7 +201,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **P8.** The result shown is row.result; a win for today and a win for 1938 have identical structure, size and position.
 - **P9.** Nothing the site computes is a race result: the shown result, margin sign and winner colour match the stored row for every pair and minute in the real files.
 - **P10.** With reduced motion, no animation runs and the finished state is shown at once; with motion, only transform and opacity are animated.
-- **P11.** Gap display: for any gap_min and gap_max the sentence shows whole minutes; it uses the "up to {max}" form exactly when gap_min rounds to 0; otherwise it shows "{min} to {max}", or one number when the rounded values are equal.
+- **P11.** Gap display: for any gap_min and gap_max the gap part shows whole minutes; it is "up to {max} minutes apart" exactly when gap_min rounds to 0; otherwise "{min} to {max} minutes apart", or "{n} minutes apart" when the rounded values are equal. The window, the date and the 1938 sentence are present in every case; the 1938 part reads "every {n} minutes" exactly when its rounded values are equal.
 - **P12.** The address bar after any pair change equals encode(pair); it never holds a time.
 
 ## Copy strings
@@ -225,7 +225,7 @@ Placeholders in braces are read from the data at run time. These are the only st
 | Honest line | "Same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins" |
 | Honest line, today wins | "Today wins this race. Across this line: same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins" |
 | When today wins list | "On {ride_same} of {pairs} corner pairs today's scheduled ride is about as long as in 1938; on {ride_faster_today} it is faster" then, only when ride_slower_today is above zero, "; on {ride_slower_today} it is slower", then "." |
-| Frequency | When gap_min rounds to 0: "Scheduled buses on this stretch leave up to {max} minutes apart ({route_names})." Otherwise: "Scheduled one-seat buses on this stretch leave {min} to {max} minutes apart between {window_from} and {window_to} ({route_names}, weekday schedule as of Nov 4, 2026). In 1938 a trolley was scheduled every {y1938.gap_min} or {y1938.gap_max} minutes." Equal values: "{gap} minutes apart" and "every {n} minutes". |
+| Frequency | "Scheduled one-seat buses on this stretch leave {gap part} between {window_from} and {window_to} ({route_names}, weekday schedule as of {service_date}). In 1938 a trolley was scheduled every {y1938.gap_min} or {y1938.gap_max} minutes." {gap part} is "up to {max} minutes apart" when gap_min rounds to 0, "{min} to {max} minutes apart" otherwise, or "{n} minutes apart" when equal. If the 1938 values are equal: "every {n} minutes". |
 | Share banner | "Shared race: {origin} → {dest}." |
 | Bad link | "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." |
 | Data error | "The timetable data didn't load. Check your connection and try again." + Retry |
