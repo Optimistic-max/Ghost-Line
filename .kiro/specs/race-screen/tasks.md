@@ -90,13 +90,13 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Playback
 
-- [ ] 11. Timeline, clock and motion (R5, section 9)
-  - [ ] 11.1 play/timeline.ts: segments from stored parts, `speed = max(4, longest / 12)`, `resultAt` chosen from `row.result`. Unit and property tests: 12 s cap, linear positions, the result moment per result type, no-ride timeline has one lane.
-  - [ ] 11.2 play/clock.ts: one rAF loop, `elapsed` written as a CSS variable, `start`, `stop`, `skip`, `onResult`, `onFinish`; 300 ms pause before a race; tab-hidden catch-up; the frame-rate watchdog (`lite` under 30 per second in the first second).
-  - [ ] 11.3 play/motion.ts: reduced-motion media query and levels (`full`, `lite`, `reduced`); reduced motion draws the finished state at once, with no clock and no "Skip to result".
-  - [ ] 11.4 CSS and view wiring (styles/motion.css): bar fills by `transform: scaleX`, vehicles by `translateX`, dimming and arrival emphasis by `opacity`; trolley bob, pole sparks, hub rotation and glow breathing as separate elements; only transform and opacity animated (a test scans the stylesheets for animated or transitioned properties and fails on anything else); result box roller-sign entrance and honest line fade; the result is shown at `resultAt` and the slower side runs on; "Skip to result"; the trolley shrinks and the legends replace the status lines at the finish.
-  - [ ] 11.5 Slider interaction: any thumb movement or minus/plus stops the race at once; only the time label and the board update while dragging; the next race starts 300 ms after the last input. `performance.mark('race-start')` when the first segment moves.
-  - [ ] 11.6 Tests with fake timers: the order of events for a 1938 win, a today win, a photo finish and a no-ride race; the result and announcement happen once, at the right moment; stop and restart; skip before and after the result; reduced motion; `lite` fallback.
+- [x] 11. Timeline, clock and motion (R5, section 9)
+  - [x] 11.1 play/timeline.ts: segments from stored parts, `speed = max(4, longest / 12)`, `resultAt` chosen from `row.result`. Unit and property tests: 12 s cap, linear positions, the result moment per result type, no-ride timeline has one lane.
+  - [x] 11.2 play/clock.ts: one rAF loop, `elapsed` written as a CSS variable, `start`, `stop`, `skip`, `onResult`, `onFinish`; 300 ms pause before a race; tab-hidden catch-up; the frame-rate watchdog (`lite` under 30 per second in the first second).
+  - [x] 11.3 play/motion.ts: reduced-motion media query and levels (`full`, `lite`, `reduced`); reduced motion draws the finished state at once, with no clock and no "Skip to result".
+  - [x] 11.4 CSS and view wiring (styles/motion.css): bar fills by `transform: scaleX`, vehicles by `translateX`, dimming and arrival emphasis by `opacity`; trolley bob, pole sparks, hub rotation and glow breathing as separate elements; only transform and opacity animated (a test scans the stylesheets for animated or transitioned properties and fails on anything else); result box roller-sign entrance and honest line fade; the result is shown at `resultAt` and the slower side runs on; "Skip to result"; the trolley shrinks and the legends replace the status lines at the finish.
+  - [x] 11.5 Slider interaction: any thumb movement or minus/plus stops the race at once; only the time label and the board update while dragging; the next race starts 300 ms after the last input. `performance.mark('race-start')` when the first segment moves.
+  - [x] 11.6 Tests with fake timers: the order of events for a 1938 win, a today win, a photo finish and a no-ride race; the result and announcement happen once, at the right moment; stop and restart; skip before and after the result; reduced motion; `lite` fallback.
   - Depends on: task 10
 
 ## Board, sheets and sources

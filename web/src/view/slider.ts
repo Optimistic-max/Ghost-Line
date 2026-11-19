@@ -40,3 +40,15 @@ export function slider(model: SliderModel): HTMLElement {
     h('output', { class: 'slider-time display', for: 'start-time', 'aria-hidden': 'true' }, label),
   );
 }
+
+/** While the slider is moved, only the time label changes (R3.5): the value, its spoken text and the large time. */
+export function updateSlider(root: ParentNode, minute: number): void {
+  const label = label12(clockOf(minute));
+  const input = root.querySelector<HTMLInputElement>('#start-time');
+  if (input) {
+    if (input.value !== String(minute)) input.value = String(minute);
+    input.setAttribute('aria-valuetext', sliderValueText(label));
+  }
+  const time = root.querySelector('.slider-time');
+  if (time) time.textContent = label;
+}

@@ -155,6 +155,8 @@ function trolleyArt(routeNumber: string | null): string[] {
     ...ROPES.map((d) => `<path class="v-rope" data-part="rope" d="${d}"/>`),
     ...POLES.map(([x1, y1, x2, y2]) => `<line class="v-pole" data-part="pole" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`),
     ...SHOES.map(([x, y]) => `<rect class="v-shoe" data-part="shoe" x="${x}" y="${y}" width="7" height="2.4" rx="1"/>`),
+    // A spark at each pole shoe, hidden until the race flashes one (screen-brief 3A.6).
+    ...POLES.map(([x, y]) => `<circle class="v-spark" data-part="spark" cx="${x}" cy="${y}" r="2.2"/>`),
     // The body is lit from inside: a warm fill with the glass cut out, then its outline.
     `<path class="v-body-fill" fill-rule="evenodd" d="${BODY_WITH_GLASS}"/>`,
     `<path class="v-body" data-part="body" d="${BODY}"/>`,

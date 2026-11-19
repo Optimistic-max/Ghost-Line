@@ -171,15 +171,17 @@
   background: var(--line);
 }
 
-/* The runner spans the track; translating it by a share of its own width puts
-   the vehicle's centre over that point of the bar, kept inside the track. */
+/* The runner spans the track. --p is the share of the bar the vehicle has
+   travelled (0 at the start, the end of its ride when parked); the vehicle
+   moves linearly over the room the track leaves it, so it always stays inside
+   the card and moves for the whole ride, whatever its drawn size. */
 .runner {
   position: absolute;
   top: 0;
   bottom: 0;
   left: var(--pad);
   right: var(--pad);
-  transform: translateX(clamp(calc(var(--veh-w) / 2), calc(var(--p, 0) * 100%), calc(100% - var(--veh-w) / 2)));
+  transform: translateX(calc(var(--p, 0) * (100% - var(--veh-w))));
 }
 
 .vehicle {
@@ -187,7 +189,6 @@
   bottom: 0;
   left: 0;
   width: var(--veh-w);
-  margin-left: calc(var(--veh-w) / -2);
 }
 
 /* One 9 px bar per side on the shared scale. Wait is hatched, ride solid,
@@ -198,23 +199,48 @@
   gap: 2px;
 }
 
+/* A phase: its dim track (not yet reached, 28%: R5.3) under its filled part.
+   The filled part is revealed from the left by --f, the share already done:
+   the fill slides in from the left inside the clipped segment while its paint
+   slides the other way, so the hatching and dots never stretch (motion.css
+   drives --f; with none set the phase is drawn finished). */
 .seg {
   position: relative;
   flex: none;
   width: calc(var(--w) * 100%);
   min-width: 2px;
   height: 100%;
+  overflow: hidden;
+  border-radius: 2px;
 }
 
 .seg[data-empty] {
   min-width: 0;
 }
 
-.seg-fill {
+.seg-track,
+.seg-fill,
+.seg-paint {
   position: absolute;
   inset: 0;
-  transform-origin: left center;
-  border-radius: 2px;
+}
+
+.seg-track {
+  opacity: 0.28;
+}
+
+/* A phase already reached is no longer dimmed; what is left of it stays a little below the filled part. */
+.seg[data-reached] .seg-track {
+  opacity: 0.55;
+}
+
+.seg-fill {
+  overflow: hidden;
+  transform: translateX(calc((var(--f, 1) - 1) * 100%));
+}
+
+.seg-paint {
+  transform: translateX(calc((1 - var(--f, 1)) * 100%));
 }
 
 .lane-1938 {
@@ -225,18 +251,69 @@
   --side: var(--today);
 }
 
-.seg-ride .seg-fill {
+.seg-ride :is(.seg-track, .seg-paint) {
   background: var(--side);
 }
 
-.seg-wait .seg-fill {
+.seg-wait :is(.seg-track, .seg-paint) {
   background: repeating-linear-gradient(-45deg, var(--side) 0 2px, transparent 2px 5px);
+}
+
+.seg-wait .seg-paint {
   opacity: 0.8;
 }
 
-.seg-walk-to-stop .seg-fill,
-.seg-walk-from-stop .seg-fill {
+.seg-walk-to-stop :is(.seg-track, .seg-paint),
+.seg-walk-from-stop :is(.seg-track, .seg-paint) {
   background: radial-gradient(circle, var(--side) 1.4px, transparent 1.6px) 0 50% / 6px 6px repeat-x;
+}
+
+/* The small dot that travels a walk while it is under way (screen-brief 3A.6). */
+.seg-dot-track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2.5px;
+  right: 2.5px;
+  transform: translateX(calc(var(--f, 1) * 100%));
+}
+
+.seg-dot {
+  position: absolute;
+  top: 50%;
+  left: -2.5px;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--side);
+  opacity: 0;
+}
+
+.seg[data-current] .seg-dot {
+  opacity: 1;
+}
+
+/* The end of the bar: unseen until the first arrival, when it brightens and settles (motion.css). */
+.bar-cap {
+  flex: none;
+  width: 4px;
+  height: calc(var(--bar-h) + 6px);
+  margin: -3px 0 0 -5px;
+  border-radius: 2px;
+  background: var(--side);
+  opacity: 0;
+}
+
+/* While racing, a lane's total waits for its arrival (design 9.3). The status
+   line and the legend take turns by the hidden attribute (racer.ts). */
+.lane[data-stage='racing']:not([data-arrived]) .lane-total {
+  visibility: hidden;
+}
+
+.status {
+  margin-top: 3px;
+  color: var(--ink);
 }
 
 .legend {
@@ -250,6 +327,46 @@
 
 .no-bus {
   color: var(--muted);
+}
+
+/* ---- Race clock row (while racing) ----------------------------------------------- */
+
+/* "10:08 scheduled" and "Skip to result", with a rule under them (mockups 01, 02). */
+.clock-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.clock-readout {
+  color: var(--muted);
+}
+
+.clock-time {
+  color: var(--ink);
+  font-size: var(--fs-slider-time);
+  line-height: 1.1;
+}
+
+/* A text link with a hit area of at least 44 x 44 px (R1.4). */
+.link.skip {
+  position: relative;
+  flex: none;
+  color: var(--muted);
+}
+
+.link.skip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, var(--tap));
+  height: var(--tap);
+  transform: translate(-50%, -50%);
 }
 
 /* ---- Result box --------------------------------------------------------------- */

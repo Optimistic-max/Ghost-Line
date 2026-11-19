@@ -1,16 +1,28 @@
 // Task 10.5: the first running page loads the lead pair from web/public/data and
-// shows its finished state, every number a button.
+// shows its finished state, every number a button. Since task 11 the first race
+// plays by itself first, so these tests run it to the finish on a fake clock.
 import { afterEach, describe, expect, it } from 'vitest';
 import { FALLBACK_START, LEAD_PAIR } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { cornerName } from '../../src/data/lookup';
 import { routeNumberOf, yearOf } from '../../src/format/line';
 import { label12, minutesOf } from '../../src/format/time';
+import { MAX_SECONDS } from '../../src/play/timeline';
 import { realData, slugNamed } from '../support/realdata';
-import { bootPage } from '../support/page';
+import { type PageOptions, bootPage } from '../support/page';
 import { text } from '../support/render';
+import { fakeTime } from '../support/time';
 
 const { index } = realData();
+
+/** Boot the page and let the first race run to its finish: it starts by itself and lasts at most 12 s. */
+async function bootFinished(options: PageOptions = {}) {
+  const time = fakeTime();
+  const app = await bootPage({ ...options, time });
+  time.advance((MAX_SECONDS + 1) * 1000);
+  expect(app.store.get().race.phase).toBe('finished');
+  return app;
+}
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -18,7 +30,7 @@ afterEach(() => {
 
 describe('the first running page', () => {
   it('shows the lead pair at the fallback start, finished, with the line label from index.json', async () => {
-    const app = await bootPage();
+    const app = await bootFinished();
     expect(app.store.get().data.status).toBe('ready');
     expect(text(document.getElementById('origin-name'))).toBe(cornerName(index, LEAD_PAIR.origin));
     expect(text(document.getElementById('dest-name'))).toBe(cornerName(index, LEAD_PAIR.dest));
@@ -38,7 +50,7 @@ describe('the first running page', () => {
   });
 
   it('registers a source for every number button on the page', async () => {
-    const app = await bootPage();
+    const app = await bootFinished();
     const buttons = [...document.querySelectorAll<HTMLElement>('button.num')];
     expect(buttons.length).toBeGreaterThan(10);
     for (const b of buttons) expect(app.registry.get(b.dataset['source']!), b.dataset['source']).toBeDefined();

@@ -1,0 +1,140 @@
+/* Motion (screen-brief 3A.6, design 9.4 and 9.5). Only transform and opacity
+   are animated or transitioned; tests/unit/tokens.test.ts scans every
+   stylesheet for it. The root class sets the level: motion-full (everything),
+   motion-lite (movement only, after the frame-rate watchdog: no bob, sparks or
+   breathing), motion-reduced (nothing moves). The movement along the lanes is
+   not animated here: racer.ts writes --f and --p each frame, and card.css turns
+   them into transforms. */
+
+/* First paint: the trolley fades in from nothing to full glow, once (R2.5). */
+.motion-full .first-paint,
+.motion-lite .first-paint {
+  animation: fade-in 400ms var(--ease-out) both;
+}
+
+/* The first arrival: the bar end brightens for 200 ms, then settles over
+   600 ms, the same for either side; a photo finish gives both ends the same
+   treatment at the same moment (R5.6). */
+.motion-full .lane.is-arriving .bar-cap,
+.motion-lite .lane.is-arriving .bar-cap {
+  animation: arrive 800ms linear both;
+}
+
+/* The result box arrives like a roller sign: it scales from 96% to 100% and
+   its text rolls up 8 px (260 ms); the honest line fades in 150 ms later
+   (200 ms). The same for every result (R5.7). */
+.motion-full .result.entering,
+.motion-lite .result.entering {
+  animation: sign-in 260ms var(--ease-out) both;
+}
+
+.motion-full .result.entering > *,
+.motion-lite .result.entering > * {
+  animation: roll-up 260ms var(--ease-out) both;
+}
+
+.motion-full .honest.entering,
+.motion-lite .honest.entering {
+  animation: fade-in 200ms var(--ease-out) 150ms both;
+}
+
+/* The trolley alive while it moves, at full motion only: a 2 px bob, the wide
+   glow breathing between 85% and 100%, and the pole sparks (a class the spark
+   timer adds for 120 ms). The bus has none of them (R5.5). */
+.motion-full .lane-1938.is-moving .trolley {
+  animation: bob 1600ms var(--ease-in-out) infinite;
+}
+
+.motion-full .lane-1938.is-moving .trolley-glow-wide {
+  animation: breathe 2400ms var(--ease-in-out) infinite;
+}
+
+.motion-full .lane-1938.is-moving.is-sparking .v-spark {
+  opacity: 1;
+}
+
+/* The wheel hubs turn while the trolley moves. */
+.motion-full .lane-1938.is-moving .v-hub,
+.motion-lite .lane-1938.is-moving .v-hub {
+  animation: turn 900ms linear infinite;
+}
+
+/* Reduced motion: nothing animates or transitions, sheets and the banner
+   included (R5.11). base.css holds the same rule under the media query. */
+.motion-reduced *,
+.motion-reduced *::before,
+.motion-reduced *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes arrive {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sign-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes roll-up {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -28,6 +28,10 @@ export function renderAt(data: Data, pair: Pair, hhmm: string, layout: Layout = 
       minute: minutesOf(hhmm),
       minuteFromClock: fromClock,
       layout,
+      // The finished state, as drawn after the race and with reduced motion.
+      stage: 'finished',
+      resultShown: true,
+      canSkip: false,
     }),
   );
   return { root, registry, view, race };

@@ -96,6 +96,12 @@
   fill: var(--ghost);
 }
 
+/* The sparks at the pole shoes: hidden, flashed by opacity during the ride (motion.css). */
+.v-spark {
+  fill: var(--lit);
+  opacity: 0;
+}
+
 .v-rope {
   fill: none;
   stroke: var(--ghost);

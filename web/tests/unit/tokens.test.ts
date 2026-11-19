@@ -129,6 +129,50 @@ describe('stylesheet rules', () => {
     }
   });
 
+  it('changes only transform and opacity inside every @keyframes, and animates only defined keyframes', () => {
+    const defined = new Set<string>();
+    let blocks = 0;
+    for (const [file, css] of sheets) {
+      for (const m of css.matchAll(/@keyframes\s+([\w-]+)\s*\{/g)) {
+        defined.add(m[1]!);
+        blocks += 1;
+        // The block runs to its matching brace.
+        let depth = 1;
+        let i = m.index! + m[0].length;
+        while (depth > 0 && i < css.length) {
+          if (css[i] === '{') depth += 1;
+          if (css[i] === '}') depth -= 1;
+          i += 1;
+        }
+        const body = css.slice(m.index! + m[0].length, i - 1);
+        const properties = [...body.matchAll(/([\w-]+)\s*:[^;{}]+;/g)].map((p) => p[1]);
+        expect(properties.length, `${file} @keyframes ${m[1]}`).toBeGreaterThan(0);
+        for (const p of properties) {
+          expect(['transform', 'opacity', 'animation-timing-function'], `${file} @keyframes ${m[1]}: ${p}`).toContain(p);
+        }
+      }
+    }
+    expect(blocks).toBeGreaterThan(0);
+    for (const [file, css] of sheets) {
+      for (const m of css.matchAll(/(?:^|[;{\s])animation(?:-name)?\s*:\s*([^;]+);/g)) {
+        const value = m[1]!.trim();
+        if (/^none\b/.test(value)) continue;
+        const names = value.split(',').map((part) => part.trim().split(/\s+/).find((word) => defined.has(word)));
+        expect(names.every(Boolean), `${file}: animation ${value}`).toBe(true);
+      }
+    }
+  });
+
+  it('animates the movement, the trolley details and the result only under a motion root class (design 9.4)', () => {
+    for (const [file, css] of sheets) {
+      for (const m of css.matchAll(/([^{}]+)\{[^{}]*\banimation\s*:(?!\s*none\b)[^;]+;/g)) {
+        const selectors = m[1]!.trim();
+        if (selectors.startsWith('@') || /^(from|to|\d+%)/.test(selectors)) continue;
+        for (const selector of selectors.split(',')) expect(selector.trim(), file).toMatch(/^\.motion-(full|lite)\b/);
+      }
+    }
+  });
+
   it('turns every animation and transition off when the device asks for reduced motion', () => {
     const base = sheets.get('web/src/styles/base.css')!;
     expect(base).toMatch(/@media \(prefers-reduced-motion: reduce\)[\s\S]*animation: none !important[\s\S]*transition: none !important/);
@@ -136,6 +180,8 @@ describe('stylesheet rules', () => {
 
   it('imports every stylesheet of the first screen from index.css', () => {
     const index = sheets.get('web/src/styles/index.css')!;
-    for (const name of ['tokens', 'base', 'layout-phone', 'layout-desktop']) expect(index).toContain(`@import './${name}.css';`);
+    for (const name of ['tokens', 'base', 'layout-phone', 'layout-desktop', 'card', 'vehicles', 'motion']) {
+      expect(index).toContain(`@import './${name}.css';`);
+    }
   });
 });

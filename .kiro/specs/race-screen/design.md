@@ -252,8 +252,8 @@ Segments are cumulative stored parts. `speed = max(4, longest / 12)` where `long
 
 To honor "animate only transform and opacity" the lane drawing is built so that nothing needs layout:
 
-- Each bar segment is a fixed-position element whose final width is set once by `layout.ts` from stored minutes on the shared scale. The fill is an inner element scaled with `transform: scaleX(p)` from a left origin, where `p` is the share of that segment already done. The dimming of not-yet-reached segments is an `opacity` change.
-- Each vehicle is positioned at `translateX(...)` computed from the filled length.
+- Each bar segment is a fixed-position element whose final width is set once by `layout.ts` from stored minutes on the shared scale. The fill is an inner element scaled with `transform: scaleX(p)` from a left origin, where `p` is the share of that segment already done. The dimming of not-yet-reached segments is an `opacity` change. As built (task 11): the fill is revealed rather than scaled, by two opposite `translateX` transforms inside the clipped segment, so the hatching and the dots are not stretched; it is still transform only.
+- Each vehicle is positioned at `translateX(...)` computed from the filled length. As built (task 11): the vehicle travels linearly over the room the track leaves it (`p × (track − vehicle width)`, with `p` going from 0 to the end of its ride during the ride phase only), so a 150 px trolley on a short ride still moves for the whole ride; its front edge stays ahead of the filled end rather than on it.
 - The status line text is the only thing that changes content, and it changes at whole-minute steps, not per frame.
 
 The clock exposes `start(timeline)`, `stop()`, `skip()`, and a promise-free callback `onFinish`. It pauses nothing on hidden tabs by itself; it uses the timestamp difference, so a tab that was hidden catches up and finishes at its real time. A frame-rate watchdog counts frames in the first second of a race; if it measures under 30 per second it switches `motion` to `lite` (R5.10): bob, sparks and glow breathing are turned off via a root class, the movement stays.
