@@ -57,14 +57,14 @@
 
 ## Module Implementation (Pipeline Steps)
 
-- [~] 8. feed_check module
+- [x] 8. feed_check module
   - [x] 8.1 Implement check_feed(feed_path) that computes SHA-256 of raw/mta_local_bus.zip and returns the hash
   - [x] 8.2 Raise FeedError with clear message if file is missing
   - [x] 8.3 Raise FeedError with expected vs actual hash if hash does not match `8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694`
   - [x] 8.4 Write tests/unit/test_feed_check.py covering missing file, hash mismatch, and valid file cases
   - Depends on: task 3
 
-- [~] 9. facts module (B4, B5 slug)
+- [x] 9. facts module (B4, B5 slug)
   - [x] 9.1 Implement load_facts(facts_path) that parses data/lines/no21-1938.yaml into a FactsFile dataclass; reads departure patterns, first/last and timing minutes from facts (not hard-coded constants)
   - [x] 9.2 Validate: at least two timing points; first minutes_from_prev = 0, later values positive whole minutes; both directions have minutes_past_hour/first/last; each leg has street, method, length_m; each leg has osm_ways with clip points or points_lonlat with note
   - [x] 9.3 Raise FactsError with field name if any required field is missing
@@ -161,23 +161,23 @@
 Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed items above stay as history. Prompt 2 in docs/planning/blockB-fixes.md holds the implementation details.
 
 - [x] 29. Correct JSON schemas (B2, B12, B16; Prompt 2)
-  - [~] 29.1 route.schema.json: each leg requires direction (eastbound or westbound), street, method, note and length_m (nonnegative number); loop legs use eastbound
-  - [~] 29.2 race.schema.json: row description covers every minute 09:00 to 13:52; races minItems and maxItems both 293
-  - [~] 29.3 index.schema.json: replace the sources array with a catalog object keyed by guide1938_diagram, guide1938_timetable, guide1938_route, mta_gtfs, osm and method; each entry requires what, year, where and url; year and url may be null only on the method entry, and every real source must have both; all six entries required
-  - [~] 29.4 race, summary and route schemas: require a top-level sources object mapping blocks to nonempty ID arrays drawn from the six catalog IDs; keep the brief's nested y1938 source URLs
-  - [~] 29.5 Run Draft202012Validator.check_schema on all four schemas
+  - [x] 29.1 route.schema.json: each leg requires direction (eastbound or westbound), street, method, note and length_m (nonnegative number); loop legs use eastbound
+  - [x] 29.2 race.schema.json: row description covers every minute 09:00 to 13:52; races minItems and maxItems both 293
+  - [x] 29.3 index.schema.json: replace the sources array with a catalog object keyed by guide1938_diagram, guide1938_timetable, guide1938_route, mta_gtfs, osm and method; each entry requires what, year, where and url; year and url may be null only on the method entry, and every real source must have both; all six entries required
+  - [x] 29.4 race, summary and route schemas: require a top-level sources object mapping blocks to nonempty ID arrays drawn from the six catalog IDs; keep the brief's nested y1938 source URLs
+  - [x] 29.5 Run Draft202012Validator.check_schema on all four schemas
   - Depends on: task 4
 
 - [x] 30. Correct the CLI to five commands (B10, B5, B13; Prompt 2)
-  - [~] 30.1 Remove fetch_osm from CLI registration, handler and stub tests; keep validate, build, check, verify and check_sources
-  - [~] 30.2 Test that top-level help lists all five commands and excludes fetch_osm; test that fetch_osm exits with argparse's unknown-command error
-  - [~] 30.3 Update check_sources help and docstrings: prose scan paths, exclusions, banned-term check, and generated JSON source validation; test top-level help and check_sources --help
-  - [~] 30.4 Remove requests from pyproject.toml; test the dependency list excludes it
+  - [x] 30.1 Remove fetch_osm from CLI registration, handler and stub tests; keep validate, build, check, verify and check_sources
+  - [x] 30.2 Test that top-level help lists all five commands and excludes fetch_osm; test that fetch_osm exits with argparse's unknown-command error
+  - [x] 30.3 Update check_sources help and docstrings: prose scan paths, exclusions, banned-term check, and generated JSON source validation; test top-level help and check_sources --help
+  - [x] 30.4 Remove requests from pyproject.toml; test the dependency list excludes it
   - Depends on: task 2
 
 - [x] 31. Add the blank-time fixture row (B22; Prompt 2)
-  - [~] 31.1 Add one fake stop_times row with empty arrival_time and departure_time, using an existing fake trip and stop and a fresh stop_sequence
-  - [~] 31.2 Test with csv.DictReader that both cells are empty, the trip and stop references exist, and sequences are unique; assert the original timed rows and the overnight example remain
+  - [x] 31.1 Add one fake stop_times row with empty arrival_time and departure_time, using an existing fake trip and stop and a fresh stop_sequence
+  - [x] 31.2 Test with csv.DictReader that both cells are empty, the trip and stop references exist, and sequences are unique; assert the original timed rows and the overnight example remain
   - Depends on: task 5
 
 - [x] 32. Apply .gitattributes LF rules (B6; Prompt 3)
@@ -189,9 +189,9 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 33.1 Provide the committed data/osm/ways.json dated 2026-11-01. Task 16 reads it and does not fetch.
   - Depends on: none
 
-- [ ] 34. Record the pending decisions
-  - [~] 34.1 Window-average method and brief corrections: pending Emmanuel
-  - [~] 34.2 Proposed 20 KB gzip limit for race files (B19): pending Emmanuel
+- [x] 34. Record the pending decisions
+  - [x] 34.1 Window-average method and brief corrections. Decided: the window average is not shown in the app; it stays a pipeline check against the plan only. The brief corrections are listed in docs/planning/race-brief.md, "Corrections (2026-11-19)".
+  - [x] 34.2 Gzip size limits (B19). Decided: 20 KB gzip per race file, 10 KB for index/summary/route.
   - Depends on: none
 
 ## Follow-up: data the race screen needs

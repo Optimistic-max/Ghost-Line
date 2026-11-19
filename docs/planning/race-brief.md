@@ -570,3 +570,14 @@ decode(query):
 | 8 | no query | lead pair, bad_link false |
 
 Property tests: `decode(encode(p)) = p` for all 20 pairs; decode never throws on any string; the URL never contains a time or a number.
+
+---
+
+## Corrections (2026-11-19)
+
+Corrections found while building the race engine, and decisions taken since this brief was written. The sections above are left as written; where they differ from this section, this section wins. No test or expected value was changed for them.
+
+- **5.3, case 2 (walk time).** The row "230.15 m → 4.156 min" mixes two values. The formula on the rounded input gives 230.15 × 1.3 ÷ 1.2 ÷ 60 = 4.15549 min, stored as **4.155**. The 4.156 is the real stop's value: stop 9486 is 230.1535 m from Aliceanna & Bond, which gives 4.15555 min, stored as 4.156. The unit test of the formula expects 4.155 for 230.15 m; the golden tests for stop 9486 (5.3 case 6, and the 4.5 example) keep 4.156.
+- **4.5, the trip list and `i`.** `today.trips` lists every eligible trip that leaves the boarding stop at or after 09:00, in departure order, through the third trip after the last trip any race row uses (to the end of the day if fewer remain). `i` is the trip's 0-based position in that list, and a race row's `today.trip` is that position. The bus gaps are still taken from all eligible trips leaving in [09:00, 14:00), and `gap_min` and `gap_max` are null only when the list is empty. So the example's `"i": 5` and `"trip": 5` do not hold: in the built lead-pair file the 10:32:43 trip is `i` 2, after the 09:17:43 and 09:56:43 trips. `i` is not a golden value. (Race-engine design, Decision 6; task 35.4.)
+- **4.4, file sizes.** Files are limited by their gzip size, which is what the phone downloads, not by the uncompressed budgets in the 4.4 table: **20 KB gzip per race file, and 10 KB gzip each for index.json, summary.json and route.geojson**. The build reports raw and gzip sizes and fails only over a gzip limit; raw sizes are not limits. In the build of Nov 19 the largest race file is 5.6 KB gzip (63.0 KB raw), index.json 1.3 KB, summary.json 1.0 KB and route.geojson 4.3 KB. The first-screen budget in 4.1 (under 100 KB compressed) is unchanged. (Race-engine design, Decision 2; task 34.2.)
+- **5.7, the window average.** The arrival-weighted wait and the lead-pair window averages (1938 12.767 min, today 32.637 min, 10:00 to 13:00) are **not shown in the app**. They stay a pipeline check against this plan only. (Task 34.1.)
