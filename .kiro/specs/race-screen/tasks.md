@@ -59,11 +59,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Layout and drawing
 
-- [ ] 7. Tokens, type and the page shell (R1, R12.1, R12.2, section 13)
-  - [ ] 7.1 styles/tokens.css with palette B exactly as in ui.md and the size tokens of screen-brief 3.3 and 3A.1; base.css; focus ring; tabular figures; sentence case.
-  - [ ] 7.2 index.html shell: top bar with "Ghost Line" only, map area, race card skeleton with the default pair's names, sheet roots, live regions (`#result-status`, `#share-status`), banner root. A test asserts the pair names in the HTML equal the lead pair's names in index.json.
-  - [ ] 7.3 layout-phone.css and layout-desktop.css: the zones and sizes of R1.2 and R1.3; sheets as a bottom sheet on phones and a slide-in over the race column on desktop; pinned button strip on phones; inside scrolling; no horizontal scroll.
-  - [ ] 7.4 Contrast test: compute WCAG ratios for every text/background pair used (text on --panel, --night, the result box, chips) from the tokens and fail under 4.5.
+- [x] 7. Tokens, type and the page shell (R1, R12.1, R12.2, section 13)
+  - [x] 7.1 styles/tokens.css with palette B exactly as in ui.md and the size tokens of screen-brief 3.3 and 3A.1; base.css; focus ring; tabular figures; sentence case.
+  - [x] 7.2 index.html shell: top bar with "Ghost Line" only, map area, race card skeleton with the default pair's names, sheet roots, live regions (`#result-status`, `#share-status`), banner root. A test asserts the pair names in the HTML equal the lead pair's names in index.json.
+  - [x] 7.3 layout-phone.css and layout-desktop.css: the zones and sizes of R1.2 and R1.3; sheets as a bottom sheet on phones and a slide-in over the race column on desktop; pinned button strip on phones; inside scrolling; no horizontal scroll.
+  - [x] 7.4 Contrast test: compute WCAG ratios for every text/background pair used (text on --panel, --night, the result box, chips) from the tokens and fail under 4.5.
   - Depends on: task 1
 
 - [ ] 8. Font (R12.2)

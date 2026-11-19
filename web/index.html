@@ -3,9 +3,39 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
     <title>Ghost Line</title>
+    <link rel="stylesheet" href="/src/styles/index.css" />
   </head>
   <body>
+    <div class="app" id="app">
+      <header class="topbar" id="topbar">
+        <h1 class="wordmark">Ghost Line</h1>
+        <span class="line-label" id="line-label" hidden></span>
+      </header>
+      <main class="main" id="main">
+        <div class="map-area" id="map-area">
+          <p class="headline" id="headline">Same ride, longer wait.</p>
+        </div>
+        <section class="card" id="race-card" aria-labelledby="pair-names">
+          <div class="card-scroll" id="card-scroll">
+            <h2 class="pair-row" id="pair-names">
+              <span class="corner" id="origin-name">Preston &amp; Caroline</span>
+              <span class="arrow">→</span>
+              <span class="corner" id="dest-name">Aliceanna &amp; Bond</span>
+            </h2>
+            <p class="loading-line" id="loading-line">Loading the 1938 timetable…</p>
+          </div>
+          <div class="card-buttons" id="card-buttons"></div>
+          <footer class="card-footer" id="card-footer"></footer>
+        </section>
+      </main>
+      <div class="scrim" id="scrim"></div>
+      <div id="sheet-root"></div>
+      <div class="banner-root" id="banner-root"></div>
+      <div id="result-status" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+      <div id="share-status" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

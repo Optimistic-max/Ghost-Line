@@ -1,0 +1,78 @@
+/* Design tokens. Palette B, "Gaslight and brick" (ui.md, screen-brief 3A.4).
+   Sizes: screen-brief 3.3 (phone, 375 x 667) and 3A.1 (desktop, 1280 x 800).
+   tests/unit/tokens.test.ts holds these to ui.md and to src/config.ts. */
+
+:root {
+  /* Colours */
+  --night: #17121f; /* page and map background */
+  --panel: #221a2d; /* race card, race column, sheets */
+  --line: #3b3049; /* hairlines, control outlines */
+  --ink: #ece7f2; /* main text, the filled button */
+  --muted: #a99fb8; /* labels and secondary text */
+  --ghost: #ffe7a8; /* 1938 data only */
+  --today: #f47c5a; /* today's data only */
+  --lit: #fff8e0; /* trolley windows and headlamp */
+  --sign: #100c16; /* the result box only */
+  --water: #1e1a33; /* harbour */
+  --street: #2a2137; /* street grid */
+  --street2: #40344f; /* main roads (screen-brief 3A.3) */
+  --alert: #ff8a80; /* error text only */
+
+  /* Type */
+  --font-display: 'Barlow Condensed', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --fs-wordmark: 24px;
+  --fs-corner: 21px;
+  --fs-corner-chip: 17px;
+  --fs-slider-time: 24px;
+  --fs-slider-ends: 9.5px;
+  --fs-lane-title: 17px;
+  --fs-lane-total: 22px;
+  --fs-result: 29px;
+  --fs-body: 13px;
+  --fs-body-small: 12px;
+
+  /* Phone zones (screen-brief 3A): top bar 40, map 150, card from 181 down. */
+  --topbar-h: 40px;
+  --map-h: 150px;
+  --card-top: 181px;
+  --card-radius: 18px;
+  --pad: 16px;
+  --tap: 44px;
+  --buttons-bottom: 6px;
+  --bar-h: 9px;
+
+  /* Vehicles (ui.md). Style, not data: only the bars are drawn to scale. */
+  --trolley-w: 150px;
+  --trolley-w-finished: 104px;
+  --bus-w: 84px;
+  --marker-w: 28px;
+
+  /* Motion (screen-brief 3A.6) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --press: 80ms;
+  --sheet-in: 220ms;
+  --sheet-out: 160ms;
+  --banner-slide: 200ms;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --fs-wordmark: 30px;
+    --fs-headline: 54px;
+    --fs-headline-line: 14px;
+    --fs-corner: 25px;
+    --fs-result: 38px;
+
+    --topbar-h: 56px;
+    --column-w: 440px;
+    --column-pad: 28px;
+
+    --trolley-w: 200px;
+    --trolley-w-finished: 200px;
+    --bus-w: 104px;
+    --marker-w: 58px;
+  }
+}

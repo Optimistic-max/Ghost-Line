@@ -3,7 +3,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+// From the path of this file, web/tests/support/files.ts, without the URL class:
+// under jsdom the global URL is jsdom's, which Node's fileURLToPath rejects.
+const THIS_FILE = fileURLToPath(import.meta.url);
+const REPO_ROOT = THIS_FILE.replace(/[\\/]web[\\/]tests[\\/]support[\\/]files\.ts$/, '/');
+if (REPO_ROOT === THIS_FILE) throw new Error(`cannot find the repository root from ${THIS_FILE}`);
 
 /** Absolute path of a repository-relative path. */
 export function repoPath(relative: string): string {

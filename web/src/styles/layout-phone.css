@@ -1,0 +1,159 @@
+/* Phone layout, below 900 px wide (designed at 375 x 667): top bar 40 px, map
+   150 px, race card from 181 px down with its rounded top over the map's lower
+   edge, the two buttons pinned 6 px above the bottom on a solid panel strip.
+   The card scrolls inside itself; nothing scrolls sideways. */
+
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--topbar-h);
+  padding: 0 var(--pad);
+  min-width: 0;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-wordmark);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.line-label {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  grid-template-rows: var(--map-h) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.map-area {
+  grid-row: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--night);
+}
+
+/* The desktop headline is not part of the phone layout. */
+.headline {
+  display: none;
+}
+
+.card {
+  grid-row: 2;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* The card starts at 181 px: 9 px over the map's lower edge. */
+  margin-top: calc(var(--card-top) - var(--topbar-h) - var(--map-h));
+  background: var(--panel);
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+}
+
+.card-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--pad) var(--pad) 0;
+}
+
+.pair-row {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-corner);
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.loading-line {
+  margin-top: 12px;
+  color: var(--muted);
+}
+
+/* The two buttons stay pinned on a solid strip, so text passes under them cleanly. */
+.card-buttons {
+  flex: none;
+  display: flex;
+  gap: 12px;
+  padding: 8px var(--pad) var(--buttons-bottom);
+  background: var(--panel);
+}
+
+.card-buttons:empty {
+  display: none;
+}
+
+/* The footer line is part of the desktop race column only. */
+.card-footer {
+  display: none;
+}
+
+/* Sheets slide up from the bottom over a scrim. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgb(0 0 0 / 55%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--sheet-out) var(--ease-in);
+}
+
+.scrim.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity var(--sheet-in) var(--ease-out);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 11;
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--pad);
+  background: var(--panel);
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+  transform: translateY(100%);
+  transition: transform var(--sheet-out) var(--ease-in);
+}
+
+.sheet.is-open {
+  transform: translateY(0);
+  transition: transform var(--sheet-in) var(--ease-out);
+}
+
+/* The banner is a light pill over the top bar. */
+.banner-root {
+  position: fixed;
+  top: 4px;
+  left: var(--pad);
+  right: var(--pad);
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}

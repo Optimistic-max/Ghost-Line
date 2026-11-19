@@ -1,0 +1,108 @@
+/* Desktop layout, from 900 px wide (designed at 1280 x 800): the map fills
+   everything left of a fixed 440 px race column; the top bar (56 px) and the
+   headline sit over the map. Above 1280 px only the map grows. The race column
+   holds the same content in the same order as the phone card, with the buttons
+   directly under the content and then the footer line; it scrolls inside itself
+   when the window is too short (under 720 px tall). Sheets slide in over the
+   race column only. */
+
+@media (min-width: 900px) {
+  .app {
+    display: block;
+    height: 100vh;
+  }
+
+  .topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: var(--column-w);
+    z-index: 2;
+    padding: 0 var(--column-pad);
+    pointer-events: none;
+  }
+
+  .main {
+    height: 100%;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) var(--column-w);
+  }
+
+  .map-area {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .headline {
+    display: block;
+    position: absolute;
+    top: var(--topbar-h);
+    left: var(--column-pad);
+    max-width: 520px;
+    z-index: 1;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--fs-headline);
+    line-height: 1.05;
+  }
+
+  .card {
+    grid-row: 1;
+    grid-column: 2;
+    margin-top: 0;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  .card-scroll {
+    flex: none;
+    overflow: visible;
+    padding: var(--column-pad) var(--column-pad) 0;
+  }
+
+  /* Buttons directly under the content, not pinned. */
+  .card-buttons {
+    padding: 20px var(--column-pad) 0;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 20px var(--column-pad) 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .card-footer:empty {
+    display: none;
+  }
+
+  /* Sheets slide in from the right edge, over the race column only; the scrim dims the map. */
+  .sheet {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    width: var(--column-w);
+    max-height: none;
+    padding: var(--column-pad);
+    border-radius: 0;
+    border-left: 1px solid var(--line);
+    transform: translateX(100%);
+  }
+
+  .sheet.is-open {
+    transform: translateX(0);
+  }
+
+  .banner-root {
+    left: auto;
+    right: 0;
+    width: var(--column-w);
+    padding: 0 var(--column-pad);
+  }
+}
