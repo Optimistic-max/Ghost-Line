@@ -321,6 +321,12 @@ describe('the clock readout and status lines', () => {
     expect(n).toBeLessThanOrEqual(ride!.shown);
     expect(lane('1938')!.classList.contains('is-moving')).toBe(true);
     expect(lane('today')!.classList.contains('is-moving')).toBe(false);
+    // The bus wait names its bus and counts nothing down (Emmanuel, Nov 19); the time is a number button.
+    const busStatus = lane('today')!.querySelector('.status')!;
+    expect(text(busStatus)).toBe(C.waitingForBus(shortClock(view.laneToday!.next)));
+    expect(busStatus.querySelector('button.num')?.getAttribute('data-source')).toBe('next-today');
+    page.time.advance(1000);
+    expect(text(lane('today')!.querySelector('.status'))).toBe(C.waitingForBus(shortClock(view.laneToday!.next)));
   });
 });
 
