@@ -36,12 +36,12 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 3.3 Tests with a fake fetch: success; each file failing; invalid JSON; shape failure; timeout with a late arrival not replacing the error; retry recovers; a failed on-demand race file gives the data error. Lookup tests, including `nextAfter` at the end of a list and with fewer than the requested count.
   - Depends on: task 2
 
-- [ ] 4. Pure formatting modules (R3.4, R4.4, R7, R8.5, R15.5, sections 6 and 7)
-  - [ ] 4.1 src/format/rounding.ts `roundParts` (largest remainder, ties to the earlier phase, throws RoundingError if the invariant cannot hold). Examples: the six rows of screen-brief 2.10. Properties (R7.8, P4): parts sum to the shown total; each shown part is a whole number within one minute of its stored value; whole inputs come back unchanged; deterministic; a stored win never shows a margin under one minute.
-  - [ ] 4.2 src/format/gaps.ts: `roundMinutes`, `minuteWord`/`minutes` (singular and plural), `gapPart`, the 1938 spacing text. Properties P11 and P13: the "up to" form exactly when the lower gap rounds to 0; one number when equal; "1 minute" exactly when the number is 1; no "1 minutes" anywhere.
-  - [ ] 4.3 src/format/time.ts: `defaultMinute(now, first, last)` with America/New_York; `label12`; `serviceDateLabel` ("Nov 4, 2026" from the ISO date, never shifting a day); `clockLabel`. Example rows 1 to 4 of race-brief 5.9; property P2 over every minute of a day and over the two clock-change days.
-  - [ ] 4.4 src/format/share.ts `encode`/`decode`: example rows 5 to 8 of race-brief 5.9; P1 round trip for all 20 pairs; `decode` never throws on any string (fast-check over arbitrary strings, odd percent-encodings and repeated parameters); the URL never holds a time or a number.
-  - [ ] 4.5 src/format/list.ts: route names joined with " and " for two and commas with "and" for more; one name alone.
+- [x] 4. Pure formatting modules (R3.4, R4.4, R7, R8.5, R15.5, sections 6 and 7)
+  - [x] 4.1 src/format/rounding.ts `roundParts` (largest remainder, ties to the earlier phase, throws RoundingError if the invariant cannot hold). Examples: the six rows of screen-brief 2.10. Properties (R7.8, P4): parts sum to the shown total; each shown part is a whole number within one minute of its stored value; whole inputs come back unchanged; deterministic; a stored win never shows a margin under one minute.
+  - [x] 4.2 src/format/gaps.ts: `roundMinutes`, `minuteWord`/`minutes` (singular and plural), `gapPart`, the 1938 spacing text. Properties P11 and P13: the "up to" form exactly when the lower gap rounds to 0; one number when equal; "1 minute" exactly when the number is 1; no "1 minutes" anywhere.
+  - [x] 4.3 src/format/time.ts: `defaultMinute(now, first, last)` with America/New_York; `label12`; `serviceDateLabel` ("Nov 4, 2026" from the ISO date, never shifting a day); `clockLabel`. Example rows 1 to 4 of race-brief 5.9; property P2 over every minute of a day and over the two clock-change days.
+  - [x] 4.4 src/format/share.ts `encode`/`decode`: example rows 5 to 8 of race-brief 5.9; P1 round trip for all 20 pairs; `decode` never throws on any string (fast-check over arbitrary strings, odd percent-encodings and repeated parameters); the URL never holds a time or a number.
+  - [x] 4.5 src/format/list.ts: route names joined with " and " for two and commas with "and" for more; one name alone.
   - Depends on: task 1
 
 - [ ] 5. Copy module and wording tests (R15, section 16)
