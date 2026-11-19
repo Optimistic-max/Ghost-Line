@@ -44,10 +44,10 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 4.5 src/format/list.ts: route names joined with " and " for two and commas with "and" for more; one name alone.
   - Depends on: task 1
 
-- [ ] 5. Copy module and wording tests (R15, section 16)
-  - [ ] 5.1 src/copy/copy.ts: one template function per row of the requirements copy table, each carrying both minute forms (R15.5), including "Link copied" and the base map credit. src/copy/announce.ts: the four announcement templates.
-  - [ ] 5.2 Copy-table test: parse the quoted strings of the copy table in requirements.md; fail if copy.ts holds a visible literal that is not a row's template, or a row has no template. Fixed phrase test: "Scheduled, not live." is the only place the word live appears.
-  - [ ] 5.3 Banned-word helper used by later DOM tests (live, real-time, realtime, "arriving now", "right now", with the one allowed phrase); tested on its own with deliver, olive and lives.
+- [x] 5. Copy module and wording tests (R15, section 16)
+  - [x] 5.1 src/copy/copy.ts: one template function per row of the requirements copy table, each carrying both minute forms (R15.5), including "Link copied" and the base map credit. src/copy/announce.ts: the four announcement templates.
+  - [x] 5.2 Copy-table test: parse the quoted strings of the copy table in requirements.md; fail if copy.ts holds a visible literal that is not a row's template, or a row has no template. Fixed phrase test: "Scheduled, not live." is the only place the word live appears.
+  - [x] 5.3 Banned-word helper used by later DOM tests (live, real-time, realtime, "arriving now", "right now", with the one allowed phrase); tested on its own with deliver, olive and lives.
   - Depends on: task 1
 
 - [ ] 6. State, derived view and the made-up fixture (R5, R6, section 4, section 5)
