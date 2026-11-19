@@ -53,6 +53,12 @@ constants block that cites this list. Do not add a URL anywhere else.
   OSM's required attribution page.
 - repository: https://github.com/Optimistic-max/Ghost-Line
   The project's git remote (origin). Link only, for the credits.
+- base map style: https://tiles.openfreemap.org/styles/dark
+  openfreemap.org; verified Nov 18, 2026. The site's map requests it at run time
+  and recolours it to palette B. MapLibre adds the map's own attribution from it.
+- base map credit text: OpenFreeMap © OpenMapTiles Data from OpenStreetMap
+  openfreemap.org; verified Nov 18, 2026. Required credit. Shown in the credits
+  sheet and in the video.
 
 ## Numbers
 
