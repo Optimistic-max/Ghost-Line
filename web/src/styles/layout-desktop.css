@@ -78,8 +78,16 @@
     padding: var(--column-pad) var(--column-pad) 0;
   }
 
+  /* The pair names stay on one line; app.ts shrinks their font for a long pair (R1.3). */
+  .pair-row {
+    white-space: nowrap;
+    overflow-x: clip;
+  }
+
   /* Buttons directly under the content, not pinned. */
   .card-buttons {
+    position: static;
+    height: auto;
     padding: 20px var(--column-pad) 0;
   }
 

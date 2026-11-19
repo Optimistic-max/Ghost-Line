@@ -10,7 +10,7 @@ import type { Lane, RaceView, Side } from '../state/model';
 import type { Num } from '../state/specs';
 import { h, setVar } from './dom';
 import type { LaneLayout, RaceLayout } from './layout';
-import { statusLine, vehicleMarkup } from './lanes';
+import { statusKey, statusLine, vehicleMarkup } from './lanes';
 import type { SourceRegistry } from './numbers';
 
 export type RacerInput = {
@@ -21,6 +21,8 @@ export type RacerInput = {
   next: { '1938': Num; today: Num | null };
   /** The trolley after the finish (phone: 104 px). */
   finishedTrolley: { width: number; routeNumber: string | null };
+  /** The departures board stays after the finish (desktop) or goes (phone) (R8.4). */
+  keepBoard: boolean;
 };
 
 export type Racer = {
@@ -29,7 +31,7 @@ export type Racer = {
   arrive(side: Side): void;
   /** The result moment. A photo finish gives both bar ends the emphasis now, together. */
   result(): void;
-  /** Both sides are done: the clock row goes, the legends stay, the trolley takes its finished size. */
+  /** Both sides are done: the clock row (and on a phone the board) goes, the legends stay, the trolley takes its finished size. */
   finish(): void;
 };
 
@@ -99,7 +101,7 @@ export function createRacer(root: ParentNode, registry: SourceRegistry, input: R
     // Racing, a lane shows its status line; from its arrival, its total and its legend (design 9.3).
     if (b.status) b.status.hidden = f.arrived;
     if (b.legend) b.legend.hidden = !f.arrived;
-    const shown = f.arrived ? 'arrived' : `${f.current} ${f.countdown}`;
+    const shown = f.arrived ? 'arrived' : statusKey(b.lane, f.current, f.countdown);
     if (b.status && shown !== b.shown && !f.arrived) {
       setStatus(b.status, statusLine(registry, b.lane, f.current, f.countdown, b.next));
     }
@@ -142,6 +144,11 @@ export function createRacer(root: ParentNode, registry: SourceRegistry, input: R
     },
     finish() {
       root.querySelector('.clock-row')?.remove();
+      if (!input.keepBoard) {
+        const board = root.querySelector('.board');
+        board?.querySelectorAll<HTMLElement>('button.num').forEach((b) => registry.delete(b.dataset['source'] ?? ''));
+        board?.remove();
+      }
       for (const b of lanes) {
         b.el.dataset['stage'] = 'finished';
         b.el.classList.remove('is-moving');

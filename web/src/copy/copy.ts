@@ -54,8 +54,9 @@ export function walkingToStop(n: number): string {
   return `Walking to the stop ${n} min (estimate)`;
 }
 
-export function waitingBus(n: number, hhmm: string): string {
-  return `Waiting ${n} min · next bus ${hhmm} (scheduled)`;
+/** The bus wait has no countdown (Emmanuel, Nov 19); `hm` is the trip's departure. */
+export function waitingForBus(hm: string): string {
+  return `Waiting for the ${hm} bus (scheduled).`;
 }
 
 export function walkingFromStop(n: number): string {
@@ -359,7 +360,13 @@ export const WHAT = {
   pairs: 'corner pairs on this line',
   rideFasterToday: "corner pairs where today's scheduled ride is faster",
   rideSlowerToday: "corner pairs where today's scheduled ride is slower",
+  spacing1938: 'scheduled spacing of 1938 cars at this corner',
 } as const;
+
+/** What the board's bus gaps are; the window is the race file's, in 12-hour form. */
+export function whatBusGaps(windowFrom: string, windowTo: string): string {
+  return `scheduled gaps between one-seat buses, ${windowFrom} to ${windowTo}`;
+}
 
 export function whatBetween(what: string, origin: string, dest: string): string {
   return `${what}, ${origin} to ${dest}`;

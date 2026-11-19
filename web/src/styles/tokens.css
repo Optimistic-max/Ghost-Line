@@ -45,6 +45,8 @@
   --pad: 16px;
   --tap: 44px;
   --buttons-bottom: 6px;
+  /* The pinned button strip: 8 px above the 52 px buttons, 6 px below them. */
+  --strip-h: calc(8px + 52px + var(--buttons-bottom));
   --bar-h: 9px;
 
   /* Vehicles (ui.md). Style, not data: only the bars are drawn to scale. */

@@ -1,7 +1,8 @@
 // The race card's content, in the order of the mockups: pair row, slider,
-// schedule line, the two lanes, the result box and the honest line once the
-// result is shown, and the race clock row while racing. Every number is a
-// number button registered in the card's source registry.
+// schedule line, the two lanes, the race clock row while racing, the result box
+// and the honest line once the result is shown, and the departures board. Every
+// number in the race is a number button registered in the card's source
+// registry.
 import { NO_SINGLE_BUS, SKIP_TO_RESULT, START_IS_NOW, minutes, ready } from '../copy/copy';
 import type { Index, RaceFile, Summary } from '../data/types';
 import { sliderRange } from '../data/lookup';
@@ -9,6 +10,7 @@ import { routeNumberOf } from '../format/line';
 import { serviceDateLabel } from '../format/time';
 import type { RaceView } from '../state/model';
 import { honestNumbers, raceNumbers, type RaceNumbers } from '../state/specs';
+import { boardView } from './board';
 import { h } from './dom';
 import { honestLine } from './honest';
 import { type Stage, laneView } from './lanes';
@@ -111,12 +113,31 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
         )
       : h('p', { class: 'no-bus' }, NO_SINGLE_BUS);
 
+  // The clock row sits right under the lanes while racing, so the result arriving
+  // under it never pushes it out of sight on a phone (R1.2); it goes at the finish.
   return [
     pairRow(view.originName, view.destName),
     slider({ first, last, minute: input.minute }),
     schedule,
     h('div', { class: 'lanes' }, lane1938, today),
-    ...(input.resultShown ? resultElements(registry, input, false) : []),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
+    ...(input.resultShown ? resultElements(registry, input, false) : []),
+    ...(boardShown(input) ? [cardBoard(registry, input)] : []),
   ];
+}
+
+/** The departures board shows before and during the race, and on desktop after it too (R8.4, R5.11). */
+export function boardShown(input: Pick<CardInput, 'layout' | 'stage'>): boolean {
+  return input.layout === 'desktop' || input.stage === 'racing';
+}
+
+/** The board for the card's race; also drawn again while the slider moves (R3.5). */
+export function cardBoard(registry: SourceRegistry, input: CardInput): HTMLElement {
+  const nums = cardNumbers(input);
+  return boardView(registry, input.view, {
+    cars: nums.boardCars,
+    buses: nums.boardBuses,
+    spacing: nums.boardSpacing,
+    gaps: nums.boardGaps,
+  });
 }

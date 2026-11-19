@@ -11,6 +11,7 @@ import {
   METHOD_TOTAL_1938,
   METHOD_WAIT_BUS,
   WHAT,
+  frequency,
   methodBusTrip,
   methodNextCar,
   methodTotalToday,
@@ -18,12 +19,14 @@ import {
   minShort,
   whatAt,
   whatBetween,
+  whatBusGaps,
   whatFrom,
 } from '../copy/copy';
 import type { RaceFile, SourceId, Summary, Trip } from '../data/types';
 import { formatCount } from '../format/count';
+import { gapPart, spacing1938 } from '../format/gaps';
 import { isPlainRounding, roundWhole } from '../format/rounding';
-import { dropSeconds, shortClock } from '../format/time';
+import { dropSeconds, label12, shortClock } from '../format/time';
 import type { Lane, Phase, RaceView } from './model';
 
 /** Which date line a Sources row carries (R9.4): the 1938 timetable's, the feed's, or both. */
@@ -195,7 +198,55 @@ export function raceNumbers(race: RaceFile, view: RaceView, spoken: Spoken) {
     ),
   );
 
-  return { lane1938, today, margin, boardCars, boardBuses };
+  const { boardSpacing, boardGaps } = boardSpacingNumbers(race, view);
+
+  return { lane1938, today, margin, boardCars, boardBuses, boardSpacing, boardGaps };
+}
+
+/** The frequency sentence (R8.5): the how-it-was-worked-out line of the board's spacing and gaps. Null without bus gaps. */
+export function frequencySentence(view: RaceView): string | null {
+  const f = view.frequency;
+  return f ? frequency(f.gapPart, f.windowFrom, f.windowTo, f.routeNames, f.date, f.spacing1938) : null;
+}
+
+/**
+ * The board's 1938 spacing and bus gaps as numbers on screen (Emmanuel, Nov 19):
+ * printed in the board's short form, spoken in the sentence form.
+ */
+function boardSpacingNumbers(race: RaceFile, view: RaceView): { boardSpacing: Num; boardGaps: Num | null } {
+  const sentenceText = frequencySentence(view);
+  const { y1938, today } = race;
+  const spacingText = view.board.spacing1938;
+  const boardSpacing: Num = {
+    spec: {
+      id: 'board-1938-spacing',
+      value: spacingText,
+      what: WHAT.spacing1938,
+      rowWhat: WHAT.spacing1938,
+      sourceIds: ['guide1938_timetable'],
+      url: y1938.sources.passes,
+      // With no bus gaps there is no frequency sentence; the cars' own line explains the spacing.
+      method: sentenceText ?? METHOD_CAR_1938,
+      date: 'effective',
+    },
+    text: spacingText,
+    bare: spacingText,
+    spoken: spacing1938(y1938.gap_min, y1938.gap_max),
+    n: Number.NaN,
+  };
+  const gapsText = view.board.busGaps;
+  if (gapsText === null || sentenceText === null || today.gap_min === null || today.gap_max === null) {
+    return { boardSpacing, boardGaps: null };
+  }
+  const what = whatBusGaps(label12(today.window_from), label12(today.window_to));
+  const boardGaps: Num = {
+    spec: { id: 'board-today-gaps', value: gapsText, what, rowWhat: what, sourceIds: ['mta_gtfs'], method: sentenceText, date: 'feed' },
+    text: gapsText,
+    bare: gapsText,
+    spoken: gapPart(today.gap_min, today.gap_max),
+    n: Number.NaN,
+  };
+  return { boardSpacing, boardGaps };
 }
 
 function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) => string, start: string) {

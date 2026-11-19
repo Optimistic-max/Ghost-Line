@@ -68,6 +68,10 @@ export type Board = {
   cars: string[];
   /** Buses: the trips, the first being the next one. */
   buses: Trip[];
+  /** The 1938 spacing in the board's short form ("every 7 or 8 min"). */
+  spacing1938: string;
+  /** The bus gaps in the board's short form ("34 to 39 min apart"); null when there are no bus gaps. */
+  busGaps: string | null;
 };
 
 export type Frequency = {

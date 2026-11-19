@@ -4,7 +4,7 @@
 // 9): the card is drawn once per race; the clock then moves it through racer.ts,
 // the result is inserted at the result moment, and the finish is applied in
 // place, so nothing is rebuilt while it moves.
-import { BREAKPOINTS, LEAD_PAIR, TIMINGS } from '../config';
+import { BREAKPOINTS, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
 import { DATA_ERROR, DATA_INCOMPLETE, TRY_AGAIN, lineLabel } from '../copy/copy';
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
@@ -22,8 +22,18 @@ import type { AppState, MotionLevel, RaceView } from '../state/model';
 import { type Store, createStore } from '../state/store';
 import { announcement, createAnnouncer } from './a11y';
 import { cardButtons, footer } from './buttons';
-import { type CardInput, type Stage, cardLayout, cardNumbers, renderCard, resultElements } from './card';
+import {
+  type CardInput,
+  type Stage,
+  boardShown,
+  cardBoard,
+  cardLayout,
+  cardNumbers,
+  renderCard,
+  resultElements,
+} from './card';
 import { h, setVar } from './dom';
+import { fitOneLine } from './layout';
 import { SourceRegistry } from './numbers';
 import { type Racer, createRacer } from './racer';
 import { updateSlider } from './slider';
@@ -178,6 +188,7 @@ export function createApp(options: AppOptions): App {
     scroll.replaceChildren(...renderCard(registry, { ...input, firstPaint }));
     buttons.replaceChildren(...cardButtons());
     foot.replaceChildren(...footer());
+    fitPairRow();
     painted = true;
     const { index, summary, race, minute, layout, stage, resultShown } = input;
     drawn = { index, summary, race, minute, layout, stage, resultShown };
@@ -192,14 +203,30 @@ export function createApp(options: AppOptions): App {
       layout: cardLayout(input),
       next: { '1938': nums.lane1938.next, today: nums.today?.next ?? null },
       finishedTrolley: { width: vehicleWidths(layout).trolleyFinished, routeNumber: routeNumberOf(index.line) },
+      keepBoard: boardShown({ layout, stage: 'finished' }),
     });
     racer.frame(clock.elapsed());
   }
 
-  /** The result box and honest line arrive at the result moment, under the lanes (R5.7). */
+  /** On desktop the pair names stay on one line, their font shrinking as far as a long pair needs (R1.3). */
+  function fitPairRow(): void {
+    const row = scroll.querySelector<HTMLElement>('.pair-row');
+    if (row && options.layout() === 'desktop') fitOneLine(row, FONT_SIZES.desktop.cornerNamesMin);
+  }
+
+  /** The result box and honest line arrive at the result moment, under the clock row (R5.7, R1.2). */
   function showResult(input: CardInput, motion: MotionLevel): void {
-    scroll.querySelector('.lanes')?.after(...resultElements(registry, input, motion !== 'reduced'));
+    const above = scroll.querySelector('.clock-row') ?? scroll.querySelector('.lanes');
+    above?.after(...resultElements(registry, input, motion !== 'reduced'));
     if (drawn) drawn.resultShown = true;
+  }
+
+  /** The board, if it is on screen, for the minute the slider now shows. */
+  function redrawBoard(input: CardInput): void {
+    const old = scroll.querySelector('.board');
+    if (!old) return;
+    old.querySelectorAll<HTMLElement>('button.num').forEach((b) => registry.delete(b.dataset['source'] ?? ''));
+    old.replaceWith(cardBoard(registry, input));
   }
 
   /** The one announcement of a race, once its result is on screen (R13.2). */
@@ -224,11 +251,6 @@ export function createApp(options: AppOptions): App {
     if (state.data.status !== 'ready' || state.minute === null) return;
     const race = state.data.races.get(pairKey(derived.view.pair));
     if (!race) return;
-    // While the slider moves, only the time label follows it (R3.5); the board joins it in task 12.
-    if (held && drawn) {
-      updateSlider(scroll, state.minute);
-      return;
-    }
     const input: CardInput = {
       index: state.data.index,
       summary: state.data.summary,
@@ -241,6 +263,12 @@ export function createApp(options: AppOptions): App {
       resultShown: state.race.resultShown,
       canSkip: state.motion !== 'reduced',
     };
+    // While the slider moves, only the time label and the departures board follow it (R3.5).
+    if (held && drawn) {
+      updateSlider(scroll, input.minute);
+      redrawBoard(input);
+      return;
+    }
     const same =
       drawn !== null &&
       drawn.index === input.index &&
@@ -416,6 +444,9 @@ export function createApp(options: AppOptions): App {
   };
   doc.addEventListener('pointerup', release);
   doc.addEventListener('pointercancel', release);
+
+  // The display font arrives after the first paint; the pair names are fitted again with its real widths.
+  void doc.fonts?.ready.then(fitPairRow);
 
   function setMotion(level: MotionLevel): void {
     // After the watchdog, the extra motion stays off for the session.

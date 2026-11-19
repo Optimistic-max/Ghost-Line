@@ -64,6 +64,8 @@ export const FONT_SIZES = {
     headline: 54,
     headlineLine: 14,
     cornerNames: 25,
+    /** The pair names shrink from cornerNames as far as this to stay on one line (Emmanuel, Nov 19). */
+    cornerNamesMin: 16,
     resultLine: 38,
   },
 } as const;

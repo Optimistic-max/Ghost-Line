@@ -90,16 +90,22 @@ describe('a 1938 win: the lead pair at 10:00', () => {
     for (const spec of registry.list()) expect(root.querySelector(`button.num[data-source="${spec.id}"]`), spec.id).not.toBeNull();
   });
 
-  it('prints every number as a number button (apart from the slider, the schedule date and the word 1938)', () => {
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const loose: string[] = [];
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      const el = n.parentElement!;
-      if (el.closest('button.num, .slider-row, .schedule')) continue;
-      const t = (n.textContent ?? '').replace(/\b1938\b/g, '');
-      if (/\d/.test(t)) loose.push(t.trim());
+  it('prints every number as a number button (apart from the start time on the slider and the board header, the schedule date and the word 1938), on both layouts', () => {
+    // The board header's time is the slider's start time (Emmanuel, Nov 19). The phone's finished card
+    // has no board, so the board is checked as the desktop card draws it.
+    const board = renderAt(data, lead, '10:00', 'desktop').root.querySelector('.board')!;
+    expect(board).not.toBeNull();
+    for (const card of [root, board]) {
+      const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+      const loose: string[] = [];
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const el = n.parentElement!;
+        if (el.closest('button.num, .slider-row, .schedule, .board-head')) continue;
+        const t = (n.textContent ?? '').replace(/\b1938\b/g, '');
+        if (/\d/.test(t)) loose.push(t.trim());
+      }
+      expect(loose).toEqual([]);
     }
-    expect(loose).toEqual([]);
   });
 
   it('names each number button by what it is', () => {

@@ -68,12 +68,14 @@
   border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
+/* The card scrolls under the pinned button strip; its last line can still
+   scroll clear of the strip (R1.2). */
 .card-scroll {
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: var(--pad) var(--pad) 0;
+  padding: var(--pad) var(--pad) calc(var(--strip-h) + var(--pad));
 }
 
 .pair-row {
@@ -89,11 +91,17 @@
   color: var(--muted);
 }
 
-/* The two buttons stay pinned on a solid strip, so text passes under them cleanly. */
+/* The two buttons stay pinned on a solid --panel strip over the bottom of the
+   card, so the card's text passes under them cleanly. */
 .card-buttons {
-  flex: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   gap: 12px;
+  height: var(--strip-h);
   padding: 8px var(--pad) var(--buttons-bottom);
   background: var(--panel);
 }

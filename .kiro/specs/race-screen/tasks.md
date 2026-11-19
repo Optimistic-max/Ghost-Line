@@ -101,10 +101,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Board, sheets and sources
 
-- [ ] 12. Departures board and frequency sentence (R8, 3A.5)
-  - [ ] 12.1 view/board.ts: four 1938 times and three bus times by `nextAfter` from the row's own entries, filled chip for the next one, every time a number button; starts at `row.start`; visible on desktop after the finish, and on phones only before and during the race.
-  - [ ] 12.2 The frequency sentence from the data: whole-minute gaps, "up to" rule, window in 12-hour form, route names, service date, 1938 spacing; "every {n} minutes" when equal.
-  - [ ] 12.3 Tests on real data for the lead pair (34 to 39 and 7 or 8, read from the file), a multi-route pair (Westwood & Carey to Aliceanna & Bond: a lower gap that rounds to 0 uses the "up to" form), and the fixture; board contents equal the file's lists.
+- [x] 12. Departures board and frequency sentence (R8, 3A.5)
+  - [x] 12.1 view/board.ts: four 1938 times and three bus times by `nextAfter` from the row's own entries, filled chip for the next one, every time a number button; starts at `row.start`; visible on desktop after the finish, and on phones only before and during the race. The 1938 spacing and the bus gaps are number buttons too; the header's time is the start time, not a button (Emmanuel, Nov 19).
+  - [x] 12.2 The frequency sentence from the data: whole-minute gaps, "up to" rule, window in 12-hour form, route names, service date, 1938 spacing; "every {n} minutes" when equal. Not printed on the card: it is the Sources method line of the board's spacing and gaps (Emmanuel, Nov 19).
+  - [x] 12.3 Tests on real data for the lead pair (34 to 39 and 7 or 8, read from the file), a multi-route pair (Westwood & Carey to Aliceanna & Bond: a lower gap that rounds to 0 uses the "up to" form), and the fixture; board contents equal the file's lists.
+  - [x] 12.4 Emmanuel's other Nov 19 decisions: the bus wait status names the bus with no countdown; on a phone the button strip is solid --panel over the scrolling card, and a 375 x 667 browser check keeps both lanes, their status lines and the clock row above it during the race (the clock row now sits above the result); on desktop the pair names stay on one line, the font shrinking as far as 16 px, checked for every pair.
   - Depends on: task 10
 
 - [ ] 13. Sheets, Sources, About and When today wins (R1.5, R9, R10, R6.5)

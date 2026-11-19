@@ -5,7 +5,7 @@ import { BOARD } from '../config';
 import { pairKey } from '../data/files';
 import { cornerName, nextAfter, rowAt, tripAt } from '../data/lookup';
 import type { Index, RaceFile, RaceResult, RaceRow, Summary, Trip } from '../data/types';
-import { gapPart, spacing1938 } from '../format/gaps';
+import { boardGaps, boardSpacing1938, gapPart, spacing1938 } from '../format/gaps';
 import { joinNames } from '../format/list';
 import { RoundingError, photoTotals, roundParts, shownMargin, sumShown } from '../format/rounding';
 import { clockOf, dropSeconds, label12, serviceDateLabel } from '../format/time';
@@ -60,10 +60,13 @@ function resultView(result: RaceResult, a: Lane, b: Lane | null): ResultView {
 }
 
 function board(race: RaceFile, row: RaceRow, trip: Trip | null): Board {
+  const { today, y1938 } = race;
   return {
     after: row.start,
-    cars: nextAfter(race.y1938.passes, row.y1938.dep, BOARD.cars1938),
-    buses: trip ? nextAfter(race.today.trips, trip, BOARD.buses) : [],
+    cars: nextAfter(y1938.passes, row.y1938.dep, BOARD.cars1938),
+    buses: trip ? nextAfter(today.trips, trip, BOARD.buses) : [],
+    spacing1938: boardSpacing1938(y1938.gap_min, y1938.gap_max),
+    busGaps: today.gap_min === null || today.gap_max === null ? null : boardGaps(today.gap_min, today.gap_max),
   };
 }
 

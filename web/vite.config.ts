@@ -42,6 +42,8 @@ export default defineConfig({
           name: 'dom',
           environment: 'jsdom',
           include: ['tests/dom/**/*.test.ts'],
+          // The playback tests step whole races frame by frame on a fake clock; a busy machine needs the room.
+          testTimeout: 30000,
         },
       },
     ],

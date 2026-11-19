@@ -22,6 +22,22 @@ function laneLayout(lane: Lane, longest: number): LaneLayout {
   return { widths, end, park };
 }
 
+/**
+ * Shrink an element's font until its one line of text fits its width, in half
+ * pixels and never below `minPx` (the desktop pair names, R1.3). Without a
+ * layout (jsdom) nothing is measured and nothing changes.
+ */
+export function fitOneLine(el: HTMLElement, minPx: number): void {
+  el.style.removeProperty('font-size');
+  for (let tries = 0; tries < 4 && el.scrollWidth > el.clientWidth && el.clientWidth > 0; tries += 1) {
+    const size = Number.parseFloat(getComputedStyle(el).fontSize);
+    const next = Math.max(minPx, Math.floor(((size * el.clientWidth) / el.scrollWidth) * 2) / 2);
+    const smaller = next < size ? next : Math.max(minPx, size - 0.5);
+    if (smaller >= size) return;
+    el.style.fontSize = `${smaller}px`;
+  }
+}
+
 /** The bars of both lanes on one scale: the longer stored total fills the track. */
 export function raceLayout(view: RaceView): RaceLayout {
   const sum = (lane: Lane): number => lane.phases.reduce((a, p) => a + p.stored, 0);

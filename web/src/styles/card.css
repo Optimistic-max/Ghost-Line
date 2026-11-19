@@ -331,15 +331,13 @@
 
 /* ---- Race clock row (while racing) ----------------------------------------------- */
 
-/* "10:08 scheduled" and "Skip to result", with a rule under them (mockups 01, 02). */
+/* "10:08 scheduled" and "Skip to result" (mockups 01, 02); the board's rule sits under them. */
 .clock-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
   margin-top: 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--line);
 }
 
 .clock-readout {
@@ -367,6 +365,85 @@
   width: max(100%, var(--tap));
   height: var(--tap);
   transform: translate(-50%, -50%);
+}
+
+/* ---- Departures board and frequency sentence (3A.5, R8) ----------------------- */
+
+/* A header line, then one row per side: the label in the side's colour, the
+   times (the next one a filled chip in that colour), and the spacing words.
+   The spacing words drop to their own line rather than push past the edge. */
+.board {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.board-head {
+  color: var(--muted);
+  font-size: var(--fs-body-small);
+}
+
+.board-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  margin-top: 4px;
+}
+
+.board-row-1938 {
+  --side: var(--ghost);
+}
+
+.board-row-today {
+  --side: var(--today);
+}
+
+.board-label {
+  flex: none;
+  width: 4.8em;
+  color: var(--side);
+  font-size: 13px;
+}
+
+.board-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The spacing words are number buttons too (Emmanuel, Nov 19), in the board's small muted face. */
+.num.board-gaps {
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.num.board-gaps::after {
+  width: max(100%, var(--tap));
+}
+
+.num.chip {
+  padding: 0 2px;
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.num.chip-next {
+  padding: 0 5px;
+  background: var(--side);
+  color: var(--night);
+}
+
+/* Board times sit apart, so each keeps a full 44 px wide hit area. */
+.num.chip::after {
+  width: max(100%, var(--tap));
 }
 
 /* ---- Result box --------------------------------------------------------------- */

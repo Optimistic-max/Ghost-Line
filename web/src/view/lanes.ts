@@ -10,7 +10,7 @@ import {
   legendWalk,
   riding,
   waiting1938,
-  waitingBus,
+  waitingForBus,
   walkingFromStop,
   walkingToStop,
 } from '../copy/copy';
@@ -72,18 +72,27 @@ function legend(registry: SourceRegistry, lane: Lane, nums: Num[]): HTMLElement 
   return el;
 }
 
+/** True when a phase's status line names the bus instead of counting down (R5.4). */
+function namesTheBus(lane: Lane, phaseIndex: number): boolean {
+  return lane.side === 'today' && lane.phases[phaseIndex]?.kind === 'wait';
+}
+
+/** What a status line shows, so it is rewritten only when that changes. */
+export function statusKey(lane: Lane, phaseIndex: number, minutesLeft: number): string {
+  return namesTheBus(lane, phaseIndex) ? `${phaseIndex}` : `${phaseIndex} ${minutesLeft}`;
+}
+
 /**
  * The status line of a lane during the race (R5.4): the phase under way and its
- * whole minutes left, counting down from the shown part, with the next car or
- * bus as a number button.
+ * whole minutes left, counting down from the shown part, with the next car as a
+ * number button. The bus wait names the bus, a number button, and has no countdown.
  */
 export function statusLine(registry: SourceRegistry, lane: Lane, phaseIndex: number, minutesLeft: number, next: Num): DocumentFragment {
   const phase = lane.phases[phaseIndex];
+  if (namesTheBus(lane, phaseIndex)) return sentence(registry, waitingForBus, next);
   switch (phase?.kind) {
     case 'wait':
-      return lane.side === '1938'
-        ? sentence(registry, waiting1938, minutesLeft, next)
-        : sentence(registry, waitingBus, minutesLeft, next);
+      return sentence(registry, waiting1938, minutesLeft, next);
     case 'ride':
       return sentence(registry, riding, minutesLeft);
     case 'walk-to-stop':

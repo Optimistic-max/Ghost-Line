@@ -20,6 +20,11 @@ export class SourceRegistry {
     return this.specs.get(id);
   }
 
+  /** Drop the entry of a number no longer on screen (a board redrawn while the slider moves). */
+  delete(id: string): void {
+    this.specs.delete(id);
+  }
+
   /** The entries in the order they first appeared on screen. */
   list(): SourceSpec[] {
     return [...this.specs.values()];
