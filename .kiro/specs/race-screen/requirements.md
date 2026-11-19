@@ -76,10 +76,11 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R4.1** Corner picker: a plain list of five full-width buttons, west to east, in two steps (start, then end). Title and step lines, the "Start" tag, the "inferred" chip on the inferred corner, the note and a Cancel button as in screen-brief 2.12. In the second step the chosen start is disabled, so the same corner cannot be chosen twice. Opening the picker is one tap; choosing a pair takes three taps.
 - **R4.2** Tapping a corner on the map opens the picker (phone) or is the main way to pick a pair (desktop). The picker still exists for keyboard and screen-reader users, and everything works without the map.
 - **R4.3** One tap on the swap button reverses the pair (origin and destination swap; the matching race file loads).
-- **R4.4** Share link (race-brief 5.9): `?from=<slug>&to=<slug>` and nothing else: no time and no number. "Share this race" copies the URL of the current pair. `decode(encode(p)) = p` for all 20 pairs; decode never throws on any text.
+- **R4.4** Share link (race-brief 5.9): `?from=<slug>&to=<slug>` and nothing else: no time and no number. "Share this race" shares the URL of the current pair (R4.8). `decode(encode(p)) = p` for all 20 pairs; decode never throws on any text.
 - **R4.5** A valid link selects the pair and shows the share banner for 5 s: slide in 200 ms, hold 5,000 ms, slide out 200 ms; it names the pair only.
 - **R4.6** A bad link (a slug unknown, or origin equals destination) falls back to the default pair, races it as usual underneath, and shows the bad-link banner. No query at all is the default pair with no banner.
 - **R4.7** The address bar follows the pair: each time the pair changes (picker, swap, map tap, "When today wins" entry) the page updates its URL with `history.replaceState`, query only (`?from=…&to=…`), no history entries. A reload or a copied address bar therefore opens the same pair.
+- **R4.8** Share button: when `navigator.share` exists the button calls it with the link only. If the visitor cancels, nothing else happens. If it is missing or fails for any other reason, the link is copied to the clipboard and the button shows "Link copied" for 2 s (a polite status message says the same for screen readers). The button keeps its size while the label changes.
 
 ### R5. Race playback
 - **R5.1** One race clock drives everything; both sides start from the same instant, including the clamped start in the before-the-table state. It reads as the time and the word "scheduled" only ("10:08 scheduled"); the playback speed is never printed. (3A.6)
@@ -88,8 +89,8 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R5.4** Racing status lines (copy table) count down in whole minutes from the shown part. After the finish the status line is replaced by the phase legend ("Wait 6 min  Ride 9 min", each number a source button). Walks say "estimate" everywhere.
 - **R5.5** The 1938 vehicle waits at the start of its bar, then moves; the bus slides at clock speed and does not move during a walk. The trolley has the bob, the pole sparks, turning hubs and the breathing glow of 3A.6; the bus has none of them. Only transform and opacity are animated; the glow layers are separate elements whose opacity changes.
 - **R5.6** First arrival: the end of the arriving bar brightens and settles (200 ms emphasis, 600 ms ease-out settle), identical whichever side arrives first. The slower side keeps running to its real finish; its vehicle may dim to 70% but its text keeps full contrast. A photo finish gives both ends the same emphasis at the same moment.
-- **R5.7** The finish moment: the result box arrives like a roller sign (scales 96% to 100%, text rolls up 8 px, 260 ms, ease-out), then the honest line fades in (200 ms, starting 150 ms later). Same place, size and weight whichever side won.
-- **R5.8** "Skip to result" is visible and reachable by tap and keyboard for as long as anything is moving. It jumps both lanes to finished and shows the result with its normal entrance.
+- **R5.7** The result moment is the first arrival, not the end of the slower side. The winner and the margin come from the data (row.result and row.margin name the winning side; nothing is compared), and the box shows both stored totals at once. The box arrives like a roller sign (scales 96% to 100%, text rolls up 8 px, 260 ms, ease-out), then the honest line fades in (200 ms, starting 150 ms later). Same place, size and weight whichever side won. The slower side keeps running to its real finish after the result is shown. For a photo finish the result appears when both sides have arrived. For no one-seat ride it appears when the 1938 side arrives.
+- **R5.8** "Skip to result" is visible and reachable by tap and keyboard for as long as anything is moving, including while the slower side runs on after the result is shown. It jumps both lanes to finished and shows the result with its normal entrance if it is not shown yet.
 - **R5.9** The small trolley on the map moves along the route in step with the lane, only during the ride phase, and stops just short of the destination dot.
 - **R5.10** If a device cannot hold 30 frames per second, drop the bob, sparks and glow breathing and keep the movement. Nothing loops when no race is running, except the finished trolley's glow held steady at 100%.
 - **R5.11** Reduced motion (the device asks for it): no clock, no movement, no bob, no sparks, no breathing, no entrance animation. On load and after every slider change both lanes are drawn finished, the vehicles are parked at the end of their bars, and the result box is simply present. Sheets and the banner appear without sliding. "Skip to result" is not shown. On a phone the departures board is not shown.
@@ -137,7 +138,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R9.6** The tapped number's row is tinted with a --ghost left edge. The sheet's last row is always "Sources and credits", which opens the credits list.
 
 ### R10. About and credits
-- **R10.1** A plain list, one line each, each with its link (copy table, from screen-brief 2.9): the 1938 timetables, today's schedule feed with "Not endorsed by MDOT MTA.", streets and route geometry, the base map (OpenFreeMap tiles and MapLibre GL JS, with the attribution OpenFreeMap requires, checked against its published terms when the spec is designed), vehicle drawings ("original illustrations"), how it was made, the code licence and the repository link. Each catalog-backed line uses the catalog `label` and `url`.
+- **R10.1** A plain list, one line each, each with its link (copy table, from screen-brief 2.9): the 1938 timetables, today's schedule feed with "Not endorsed by MDOT MTA.", streets and route geometry, the base map (OpenFreeMap tiles and MapLibre GL JS, with the credit text "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" from the Source URLs list in tech.md; the same credit is also required in the video), vehicle drawings ("original illustrations"), how it was made, the code licence and the repository link. Each catalog-backed line uses the catalog `label` and `url`.
 - **R10.2** There is no 1933 link and no 1933 line (structure.md was updated to match).
 - **R10.3** Code licence: "MIT licence", linking to the LICENSE file in the repository. The repository link is https://github.com/Optimistic-max/Ghost-Line (the git remote); that URL is first added to the "Source URLs" list in tech.md, so it lives in one constants block, as the other two do.
 - **R10.4** "How it was made": "Facts files and expected test values were prepared during planning with Claude Code and Codex; the pipeline and app were built in Kiro." The words "and checked by hand against the scans" are added only when `street_order_checked` in index.json is true (that one flag alone decides it; today it is false, so the clause is absent).
@@ -145,9 +146,9 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R10.6** Scans are linked, never reproduced. No MTA colours or logos.
 
 ### R11. Map
-- **R11.1** The map is 2D MapLibre GL JS with OpenFreeMap vector tiles requested at run time (approved), styled in palette B: street lines as hairlines (--street, main roads --street2), no fills, the harbour as the area with no streets. Street names off the route and any water label come from the tiles, not from typed text. The 1938 line, drawn from route.geojson, is the brightest thing (--ghost with a blurred copy beneath), its streets named along it in --ghost condensed type with a dark outline from the features' `street` property. No neighbourhood names.
+- **R11.1** The map is 2D MapLibre GL JS with the OpenFreeMap dark style (https://tiles.openfreemap.org/styles/dark, from the Source URLs list in tech.md) requested at run time (approved) and recoloured to palette B: street lines as hairlines (--street, main roads --street2), no fills, the harbour as the area with no streets. Street names off the route and any water label come from the tiles, not from typed text. The 1938 line, drawn from route.geojson, is the brightest thing (--ghost with a blurred copy beneath), its streets named along it in --ghost condensed type with a dark outline from the features' `street` property. No neighbourhood names.
 - **R11.2** Corners: all five named on desktop; on a phone only the two chosen ones. Origin is a filled dot, destination a ring. The inferred corner has a dashed outline, and "(inferred)" after its name on the map; the inferred stretch is dashed. Each name sits beside its own dot. When the inferred corner is one of the phone pair, the Dolphin St and Preston St labels are hidden to make room.
-- **R11.3** Faint map text is never below 80% opacity. The map shows the attribution OpenFreeMap and OpenStreetMap require, and the line "Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred."
+- **R11.3** Faint map text is never below 80% opacity. The map shows the attribution MapLibre adds from the style (OpenFreeMap and OpenStreetMap), and the line "Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred."
 - **R11.4** Map unavailable (tiles or WebGL fail, or the map is blocked): the map area shows the bundled route drawing (route, its street names, corner dots, plain background, built from route.geojson and index.json only) and the line "Map unavailable. Showing the route diagram." The race is unchanged. The site still plays a race with the map blocked. The race starts before and without the map in every case.
 
 ### R12. Visual direction
@@ -159,7 +160,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 
 ### R13. Accessibility
 - **R13.1** Works by keyboard alone and with a screen reader; a visible focus ring on every control.
-- **R13.2** The result region is aria-live polite and speaks once, when the race ends, with the summary for that result (copy table: 1938 wins, today wins, photo finish, no one-seat ride), built from the shown numbers. Nothing is announced during the animation, and with reduced motion it still speaks once per race.
+- **R13.2** The result region is aria-live polite and speaks once, when the result appears (the first arrival; for a photo finish, when both sides have arrived), with the summary for that result (copy table: 1938 wins, today wins, photo finish, no one-seat ride), built from the shown numbers. Nothing is announced during the animation, and with reduced motion it still speaks once per race.
 - **R13.3** Information never rests on colour alone: each phase has a text label; the inferred stretch is dashed and named in text.
 - **R13.4** An automated accessibility check (axe-core in jsdom, and in Playwright where layout matters) runs in the tests on every state that can be reached in a test.
 
@@ -173,6 +174,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R15.2** Banned in any rendered text: live, real-time, realtime, "arriving now", "right now", except the fixed phrase "Scheduled, not live." (the `aria-live` attribute name is not rendered text). A test scans every state's rendered text.
 - **R15.3** Every time on screen carries the word "scheduled" in its line, label or accessible name. The screen states "weekday schedule as of Nov 4, 2026", with the date read from service_date.
 - **R15.4** Counts come from summary.json at run time. A test swaps in a summary.json holding different numbers and checks the screen shows them; no count is in the code or the copy strings.
+- **R15.5** Every string with a minute count has a singular form: "1 minute" where the number is 1 and "minutes" otherwise ("1938 wins by 1 minute", "Both about 1 minute", "1 minute apart", "up to 1 minute apart", "every 1 minute", "Trolley 1 min" is unchanged because "min" is an abbreviation). In "About {n} and {m} minutes" the unit follows {m}. One helper chooses the form; the copy table templates carry both.
 
 ### R16. Performance, hosting and budgets
 - **R16.1** First-screen budget: 100 KB compressed, map excluded (tech.md). The first race must not wait for the map.
@@ -188,6 +190,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R17.4** The state tests run against the real generated files where a real state exists (today wins: Westwood & Carey → Preston & Caroline at 11:23; photo finish: lead pair at 10:30; before the table: lead pair at 9:00; inferred corner: any Brevard pair) and against the made-up fixture where it does not (no one-seat ride).
 - **R17.5** Tests of the real data path read their expected values from the files, not from the brief.
 - **R17.6** The "map blocked" test runs the whole race in Playwright with the tile host blocked and WebGL absent.
+- **R17.7** A test that asserts a wall-clock limit is tagged `timing`, left out of the default run, and run with its own command on a quiet machine before submission: `python -m pipeline check --timing` for the pipeline and `npm run perf` for the site's first-race measurement (R16.2). The limits do not change.
 
 ## Correctness Properties
 
@@ -201,6 +204,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **P8.** The result shown is row.result; a win for today and a win for 1938 have identical structure, size and position.
 - **P9.** Nothing the site computes is a race result: the shown result, margin sign and winner colour match the stored row for every pair and minute in the real files.
 - **P10.** With reduced motion, no animation runs and the finished state is shown at once; with motion, only transform and opacity are animated.
+- **P13.** For every number n in any minute string, the word is "minute" exactly when the number it follows is 1 and "minutes" otherwise; no rendered text contains "1 minutes".
 - **P11.** Gap display: for any gap_min and gap_max the gap part shows whole minutes; it is "up to {max} minutes apart" exactly when gap_min rounds to 0; otherwise "{min} to {max} minutes apart", or "{n} minutes apart" when the rounded values are equal. The window, the date and the 1938 sentence are present in every case; the 1938 part reads "every {n} minutes" exactly when its rounded values are equal.
 - **P12.** The address bar after any pair change equals encode(pair); it never holds a time.
 
@@ -226,6 +230,7 @@ Placeholders in braces are read from the data at run time. These are the only st
 | Honest line, today wins | "Today wins this race. Across this line: same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins" |
 | When today wins list | "On {ride_same} of {pairs} corner pairs today's scheduled ride is about as long as in 1938; on {ride_faster_today} it is faster" then, only when ride_slower_today is above zero, "; on {ride_slower_today} it is slower", then "." |
 | Frequency | "Scheduled one-seat buses on this stretch leave {gap part} between {window_from} and {window_to} ({route_names}, weekday schedule as of {service_date}). In 1938 a trolley was scheduled every {y1938.gap_min} or {y1938.gap_max} minutes." {gap part} is "up to {max} minutes apart" when gap_min rounds to 0, "{min} to {max} minutes apart" otherwise, or "{n} minutes apart" when equal. If the 1938 values are equal: "every {n} minutes". |
+| Share | "Link copied" (on the Share this race button for 2 s after a copy; the same text in the status message) |
 | Share banner | "Shared race: {origin} → {dest}." |
 | Bad link | "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." |
 | Data error | "The timetable data didn't load. Check your connection and try again." + Retry |
@@ -237,9 +242,11 @@ Placeholders in braces are read from the data at run time. These are the only st
 | Announcement, today wins | "Race finished. {origin} to {dest}, starting {time}. 1938 trackless trolley: {n} minutes. Today's bus: {n} minutes, including {n} minutes of walking, estimated. Today was faster by {n} minutes. All times are scheduled." |
 | Announcement, photo finish | "Race finished. {origin} to {dest}, starting {time}. 1938 trackless trolley: {n} minutes. Today's bus: {n} minutes, including {n} minutes of walking, estimated. Photo finish. No winner is called. All times are scheduled." |
 | Announcement, no one-seat ride | "Race finished. {origin} to {dest}, starting {time}. 1938 trackless trolley: {n} minutes. No one-seat ride today: no single scheduled bus links these corners. No winner is called. All times are scheduled." |
-| Credits | the catalog `label` and link for each source; "Not endorsed by MDOT MTA."; "Vehicle drawings: original illustrations."; "How it was made: Facts files and expected test values were prepared during planning with Claude Code and Codex; the pipeline and app were built in Kiro." plus " and checked by hand against the scans" only when street_order_checked is true; "MIT licence"; "Source code" |
+| Credits | the catalog `label` and link for each source; "OpenFreeMap © OpenMapTiles Data from OpenStreetMap"; "Not endorsed by MDOT MTA."; "Vehicle drawings: original illustrations."; "How it was made: Facts files and expected test values were prepared during planning with Claude Code and Codex; the pipeline and app were built in Kiro." plus " and checked by hand against the scans" only when street_order_checked is true; "MIT licence"; "Source code" |
 | Fixture tag | "Test fixture: a made-up line and made-up numbers. Not Baltimore data." |
 | Buttons and bars | "Sources", "Share this race", "Skip to result", "About and credits", "Open source. Built in Kiro.", "Ghost Line", "{n}:{nn} scheduled" |
+
+Minute words follow R15.5: where a template says "minutes", the site uses "minute" for 1 (for example "1938 wins by 1 minute.", "Both about 1 minute.", "leave up to 1 minute apart", "every 1 minute").
 
 ## Out of scope
 

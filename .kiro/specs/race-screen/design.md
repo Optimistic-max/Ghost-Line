@@ -2,7 +2,7 @@
 
 This design implements `requirements.md` in this folder. It follows ui.md, tech.md, product.md, docs/planning/screen-brief.md (sections 2, 3 and 3A, with 3A winning) and the mockups in docs/planning/ui-mockups/. Requirement IDs (R1 to R17), principles (P-A to P-E) and correctness properties (P1 to P12) refer to that file.
 
-Status: draft for review. Nothing is built. Section 18 lists the points where this design makes a choice the requirements left open.
+Status: reviewed. Emmanuel's decisions on the design choices are folded in (section 18). Nothing is built.
 
 ## 1. What the site is allowed to do
 
@@ -132,7 +132,7 @@ type AppState = {
   pair: { origin: string; dest: string };
   minute: number;               // slider value as minutes after midnight, an integer
   minuteFromClock: boolean;     // R3.4: adds "Start time is the time now."
-  race: { phase: 'idle' | 'pausing' | 'running' | 'finished'; elapsed: number /* scheduled minutes */ };
+  race: { phase: 'idle' | 'running' | 'finished'; resultShown: boolean; elapsed: number /* scheduled minutes */ };
   motion: 'full' | 'reduced' | 'lite';
   sheet: null | 'sources' | 'corners' | 'about' | 'whentoday';
   sourcesTarget?: string;       // number button id to scroll to
@@ -148,11 +148,13 @@ Only `race.elapsed` changes at frame rate, and it is stored outside the main sto
 State transitions for the race:
 
 ```
-idle --(data ready, +300 ms)--> running --(both sides done)--> finished
-running --(slider moved / minus / plus / pair change)--> idle (stopped at once)
+idle --(data ready, +300 ms)--> running
+running --(result moment reached)--> running, resultShown = true     (the slower side keeps going)
+running --(both sides done)--> finished
+running --(slider moved / minus / plus / pair change)--> idle (stopped at once, resultShown = false)
 idle --(300 ms after last input)--> running
-running --(Skip to result)--> finished
-reduced motion: any change --> finished immediately (no pausing, no running)
+running --(Skip to result)--> finished (resultShown = true)
+reduced motion: any change --> finished immediately, resultShown = true (no running)
 ```
 
 ## 5. Derived view data (R5, R6, R7, R8)
@@ -201,13 +203,13 @@ The six example rows from 2.10 are example tests; the four properties of R7.8 ar
 
 ```ts
 function gapPart(min: number, max: number): string   // returns the {gap part} text
-// a = roundMinutes(min), b = roundMinutes(max)
-// a === 0  -> "up to {b} minutes apart"      (checked first)
-// a === b  -> "{a} minutes apart"
-// else     -> "{a} to {b} minutes apart"
+// a = roundMinutes(min), b = roundMinutes(max); the unit word comes from minutes(n)
+// a === 0  -> "up to {b} minute(s) apart"    (checked first)
+// a === b  -> "{a} minute(s) apart"
+// else     -> "{a} to {b} minute(s) apart"   (the unit follows {b})
 ```
 
-A rounded maximum of 1 reads "up to 1 minutes apart" with this rule. The copy table has no singular form and the site does not write new wording, so the design keeps the template as written. (Real data has no such case: the smallest maximum is 18.) The 1938 part uses the same rounding: `every {a} or {b} minutes`, or `every {a} minutes` when equal.
+Singular forms (R15.5): one helper `minutes(n: number): string` returns `"1 minute"` for 1 and `"{n} minutes"` otherwise, and `minuteWord(n)` returns just the unit. Every template that says "minutes" takes its unit from `minuteWord` of the number it follows: "1938 wins by 1 minute.", "Both about 1 minute.", "up to 1 minute apart", "1 minute apart", "every 1 minute". In "About {n} and {m} minutes" the unit follows {m}. "min" is an abbreviation and is unchanged ("Trolley 1 min"). The 1938 part uses the same rounding: `every {a} or {b} minutes` (unit follows {b}), or `every {a} minute(s)` when equal. Property P13 generates numbers and checks that no rendered string contains "1 minutes" and that "minute" appears exactly when the number is 1.
 
 ## 7. Time and dates (R3, R15)
 
@@ -237,11 +239,13 @@ The board's first chip is the next departure for that side (filled); the rest ar
 
 ```ts
 type Segment = { side; kind; from: number; to: number /* scheduled minutes since start */ };
-type Timeline = { segments: Segment[]; end1938: number; endToday: number | null; speed: number /* scheduled min per real s */ };
+type Timeline = { segments: Segment[]; end1938: number; endToday: number | null; resultAt: number; speed: number /* scheduled min per real s */ };
 function buildTimeline(view: RaceView): Timeline
 ```
 
 Segments are cumulative stored parts. `speed = max(4, longest / 12)` where `longest` is the larger stored total, so a trip longer than 48 scheduled minutes plays in exactly 12 s and shorter ones play at 4 scheduled minutes per real second (R5.2). The shown rounded numbers are never used here.
+
+`resultAt` is the moment the result is shown (R5.7). It is chosen from `row.result`, never by comparing the two ends: `'1938'` gives `end1938`; `'today'` gives `endToday`; `'photo_finish'` gives the later of the two ends (both sides must have arrived); `'no_one_seat_ride'` gives `end1938`. Because the pipeline derives `row.result` from the same totals, the winner's arrival is the first arrival, and a test over all 5,860 real rows (20 pairs by 293 minutes) asserts that `resultAt` is the first arrival for every win and the second for every photo finish.
 
 ### 9.2 Clock
 `clock.ts` owns one `requestAnimationFrame` loop. On each frame it computes `elapsed = (now - t0) * speed / 1000` scheduled minutes and writes it to the root element as `--elapsed` (a number) plus a data attribute for the phase, and it calls `lanes.update(elapsed)`.
@@ -257,9 +261,10 @@ The clock exposes `start(timeline)`, `stop()`, `skip()`, and a promise-free call
 ### 9.3 Phases and events
 - The 1938 trolley waits at the start of its bar, then moves along the ride segment; the bus does not move during a walk and moves during its ride (R5.5). A walk fills its dotted segment at clock speed and a small dot travels it.
 - Arrival events fire when `elapsed` crosses `end1938` or `endToday`: the arriving bar end gets the 200 ms emphasis then a 600 ms settle, identical for both sides (a CSS class toggling opacity only). The shown total for that side appears at that moment.
-- The race ends when both sides are done (for no-ride, when the 1938 side is done). `onFinish` sets `phase: 'finished'`, which triggers the result box entrance (260 ms), the honest line fade (200 ms, delayed 150 ms), and the one announcement.
+- When `elapsed` reaches `resultAt`, `onResult` sets `resultShown: true`. That triggers the result box entrance (260 ms), the honest line fade (200 ms, delayed 150 ms), and the one announcement. The box shows both stored totals at once, so the slower side's total is visible before its own bar ends; the winner and the margin are the data's (`row.result`, `row.margin`, rounded for display). The slower side keeps running to its real finish.
+- When both sides are done (for no-ride, when the 1938 side is done), `onFinish` sets `phase: 'finished'`: the status lines give way to the legends, the trolley shrinks to its finished size, and "Skip to result" disappears. Skip to result stays available until this point, including after the result is shown.
 - Photo finish: the two arrival emphases are applied in the same frame, by the same code path, so nothing is winner-specific.
-- Skip to result sets `elapsed` to the end, applies the final classes, and runs the normal entrance.
+- Skip to result sets `elapsed` to the end, applies the final classes, and runs the normal result entrance if the result is not shown yet.
 - Slider input while running: `clock.stop()` first, then state update, then a 300 ms debounce timer starts the next race (R3.5).
 - The first race starts 300 ms after data is ready (R2.5). `performance.mark('race-start')` is called when the first segment begins to move (for R16.2).
 
@@ -308,7 +313,12 @@ function decode(query: string, known: Set<string>): { pair: Pair; bad: boolean }
 
 `decode` uses `URLSearchParams` inside a try/catch, accepts only two parameters whose values are known slugs and different, and returns the lead pair with `bad: true` on anything else (including an empty or non-string input); with no query at all `bad` is false. It never throws (P1). The lead pair constant is `{origin: 'preston-caroline', dest: 'aliceanna-bond'}` in `config.ts`, checked at boot against `index.corners`; if either slug is missing from the data the screen goes to `data-error`.
 
-Pair changes call `history.replaceState(null, '', BASE + encode(pair))`, query only (R4.7, P12). "Share this race" copies `location.origin + location.pathname + encode(pair)` with `navigator.clipboard.writeText`, falling back to a hidden text area and `execCommand('copy')`, and shows the button's copied state as a text change only (no new wording: the label alternates between the two strings in the copy table; see section 18 for the open point on a "copied" confirmation).
+Pair changes call `history.replaceState(null, '', BASE + encode(pair))`, query only (R4.7, P12). "Share this race" builds the link `location.origin + location.pathname + encode(pair)` and then (R4.8):
+
+1. If `navigator.share` exists it calls `navigator.share({ url })` with the link only (no title or text: no new wording). A rejection with `AbortError` (the visitor cancelled) does nothing more. Any other rejection falls through to step 2.
+2. Otherwise it copies with `navigator.clipboard.writeText`, falling back to a hidden text area and `execCommand('copy')`.
+3. After a successful copy the button's label becomes "Link copied" for 2 s, then returns to "Share this race". The button keeps its size (its width is set from the longer label), so nothing moves. A separate polite live region, not the race announcement region, receives the same text so screen readers hear it.
+4. If every method fails, the label does not change; the address bar already holds the link (R4.7).
 
 The corner picker is the `corners` sheet with the two-step flow from screen-brief 2.12. State lives in `picker`. Choosing a start disables it in the second step; choosing an end calls `setPair`. Cancel closes without change. The map uses the same state machine (section 12.4).
 
@@ -322,19 +332,19 @@ The map area always contains the route drawing first (`routedrawing.ts`), an SVG
 ### 12.2 MapLibre chunk
 `map/map.ts` is a dynamic import started after the race card is painted (`requestIdleCallback`, with a 1 s timeout fallback). It creates the map with:
 
-- the OpenFreeMap vector style, its URL taken from the Source URLs list in tech.md (section 18, point 1);
+- the OpenFreeMap dark style, `https://tiles.openfreemap.org/styles/dark`, read from the Source URLs list in tech.md through the `config.ts` constants block and recoloured at run time by `style.ts` (it loads the style JSON, then sets the paint properties of its layers to palette B and hides the layers the design does not want);
 - `style.ts` overrides that recolour the style to palette B: background `--night`, streets as hairlines in `--street` (main roads `--street2`, about twice as thick), no building or land fills, no labels except street names in `--muted` at 80% opacity or more, harbour left as empty background (the tiles' water layer is hidden, matching "no shoreline is drawn");
 - `route.geojson` as a source with three layers: a wide blurred copy and a bright line in `--ghost` for legs, a dashed line layer filtered by `method == 'inferred'`, and a symbol layer with `symbol-placement: line` and `text-field: ['get','street']` (condensed type, dark halo);
 - corner circles and labels from `index.json` (origin filled, destination ring, inferred dashed outline and "(inferred)" suffix; on a phone only the chosen two are labelled; the Dolphin St and Preston St labels are hidden by a filter when the inferred corner is chosen on a phone);
 - the map marker: a DOM marker holding the simplified trolley SVG, moved with `marker.setLngLat(point)`, which MapLibre applies as a `transform`. Its position along the route comes from `play/clock` through a helper that maps ride-phase progress `p` to a point on the joined route polyline (distance along the line by the geometry's own segment lengths; geometry arithmetic, not race arithmetic). It stops a short distance before the destination dot.
 
-The fit bounds and padding depend on the layout (phone: 150 px strip; desktop: area left of the 440 px race column with room for the headline top left), set from `config.ts` constants. The credit line text is a DOM element over the map; the MapLibre attribution control is configured to show the OpenFreeMap and OpenStreetMap attribution required by their terms.
+The fit bounds and padding depend on the layout (phone: 150 px strip; desktop: area left of the 440 px race column with room for the headline top left), set from `config.ts` constants. The credit line text is a DOM element over the map. MapLibre adds the style's own attribution automatically, with its default attribution control; nothing is hand-written for it. The credits sheet separately shows "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" (the credit text in tech.md's Source URLs list), which the video credits also need.
 
 ### 12.3 Failure paths
 `map.ts` import failure, WebGL absence (`maplibregl.supported` or context creation failure), the style or tiles failing to load within a timeout (8 s after the map is created, or the `error` event for the style), or the host being blocked all set `mapStatus: 'unavailable'`. None touches `data.status`. The race continues unchanged (R11.4, R14.3). An e2e test blocks the tile host and removes WebGL and plays a whole race.
 
 ### 12.4 Picking on the map
-On both layouts a click or tap on a corner circle (or its drawing dot in the fallback) feeds the same picker state machine. Phone: it opens the Corners sheet at the right step. Desktop: it advances the picker without opening the sheet; a small hint strip over the map shows the existing step lines from the copy table ("Choose where the ride starts", then "Start is set. Now choose where the ride ends."), and a second click completes the pair. The Corners sheet stays available by keyboard and from the pair row. This is a design choice the requirements leave open (section 18, point 2).
+On both layouts a click or tap on a corner circle (or its drawing dot in the fallback) feeds the same picker state machine. Phone: it opens the Corners sheet at the right step. Desktop: it advances the picker without opening the sheet; a small hint strip over the map shows the existing step lines from the copy table ("Choose where the ride starts", then "Start is set. Now choose where the ride ends."), and a second click completes the pair. The Corners sheet stays available by keyboard and from the pair row. (Approved.)
 
 ## 13. Layout and CSS (R1, R12)
 
@@ -370,7 +380,7 @@ Notices (before the table, inferred) are a tinted strip with a `--ghost` left ed
 ## 15. Accessibility (R13)
 - Landmarks: `header`, `main`, `section[aria-label]` for the race card, `footer`.
 - The slider is a native `input[type=range]` with `min`, `max` from the race file, `step=1`, `aria-valuetext` "10:00 AM, scheduled weekday time". Minus and plus are buttons with labels; dragging updates the visible time and the board but does not start a race (R3.5).
-- The result region is `<div role="status" aria-live="polite" aria-atomic="true">`. `a11y.ts` writes the announcement string once per race, at `finished`, after clearing the region and using a 50 ms delay so assistive tech picks it up. Nothing else writes to it; the animation updates elements with `aria-hidden="true"` or elements outside the live region. With reduced motion the same code runs at once.
+- The result region is `<div role="status" aria-live="polite" aria-atomic="true">`. `a11y.ts` writes the announcement string once per race, when `resultShown` becomes true (the first arrival; for a photo finish, when both have arrived), after clearing the region and using a 50 ms delay so assistive tech picks it up. A second polite region, `#share-status`, carries only "Link copied". Nothing else writes to it; the animation updates elements with `aria-hidden="true"` or elements outside the live region. With reduced motion the same code runs at once.
 - Every number button has `aria-label` such as "9 minutes, scheduled 1938 ride. Show source." built by the registry.
 - Sheets use `role="dialog"` with `aria-modal`, a focus trap, Escape to close, and focus returns to the opening control on close (stored in the sheet's open call).
 - The corner picker is a list of buttons (`aria-pressed` on the start in step two, `disabled` on it), usable with no map or WebGL.
@@ -379,7 +389,7 @@ Notices (before the table, inferred) are a tinted strip with a `--ghost` left ed
 - axe-core runs in jsdom on every reachable state (section 16) and in Playwright on the two layouts for the states where layout matters.
 
 ## 16. Wording and copy (R15)
-`copy.ts` is the only module with user-visible literals, as template functions: `copy.ready(dateLabel, fromClock)`, `copy.racing.wait1938(n, hhmm)`, and so on, one per row of the requirements copy table. A test extracts the quoted strings from the copy table in `requirements.md` and fails if `copy.ts` holds a literal that is not a row's template, or if a table row has no template (this is how "use only the copy strings" is enforced). A second test renders every reachable state and scans its text for the banned words, allowing only "Scheduled, not live." (P6). The `aria-live` attribute name is not text. A third test swaps `summary.json` for one with different counts and asserts the screen shows those counts and that no digit string from the real summary appears in any `src/` file (P5).
+`copy.ts` is the only module with user-visible literals, as template functions: `copy.ready(dateLabel, fromClock)`, `copy.racing.wait1938(n, hhmm)`, and so on, one per row of the requirements copy table. A test extracts the quoted strings from the copy table in `requirements.md` and fails if `copy.ts` holds a literal that is not a row's template, or if a table row has no template (this is how "use only the copy strings" is enforced). A second test renders every reachable state and scans its text for the banned words, allowing only "Scheduled, not live." (P6). The `aria-live` attribute name is not text. Each template carries both unit forms (R15.5); a test renders every template with 1 and with another number and asserts the forms. The credits row for the base map reads its text from the one constants block, and the share label "Link copied" is a copy-table row like the others. A third test swaps `summary.json` for one with different counts and asserts the screen shows those counts and that no digit string from the real summary appears in any `src/` file (P5).
 
 ## 17. Error handling
 | Condition | Result |
@@ -392,15 +402,18 @@ Notices (before the table, inferred) are a tinted strip with a `--ghost` left ed
 | Bad share link | default pair, bad-link banner, race runs |
 | Clipboard unavailable | fallback copy; if that fails, the share button stays and the address bar already holds the link (R4.7) |
 
-## 18. Choices this design makes that the requirements did not fix (for your review)
-1. **OpenFreeMap style URL and attribution text.** The design needs the exact style URL and the attribution wording OpenFreeMap requires. They are not in the repository and I did not look them up. Per tech.md they must be added to the "Source URLs" list (with provenance) before the map is built; `map/style.ts` and the credits then read them from the one constants block.
-2. **Picking on the map on desktop** (section 12.4): clicks drive the same two-step picker, with a small hint strip using the picker's existing step lines. If you would rather open the Corners panel on every map click, that is a one-line change.
-3. **Route drawing doubles as the placeholder** (section 12.1): the SVG route is shown while tiles load and removed when the tiles map renders, so the map area is never blank. The "Map unavailable" line appears only on failure.
-4. **Hand-written shape validators** with a contract test against the pipeline's schema files (section 3.2), instead of shipping a schema library within the 100 KB budget.
-5. **Share confirmation.** The copy table has no "copied" string, and the design does not invent one. The button label stays "Share this race"; copying is silent except for the clipboard. If you want a visible confirmation, I need the wording.
-6. **"up to 1 minutes apart"** (section 6): the table has no singular form. The data cannot produce it today (smallest maximum is 18).
-7. **Result timing**: the result box and the announcement come when the slower side finishes; the first arrival only emphasises its bar end and shows its total (R5.6, R5.7).
-8. **Frame-rate fallback** (`lite`) is decided in the first second of a race and stays for the session.
+## 18. Decisions on the design choices (Emmanuel, Nov 18, 2026)
+1. **Base map.** Style `https://tiles.openfreemap.org/styles/dark`, recoloured to palette B at run time. MapLibre adds the style's attribution; the credits sheet also shows "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" (also required in the video). Both are in tech.md's Source URLs list, "openfreemap.org; verified Nov 18, 2026".
+2. **Map clicks** drive the same two-step picker (section 12.4).
+3. **Route drawing** is the placeholder while tiles load (section 12.1).
+4. **Hand-written shape validators** plus the schema-comparison test (section 3.2).
+5. **Share.** `navigator.share` when available; otherwise copy and show "Link copied" for 2 s (section 11). "Link copied" is a copy-table row.
+6. **Singular forms** for every minute string (section 6, R15.5, P13).
+7. **Result timing.** The result box and the announcement appear at the first arrival, with the winner and margin from the data; the slower side keeps running to its real finish. For a photo finish the result appears when both have arrived (sections 4 and 9).
+8. **Low frame rate.** Under 30 frames per second in the first second turns off the bob, sparks and glow breathing for the session.
+9. **Timing tests** are excluded from the default run (`addopts = -m "not timing"` in pyproject.toml, done) and run alone on a quiet machine: `python -m pipeline check --timing` for the pipeline (10 s validate, 60 s build) and `npm run perf` for the site (section 19). The limits do not change.
+
+One thing to watch: the announcement copy begins "Race finished." although it now speaks at the first arrival, while the slower side may still be moving. The wording is the approved copy and is unchanged here.
 
 ## 19. Testing strategy (R17)
 
@@ -412,6 +425,8 @@ Notices (before the table, inferred) are a tinted strip with a `--ghost` left ed
 | DOM | jsdom + axe-core | every state of R17.1 rendered from real data (today wins: Westwood & Carey to Preston & Caroline at 11:23; photo finish: lead pair at 10:30; before the table: lead pair at 9:00; inferred: a Brevard pair) and from the fixture line (no one-seat ride, with the fixture tag); P3 (every number button has a registry entry and a sheet row); P5, P6, P7 (no digit in the DOM in the data-error state), P8 (box geometry); the copy-table test; accessibility check per state |
 | End to end | Playwright | the full first race on both layouts; the race with the tile host blocked and WebGL off ("map blocked"); reduced motion (no running animation, finished at once); keyboard-only run through slider, picker, swap, sources, about; no horizontal scroll at widths 320 to 1920; the throttled-phone measurement of R16.2 (slow 4G, CPU slowdown through the browser's debugging protocol, `race-start` mark, five runs, median) against the deployed or preview URL; screenshots of every mockup state saved for side-by-side review against `ui-mockups/` |
 | Budget | node script | `npm run build` then a script (also one command) gzips the first-load assets, excluding the map chunk, and fails over 100 KB |
+
+**Timing tests.** Any test that asserts a wall-clock limit carries the `timing` tag and is left out of the default run, because it can fail on a busy machine (a validate run measured 11.0 s while the editor hook ran a suite at the same time). Before submission, on a quiet machine with nothing else running, run `python -m pipeline check --timing` (the pipeline's 10 s and 60 s limits) and `npm run perf` (the site's 5-second first-race measurement, section R16.2: five runs, median). Both limits are unchanged.
 
 Fixtures: the made-up line lives in `web/tests/fixtures/` (named fake, never under `public/`), holds the same file shapes (including `today: null` rows, an empty trips list and null gaps), and is loaded by the DOM tests through the same loader with a base-path override.
 
