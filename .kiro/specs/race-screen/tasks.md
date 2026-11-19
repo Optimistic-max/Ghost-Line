@@ -23,11 +23,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Data and pure logic
 
-- [ ] 2. Data types and shape validators (R14.1, section 3)
-  - [ ] 2.1 src/data/types.ts as in section 3.1, including the task 35 fields.
-  - [ ] 2.2 src/data/shape.ts: one validator each for index, summary, race and route; throws ShapeError naming file and field. Checks: required fields and types, finite numbers, race rows are one per whole minute with first and last `t` consistent, every `today.trip` index inside `today.trips`, every `sources` id in the catalog, label present.
-  - [ ] 2.3 Contract test: read pipeline/schemas/*.schema.json and compare each schema's `required` lists (top level and the nested objects the site uses) with the validators' field lists; fail on any required field the validators do not check.
-  - [ ] 2.4 Tests on the real files: all 23 files in web/public/data validate; mutated copies each fail (a field removed, a type changed, a row dropped, a trip index out of range, an unknown source id, a null where a number is needed).
+- [x] 2. Data types and shape validators (R14.1, section 3)
+  - [x] 2.1 src/data/types.ts as in section 3.1, including the task 35 fields.
+  - [x] 2.2 src/data/shape.ts: one validator each for index, summary, race and route; throws ShapeError naming file and field. Checks: required fields and types, finite numbers, race rows are one per whole minute with first and last `t` consistent, every `today.trip` index inside `today.trips`, every `sources` id in the catalog, label present.
+  - [x] 2.3 Contract test: read pipeline/schemas/*.schema.json and compare each schema's `required` lists (top level and the nested objects the site uses) with the validators' field lists; fail on any required field the validators do not check.
+  - [x] 2.4 Tests on the real files: all 23 files in web/public/data validate; mutated copies each fail (a field removed, a type changed, a row dropped, a trip index out of range, an unknown source id, a null where a number is needed).
   - Depends on: task 1
 
 - [ ] 3. Loading and lookups (R2.3, R14.2, section 3.3, section 8)
