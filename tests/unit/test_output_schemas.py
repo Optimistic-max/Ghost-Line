@@ -45,6 +45,7 @@ def index_doc():
         "pairs": [{"origin": "westwood-carey", "dest": "dolphin-myrtle"}],
         "service_date": "2026-11-04", "feed_version": "20260821", "feed_sha256": SHA,
         "street_order_checked": False,
+        "photo_finish_min": 1,
         "sources": {
             "guide1938_diagram": entry(), "guide1938_timetable": entry(),
             "guide1938_route": entry(), "mta_gtfs": entry(2026), "osm": entry(2026),
@@ -77,7 +78,7 @@ def race_doc(rows=293):
         "today": {"gap_min": 34.0, "gap_max": 39.0, "window_from": "09:00", "window_to": "14:00",
                   "route_names": ["CityLink Lime"], "trips": [{
             "i": 0, "trip_id": "4110804", "route": "CityLink LIME", "route_display": "CityLink Lime",
-            "headsign": "HARBOR EAST",
+            "headsign": "HARBOR EAST", "headsign_display": "Harbor East",
             "board": {"stop_id": "8564", "name": "B", "walk_m": 125.07, "walk_min": 2.258},
             "alight": {"stop_id": "9486", "name": "A", "walk_m": 230.15, "walk_min": 4.156},
             "dep": "10:32:43", "arr": "10:41:00", "ride_min": 8.283}]},

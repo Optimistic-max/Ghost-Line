@@ -14,6 +14,7 @@ from __future__ import annotations
 import functools
 import gzip
 import json
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -81,6 +82,7 @@ INDEX_COVERAGE = {
     "service_date": ["mta_gtfs"],
     "feed_version": ["mta_gtfs"],
     "feed_sha256": ["mta_gtfs"],
+    "photo_finish_min": ["method"],
 }
 
 
@@ -209,6 +211,9 @@ def _index_doc(
         "feed_version": feed_version,
         "feed_sha256": feed_sha256,
         "street_order_checked": bool(facts.street_order_checked),
+        # The photo-finish band, from the one constant (race.PHOTO_FINISH_MIN), so the
+        # site reads it rather than typing it (race-engine task 36).
+        "photo_finish_min": _r(PHOTO_FINISH_MIN),
         "sources": build_source_catalog(facts, feed_sha256, feed_version, service_date),
     }
 
@@ -299,6 +304,24 @@ def display_route_name(name: str) -> str:
     return " ".join(words)
 
 
+_CAPITAL_WORD = re.compile(r"\b[A-Z]{2,}\b")
+
+
+def display_headsign(headsign: str) -> str:
+    """The headsign as the Sources sheet shows it (race-engine task 36).
+
+    Each run of two or more capital letters standing as a word keeps its first
+    letter and lower-cases the rest ("HARBOR EAST" becomes "Harbor East",
+    "MALL/METRO" becomes "Mall/Metro"). Other text is unchanged. The GTFS
+    headsign itself stays in `headsign`. An empty headsign raises ValueError:
+    no display text is invented.
+    """
+    text = " ".join((headsign or "").split())
+    if not text:
+        raise ValueError("a headsign is needed for the display headsign")
+    return _CAPITAL_WORD.sub(lambda m: m.group(0).capitalize(), text)
+
+
 def select_trips(all_trips: list[EligibleTrip], rows: list[RaceRow]) -> list[EligibleTrip]:
     """Trips for today.trips: every trip departing at or after 09:00, through
     the third trip after the last trip any race row uses (or to the end of the
@@ -362,6 +385,7 @@ def _race_doc(
         raise ValidationError(f"Race file {origin} -> {dest} needs the 1938 spacing: {exc}") from exc
     try:
         route_displays = [display_route_name(t.route) for t in ordered]
+        headsign_displays = [display_headsign(t.headsign) for t in ordered]
     except ValueError as exc:
         raise ValidationError(f"Race file {origin} -> {dest}: {exc}") from exc
     route_names = list(dict.fromkeys(route_displays))
@@ -405,13 +429,14 @@ def _race_doc(
                     "route": t.route,
                     "route_display": display,
                     "headsign": t.headsign,
+                    "headsign_display": headsign,
                     "board": _stop_ref(t.board_stop),
                     "alight": _stop_ref(t.alight_stop),
                     "dep": _hhmmss(t.dep_str),
                     "arr": _hhmmss(t.arr_str),
                     "ride_min": _r(t.ride_min),
                 }
-                for i, (t, display) in enumerate(zip(ordered, route_displays))
+                for i, (t, display, headsign) in enumerate(zip(ordered, route_displays, headsign_displays))
             ],
         },
         "races": [_race_row(r, trip_index) for r in rows],

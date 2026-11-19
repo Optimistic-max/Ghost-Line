@@ -14,6 +14,8 @@ const TAG = 'Test fixture: a made-up line and made-up numbers. Not Baltimore dat
 const FIRST = 9 * 60;
 const LAST = 13 * 60 + 52;
 const WINDOW = [9 * 60, 14 * 60];
+// The made-up photo-finish band: unlike the real one, so tests catch any typed value.
+const BAND = 2;
 const R3 = (x) => Math.round(x * 1000) / 1000;
 const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const hhmmss = (m) => {
@@ -99,6 +101,7 @@ function buildRace(p) {
     route: t.route,
     route_display: p.routes[t.route],
     headsign: p.direction === 'eastbound' ? 'FAKE EAST' : 'FAKE WEST',
+    headsign_display: p.direction === 'eastbound' ? 'Fake East' : 'Fake West',
     board: stop(`fake-stop-${p.origin}`, `FAKE STOP AT ${p.origin.toUpperCase()}`, t.walkTo),
     alight: stop(`fake-stop-${p.dest}`, `FAKE STOP AT ${p.dest.toUpperCase()}`, t.walkFrom),
     dep: hhmmss(t.dep),
@@ -124,7 +127,7 @@ function buildRace(p) {
     if (!today) row.result = 'no_one_seat_ride';
     else {
       const diff = R3(today.total - y1938.total);
-      row.result = Math.abs(diff) < 1 ? 'photo_finish' : diff > 0 ? '1938' : 'today';
+      row.result = Math.abs(diff) < BAND ? 'photo_finish' : diff > 0 ? '1938' : 'today';
       row.margin = Math.abs(diff);
     }
     races.push(row);
@@ -171,6 +174,7 @@ const index = {
   feed_version: 'fake-feed-1',
   feed_sha256: '0'.repeat(64),
   street_order_checked: true,
+  photo_finish_min: BAND,
   sources: {
     guide1938_diagram: entry('Fake 1938 diagram', 'Made-up route diagram', 1900, 'https://example.org/fake/diagram'),
     guide1938_timetable: entry('Fake 1938 timetable', 'Made-up timetable', 1900, 'https://example.org/fake/timetable'),

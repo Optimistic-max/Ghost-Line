@@ -207,6 +207,13 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - [x] 35.7 The full `python -m pipeline check` passes before the commit "Task 35: data additions for the race screen".
   - Depends on: tasks 18, 24, 28
 
+- [x] 36. Display headsigns and the photo-finish band (Emmanuel, Nov 19: approval of the race-screen copy)
+  - [x] 36.1 Add `headsign_display` (required, nonempty string) to every trip in the race files, keeping `headsign` as the GTFS text. One pure function, emit.display_headsign: each run of two or more capital letters standing as a word keeps its first letter and lower-cases the rest ("HARBOR EAST" to "Harbor East", "MALL/METRO" to "Mall/Metro"); other text is unchanged; an empty headsign raises. The rule is mechanical, so an abbreviation such as "UMBC" would become "Umbc"; none occurs in the pinned feed's headsigns. The race-screen Sources sheet shows `headsign_display`.
+  - [x] 36.2 Add `photo_finish_min` (number above 0) to index.json, written from race.PHOTO_FINISH_MIN and covered by the method source, so the site's photo-finish wording reads the band instead of typing it.
+  - [x] 36.3 Tests: unit tests of the rule and of an empty headsign (tests/unit/test_task36.py); schemas require both fields; emitted made-up files carry them; golden: every real trip's display headsign follows the rule with the same letters, the lead pair reads "Harbor East", and the band equals the race constant (tests/golden/test_task35_golden.py).
+  - [x] 36.4 Regenerate web/public/data with `python -m pipeline build`; `python -m pipeline verify`, `check_sources` and the full `python -m pipeline check` pass.
+  - Depends on: task 35
+
 ## Integration and Commands
 
 - [x] 20. validate command (B21)

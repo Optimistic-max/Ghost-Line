@@ -178,3 +178,24 @@ def test_index_has_only_the_one_flag_no_1933_entry(built):
     idx = load(built / "index.json")
     assert isinstance(idx["street_order_checked"], bool)
     assert "1933" not in json.dumps(idx)
+
+
+# --- task 36: display headsigns and the photo-finish band ----------------------
+
+
+def test_every_trip_has_a_title_case_headsign_of_the_same_letters(built):
+    from pipeline.emit import display_headsign
+
+    seen = set()
+    for f in race_files(built):
+        for t in load(f)["today"]["trips"]:
+            assert t["headsign_display"] == display_headsign(t["headsign"])
+            assert t["headsign_display"].upper() == " ".join(t["headsign"].split()).upper()
+            seen.add((t["headsign"], t["headsign_display"]))
+    assert ("HARBOR EAST", "Harbor East") in seen  # the lead pair's eastbound trips
+
+
+def test_index_photo_finish_band_is_the_race_constant(built):
+    from pipeline.race import PHOTO_FINISH_MIN
+
+    assert load(built / "index.json")["photo_finish_min"] == PHOTO_FINISH_MIN

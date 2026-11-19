@@ -171,6 +171,7 @@ const indexShape = {
   feed_version: text,
   feed_sha256: sha256,
   street_order_checked: bool,
+  photo_finish_min: positive,
   sources: object(indexSourcesShape),
 };
 
@@ -257,6 +258,7 @@ const tripShape = {
   route: text,
   route_display: text,
   headsign: str,
+  headsign_display: text,
   board: object(stopRefShape),
   alight: object(stopRefShape),
   dep: clockSeconds,

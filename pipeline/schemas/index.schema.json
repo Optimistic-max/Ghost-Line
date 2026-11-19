@@ -15,6 +15,7 @@
     "feed_version",
     "feed_sha256",
     "street_order_checked",
+    "photo_finish_min",
     "sources"
   ],
   "additionalProperties": false,
@@ -70,6 +71,11 @@
     "street_order_checked": {
       "type": "boolean",
       "description": "The street_order_checked flag of the 1938 facts file: true once a person has checked the street order against the scans. The credits clause 'checked by hand' depends on this flag alone."
+    },
+    "photo_finish_min": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "The photo-finish band in minutes: a race is a photo finish when the two totals differ by less than this (race.PHOTO_FINISH_MIN). Covered by the method source. The site reads it for its photo-finish wording (race-engine task 36)."
     },
     "sources": {
       "type": "object",

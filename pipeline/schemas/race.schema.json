@@ -234,7 +234,7 @@
     },
     "Trip": {
       "type": "object",
-      "required": ["i", "trip_id", "route", "route_display", "headsign", "board", "alight", "dep", "arr", "ride_min"],
+      "required": ["i", "trip_id", "route", "route_display", "headsign", "headsign_display", "board", "alight", "dep", "arr", "ride_min"],
       "additionalProperties": false,
       "properties": {
         "i": {
@@ -258,6 +258,11 @@
         "headsign": {
           "type": "string",
           "description": "Trip headsign as it appears in the GTFS feed."
+        },
+        "headsign_display": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Headsign as the Sources sheet shows it: each all-capital word of two or more letters capitalised, for example 'Harbor East' (race-engine task 36)."
         },
         "board": {
           "$ref": "#/$defs/StopRef",

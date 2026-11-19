@@ -40,6 +40,8 @@ export type Index = {
   feed_version: string;
   feed_sha256: string;
   street_order_checked: boolean;
+  /** The photo-finish band in minutes (race-engine task 36). */
+  photo_finish_min: number;
   sources: Record<SourceId, SourceEntry>;
 };
 
@@ -54,6 +56,8 @@ export type Trip = {
   route: string;
   route_display: string;
   headsign: string;
+  /** The headsign in title case, for the Sources sheet (race-engine task 36). */
+  headsign_display: string;
   board: StopRef;
   alight: StopRef;
   /** hh:mm:ss; hours may pass 24. */
