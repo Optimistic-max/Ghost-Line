@@ -76,7 +76,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 - **R4.1** Corner picker: a plain list of five full-width buttons, west to east, in two steps (start, then end). Title and step lines, the "Start" tag, the "inferred" chip on the inferred corner, the note and a Cancel button as in screen-brief 2.12. In the second step the chosen start is disabled, so the same corner cannot be chosen twice. Opening the picker is one tap; choosing a pair takes three taps.
 - **R4.2** Tapping a corner on the map opens the picker (phone) or is the main way to pick a pair (desktop). The picker still exists for keyboard and screen-reader users, and everything works without the map.
 - **R4.3** One tap on the swap button reverses the pair (origin and destination swap; the matching race file loads).
-- **R4.4** Share link (race-brief 5.9): `?from=<slug>&to=<slug>` and nothing else: no time and no number. "Share this race" shares the URL of the current pair (R4.8). `decode(encode(p)) = p` for all 20 pairs; decode never throws on any text.
+- **R4.4** Share link (race-brief 5.9): `?from=<slug>&to=<slug>` and nothing else: no time and no number. "Share this race" shares the URL of the current pair (R4.8). `decode(encode(p)) = p` for all 20 pairs; decode never throws on any text. Decode reads only `from` and `to` and ignores any other parameter, such as a tracking tag a social app adds (Emmanuel, Nov 19); a missing, repeated, unknown or equal pair is still a bad link.
 - **R4.5** A valid link selects the pair and shows the share banner for 5 s: slide in 200 ms, hold 5,000 ms, slide out 200 ms; it names the pair only.
 - **R4.6** A bad link (a slug unknown, or origin equals destination) falls back to the default pair, races it as usual underneath, and shows the bad-link banner. No query at all is the default pair with no banner.
 - **R4.7** The address bar follows the pair: each time the pair changes (picker, swap, map tap, "When today wins" entry) the page updates its URL with `history.replaceState`, query only (`?from=…&to=…`), no history entries. A reload or a copied address bar therefore opens the same pair.
@@ -166,7 +166,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 
 ### R14. Data errors and the shape check
 - **R14.1** Every data file is shape-checked when it arrives (required fields present, types right, the race file has the expected rows, every source ID resolves in the catalog). If any file fails to load or fails the check, no number is rendered anywhere: no times, totals or counts; no "No. 21, 1938" in the top bar; the trolley is drawn without its route number. Corner names stay.
-- **R14.2** The data-error state shows its message and a Retry button (copy table). Retry reloads the files and recovers without a page reload.
+- **R14.2** The data-error state shows its message and a "Try again" button (copy table). The button reloads the files and recovers without a page reload.
 - **R14.3** A failed map does not trigger the data-error state.
 
 ### R15. Wording
@@ -210,7 +210,7 @@ How the lanes are filled from one race row (lookups only, no arithmetic):
 
 ## Copy strings
 
-Placeholders in braces are read from the data at run time. These are the only strings the screen may use. Source: screen-brief 2.4, 2.5, 2.6, 2.8, 2.9, 2.12, with the decisions above.
+Placeholders in braces are read from the data at run time. These are the only strings the screen may use. Source: screen-brief 2.4, 2.5, 2.6, 2.8, 2.9, 2.12, with the decisions above. Rows marked (draft) were drafted on Nov 19 from the mockups and the brief, for Emmanuel's review; they are used like the other rows until he changes them.
 
 | Where | String |
 | --- | --- |
@@ -233,7 +233,7 @@ Placeholders in braces are read from the data at run time. These are the only st
 | Share | "Link copied" (on the Share this race button for 2 s after a copy; the same text in the status message) |
 | Share banner | "Shared race: {origin} → {dest}." |
 | Bad link | "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." |
-| Data error | "The timetable data didn't load. Check your connection and try again." + Retry |
+| Data error | "The timetable data didn't load. Check your connection and try again." and the button "Try again" |
 | Map unavailable | "Map unavailable. Showing the route diagram." |
 | Map credit | "Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred." plus the OpenFreeMap attribution |
 | Picker | "Choose two corners"; "Choose where the ride starts"; "Start is set. Now choose where the ride ends."; "Corners are listed west to east along the 1938 line. Brevard & Preston's position is inferred."; "Start"; "inferred"; "Cancel" |
@@ -245,6 +245,20 @@ Placeholders in braces are read from the data at run time. These are the only st
 | Credits | the catalog `label` and link for each source; "OpenFreeMap © OpenMapTiles Data from OpenStreetMap"; "Not endorsed by MDOT MTA."; "Font: Barlow Condensed, SIL Open Font Licence 1.1."; "Vehicle drawings: original illustrations."; "How it was made: Facts files and expected test values were prepared during planning with Claude Code and Codex; the pipeline and app were built in Kiro." plus " and checked by hand against the scans" only when street_order_checked is true; "MIT licence"; "Source code" |
 | Fixture tag | "Test fixture: a made-up line and made-up numbers. Not Baltimore data." |
 | Buttons and bars | "Sources", "Share this race", "Skip to result", "About and credits", "Open source. Built in Kiro.", "Ghost Line", "{n}:{nn} scheduled" |
+| Lane titles (draft) | "1938 trackless trolley"; "Today's bus" |
+| Lane total (draft) | "{n} min" |
+| Departures board (draft) | header "Scheduled departures from this corner after {h:mm}"; row labels "1938 trolley" and "Today's bus"; 1938 spacing "every {a} or {b} min", or "every {n} min" when equal; bus gaps "up to {max} min apart", "{min} to {max} min apart" or "{n} min apart", by the rule of the Frequency row |
+| Number button, accessible name (draft) | "{value}, {what}. Show source." where {value} is a minute count as "{n} minutes", a time as {h:mm}, or a count, and {what} is a phrase of the next row |
+| What a number is (draft) | "scheduled 1938 wait"; "scheduled 1938 ride"; "scheduled 1938 total"; "scheduled 1938 car"; "walk to the stop (estimate)"; "scheduled wait today"; "scheduled bus ride"; "walk from the stop (estimate)"; "today's scheduled total, walking included (estimated)"; "scheduled bus departure"; "difference of the two scheduled totals"; "races the 1938 trolley is first"; "races on this line"; "corner pairs with about the same scheduled ride"; "corner pairs on this line"; "corner pairs where today's scheduled ride is faster"; "corner pairs where today's scheduled ride is slower" |
+| Sources sheet (draft) | title "Where these numbers come from"; each row opens with the value ("{n} min", a time or a count) and {what}, extended where it applies as "{what}, {origin} to {dest}", "{what} from {h:mm}" or "{what} at {corner}"; "(opens in a new tab)" after each source link; last row "Sources and credits"; button "Close" |
+| Sources, how it was worked out (draft) | "Sum of the diagram's segment minutes between the two corners."; "Next listed car passes at {h:mm}."; "Listed in the 1938 timetable at this corner."; "Wait plus ride."; "Straight-line {n} m from the corner to the stop."; "From {h:mm}, after the walk, to the scheduled departure."; "From the trip's scheduled departure to its scheduled arrival."; "{route} toward {headsign} leaves stop {stop_id} at {h:mm}."; "Walks, wait and ride, from {h:mm} to the destination corner."; "The difference of the two totals as shown."; "Counted over every race on this line, one per corner pair and slider minute."; "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides." Walk rows then add the catalog method entry's `what` as written (R9.5). |
+| Sources, date of the data (draft) | "Effective {date}" for 1938 numbers, {date} being effective in its long form (March 6, 1938); "MTA feed version {feed_version}, service date {date}" for today's numbers, {date} being service_date with its weekday (Wed Nov 4, 2026); counts carry both |
+| Sources, exact value (R7.7) | "Exact value {x} min. Parts are rounded so they add up to the {n} min total." |
+| Slider controls (draft) | input name "Start time"; value text "{hh:mm AM/PM}, scheduled weekday time"; buttons "One minute earlier" and "One minute later" |
+| Pair row controls (draft) | swap button "Swap direction"; the pair names open the picker and are named "Choose two corners"; the info button is named "About and credits" |
+| Desktop headline, second line (draft) | "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners." |
+| When today wins list entry (draft) | "{origin} → {dest}, {h:mm} (scheduled)" |
+| Map corner label (R11.2) | "(inferred)" after the inferred corner's name |
 
 Minute words follow R15.5: where a template says "minutes", the site uses "minute" for 1 (for example "1938 wins by 1 minute.", "Both about 1 minute.", "leave up to 1 minute apart", "every 1 minute").
 

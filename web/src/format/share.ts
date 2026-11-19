@@ -10,20 +10,23 @@ export function encode(pair: Pair): string {
 export type Decoded = { pair: Pair; bad: boolean };
 
 /**
- * The pair a query names. Only exactly `from` and `to`, once each, with two
- * different known slugs, select a pair; anything else gives the lead pair with
- * `bad: true`. No query at all gives the lead pair with `bad: false`. Never throws.
+ * The pair a query names. Only `from` and `to` are read; any other parameter
+ * (such as a tracking tag a social app adds) is ignored. `from` and `to`, once
+ * each, with two different known slugs, select a pair; a missing, repeated,
+ * unknown or equal pair gives the lead pair with `bad: true`. No query at all,
+ * or a query with neither parameter, gives the lead pair with `bad: false`.
+ * Never throws.
  */
 export function decode(query: unknown, known: ReadonlySet<string>): Decoded {
   const lead: Pair = { origin: LEAD_PAIR.origin, dest: LEAD_PAIR.dest };
   const bad: Decoded = { pair: lead, bad: true };
   if (typeof query !== 'string') return bad;
-  if (query === '' || query === '?') return { pair: lead, bad: false };
   try {
     const params = new URLSearchParams(query);
     const from = params.getAll('from');
     const to = params.getAll('to');
-    if ([...params.keys()].length !== 2 || from.length !== 1 || to.length !== 1) return bad;
+    if (from.length === 0 && to.length === 0) return { pair: lead, bad: false };
+    if (from.length !== 1 || to.length !== 1) return bad;
     const origin = from[0];
     const dest = to[0];
     if (origin === undefined || dest === undefined || origin === dest) return bad;

@@ -53,6 +53,44 @@ describe('share link (P1)', () => {
     );
   });
 
+  /** Extra parameters that are not from or to, as a social app might add. */
+  const extras = fc.dictionary(
+    fc.stringMatching(/^[a-z_]{1,12}$/).filter((k) => k !== 'from' && k !== 'to'),
+    fc.string({ unit: 'binary', maxLength: 20 }),
+    { maxKeys: 4 },
+  );
+  const withExtras = (query: string, extra: Record<string, string>): string => {
+    const params = new URLSearchParams(query);
+    for (const [k, v] of Object.entries(extra)) params.append(k, v);
+    return `?${params.toString()}`;
+  };
+
+  it('ignores any other parameter: every pair still opens', () => {
+    fc.assert(
+      fc.property(fc.constantFrom(...index.pairs), extras, (pair, extra) => {
+        expect(decode(withExtras(encode(pair), extra), known)).toEqual({ pair, bad: false });
+      }),
+    );
+  });
+
+  it('a missing or invalid pair is still a bad link, whatever else the link carries', () => {
+    const slug = fc.constantFrom(...known);
+    const broken = fc.oneof(
+      slug.map((s) => `?from=${s}`),
+      slug.map((s) => `?to=${s}`),
+      slug.map((s) => `?from=${s}&to=${s}`),
+      slug.map((s) => `?from=nowhere&to=${s}`),
+    );
+    fc.assert(
+      fc.property(broken, extras, (query, extra) => {
+        expect(decode(withExtras(query, extra), known)).toEqual({
+          pair: { origin: LEAD_PAIR.origin, dest: LEAD_PAIR.dest },
+          bad: true,
+        });
+      }),
+    );
+  });
+
   it('never throws on any value at all', () => {
     fc.assert(fc.property(fc.anything(), (v) => wellFormed(v)));
   });

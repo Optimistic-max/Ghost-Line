@@ -311,7 +311,7 @@ const encode = (p: Pair): string => `?from=${p.origin}&to=${p.dest}`;
 function decode(query: string, known: Set<string>): { pair: Pair; bad: boolean }
 ```
 
-`decode` uses `URLSearchParams` inside a try/catch, accepts only two parameters whose values are known slugs and different, and returns the lead pair with `bad: true` on anything else (including an empty or non-string input); with no query at all `bad` is false. It never throws (P1). The lead pair constant is `{origin: 'preston-caroline', dest: 'aliceanna-bond'}` in `config.ts`, checked at boot against `index.corners`; if either slug is missing from the data the screen goes to `data-error`.
+`decode` uses `URLSearchParams` inside a try/catch and reads only `from` and `to`; any other parameter (a tracking tag a social app adds, for example) is ignored (Emmanuel, Nov 19). It accepts `from` and `to` when each appears once with two different known slugs, and returns the lead pair with `bad: true` when either is missing, repeated, unknown or equal to the other, or the input is not a string. With no query at all, or a query with neither parameter, `bad` is false. It never throws (P1). The lead pair constant is `{origin: 'preston-caroline', dest: 'aliceanna-bond'}` in `config.ts`, checked at boot against `index.corners`; if either slug is missing from the data the screen goes to `data-error`.
 
 Pair changes call `history.replaceState(null, '', BASE + encode(pair))`, query only (R4.7, P12). "Share this race" builds the link `location.origin + location.pathname + encode(pair)` and then (R4.8):
 
@@ -394,7 +394,7 @@ Notices (before the table, inferred) are a tinted strip with a `--ghost` left ed
 ## 17. Error handling
 | Condition | Result |
 | --- | --- |
-| Any of index, summary, race file fails to fetch, parse or pass the shape check; or 3 s pass at boot | `data-error`: message and Retry; no number, no "No. 21, 1938", trolley without its number; corner names stay from the static HTML |
+| Any of index, summary, race file fails to fetch, parse or pass the shape check; or 3 s pass at boot | `data-error`: message and "Try again"; no number, no "No. 21, 1938", trolley without its number; corner names stay from the static HTML |
 | On-demand race file fails after a pair change | the same `data-error` (nothing is guessed) |
 | `route.geojson` fails | map area keeps the plain background; "Map unavailable" notice |
 | MapLibre import, WebGL, tiles, style fail | route drawing stays; notice; race unaffected |

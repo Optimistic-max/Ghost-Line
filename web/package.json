@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "screens": "playwright test tests/e2e/screens.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
+    "@types/node": "^24.19.2",
     "axe-core": "^4.14.1",
     "fast-check": "^4.10.3",
     "jsdom": "^31.0.1",

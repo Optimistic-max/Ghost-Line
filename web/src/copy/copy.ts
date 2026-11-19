@@ -218,7 +218,7 @@ export function badLink(origin: string, dest: string): string {
 }
 
 export const DATA_ERROR = "The timetable data didn't load. Check your connection and try again.";
-export const RETRY = 'Retry';
+export const TRY_AGAIN = 'Try again';
 export const MAP_UNAVAILABLE = 'Map unavailable. Showing the route diagram.';
 export const MAP_CREDIT = 'Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred.';
 
@@ -281,3 +281,160 @@ export const FOOTER_LINE = 'Open source. Built in Kiro.';
 export function clockReadout(hm: string): string {
   return `${hm} scheduled`;
 }
+
+// =================================================================================
+// Draft rows (Nov 19), for Emmanuel's review: drafted from the mockups and the brief.
+// =================================================================================
+
+// ---- Lanes and the departures board (draft) ----------------------------------
+
+export const LANE_TITLE_1938 = '1938 trackless trolley';
+/** Today's lane title, and the bus row label of the departures board. */
+export const LANE_TITLE_TODAY = "Today's bus";
+
+/** A shown duration: a lane total, or a value in the Sources sheet. */
+export function minShort(n: number): string {
+  return `${n} min`;
+}
+
+export function boardHeader(hm: string): string {
+  return `Scheduled departures from this corner after ${hm}`;
+}
+
+export const BOARD_1938 = '1938 trolley';
+
+export function boardEveryOr(a: number, b: number): string {
+  return `every ${a} or ${b} min`;
+}
+
+export function boardEvery(n: number): string {
+  return `every ${n} min`;
+}
+
+export function boardGapUpTo(max: number): string {
+  return `up to ${max} min apart`;
+}
+
+export function boardGapRange(min: number, max: number): string {
+  return `${min} to ${max} min apart`;
+}
+
+export function boardGapEqual(n: number): string {
+  return `${n} min apart`;
+}
+
+// ---- Number buttons and the Sources sheet (draft) ---------------------------
+
+/** A number button's accessible name: "9 minutes, scheduled 1938 ride. Show source." */
+export function numberLabel(value: string, what: string): string {
+  return `${value}, ${what}. Show source.`;
+}
+
+/** What each kind of number is, for its button's name and its Sources row. */
+export const WHAT = {
+  wait1938: 'scheduled 1938 wait',
+  ride1938: 'scheduled 1938 ride',
+  total1938: 'scheduled 1938 total',
+  car1938: 'scheduled 1938 car',
+  walkToStop: 'walk to the stop (estimate)',
+  waitBus: 'scheduled wait today',
+  rideBus: 'scheduled bus ride',
+  walkFromStop: 'walk from the stop (estimate)',
+  totalToday: "today's scheduled total, walking included (estimated)",
+  busDeparture: 'scheduled bus departure',
+  margin: 'difference of the two scheduled totals',
+  wins1938: 'races the 1938 trolley is first',
+  races: 'races on this line',
+  rideSame: 'corner pairs with about the same scheduled ride',
+  pairs: 'corner pairs on this line',
+  rideFasterToday: "corner pairs where today's scheduled ride is faster",
+  rideSlowerToday: "corner pairs where today's scheduled ride is slower",
+} as const;
+
+export function whatBetween(what: string, origin: string, dest: string): string {
+  return `${what}, ${origin} to ${dest}`;
+}
+
+export function whatFrom(what: string, hm: string): string {
+  return `${what} from ${hm}`;
+}
+
+export function whatAt(what: string, corner: string): string {
+  return `${what} at ${corner}`;
+}
+
+export const SOURCES_TITLE = 'Where these numbers come from';
+export const NEW_TAB = '(opens in a new tab)';
+export const SOURCES_AND_CREDITS = 'Sources and credits';
+export const CLOSE = 'Close';
+
+// How each number was worked out, one line each.
+export const METHOD_RIDE_1938 = "Sum of the diagram's segment minutes between the two corners.";
+
+export function methodNextCar(hm: string): string {
+  return `Next listed car passes at ${hm}.`;
+}
+
+export const METHOD_CAR_1938 = 'Listed in the 1938 timetable at this corner.';
+export const METHOD_TOTAL_1938 = 'Wait plus ride.';
+
+export function methodWalk(metres: number): string {
+  return `Straight-line ${metres} m from the corner to the stop.`;
+}
+
+export function methodWaitBus(hm: string): string {
+  return `From ${hm}, after the walk, to the scheduled departure.`;
+}
+
+export const METHOD_RIDE_BUS = "From the trip's scheduled departure to its scheduled arrival.";
+
+export function methodBusTrip(route: string, headsign: string, stopId: string, hm: string): string {
+  return `${route} toward ${headsign} leaves stop ${stopId} at ${hm}.`;
+}
+
+export function methodTotalToday(hm: string): string {
+  return `Walks, wait and ride, from ${hm} to the destination corner.`;
+}
+
+export const METHOD_MARGIN = 'The difference of the two totals as shown.';
+export const METHOD_RACE_COUNTS = 'Counted over every race on this line, one per corner pair and slider minute.';
+export const METHOD_RIDE_VERDICTS =
+  "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.";
+
+/** The date line of 1938 numbers; `date` is effective in its long form. */
+export function dateEffective(date: string): string {
+  return `Effective ${date}`;
+}
+
+/** The date line of today's numbers; `date` is service_date with its weekday. */
+export function dateFeed(feedVersion: string, date: string): string {
+  return `MTA feed version ${feedVersion}, service date ${date}`;
+}
+
+/** R7.7: a shown part that is not the plain rounding of its stored value. */
+export function exactValue(exact: string, shownTotal: number): string {
+  return `Exact value ${exact} min. Parts are rounded so they add up to the ${shownTotal} min total.`;
+}
+
+// ---- Controls, the desktop headline, the today-wins list, the map (draft) ----
+
+export const START_TIME = 'Start time';
+
+/** The slider's aria-valuetext; `label` is the 12-hour start time. */
+export function sliderValueText(label: string): string {
+  return `${label}, scheduled weekday time`;
+}
+
+export const ONE_MINUTE_EARLIER = 'One minute earlier';
+export const ONE_MINUTE_LATER = 'One minute later';
+export const SWAP_DIRECTION = 'Swap direction';
+
+export const HEADLINE_LINE =
+  "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners.";
+
+export function todayWinEntry(origin: string, dest: string, hm: string): string {
+  return `${origin} → ${dest}, ${hm} (scheduled)`;
+}
+
+/** After the inferred corner's name on the map (R11.2). */
+export const MAP_INFERRED = '(inferred)';

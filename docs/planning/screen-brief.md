@@ -124,7 +124,7 @@ The race plays at 1 second per 4 scheduled minutes, capped so no race lasts more
 | **Inferred corner** | The pair includes Brevard & Preston | A chip "Inferred corner" by the name, and one line: "Brevard Street is gone. This corner's position is our best reading of the 1938 diagram, so times to and from it are less certain." The route there is dashed. |
 | **Share link opened** | URL carries a valid pair | A banner for 5 s: "Shared race: Preston & Caroline → Aliceanna & Bond." The start time follows the normal default; the link carries no time. |
 | **Bad share link** | URL pair unknown, or origin = destination | "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." |
-| **Data error** | A data file failed to load or failed its shape check | "The timetable data didn't load. Check your connection and try again." plus a Retry button. **No number appears anywhere on the screen**: no times, no totals, no counts, no "No. 21, 1938" in the top bar, and the trolley is drawn without its route number. Corner names stay. |
+| **Data error** | A data file failed to load or failed its shape check | "The timetable data didn't load. Check your connection and try again." plus a "Try again" button. **No number appears anywhere on the screen**: no times, no totals, no counts, no "No. 21, 1938" in the top bar, and the trolley is drawn without its route number. Corner names stay. |
 | **Map unavailable** | Tiles or WebGL unavailable | The map area shows the bundled route drawing. The race is unaffected. Small text: "Map unavailable. Showing the route diagram." |
 
 The "no one-seat ride" state cannot be reached with the pinned feed at 400 m [C]. Build it and test it with the fake fixture line.

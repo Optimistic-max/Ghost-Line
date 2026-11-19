@@ -38,17 +38,47 @@ describe('decode: only from and to, once each', () => {
     expect(decode('?from=westwood%2Dcarey&to=aliceanna-bond', known).bad).toBe(false);
   });
 
-  it('rejects repeated, missing, extra or empty parameters', () => {
+  it('rejects repeated, missing or empty pair parameters', () => {
     for (const query of [
       '?from=westwood-carey&to=aliceanna-bond&from=dolphin-myrtle',
       '?from=westwood-carey',
       '?to=aliceanna-bond',
-      '?from=westwood-carey&to=aliceanna-bond&t=10:00',
       '?from=&to=',
       '?from=Westwood-Carey&to=aliceanna-bond',
     ]) {
       expect(decode(query, known), query).toEqual({ pair: lead, bad: true });
     }
+  });
+});
+
+describe('decode: other parameters are ignored', () => {
+  const pair = { origin: 'westwood-carey', dest: 'aliceanna-bond' };
+
+  it('opens the right pair when a link carries an extra parameter', () => {
+    for (const query of [
+      '?from=westwood-carey&to=aliceanna-bond&fbclid=IwAR0abc',
+      '?utm_source=social&from=westwood-carey&utm_medium=post&to=aliceanna-bond',
+      '?from=westwood-carey&to=aliceanna-bond&t=10:00',
+      '?from=westwood-carey&to=aliceanna-bond&from_x=1&=&&',
+    ]) {
+      expect(decode(query, known), query).toEqual({ pair, bad: false });
+    }
+  });
+
+  it('still gives the bad-link state for a missing or invalid pair beside an extra parameter', () => {
+    for (const query of [
+      '?from=westwood-carey&fbclid=IwAR0abc',
+      '?to=aliceanna-bond&utm_source=social',
+      '?from=nowhere&to=aliceanna-bond&fbclid=IwAR0abc',
+      '?from=westwood-carey&to=westwood-carey&utm_source=social',
+      '?from=westwood-carey&to=aliceanna-bond&to=dolphin-myrtle&fbclid=IwAR0abc',
+    ]) {
+      expect(decode(query, known), query).toEqual({ pair: lead, bad: true });
+    }
+  });
+
+  it('treats a link with only other parameters as no share link at all', () => {
+    expect(decode('?fbclid=IwAR0abc', known)).toEqual({ pair: lead, bad: false });
   });
 
   it('rejects input that is not a string', () => {

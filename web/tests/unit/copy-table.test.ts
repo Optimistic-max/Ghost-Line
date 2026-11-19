@@ -100,15 +100,61 @@ const RENDERED: Record<string, string> = {
   announceTodayWins: A.announceTodayWins(announceBus),
   announcePhotoFinish: A.announcePhotoFinish(announceBus),
   announceNoOneSeatRide: A.announceNoOneSeatRide(announceBus),
+  TRY_AGAIN: C.TRY_AGAIN,
+  // Draft rows (Nov 19).
+  LANE_TITLE_1938: C.LANE_TITLE_1938,
+  LANE_TITLE_TODAY: C.LANE_TITLE_TODAY,
+  minShort: C.minShort(N),
+  boardHeader: C.boardHeader('{h:mm}'),
+  BOARD_1938: C.BOARD_1938,
+  boardEveryOr: C.boardEveryOr(n('{a}'), n('{b}')),
+  boardEvery: C.boardEvery(N),
+  boardGapUpTo: C.boardGapUpTo(n('{max}')),
+  boardGapRange: C.boardGapRange(n('{min}'), n('{max}')),
+  boardGapEqual: C.boardGapEqual(N),
+  numberLabel: C.numberLabel('{value}', '{what}'),
+  minutes: C.minutes(N),
+  whatBetween: C.whatBetween('{what}', '{origin}', '{dest}'),
+  whatFrom: C.whatFrom('{what}', '{h:mm}'),
+  whatAt: C.whatAt('{what}', '{corner}'),
+  SOURCES_TITLE: C.SOURCES_TITLE,
+  NEW_TAB: C.NEW_TAB,
+  SOURCES_AND_CREDITS: C.SOURCES_AND_CREDITS,
+  CLOSE: C.CLOSE,
+  METHOD_RIDE_1938: C.METHOD_RIDE_1938,
+  methodNextCar: C.methodNextCar('{h:mm}'),
+  METHOD_CAR_1938: C.METHOD_CAR_1938,
+  METHOD_TOTAL_1938: C.METHOD_TOTAL_1938,
+  methodWalk: C.methodWalk(N),
+  methodWaitBus: C.methodWaitBus('{h:mm}'),
+  METHOD_RIDE_BUS: C.METHOD_RIDE_BUS,
+  methodBusTrip: C.methodBusTrip('{route}', '{headsign}', '{stop_id}', '{h:mm}'),
+  methodTotalToday: C.methodTotalToday('{h:mm}'),
+  METHOD_MARGIN: C.METHOD_MARGIN,
+  METHOD_RACE_COUNTS: C.METHOD_RACE_COUNTS,
+  METHOD_RIDE_VERDICTS: C.METHOD_RIDE_VERDICTS,
+  dateEffective: C.dateEffective('{date}'),
+  dateFeed: C.dateFeed('{feed_version}', '{date}'),
+  exactValue: C.exactValue('{x}', N),
+  START_TIME: C.START_TIME,
+  sliderValueText: C.sliderValueText('{hh:mm AM/PM}'),
+  ONE_MINUTE_EARLIER: C.ONE_MINUTE_EARLIER,
+  ONE_MINUTE_LATER: C.ONE_MINUTE_LATER,
+  SWAP_DIRECTION: C.SWAP_DIRECTION,
+  HEADLINE_LINE: C.HEADLINE_LINE,
+  todayWinEntry: C.todayWinEntry('{origin}', '{dest}', '{h:mm}'),
+  MAP_INFERRED: C.MAP_INFERRED,
 };
+
+/** The phrases of WHAT ("What a number is"), each a table string. */
+for (const [key, phrase] of Object.entries(C.WHAT)) RENDERED[`WHAT.${key}`] = phrase;
 
 /** Exports that are not a table string on their own; each is checked below. */
 const HELPERS = [
   'minuteWord',
-  'minutes',
   'clock12',
   'LIST_AND',
-  'RETRY',
+  'WHAT',
   'everyMinutesOr',
   'trolleyFirst',
   'whenTodayWinsSentence',
@@ -175,9 +221,19 @@ describe('helpers', () => {
     expect(C.clock12('2:00', true)).toBe('2:00 PM');
   });
 
-  it('RETRY is the Retry label of the data-error row', () => {
-    expect(table.raw).toMatch(/\| Data error \|.*\+ Retry \|/);
-    expect(C.RETRY).toBe('Retry');
+  it('the data-error button reads "Try again"', () => {
+    expect(table.raw).toMatch(/\| Data error \|.*the button "Try again" \|/);
+    expect(C.TRY_AGAIN).toBe('Try again');
+  });
+
+  it('WHAT holds every phrase of the "What a number is" row, in order', () => {
+    const row = table.raw.split('\n').find((l) => l.startsWith('| What a number is'))!;
+    expect(Object.values(C.WHAT)).toEqual([...row.matchAll(/"([^"]*)"/g)].map((m) => m[1]));
+  });
+
+  it('builds the number label of the brief from the draft templates', () => {
+    expect(C.numberLabel(C.minutes(9), C.WHAT.ride1938)).toBe('9 minutes, scheduled 1938 ride. Show source.');
+    expect(C.numberLabel(C.minutes(1), C.WHAT.wait1938)).toBe('1 minute, scheduled 1938 wait. Show source.');
   });
 
   it('the honest-line parts are exactly the two honest lines, in order', () => {
@@ -206,7 +262,7 @@ describe('helpers', () => {
     expect(C.howItWasMade(true).replace(C.CHECKED_BY_HAND, '')).toBe(C.howItWasMade(false));
   });
 
-  it('LIST_AND, minuteWord and minutes are words of the table', () => {
+  it('LIST_AND and minuteWord are words of the table', () => {
     for (const word of [C.LIST_AND, C.minuteWord(1), C.minuteWord(2)]) expect(table.raw).toContain(word);
     expect(C.minutes(1)).toBe('1 minute');
   });
@@ -224,6 +280,7 @@ describe('minute words (R15.5)', () => {
     C.gapEqual(k),
     C.everyMinutes(k),
     C.everyMinutesOr(k, k),
+    C.numberLabel(C.minutes(k), C.WHAT.ride1938),
     A.announce1938Wins({ ...bus, trolley: k, bus: k, walk: k, margin: k }),
     A.announceTodayWins({ ...bus, trolley: k, bus: k, walk: k, margin: k }),
     A.announcePhotoFinish({ ...bus, trolley: k, bus: k, walk: k }),

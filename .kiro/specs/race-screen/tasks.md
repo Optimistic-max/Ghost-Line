@@ -128,7 +128,7 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [ ] 15.1 Loading (the line under the pair names, top bar shows only "Ghost Line"), Ready (schedule line, "Start time is the time now." only for a clock-derived time), and the first race starting by itself.
   - [ ] 15.2 Before the midday table: notice naming `row.start`, thumb unmoved, lanes and board from `row.start`; inferred corner: chip, caution line, dashed dot and stretch; notices as tinted strips that hide the schedule line.
   - [ ] 15.3 No one-seat ride: the 1938 lane, the no-bus sentence, "No one-seat ride today", "Trolley {n} min. No winner is called.", no bus lane, vehicle, total or margin; shown from the fixture with the fixture tag, never from the shipped data.
-  - [ ] 15.4 Data error: message, Retry, no number anywhere (top bar, trolley route number, counts), corner names stay; Retry recovers without a reload; the 3 s timeout.
+  - [ ] 15.4 Data error: message, "Try again", no number anywhere (top bar, trolley route number, counts), corner names stay; "Try again" recovers without a reload; the 3 s timeout.
   - [ ] 15.5 "No. 21, 1938" and the trolley's route number built from index.json's `line` and `effective` after the shape check, omitted when `line` does not match; absent in the error state.
   - [ ] 15.6 Tests for each state of R17.1 from real data where a real state exists (today win, photo finish, before the table at 9:00, an inferred pair) and from the fixture otherwise; P7: in the data-error state the DOM contains no digit.
   - Depends on: tasks 11, 12, 13, 14
@@ -167,10 +167,10 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 ## End to end, budgets and deploy
 
 - [ ] 20. Playwright end-to-end (R17, R5.11, R11.4, R1.4)
-  - [ ] 20.1 Install Playwright's Chromium (needs the network: ask first). Config for a phone (375 × 667) and a laptop (1280 × 800) project.
-  - [ ] 20.2 Scripts `test:e2e` (one command). Tests: the first race on both layouts; the result appears at the first arrival and the slower side runs on; skip; the whole race with the tile host blocked and WebGL absent; reduced motion (no animation, finished at once); keyboard-only run through every control; no horizontal scroll at 320, 375, 899, 900, 1280 and 1920 px wide; the data-error state with the data blocked, then Retry.
+  - [ ] 20.1 Install Playwright's Chromium (done Nov 19, approved). Config for a phone (375 × 667) and a laptop (1280 × 800) project; web/playwright.config.ts already starts the Vite dev server for `npm run screens`.
+  - [ ] 20.2 Scripts `test:e2e` (one command). Tests: the first race on both layouts; the result appears at the first arrival and the slower side runs on; skip; the whole race with the tile host blocked and WebGL absent; reduced motion (no animation, finished at once); keyboard-only run through every control; no horizontal scroll at 320, 375, 899, 900, 1280 and 1920 px wide; the data-error state with the data blocked, then "Try again".
   - [ ] 20.3 axe-core in the browser on both layouts for the states where layout matters.
-  - [ ] 20.4 A screenshot per mockup state (01 to 26) saved under web/tests/e2e/screenshots/ (git-ignored) for side-by-side review against docs/planning/ui-mockups/; Emmanuel reviews them. The fixture state is rendered through a test-only route that is not in the build.
+  - [ ] 20.4 A screenshot per mockup state (01 to 26) saved under web/test-results/screens/ (git-ignored) for side-by-side review against docs/planning/ui-mockups/; Emmanuel reviews them. Extends `npm run screens` (tests/e2e/screens.spec.ts, added Nov 19), which answers every data request from the made-up fixture by request interception, so no test-only route is in the build.
   - Depends on: tasks 18, 19
 
 - [ ] 21. Build budget and chunks (R16.1)

@@ -1,17 +1,14 @@
 // Read repository files from tests. Paths are relative to the repository root
 // (the folder above web/), so a test can read .kiro/, pipeline/ and web/ alike.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-// From the path of this file, web/tests/support/files.ts, without the URL class:
-// under jsdom the global URL is jsdom's, which Node's fileURLToPath rejects.
-const THIS_FILE = fileURLToPath(import.meta.url);
-const REPO_ROOT = THIS_FILE.replace(/[\\/]web[\\/]tests[\\/]support[\\/]files\.ts$/, '/');
-if (REPO_ROOT === THIS_FILE) throw new Error(`cannot find the repository root from ${THIS_FILE}`);
+// This file is web/tests/support/files.ts.
+const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
 
 /** Absolute path of a repository-relative path. */
 export function repoPath(relative: string): string {
-  return REPO_ROOT + relative;
+  return resolve(REPO_ROOT, relative);
 }
 
 export function readRepoText(relative: string): string {
