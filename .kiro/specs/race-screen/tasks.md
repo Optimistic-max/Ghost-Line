@@ -13,12 +13,12 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Setup
 
-- [ ] 1. Scaffold web/ (R16.3 to R16.5)
-  - [ ] 1.1 Create web/package.json with scripts `dev` (vite), `build` (vite build), `test` (vitest run), each one command with no `&&`, pipes or shell syntax; dev dependencies vite, typescript, vitest, fast-check, jsdom, axe-core, @playwright/test; runtime dependencies maplibre-gl and @fontsource/barlow-condensed only. (Needs the network: ask first.)
-  - [ ] 1.2 vite.config.ts with `base: '/Ghost-Line/'`, a manual chunk so maplibre-gl and src/map/map.ts form a separate chunk, and the dev server serving web/public/data. tsconfig.json strict. vitest config: node environment by default, jsdom for tests under tests/dom.
-  - [ ] 1.3 .gitignore entries for web/node_modules and web/dist (the repo's .gitignore must not ignore web/public/data or .kiro).
-  - [ ] 1.4 src/config.ts: one constants block with the lead pair, the 300 ms and 2 s and 5 s and 3 s timings, the 900 px and 720 px breakpoints, the vehicle and font sizes, and the Source URLs read from tech.md (repository link, base map style URL, base map credit text). A test reads tech.md and fails if any URL or credit text in config.ts is not in its Source URLs list.
-  - [ ] 1.5 tests/unit/smoke.test.ts passes; `npm run build` produces web/dist with an empty page; confirm base path in the output.
+- [x] 1. Scaffold web/ (R16.3 to R16.5)
+  - [x] 1.1 Create web/package.json with scripts `dev` (vite), `build` (vite build), `test` (vitest run), each one command with no `&&`, pipes or shell syntax; dev dependencies vite, typescript, vitest, fast-check, jsdom, axe-core, @playwright/test; runtime dependencies maplibre-gl and @fontsource/barlow-condensed only. (Needs the network: ask first.)
+  - [x] 1.2 vite.config.ts with `base: '/Ghost-Line/'`, a manual chunk so maplibre-gl and src/map/map.ts form a separate chunk, and the dev server serving web/public/data. tsconfig.json strict. vitest config: node environment by default, jsdom for tests under tests/dom.
+  - [x] 1.3 .gitignore entries for web/node_modules and web/dist (the repo's .gitignore must not ignore web/public/data or .kiro).
+  - [x] 1.4 src/config.ts: one constants block with the lead pair, the 300 ms and 2 s and 5 s and 3 s timings, the 900 px and 720 px breakpoints, the vehicle and font sizes, and the Source URLs read from tech.md (repository link, base map style URL, base map credit text). A test reads tech.md and fails if any URL or credit text in config.ts is not in its Source URLs list.
+  - [x] 1.5 tests/unit/smoke.test.ts passes; `npm run build` produces web/dist with an empty page; confirm base path in the output.
   - Depends on: none
 
 ## Data and pure logic
