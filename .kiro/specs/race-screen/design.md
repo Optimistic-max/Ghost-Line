@@ -31,7 +31,7 @@ web/
   vite.config.ts             base "/Ghost-Line/", manualChunks: main, map
   package.json               scripts: dev, build, test (each one command)
   public/data/               generated; never edited by hand
-  public/fonts/              BarlowCondensed-600.subset.woff2 (self-hosted, one file)
+  (font)                     @fontsource/barlow-condensed, latin-600.css only; Vite bundles the one WOFF2
   src/
     main.ts                  boot: read URL, start loaders, mount UI, lazy-import the map
     config.ts                constants block (base paths, timings, sizes, breakpoints, the Source URLs block)
@@ -360,7 +360,7 @@ Two layouts, one DOM. CSS grid with `@media (min-width: 900px)`:
 No horizontal scroll at any width: all widths use `min()`/percentages inside the card; long names wrap; a test measures `document.documentElement.scrollWidth <= innerWidth` at 320, 375, 899, 900, 1280 and 1920.
 
 ### 13.2 Tokens and type
-`tokens.css` defines palette B exactly as in ui.md and the sizes from 3.3 and 3A.1 as custom properties. `@font-face` for Barlow Condensed 600 loads one WOFF2 with `font-display: swap` and a `<link rel="preload">` so the first paint does not wait for it; the system stack covers the swap. Tabular figures via `font-variant-numeric: tabular-nums`. Sentence case throughout (no `text-transform`).
+`tokens.css` defines palette B exactly as in ui.md and the sizes from 3.3 and 3A.1 as custom properties. `@font-face` for Barlow Condensed 600 comes from `@fontsource/barlow-condensed/latin-600.css` (weight 600, Latin subset only), which Vite bundles as one WOFF2 with `font-display: swap` and a `<link rel="preload">` so the first paint does not wait for it; the system stack covers the swap. Tabular figures via `font-variant-numeric: tabular-nums`. Sentence case throughout (no `text-transform`).
 
 Sizes: phone wordmark 24, corner names 21 (17 with the chip), slider time 24, lane title 17, lane total 22, result line 29, body 12 to 13; desktop wordmark 30, headline 54, corner names 25, result line 38. Tap targets are at least 44 × 44 px (padding, not font size).
 
@@ -413,7 +413,7 @@ Notices (before the table, inferred) are a tinted strip with a `--ghost` left ed
 8. **Low frame rate.** Under 30 frames per second in the first second turns off the bob, sparks and glow breathing for the session.
 9. **Timing tests** are excluded from the default run (`addopts = -m "not timing"` in pyproject.toml, done) and run alone on a quiet machine: `python -m pipeline check --timing` for the pipeline (10 s validate, 60 s build) and `npm run perf` for the site (section 19). The limits do not change.
 
-One thing to watch: the announcement copy begins "Race finished." although it now speaks at the first arrival, while the slower side may still be moving. The wording is the approved copy and is unchanged here.
+The announcement copy begins "Race result." (changed from "Race finished." because it speaks at the first arrival, while the slower side may still be moving).
 
 ## 19. Testing strategy (R17)
 

@@ -169,7 +169,7 @@ The sheet's last row is always "Sources and credits", which opens the credits li
 ### 2.8 Accessibility
 
 - **Reduced motion:** no animation. Both lanes are drawn finished, as static bars, and the result shows at once.
-- **Screen reader:** the result region is `aria-live="polite"` and speaks once, when the race ends: "Race finished. Preston and Caroline to Aliceanna and Bond, starting 10:00 AM. 1938 trackless trolley: 15 minutes. Today's bus: 45 minutes, including 6 minutes of walking. 1938 was faster by 30 minutes. All times are scheduled." Nothing is announced during the animation.
+- **Screen reader:** the result region is `aria-live="polite"` and speaks once, when the race ends: "Race result. Preston and Caroline to Aliceanna and Bond, starting 10:00 AM. 1938 trackless trolley: 15 minutes. Today's bus: 45 minutes, including 6 minutes of walking. 1938 was faster by 30 minutes. All times are scheduled." Nothing is announced during the animation.
 - **Slider:** a native range input, one-minute steps, with `aria-valuetext` such as "10:00 AM, scheduled weekday time", plus − and + buttons.
 - **Number buttons:** each has a label such as "9 minutes, scheduled 1938 ride. Show source."
 - **No map needed:** the corner picker is a plain list of five buttons, so the whole app works by keyboard and without WebGL.
@@ -262,7 +262,7 @@ One glowing thing per screen. The trolley glows and hangs from two overhead wire
 
 ### 3.3 Type
 
-- Barlow Condensed (one self-hosted WOFF2 subset, weight 600) for the wordmark, corner names, lane titles, times, totals and the result line.
+- Barlow Condensed (from the @fontsource/barlow-condensed package, Latin subset, weight 600) for the wordmark, corner names, lane titles, times, totals and the result line.
 - The system font for everything else.
 - Sizes at 375 px: wordmark 24; corner names 21 (17 when the "inferred" chip is shown); slider time 24; lane title 17; lane total 22; result line 29; body 12 to 13.
 - Tabular figures for all numbers. Sentence case everywhere; no all-caps labels.

@@ -8,13 +8,13 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 - Stop and report, without committing, on: any expected value that differs from the requirements, the brief or the data; any fix that would weaken a test or a tolerance; any conflict between this spec and a steering file; any need for the network, a write under raw/, or a change to data/lines/.
 - The site never computes a race result (principle P-A and the table in design section 1). No count, time or minute value from the brief or the mockups is typed into src/ or into the tests of the real data path.
 - No new wording: every visible string is a row of the copy table in requirements.md.
-- Needs the network and so needs Emmanuel's go-ahead before it runs: task 1 (`npm install`), task 8 (the font file), task 20 (Playwright's browsers), task 22 (the deployed page). Tell Emmanuel before each of these.
+- Needs the network and so needs Emmanuel's go-ahead before it runs: task 1 (`npm install`), task 8 (the font package, `npm install`), task 20 (Playwright's browsers), task 22 (the deployed page). Tell Emmanuel before each of these.
 - Never edit web/public/data/ by hand; it is written only by `python -m pipeline build`.
 
 ## Setup
 
 - [ ] 1. Scaffold web/ (R16.3 to R16.5)
-  - [ ] 1.1 Create web/package.json with scripts `dev` (vite), `build` (vite build), `test` (vitest run), each one command with no `&&`, pipes or shell syntax; dev dependencies vite, typescript, vitest, fast-check, jsdom, axe-core, @playwright/test; runtime dependency maplibre-gl only. (Needs the network: ask first.)
+  - [ ] 1.1 Create web/package.json with scripts `dev` (vite), `build` (vite build), `test` (vitest run), each one command with no `&&`, pipes or shell syntax; dev dependencies vite, typescript, vitest, fast-check, jsdom, axe-core, @playwright/test; runtime dependencies maplibre-gl and @fontsource/barlow-condensed only. (Needs the network: ask first.)
   - [ ] 1.2 vite.config.ts with `base: '/Ghost-Line/'`, a manual chunk so maplibre-gl and src/map/map.ts form a separate chunk, and the dev server serving web/public/data. tsconfig.json strict. vitest config: node environment by default, jsdom for tests under tests/dom.
   - [ ] 1.3 .gitignore entries for web/node_modules and web/dist (the repo's .gitignore must not ignore web/public/data or .kiro).
   - [ ] 1.4 src/config.ts: one constants block with the lead pair, the 300 ms and 2 s and 5 s and 3 s timings, the 900 px and 720 px breakpoints, the vehicle and font sizes, and the Source URLs read from tech.md (repository link, base map style URL, base map credit text). A test reads tech.md and fails if any URL or credit text in config.ts is not in its Source URLs list.
@@ -67,8 +67,8 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - Depends on: task 1
 
 - [ ] 8. Font (R12.2)
-  - [ ] 8.1 Add one self-hosted Barlow Condensed 600 WOFF2 subset at web/public/fonts/ with its OFL licence text beside it, `@font-face` with `font-display: swap`, and a preload link. The file must be supplied or downloaded: Emmanuel decides which before this runs. Stop and ask if it is not in the repository.
-  - [ ] 8.2 Test that only this one font file is referenced and that its licence text is present.
+  - [ ] 8.1 Add the `@fontsource/barlow-condensed` npm package (needs the network: ask first). Import only `@fontsource/barlow-condensed/latin-600.css` (weight 600, Latin subset) so Vite bundles the one WOFF2 it names, with `font-display: swap`; add a preload link for that file. The package's OFL licence file comes with it in node_modules. Credit the font in the credits sheet (task 13.3).
+  - [ ] 8.2 Test that only the latin-600 stylesheet of the package is imported (no other weight or subset), that the built CSS names one WOFF2, and that the package's licence file is present.
   - Depends on: task 7
 
 - [ ] 9. Vehicles (R12.3, section 14)
@@ -110,7 +110,7 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 - [ ] 13. Sheets, Sources, About and When today wins (R1.5, R9, R10, R6.5)
   - [ ] 13.1 view/sheets/sheet.ts: dialog with focus trap, Escape, scrim, slide (220 ms in, 160 ms out), focus returns to the opener; no sliding under reduced motion.
   - [ ] 13.2 sheets/sources.ts: rows from the registry (value and meaning, catalog `label` and link or the race file's own URL, one-line method from the copy table, date line, walk rows with "estimate" and the method entry's `what`, bus rows with route and headsign, the "Exact value" line when a part is not the plain rounding); the tapped row scrolled into view with the --ghost edge; the last row "Sources and credits".
-  - [ ] 13.3 sheets/about.ts: credits list from the catalog labels and links, "Not endorsed by MDOT MTA.", the base map credit text, "original illustrations", the "how it was made" line with the checked-by-hand clause only when `street_order_checked` is true, "MIT licence" and the repository link, the inferred-corner sentence and "Scheduled, not live."; no 1933 line.
+  - [ ] 13.3 sheets/about.ts: credits list from the catalog labels and links, "Not endorsed by MDOT MTA.", the base map credit text, the font credit (Barlow Condensed, SIL Open Font Licence 1.1), "original illustrations", the "how it was made" line with the checked-by-hand clause only when `street_order_checked` is true, "MIT licence" and the repository link, the inferred-corner sentence and "Scheduled, not live."; no 1933 line.
   - [ ] 13.4 sheets/whentoday.ts: the sentence (the slower clause only when above zero; the pair count from summary.pairs), then every entry of `today_wins`; each entry selects that pair and time.
   - [ ] 13.5 Tests: P3 (every number button on the card, for each state, has a registry entry and a row in the sheet, found by crawling the DOM); counts swapped for a different summary.json show the new numbers (P5); credits with the flag true and false; `today_wins` list length equals the file's.
   - Depends on: tasks 10, 12

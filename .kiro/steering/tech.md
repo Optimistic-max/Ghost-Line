@@ -59,6 +59,9 @@ constants block that cites this list. Do not add a URL anywhere else.
 - base map credit text: OpenFreeMap © OpenMapTiles Data from OpenStreetMap
   openfreemap.org; verified Nov 18, 2026. Required credit. Shown in the credits
   sheet and in the video.
+- font: npm package @fontsource/barlow-condensed, weight 600, Latin subset only.
+  SIL Open Font Licence 1.1; the licence file ships in the package. Credited in
+  the credits sheet. No URL: installed from npm, never fetched at run time.
 
 ## Numbers
 

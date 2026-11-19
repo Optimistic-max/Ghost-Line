@@ -22,7 +22,7 @@ intended look on a phone and on a laptop; match them closely.
   --today #F47C5A (today only), --lit #FFF8E0 (trolley windows), result box
   #100C16, --water #1E1A33, --street #2A2137, --alert #FF8A80 (errors only).
   Text contrast at least 4.5:1; faint map text never below 80% opacity.
-- Type: Barlow Condensed 600 (one self-hosted WOFF2 subset) for the wordmark,
+- Type: Barlow Condensed 600 (@fontsource package, Latin subset) for the wordmark,
   corner names, lane titles, times, totals and the result line; the system font
   for everything else. Tabular figures. Sentence case; no all-caps labels.
 - Only the 1938 trolley glows. It is the detailed illustration described in
