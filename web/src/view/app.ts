@@ -396,8 +396,10 @@ export function createApp(options: AppOptions): App {
   const isSlider = (event: Event): boolean => (event.target as Element | null)?.id === 'start-time';
   doc.addEventListener('input', (event) => {
     if (!isSlider(event)) return;
+    // Read the thumb first: stopping the race redraws the time label from the minute before.
+    const minute = Number((event.target as HTMLInputElement).value);
     holdRace();
-    store.dispatch({ type: 'minute/set', minute: Number((event.target as HTMLInputElement).value) });
+    store.dispatch({ type: 'minute/set', minute });
     scheduleRace();
   });
   // The next race starts 300 ms after the thumb is released (R3.5).

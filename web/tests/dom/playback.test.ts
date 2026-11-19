@@ -337,6 +337,8 @@ describe('stop and restart (R3.5)', () => {
     };
     move(720);
     expect(page.app.store.get().race.phase).toBe('idle');
+    expect(page.app.store.get().minute).toBe(720);
+    expect(text(document.querySelector('.slider-time'))).toBe(label12('12:00'));
     page.time.advance(200);
     move(721);
     page.time.advance(200);
