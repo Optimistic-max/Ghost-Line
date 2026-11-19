@@ -30,10 +30,10 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 2.4 Tests on the real files: all 23 files in web/public/data validate; mutated copies each fail (a field removed, a type changed, a row dropped, a trip index out of range, an unknown source id, a null where a number is needed).
   - Depends on: task 1
 
-- [ ] 3. Loading and lookups (R2.3, R14.2, section 3.3, section 8)
-  - [ ] 3.1 src/data/load.ts: fetch index, summary and the pair's race file together; 3 s timeout; one `data-error` result on any failure; retry; in-memory cache of race files by pair; route.geojson loaded separately and never part of the gate.
-  - [ ] 3.2 src/data/lookup.ts: `rowAt(race, hhmm)` through a Map built once; `tripAt`; `nextAfter(list, current, count)` by position (no time comparison); source-row lookup.
-  - [ ] 3.3 Tests with a fake fetch: success; each file failing; invalid JSON; shape failure; timeout with a late arrival not replacing the error; retry recovers; a failed on-demand race file gives the data error. Lookup tests, including `nextAfter` at the end of a list and with fewer than the requested count.
+- [x] 3. Loading and lookups (R2.3, R14.2, section 3.3, section 8)
+  - [x] 3.1 src/data/load.ts: fetch index, summary and the pair's race file together; 3 s timeout; one `data-error` result on any failure; retry; in-memory cache of race files by pair; route.geojson loaded separately and never part of the gate.
+  - [x] 3.2 src/data/lookup.ts: `rowAt(race, hhmm)` through a Map built once; `tripAt`; `nextAfter(list, current, count)` by position (no time comparison); source-row lookup.
+  - [x] 3.3 Tests with a fake fetch: success; each file failing; invalid JSON; shape failure; timeout with a late arrival not replacing the error; retry recovers; a failed on-demand race file gives the data error. Lookup tests, including `nextAfter` at the end of a list and with fewer than the requested count.
   - Depends on: task 2
 
 - [ ] 4. Pure formatting modules (R3.4, R4.4, R7, R8.5, R15.5, sections 6 and 7)
