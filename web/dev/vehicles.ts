@@ -1,8 +1,7 @@
 // Dev only, not part of the build (Vite builds index.html alone). Open
 // /Ghost-Line/dev/vehicles.html on the dev server to see the vehicles at the
 // sizes of ui.md, beside docs/planning/ui-mockups/18-trolley-sheet.png.
-// The route number is read from index.json, as on the race screen; with the
-// made-up fixture (npm run screens) there is none, so the trolleys show none.
+// The route number is read from the real index.json, as on the race screen.
 import { routeNumberOf } from '../src/format/line';
 import { busSvg, markerSvg, trolleySvg, vehicleWidths } from '../src/view/vehicles';
 

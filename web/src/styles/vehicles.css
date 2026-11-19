@@ -1,7 +1,9 @@
-/* The vehicles (screen-brief 3A.2). Only the 1938 trolley glows: its glow is two
-   blurred copies of its outline, separate layers under the drawing. The blur is
-   fixed here and never animated; motion (task 11) changes only their opacity.
-   --ghost and --lit are for the trolley only, --today for the bus only. */
+/* The vehicles (screen-brief 3A.2, mockup 18). Only the 1938 trolley glows: its
+   glow is two blurred copies of the drawing, separate layers under it. The blur
+   is fixed here and never animated; motion (task 11) changes only their opacity.
+   The trolley is painted in --ghost and --lit only: its dark parts (passengers,
+   the inside of the wheels, the gap between the poles) are left unpainted, so
+   the card shows through. --today is for the bus only. */
 
 .trolley,
 .marker,
@@ -26,9 +28,10 @@
   width: 100%;
 }
 
+/* At rest the wide glow is at full strength; while moving it breathes between
+   85% and 100% (screen-brief 3A.6, task 11). */
 .trolley-glow-wide {
   filter: blur(7px);
-  opacity: 0.85;
 }
 
 .trolley-glow-tight {
@@ -39,18 +42,40 @@
   position: relative;
 }
 
+/* What glows: the light inside the body, and a halo round the outline, poles and tyres. */
 .v-glow-lines {
   fill: none;
   stroke: var(--ghost);
+}
+
+.trolley-glow-wide .v-glow-lines {
   stroke-width: 3;
 }
 
-/* The drawing: outline in --ghost, body fill about 15%, windows brighter. */
-.v-body {
-  fill: var(--ghost);
-  fill-opacity: 0.15;
+.trolley-glow-tight .v-glow-lines {
+  stroke-width: 2.4;
+}
+
+.v-glow-poles {
   stroke: var(--ghost);
-  stroke-width: 1.6;
+  stroke-width: 1.2;
+}
+
+.v-glow-body {
+  fill: var(--ghost);
+  fill-opacity: 0.3;
+}
+
+/* The drawing. The body is lit from inside: a warm fill, with its outline over it. */
+.v-body-fill {
+  fill: var(--ghost);
+  fill-opacity: 0.27;
+}
+
+.v-body {
+  fill: none;
+  stroke: var(--ghost);
+  stroke-width: 2;
   stroke-linejoin: round;
 }
 
@@ -85,41 +110,54 @@
   stroke-width: 0.8;
 }
 
-.v-window {
+/* Bright panes of warm lit glass (mockup 18). */
+.v-glass {
   fill: var(--lit);
-  fill-opacity: 0.55;
+  fill-opacity: 0.88;
+}
+
+.v-frame {
+  fill: none;
   stroke: var(--ghost);
-  stroke-width: 1;
+  stroke-width: 1.1;
+}
+
+/* A passenger is a gap in the pane; through it shows the dim car interior, so
+   the passenger reads as a dark silhouette against the bright glass. */
+.v-passenger {
+  fill: var(--lit);
+  fill-opacity: 0.3;
 }
 
 .v-door {
   fill: var(--lit);
-  fill-opacity: 0.3;
+  fill-opacity: 0.68;
   stroke: var(--ghost);
-  stroke-width: 1;
+  stroke-width: 1.1;
 }
 
-/* The passengers are the ghosts: kept faint. */
-.v-passenger {
-  fill: var(--night);
-  opacity: 0.35;
+.v-door-split {
+  stroke: var(--ghost);
+  stroke-width: 0.9;
 }
 
 .v-trim {
+  fill: none;
   stroke: var(--ghost);
   stroke-width: 0.8;
-  stroke-opacity: 0.8;
+  stroke-opacity: 0.85;
 }
 
 .v-sign {
   fill: var(--lit);
-  fill-opacity: 0.7;
+  fill-opacity: 0.55;
 }
 
 .v-lamp {
   fill: var(--lit);
 }
 
+/* The route number on the rear panel, in the display face (mockup 18). */
 .v-number {
   fill: var(--ghost);
   font-family: var(--font-display);
@@ -127,10 +165,18 @@
   font-size: 9px;
 }
 
+/* Wheels: concentric rings over an unpainted (dark) wheel. */
 .v-tyre {
-  fill: var(--night);
+  fill: none;
   stroke: var(--ghost);
-  stroke-width: 2;
+  stroke-width: 2.8;
+}
+
+.v-rim {
+  fill: none;
+  stroke: var(--ghost);
+  stroke-width: 0.9;
+  stroke-opacity: 0.6;
 }
 
 .v-hub circle {
@@ -139,9 +185,12 @@
   stroke-width: 1.4;
 }
 
-.v-hub line {
+/* The one faint mark that shows the hub turning (task 11). */
+.v-hub-mark {
+  fill: none;
   stroke: var(--ghost);
-  stroke-width: 1.2;
+  stroke-width: 1;
+  stroke-opacity: 0.35;
 }
 
 /* The map marker: a solid body with a dark window strip. */

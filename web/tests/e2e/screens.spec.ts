@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { type Page, expect, test } from '@playwright/test';
+import { routeNumberOf } from '../../src/format/line';
 
 const FIXTURE = resolve(import.meta.dirname, '..', 'fixtures', 'fake');
 const OUT = resolve(import.meta.dirname, '..', '..', 'test-results', 'screens');
@@ -59,14 +60,23 @@ for (const size of SIZES) {
   });
 }
 
+// The vehicle sheet reads the real index.json from the dev server (not the
+// fixture), so the trolleys carry the line's real route number, from the data.
 test('vehicle sheet (dev only), beside mockup 18', async ({ browser }) => {
+  const index = JSON.parse(readFileSync(resolve(import.meta.dirname, '..', '..', 'public', 'data', 'index.json'), 'utf8'));
+  const expected = routeNumberOf(index.line);
+  expect(expected).not.toBeNull();
+
   const context = await browser.newContext({ viewport: { width: 1280, height: 420 } });
   const page = await context.newPage();
-  await serveFixture(page);
   await page.goto('./dev/vehicles.html');
   await page.locator('#sheet figure').first().waitFor();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: resolve(OUT, 'vehicles.png'), fullPage: true });
   expect(await page.locator('#sheet [data-vehicle]').count()).toBe(9);
+  // Every trolley carries the number from the data, except the data-error one.
+  const trolleys = await page.locator('#sheet [data-vehicle="trolley"]').count();
+  const numbers = await page.locator('#sheet [data-part="route-number"]').allTextContents();
+  expect(numbers).toEqual(Array(trolleys - 1).fill(expected));
   await context.close();
 });

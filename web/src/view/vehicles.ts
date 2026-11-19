@@ -2,10 +2,12 @@
 // drawings made for this site, not traced from a photograph or a scan.
 //
 // - The 1938 trackless trolley: side view facing right, 240 x 104 proportions.
-//   Two trolley poles rise from the roof and trail back to two overhead wires,
-//   each pole ending in a shoe, with two retriever ropes to the rear. Rubber
-//   tyres with hub rings, and no rails. Its glow is two blurred copies of the
-//   outline, each a separate element, so motion can change their opacity alone.
+//   A tall, rounded body lit from inside, bright windows with dark passenger
+//   silhouettes, two separate trolley poles reaching two overhead wires, each
+//   ending in a shoe, with two retriever ropes to the rear. Rubber tyres with
+//   concentric hub rings, and no rails. Its glow is two blurred copies of the
+//   drawing, each a separate element, so motion can change their opacity alone.
+//   It is drawn in --ghost and --lit only; its dark parts are left unpainted.
 // - The map marker: a separate simplified trolley for small sizes.
 // - Today's bus: flat and plain, no poles, wires or glow.
 //
@@ -36,43 +38,112 @@ function svg(className: string, viewBox: string, width: number, parts: string[])
 
 // ---- The 1938 trackless trolley -------------------------------------------------
 
+// Geometry, in units of the 240 x 104 view box. The box keeps the proportions of
+// screen-brief 3A.2, so a drawing's height follows from its width alone. Every
+// coordinate is written out here; nothing is computed.
 const TROLLEY_VIEWBOX = '0 0 240 104';
 
-/** The body: curved rear, crowned roof, sloping streamlined front. */
-const BODY = 'M12 86 L224 86 Q234 86 234 76 L232 60 Q228 44 210 37 Q120 30 30 37 Q8 40 6 56 L6 80 Q6 86 12 86 Z';
+/**
+ * The body: a tall 1930s car (mockup 18). Rounded rear, a gently crowned roof,
+ * a front that curves down to the bumper, and wheel arches over both wheels.
+ */
+const BODY = [
+  'M14 25.5 Q100 23.5 188 25.5', // roof
+  'C208 26 222 34 228 48 C233 60 236 72 236 82 Q236 87.5 230.5 87.5', // front
+  'L207 87.5 A17 17 0 0 0 173 87.5 L73 87.5 A17 17 0 0 0 39 87.5 L8 87.5', // floor and wheel arches
+  'Q2.5 87.5 2.5 82 L2.5 36 Q2.5 25.5 14 25.5 Z', // rear
+].join(' ');
 
-/** The two poles, from their base on the roof back to the shoe on each wire. */
-const POLES: [x1: number, y1: number, x2: number, y2: number][] = [
-  [154, 31, 40, 5],
-  [146, 31, 50, 10],
+/** The two overhead wires. */
+const WIRE_HEIGHTS = [2.5, 11];
+
+/**
+ * The two trolley poles, from the shoe on each wire forward to the pole base
+ * on the roof. They are parallel and about 7 units apart along their whole
+ * length, so they stay two separate lines at the smallest size (104 px).
+ */
+const POLES: [shoeX: number, shoeY: number, baseX: number, baseY: number][] = [
+  [6.5, 2.5, 98, 17.5],
+  [14.5, 11, 106, 26],
 ];
 
-/** The two overhead wires, at the height of each shoe. */
-const WIRE_HEIGHTS = [5, 10];
-
-/** Wheel centres, and the top and bottom of the notch on each hub ring that shows it turning. */
-const WHEELS: [cx: number, cy: number, notchTop: number, notchBottom: number][] = [
-  [52, 87, 82, 85],
-  [192, 87, 82, 85],
+/** The shoes, centred on the pole tips: top-left corner of each. */
+const SHOES: [x: number, y: number][] = [
+  [3, 1.3],
+  [11, 9.8],
 ];
 
-/** Five side windows: three before the centre door, two between the doors. */
-const WINDOW_XS = [24, 46, 68, 110, 132];
+/** The retriever ropes, from each pole tip down to the rear of the car. */
+const ROPES = ['M7 4 C3 12 2 22 2.6 32.5', 'M15 12.5 C10.5 17 8.5 21.5 8.4 26.3'];
 
-/** Three faint passengers, the "ghosts", in the second, fourth and fifth windows. */
-const PASSENGERS: [cx: number, cy: number][] = [
-  [55, 50],
-  [119, 50],
-  [141, 50],
+/** Five side windows: three before the centre door, two between the doors. Left edges. */
+const WINDOW_XS = [15, 38, 61, 109, 131];
+
+/** The passengers sit in the second, fourth and fifth windows: each window's left edge and centre. */
+const PASSENGER_WINDOWS: [windowX: number, cx: number][] = [
+  [38, 46.5],
+  [109, 117.5],
+  [131, 139.5],
 ];
 
-/** The outline drawn again, blurred, under the trolley: body, poles and tyres, with no parts named. */
-function trolleyOutline(): string[] {
+/** The cab window, following the curve of the front. */
+const CAB = 'M179 34 L204 34 Q217 35 222.5 53 L179 53 Z';
+
+/** The two double-leaf doors, centre and front: left edge and the line between the leaves. */
+const DOORS: [x: number, split: number][] = [
+  [83, 93],
+  [152, 162],
+];
+
+/** The two belt rails, broken by the doors: height and where each ends at the front. */
+const BELTS: [y: number, frontEnd: number][] = [
+  [58.5, 229.5],
+  [64.5, 231],
+];
+
+/** The lower trim line, broken by the wheel arches and the doors. */
+const TRIM = 'M3 80 H38.5 M73.5 80 H83 M103 80 H152 M207.5 80 H233';
+
+/** Wheel centres, under the arches. */
+const WHEELS: [cx: number, cy: number][] = [
+  [56, 88.5],
+  [190, 88.5],
+];
+
+/** A window's outline: 17 x 19 units with rounded corners, from its left edge. */
+function windowOutline(x: number): string {
+  return `M${x} 36.5 a2.5 2.5 0 0 1 2.5 -2.5 h12 a2.5 2.5 0 0 1 2.5 2.5 v14 a2.5 2.5 0 0 1 -2.5 2.5 h-12 a2.5 2.5 0 0 1 -2.5 -2.5 Z`;
+}
+
+/** A passenger seen through a window: a head and shoulders, standing on the sill. */
+function passenger(cx: number): string {
+  return `M${cx} 42.8 m-3.2 0 a3.2 3.2 0 1 0 6.4 0 a3.2 3.2 0 1 0 -6.4 0 Z M${cx} 53 m-6 0 c0 -7.5 12 -7.5 12 0 Z`;
+}
+
+/** The body with the window glass cut out, so the light inside shows through the windows. */
+const BODY_WITH_GLASS = [BODY, ...WINDOW_XS.map(windowOutline), CAB].join(' ');
+
+/**
+ * The drawing again, blurred, under the trolley, with no parts named (mockup 18).
+ * The wide layer is the light inside the car (the body, with the glass cut out
+ * so the passengers stay dark) and a soft halo round the outline, poles and
+ * tyres. The tight layer keeps the outline and tyres crisp; it leaves out the
+ * poles, so the gap between them stays dark.
+ */
+function trolleyGlow(wide: boolean): string[] {
+  const inside = wide
+    ? [
+        `<path class="v-glow-body" fill-rule="evenodd" d="${BODY_WITH_GLASS}"/>`,
+        '<g class="v-glow-poles">',
+        ...POLES.map(([x1, y1, x2, y2]) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`),
+        '</g>',
+      ]
+    : [];
   return [
+    ...inside,
     '<g class="v-glow-lines">',
     `<path d="${BODY}"/>`,
-    ...POLES.map(([x1, y1, x2, y2]) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`),
-    ...WHEELS.map(([cx, cy]) => `<circle cx="${cx}" cy="${cy}" r="12"/>`),
+    ...WHEELS.map(([cx, cy]) => `<circle cx="${cx}" cy="${cy}" r="13"/>`),
     '</g>',
   ];
 }
@@ -80,35 +151,53 @@ function trolleyOutline(): string[] {
 function trolleyArt(routeNumber: string | null): string[] {
   return [
     ...WIRE_HEIGHTS.map((y) => `<line class="v-wire" data-part="wire" x1="0" y1="${y}" x2="240" y2="${y}"/>`),
-    '<path class="v-rope" data-part="rope" d="M41 6 C 24 20, 13 34, 9 52"/>',
-    '<path class="v-rope" data-part="rope" d="M51 11 C 32 25, 18 38, 13 54"/>',
+    ...ROPES.map((d) => `<path class="v-rope" data-part="rope" d="${d}"/>`),
     ...POLES.map(([x1, y1, x2, y2]) => `<line class="v-pole" data-part="pole" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`),
-    ...POLES.map(([, , x, y]) => `<rect class="v-shoe" data-part="shoe" x="${x}" y="${y}" width="7" height="2.4" rx="1"/>`),
+    ...SHOES.map(([x, y]) => `<rect class="v-shoe" data-part="shoe" x="${x}" y="${y}" width="7" height="2.4" rx="1"/>`),
+    // The body is lit from inside: a warm fill with the glass cut out, then its outline.
+    `<path class="v-body-fill" fill-rule="evenodd" d="${BODY_WITH_GLASS}"/>`,
     `<path class="v-body" data-part="body" d="${BODY}"/>`,
-    '<rect class="v-pole-base" data-part="pole-base" x="140" y="30" width="20" height="4" rx="1.5"/>',
-    ...WINDOW_XS.map((x) => `<rect class="v-window" data-part="window" x="${x}" y="44" width="18" height="15" rx="2"/>`),
-    '<path class="v-window" data-part="cab-window" d="M174 44 L210 44 Q223 46 228 59 L174 59 Z"/>',
-    ...PASSENGERS.map(
-      ([cx, cy]) =>
-        `<g class="v-passenger" data-part="passenger"><circle cx="${cx}" cy="${cy}" r="3"/><path d="M${cx} ${cy} m-5 9 q5 -7 10 0 z"/></g>`,
+    '<rect class="v-pole-base" data-part="pole-base" x="92" y="17.5" width="30" height="8.5" rx="2"/>',
+    // Bright panes. A passenger is a gap in the pane, so the dimmer car interior shows as a dark silhouette.
+    ...WINDOW_XS.map((x) => {
+      const seated = PASSENGER_WINDOWS.find(([wx]) => wx === x);
+      const glass = seated ? `${windowOutline(x)} ${passenger(seated[1])}` : windowOutline(x);
+      return [
+        '<g data-part="window">',
+        `<path class="v-glass" fill-rule="evenodd" d="${glass}"/>`,
+        seated ? `<path class="v-passenger" data-part="passenger" d="${passenger(seated[1])}"/>` : '',
+        `<path class="v-frame" d="${windowOutline(x)}"/>`,
+        '</g>',
+      ].join('');
+    }),
+    `<g data-part="cab-window"><path class="v-glass" d="${CAB}"/><path class="v-frame" d="${CAB}"/></g>`,
+    // Two double-leaf doors, centre and front, nearly to the floor; the line between the leaves.
+    ...DOORS.map(([x, split]) =>
+      [
+        '<g data-part="door">',
+        `<rect class="v-door" x="${x}" y="33.5" width="20" height="50.5" rx="1.5"/>`,
+        `<line class="v-door-split" x1="${split}" y1="33.5" x2="${split}" y2="84"/>`,
+        '</g>',
+      ].join(''),
     ),
-    // Two double-leaf doors, centre and front, nearly to the floor.
-    '<g data-part="door"><rect class="v-door" x="91" y="42" width="15" height="42" rx="1"/><line class="v-trim" x1="98.5" y1="42" x2="98.5" y2="84"/></g>',
-    '<g data-part="door"><rect class="v-door" x="155" y="42" width="15" height="42" rx="1"/><line class="v-trim" x1="162.5" y1="42" x2="162.5" y2="84"/></g>',
-    '<line class="v-trim" data-part="belt" x1="7" y1="64" x2="233" y2="64"/>',
-    '<line class="v-trim" data-part="belt" x1="7" y1="67" x2="233" y2="67"/>',
-    '<line class="v-trim" data-part="trim" x1="7" y1="79" x2="233" y2="79"/>',
-    '<rect class="v-sign" data-part="destination-sign" x="182" y="38.5" width="30" height="3.5" rx="1"/>',
-    '<circle class="v-lamp" data-part="headlamp" cx="230" cy="71" r="2.6"/>',
-    '<rect class="v-bumper" data-part="bumper" x="226" y="83" width="11" height="3" rx="1.5"/>',
-    '<rect class="v-bumper" data-part="bumper" x="3" y="83" width="11" height="3" rx="1.5"/>',
-    routeNumber === null ? '' : `<text class="v-number" data-part="route-number" x="18" y="76">${escape(routeNumber)}</text>`,
-    ...WHEELS.map(([cx, cy, top, bottom]) =>
+    ...BELTS.map(
+      ([y, end]) => `<path class="v-trim" data-part="belt" d="M3 ${y} H83 M103 ${y} H152 M172 ${y} H${end}"/>`,
+    ),
+    `<path class="v-trim" data-part="trim" d="${TRIM}"/>`,
+    '<rect class="v-sign" data-part="destination-sign" x="181" y="29.5" width="20" height="3" rx="1"/>',
+    '<circle class="v-lamp" data-part="headlamp" cx="231" cy="73" r="2.6"/>',
+    '<rect class="v-bumper" data-part="bumper" x="229" y="85" width="10" height="3" rx="1.5"/>',
+    '<rect class="v-bumper" data-part="bumper" x="0.5" y="85" width="10" height="3" rx="1.5"/>',
+    // The route number on the rear panel, under the belt rails (mockup 18).
+    routeNumber === null ? '' : `<text class="v-number" data-part="route-number" x="15" y="76.5">${escape(routeNumber)}</text>`,
+    // Wheels: tyre, rim and hub as concentric rings; the hub carries one faint mark so turning shows (task 11).
+    ...WHEELS.map(([cx, cy]) =>
       [
         '<g data-part="wheel">',
-        `<circle class="v-tyre" data-part="tyre" cx="${cx}" cy="${cy}" r="12"/>`,
+        `<circle class="v-tyre" data-part="tyre" cx="${cx}" cy="${cy}" r="13"/>`,
+        `<circle class="v-rim" data-part="rim" cx="${cx}" cy="${cy}" r="9"/>`,
         `<g class="v-hub" data-part="hub" style="transform-origin: ${cx}px ${cy}px">`,
-        `<circle cx="${cx}" cy="${cy}" r="5"/><line x1="${cx}" y1="${top}" x2="${cx}" y2="${bottom}"/>`,
+        `<circle cx="${cx}" cy="${cy}" r="4.2"/><path class="v-hub-mark" d="M${cx} ${cy} m0 -4.2 v-3.6"/>`,
         '</g>',
         `<circle class="v-hub-dot" cx="${cx}" cy="${cy}" r="1.6"/>`,
         '</g>',
@@ -126,8 +215,8 @@ export function trolleySvg(options: { routeNumber: string | null; width: number 
   const { routeNumber, width } = options;
   return [
     '<span class="trolley" data-vehicle="trolley">',
-    svg('trolley-glow trolley-glow-wide', TROLLEY_VIEWBOX, width, trolleyOutline()),
-    svg('trolley-glow trolley-glow-tight', TROLLEY_VIEWBOX, width, trolleyOutline()),
+    svg('trolley-glow trolley-glow-wide', TROLLEY_VIEWBOX, width, trolleyGlow(true)),
+    svg('trolley-glow trolley-glow-tight', TROLLEY_VIEWBOX, width, trolleyGlow(false)),
     svg('trolley-art', TROLLEY_VIEWBOX, width, trolleyArt(routeNumber)),
     '</span>',
   ].join('');
