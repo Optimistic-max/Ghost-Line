@@ -165,6 +165,7 @@ const HELPERS = [
   'TODAY_WINS_THIS_RACE',
   'ACROSS_THIS_LINE',
   'WHEN_TODAY_WINS',
+  'NOT_LIVE',
 ];
 
 const table = copyTable();
@@ -251,6 +252,11 @@ describe('helpers', () => {
     expect([C.TODAY_WINS_THIS_RACE, C.ACROSS_THIS_LINE, counts, C.WHEN_TODAY_WINS].join(' ')).toBe(
       RENDERED.honestLineTodayWins,
     );
+  });
+
+  it('NOT_LIVE is the fixed phrase that ends the Ready line', () => {
+    expect(C.NOT_LIVE).toBe(ALLOWED_PHRASE);
+    expect(RENDERED.ready.endsWith(` ${C.NOT_LIVE}`)).toBe(true);
   });
 
   it('everyMinutesOr is the 1938 spacing inside the frequency sentence', () => {

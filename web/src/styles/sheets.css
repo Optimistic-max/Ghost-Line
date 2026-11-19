@@ -1,0 +1,140 @@
+/* The sheets (mockups 10, 11, 17): Sources, About and credits, When today wins.
+   Their slide and the scrim are in the layout sheets; this is their content. */
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sheet-handle {
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  margin-top: -4px;
+  border-radius: 2px;
+  background: var(--muted);
+  opacity: 0.45;
+}
+
+.sheet-title {
+  font-size: var(--fs-result);
+  line-height: 1.1;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sheet-title:focus {
+  outline: none;
+}
+
+.sheet-body ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sheet-close {
+  flex: none;
+  margin-top: 6px;
+}
+
+/* ---- Sources rows ------------------------------------------------------------ */
+
+.source-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.source-row p + p {
+  margin-top: 2px;
+}
+
+/* The tapped number's row: tinted, with the --ghost left edge (R9.6). */
+.source-row.is-target {
+  margin: 0 calc(var(--pad) * -1);
+  padding: 10px var(--pad);
+  background: color-mix(in srgb, var(--ghost) 7%, transparent);
+  box-shadow: inset 3px 0 0 var(--ghost);
+}
+
+.source-head {
+  color: var(--muted);
+}
+
+.source-value {
+  color: var(--ink);
+  font-size: var(--fs-lane-total);
+  line-height: 1.15;
+}
+
+.source-row a,
+.credit a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.source-credits {
+  border-bottom: 0;
+}
+
+/* ---- Credits and the today-wins list ------------------------------------------- */
+
+.credit {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.whentoday-sentence {
+  color: var(--muted);
+}
+
+.today-wins {
+  margin-top: 8px;
+}
+
+.today-win {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  color: var(--ink);
+}
+
+/* ---- The info button ------------------------------------------------------------ */
+
+/* "i" in a ring at the top right: in the phone's top bar, at the top of the
+   desktop race column (mockups 01 and 13). */
+.info {
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  right: var(--pad);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+@media (min-width: 900px) {
+  .info {
+    top: 13px;
+    right: var(--column-pad);
+  }
+
+  /* The desktop sheet slides in from the side: no handle, and a title that fits the column on one line (mockup 17). */
+  .sheet-handle {
+    display: none;
+  }
+
+  .sheet-title {
+    font-size: 26px;
+  }
+}

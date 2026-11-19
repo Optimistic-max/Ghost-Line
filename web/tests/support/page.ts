@@ -12,11 +12,16 @@ import { type FakeTime, fakeTime } from './time';
 
 const BASE = '/Ghost-Line/data/';
 
-/** A fetch serving files from a repository folder; `fail` names files that fail. */
-export function folderFetch(folder: string, fail: ReadonlySet<string> = new Set()): FetchLike {
+/**
+ * A fetch serving files from a repository folder; `fail` names files that fail,
+ * and `override` serves changed copies of files by name (for example a
+ * summary.json with other counts).
+ */
+export function folderFetch(folder: string, fail: ReadonlySet<string> = new Set(), override: Record<string, unknown> = {}): FetchLike {
   return async (url) => {
     const name = url.slice(BASE.length);
     const path = `${folder}/${name}`;
+    if (name in override) return { ok: true, status: 200, json: async () => structuredClone(override[name]) };
     const ok = !fail.has(name) && repoFileExists(path);
     return { ok, status: ok ? 200 : 404, json: async () => readRepoJson(path) };
   };
@@ -35,6 +40,8 @@ export type PageOptions = {
   time?: FakeTime;
   /** The pair the loader requires index.json to list: the lead pair, or one of the fixture's. */
   leadPair?: Pair;
+  /** Changed copies of data files, by file name. */
+  override?: Record<string, unknown>;
 };
 
 /** Mount index.html's body and boot the app. Resolves when the first boot has finished. */
@@ -48,7 +55,7 @@ export async function bootPage(options: PageOptions = {}): Promise<App> {
       baseUrl: BASE,
       timeoutMs: TIMINGS.dataTimeoutMs,
       leadPair: options.leadPair ?? LEAD_PAIR,
-      fetch: folderFetch(options.folder ?? 'web/public/data', options.fail),
+      fetch: folderFetch(options.folder ?? 'web/public/data', options.fail, options.override),
     }),
     // 20:00 in New York is outside the slider range, so the start falls back to 10:00.
     now: () => options.now ?? new Date('2026-11-04T20:00:00-05:00'),

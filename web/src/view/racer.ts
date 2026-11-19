@@ -152,6 +152,8 @@ export function createRacer(root: ParentNode, registry: SourceRegistry, input: R
       for (const b of lanes) {
         b.el.dataset['stage'] = 'finished';
         b.el.classList.remove('is-moving');
+        // The status line's next car or bus leaves the screen, and so its Sources row.
+        b.status?.querySelectorAll<HTMLElement>('button.num').forEach((n) => registry.delete(n.dataset['source'] ?? ''));
         b.status?.remove();
         b.status = null;
         if (b.legend) b.legend.hidden = false;

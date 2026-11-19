@@ -39,6 +39,8 @@ type State = {
   query?: string;
   /** A racing state: this many real milliseconds into the race (0 is the pause before it starts). */
   racing?: number;
+  /** A control to click before the picture, to open a sheet. */
+  open?: string;
 };
 
 const STATES: State[] = [
@@ -53,6 +55,10 @@ const STATES: State[] = [
   { file: '16-desktop-todaywins', size: DESKTOP, at: '11:23', query: westToPreston },
   { file: '05-photofinish', size: PHONE, at: '10:30' },
   { file: '12-reducedmotion', size: PHONE, at: '12:00' },
+  // The sheets, opened from a number (Sources at its row) and from the info button.
+  { file: '10-sources', size: PHONE, at: '20:00', open: '#card-scroll button.num[data-source="wait-1938"]' },
+  { file: '11-credits', size: PHONE, at: '20:00', open: '#app > button.info' },
+  { file: '17-desktop-sources', size: DESKTOP, at: '20:00', open: '#card-scroll button.num[data-source="wait-1938"]' },
 ];
 
 async function fontsReady(page: Page): Promise<void> {
@@ -82,6 +88,10 @@ async function shoot(browser: Browser, state: State): Promise<void> {
     await page.clock.runFor(TIMINGS.racePauseMs);
     await page.clock.runFor(state.racing + 20);
     await expect(page.locator('.result')).toHaveCount(0);
+  }
+  if (state.open) {
+    await page.locator(state.open).click();
+    await page.locator('.sheet.is-open').waitFor();
   }
   // CSS animations run on the real clock: finite ones (the trolley's fade-in) are shown at their end, loops at rest.
   await page.screenshot({ path: resolve(OUT, `${state.file}.png`), animations: 'disabled' });

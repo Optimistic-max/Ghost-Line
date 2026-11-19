@@ -72,10 +72,11 @@
     --pad: var(--column-pad);
   }
 
+  /* The column's content starts under the info button's row (mockups 13 to 17). */
   .card-scroll {
     flex: none;
     overflow: visible;
-    padding: var(--column-pad) var(--column-pad) 0;
+    padding: var(--topbar-h) var(--column-pad) 0;
   }
 
   /* The pair names stay on one line; app.ts shrinks their font for a long pair (R1.3). */

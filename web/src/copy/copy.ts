@@ -33,9 +33,12 @@ export function lineLabel(n: string, year: string): string {
   return `No. ${n}, ${year}`;
 }
 
+/** The fixed phrase (product rule 1): the end of the schedule line, and a line of its own in About (R10.5). */
+export const NOT_LIVE = 'Scheduled, not live.';
+
 /** The schedule line; `date` is service_date as "Nov 4, 2026". */
 export function ready(date: string): string {
-  return `Weekday schedule as of ${date}. Scheduled, not live.`;
+  return `Weekday schedule as of ${date}. ${NOT_LIVE}`;
 }
 
 export const START_IS_NOW = 'Start time is the time now.';

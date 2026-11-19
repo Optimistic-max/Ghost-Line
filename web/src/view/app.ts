@@ -5,14 +5,14 @@
 // the result is inserted at the result moment, and the finish is applied in
 // place, so nothing is rebuilt while it moves.
 import { BREAKPOINTS, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
-import { DATA_ERROR, DATA_INCOMPLETE, TRY_AGAIN, lineLabel } from '../copy/copy';
+import { ABOUT_AND_CREDITS, DATA_ERROR, DATA_INCOMPLETE, TRY_AGAIN, lineLabel } from '../copy/copy';
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
 import { sliderRange } from '../data/lookup';
 import type { Index, Pair, RaceFile, Summary } from '../data/types';
 import { routeNumberOf, yearOf } from '../format/line';
 import { decode } from '../format/share';
-import { defaultStart } from '../format/time';
+import { defaultStart, minutesOf } from '../format/time';
 import { type PageTimers, browserTimers, createClock } from '../play/clock';
 import { initialMotion, motionClass, watchMotion } from '../play/motion';
 import { SPARK, type Timeline, buildTimeline, sparkGapMs } from '../play/timeline';
@@ -33,9 +33,14 @@ import {
   resultElements,
 } from './card';
 import { h, setVar } from './dom';
+import { GLYPH } from './glyphs';
 import { fitOneLine } from './layout';
 import { SourceRegistry } from './numbers';
 import { type Racer, createRacer } from './racer';
+import { aboutSheet } from './sheets/about';
+import { type OpenSheet, type SheetParts, openSheet } from './sheets/sheet';
+import { showTarget, sourcesSheet } from './sheets/sources';
+import { whenTodaySheet } from './sheets/whentoday';
 import { updateSlider } from './slider';
 import { type Layout, vehicleWidths } from './vehicles';
 
@@ -93,7 +98,21 @@ export function createApp(options: AppOptions): App {
   const buttons = byId(doc, 'card-buttons');
   const foot = byId(doc, 'card-footer');
   const label = byId(doc, 'line-label');
+  const sheetRoot = byId(doc, 'sheet-root');
+  const scrim = byId(doc, 'scrim');
   const announcer = createAnnouncer(doc.getElementById('result-status'), timers.later, timers.cancel);
+  // The info button opens About and credits; it shows once the data is in (screen-brief 3A.1).
+  const info = h(
+    'button',
+    { type: 'button', class: 'icon-button info', 'data-action': 'about', 'aria-label': ABOUT_AND_CREDITS, hidden: true },
+    GLYPH.info,
+  );
+  byId(doc, 'app').append(info);
+
+  /** The sheet on screen, what it shows, and the control outside any sheet that opened it. */
+  let sheet: OpenSheet | null = null;
+  let sheetShown = '';
+  let opener: HTMLElement | null = null;
 
   let drawn: Drawn | null = null;
   let racer: Racer | null = null;
@@ -146,6 +165,61 @@ export function createApp(options: AppOptions): App {
     const year = data.status === 'ready' ? yearOf(data.index.effective) : null;
     label.textContent = n && year ? lineLabel(n, year) : '';
     label.hidden = !(n && year);
+    info.hidden = data.status !== 'ready';
+  }
+
+  /** The parts of the sheet the state names; none for the corner picker until task 14. */
+  function sheetParts(state: AppState): SheetParts | null {
+    if (state.data.status !== 'ready') return null;
+    switch (state.sheet) {
+      case 'sources':
+        return sourcesSheet(registry, state.data.index, state.sourcesTarget);
+      case 'about':
+        return aboutSheet(state.data.index);
+      case 'whentoday':
+        return whenTodaySheet(registry, state.data.index, state.data.summary);
+      default:
+        return null;
+    }
+  }
+
+  /** Open, swap or close the sheet to match the state (R1.5). */
+  function syncSheet(): void {
+    const state = store.get();
+    const shown = state.sheet === null ? '' : `${state.sheet} ${state.sourcesTarget ?? ''}`;
+    if (shown === sheetShown) return;
+    sheetShown = shown;
+    const parts = sheetParts(state);
+    const old = sheet;
+    sheet = null;
+    if (old) {
+      // Numbers only a sheet showed (the ride-verdict counts) leave the registry with it.
+      for (const b of old.el.querySelectorAll<HTMLElement>('button.num')) {
+        const id = b.dataset['source'] ?? '';
+        if (!scroll.querySelector(`[data-source="${id}"]`)) registry.delete(id);
+      }
+      old.close(parts === null);
+    }
+    if (!parts) return;
+    sheet = openSheet(doc, sheetRoot, scrim, parts, opener, () => store.dispatch({ type: 'sheet/close' }));
+    if (parts.name === 'sources') showTarget(sheet.el);
+  }
+
+  /** A "When today wins" entry: that pair at that time, raced at once (R6.5). */
+  function selectTodayWin(k: number): void {
+    const state = store.get();
+    if (state.data.status !== 'ready') return;
+    const win = state.data.summary.today_wins[k];
+    if (!win) return;
+    const pair: Pair = { origin: win.origin, dest: win.dest };
+    const samePairNow = samePair(state.pair, pair);
+    stopRace();
+    store.dispatch({ type: 'sheet/close' });
+    store.dispatch({ type: 'race/stop' });
+    store.dispatch({ type: 'pair/set', pair });
+    store.dispatch({ type: 'minute/set', minute: minutesOf(win.t) });
+    // A new pair starts when its race file is in; the same pair starts after the usual pause.
+    if (samePairNow) scheduleRace();
   }
 
   /** The motion level as a root class, so the stylesheets can gate the extra motion (design 9.4). */
@@ -396,13 +470,41 @@ export function createApp(options: AppOptions): App {
       held = false;
     }
     render();
+    syncSheet();
     if (pairChanged) void changePair();
   });
 
   doc.addEventListener('click', (event) => {
-    const target = (event.target as Element | null)?.closest<HTMLElement>('[data-action]');
+    if (event.target === scrim) {
+      store.dispatch({ type: 'sheet/close' });
+      return;
+    }
+    const target = (event.target as Element | null)?.closest<HTMLElement>('[data-action], button.num');
     if (!target) return;
+    // Focus goes back to the control outside the sheets that opened the first one.
+    if (!target.closest('.sheet')) opener = target;
+    // Every number opens the Sources sheet at its row (R9.1).
+    if (target.matches('button.num')) {
+      store.dispatch({ type: 'sheet/open', sheet: 'sources', target: target.dataset['source'] ?? '' });
+      return;
+    }
     switch (target.dataset['action']) {
+      case 'sources':
+        store.dispatch({ type: 'sheet/open', sheet: 'sources' });
+        break;
+      case 'about':
+      case 'credits':
+        store.dispatch({ type: 'sheet/open', sheet: 'about' });
+        break;
+      case 'whentoday':
+        store.dispatch({ type: 'sheet/open', sheet: 'whentoday' });
+        break;
+      case 'close-sheet':
+        store.dispatch({ type: 'sheet/close' });
+        break;
+      case 'today-win':
+        selectTodayWin(Number(target.dataset['index']));
+        break;
       case 'minus':
         holdRace();
         store.dispatch({ type: 'minute/step', step: -1 });
@@ -444,6 +546,10 @@ export function createApp(options: AppOptions): App {
   };
   doc.addEventListener('pointerup', release);
   doc.addEventListener('pointercancel', release);
+  // Escape shuts an open sheet even when focus has left it.
+  doc.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && store.get().sheet !== null) store.dispatch({ type: 'sheet/close' });
+  });
 
   // The display font arrives after the first paint; the pair names are fitted again with its real widths.
   void doc.fonts?.ready.then(fitPairRow);

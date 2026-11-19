@@ -70,6 +70,9 @@ export const FONT_SIZES = {
   },
 } as const;
 
+/** Where the licence file sits in the repository, for the "MIT licence" link (R10.3). */
+export const LICENCE_PATH = '/blob/main/LICENSE';
+
 /**
  * Links and credit text from the "Source URLs" list in .kiro/steering/tech.md.
  * Do not add a URL anywhere else in src/; a test checks both rules.

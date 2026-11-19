@@ -50,6 +50,8 @@ export type SourceSpec = {
   date: DateKind;
   /** For bus numbers: the trip's route and headsign (the only place headsigns are shown). */
   trip?: { route: string; headsign: string };
+  /** For a bus wait, ride or total: the trip's own line, naming its route and headsign, when the method line does not. */
+  tripLine?: string;
   /** A walk: the row adds "estimate" and the method entry's own text (R9.5). */
   walk?: boolean;
   /** A shown part that is not the plain rounding of its stored value (R7.7). */
@@ -86,6 +88,11 @@ function exactOf(phase: Phase, lane: Lane): SourceSpec['exact'] {
 
 function busTrip(trip: Trip): SourceSpec['trip'] {
   return { route: trip.route, headsign: trip.headsign_display };
+}
+
+/** "CityLink Lime toward Harbor East leaves stop 8564 at 9:17." */
+function tripLineOf(trip: Trip): string {
+  return methodBusTrip(trip.route_display, trip.headsign_display, trip.board.stop_id, shortClock(dropSeconds(trip.dep)));
 }
 
 /** The numbers of one race on screen: phases, totals, next departures, margin and board times. */
@@ -278,6 +285,7 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
         method: METHOD_WAIT_BUS,
         date: 'feed',
         trip: busTrip(trip),
+        tripLine: tripLineOf(trip),
         exact: exactOf(wait, lane),
       },
       wait.shown,
@@ -292,6 +300,7 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
         method: METHOD_RIDE_BUS,
         date: 'feed',
         trip: busTrip(trip),
+        tripLine: tripLineOf(trip),
         exact: exactOf(ride, lane),
       },
       ride.shown,
@@ -307,6 +316,7 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
         method: methodTotalToday(start),
         date: 'feed',
         trip: busTrip(trip),
+        tripLine: tripLineOf(trip),
       },
       lane.shownTotal,
     ),
