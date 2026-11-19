@@ -31,6 +31,11 @@
   --fs-result: 29px;
   --fs-body: 13px;
   --fs-body-small: 12px;
+  /* The phase legend, as drawn in mockups 03 and 15 (one line per lane). */
+  --fs-legend: 10.5px;
+  /* The drawn size of the small square controls (minus, plus, swap) in the
+     mockups; each keeps a 44 x 44 px hit area around it. */
+  --icon-button: 30px;
 
   /* Phone zones (screen-brief 3A): top bar 40, map 150, card from 181 down. */
   --topbar-h: 40px;
@@ -65,6 +70,8 @@
     --fs-headline-line: 14px;
     --fs-corner: 25px;
     --fs-result: 38px;
+    --fs-legend: 11px;
+    --icon-button: 24px;
 
     --topbar-h: 56px;
     --column-w: 440px;

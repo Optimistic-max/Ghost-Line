@@ -15,6 +15,7 @@
 // aria-hidden. Sizes are style, not data (ui.md); they come from config.ts.
 import { ROUTE_NUMBER_MIN_WIDTH, VEHICLE_SIZES } from '../config';
 
+/** The two layouts (R1.1): phone below the desktop breakpoint, desktop from it up. */
 export type Layout = 'phone' | 'desktop';
 
 export type VehicleWidths = { trolleyRacing: number; trolleyFinished: number; bus: number; marker: number };

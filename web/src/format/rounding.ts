@@ -21,6 +21,9 @@ export function roundTotal(stored: number): number {
 /** The same rule for any single stored value, such as a gap. */
 export const roundMinutes = roundTotal;
 
+/** The same rule for a stored distance in metres, as the Sources sheet shows it. */
+export const roundWhole = roundTotal;
+
 export type Rounded = { shownTotal: number; shown: number[] };
 
 /**

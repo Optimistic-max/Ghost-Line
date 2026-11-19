@@ -38,12 +38,22 @@
     position: absolute;
     top: var(--topbar-h);
     left: var(--column-pad);
-    max-width: 520px;
+    max-width: 470px;
     z-index: 1;
+  }
+
+  .headline-title {
     font-family: var(--font-display);
     font-weight: 600;
     font-size: var(--fs-headline);
     line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .headline-line {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: var(--fs-headline-line);
   }
 
   .card {
@@ -55,6 +65,11 @@
     overflow-y: auto;
     border-radius: 0;
     border-left: 1px solid var(--line);
+  }
+
+  /* Inside the race column the side padding is the column's own. */
+  .card {
+    --pad: var(--column-pad);
   }
 
   .card-scroll {

@@ -1,2 +1,5 @@
-// Boot entry. The race screen is mounted here in later tasks.
-export {};
+// Boot entry: start the race screen in the static shell of index.html, which
+// links the stylesheet.
+import { startPage } from './view/app';
+
+startPage(document, window);

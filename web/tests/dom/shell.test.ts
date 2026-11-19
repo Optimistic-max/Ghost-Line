@@ -1,7 +1,7 @@
 // Task 7.2: the static page shell in index.html.
 import { describe, expect, it } from 'vitest';
 import { LEAD_PAIR } from '../../src/config';
-import { LOADING, SAME_RIDE, WORDMARK } from '../../src/copy/copy';
+import { HEADLINE_LINE, LOADING, SAME_RIDE, WORDMARK } from '../../src/copy/copy';
 import { cornerName } from '../../src/data/lookup';
 import { bannedTerms } from '../support/banned';
 import { readRepoText } from '../support/files';
@@ -48,7 +48,7 @@ describe('index.html shell', () => {
   });
 
   it('writes no wording of its own: every text is a copy string, a corner name or the arrow', () => {
-    const allowed = new Set([WORDMARK, LOADING, SAME_RIDE, '→', ...index.corners.map((c) => c.name)]);
+    const allowed = new Set([WORDMARK, LOADING, SAME_RIDE, HEADLINE_LINE, '→', ...index.corners.map((c) => c.name)]);
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
     const found: string[] = [];
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {

@@ -10,9 +10,12 @@ import { SOURCE_URLS } from '../config';
 
 // ---- Minute words (R15.5) -----------------------------------------------------
 
-/** "minute" for 1, "minutes" for any other number. */
+/**
+ * "minute" for 1, "minutes" for any other number. Number() lets a number-button
+ * token stand in for the number it carries (view/numbers.ts).
+ */
 export function minuteWord(n: number): string {
-  return n === 1 ? 'minute' : 'minutes';
+  return Number(n) === 1 ? 'minute' : 'minutes';
 }
 
 /** "1 minute", "15 minutes". */

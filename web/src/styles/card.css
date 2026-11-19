@@ -1,0 +1,382 @@
+/* The race card: pair row, slider, schedule line, result box, honest line,
+   buttons and the number buttons (screen-brief 3.3 to 3.7 and 3A.1). */
+
+/* ---- Pair row ---------------------------------------------------------------- */
+
+.pair-row-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pair-row {
+  flex: 1;
+  min-width: 0;
+}
+
+.pair-row .arrow {
+  color: var(--muted);
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* Small square controls as drawn in the mockups, each with a hit area of at
+   least 44 x 44 px around it (R1.4). */
+.icon-button {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-button);
+  height: var(--icon-button);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.icon-button::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, var(--tap));
+  height: max(100%, var(--tap));
+  transform: translate(-50%, -50%);
+}
+
+/* ---- Slider -------------------------------------------------------------------- */
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.slider-track {
+  flex: 1;
+  min-width: 0;
+}
+
+.slider-input {
+  display: block;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--ink);
+  background: transparent;
+}
+
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -2px;
+  color: var(--muted);
+  font-size: var(--fs-slider-ends);
+  line-height: 1.2;
+}
+
+.slider-time {
+  flex: none;
+  min-width: 5.2em;
+  font-size: var(--fs-slider-time);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.schedule {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+/* ---- Lanes ------------------------------------------------------------------------ */
+
+.lanes {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.lane-head {
+  line-height: 1.15;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lane-title {
+  font-size: var(--fs-lane-title);
+}
+
+.lane-total {
+  font-size: var(--fs-lane-total);
+}
+
+.lane-1938 .lane-title,
+.lane-1938 .lane-total {
+  color: var(--ghost);
+}
+
+.lane-today .lane-title,
+.lane-today .lane-total {
+  color: var(--today);
+}
+
+/* The vehicle row: as tall as the vehicle; the trolley hangs from two hairline
+   wires across the whole card (at the drawing's own wire heights), the bus sits
+   on one hairline. */
+.vehicle-row {
+  position: relative;
+  height: calc(var(--veh-w) * 104 / 240);
+  margin: 2px calc(var(--pad) * -1) 2px;
+  overflow: hidden;
+}
+
+.vehicle-row-today {
+  height: calc(var(--veh-w) * 40 / 104);
+}
+
+.wire,
+.road {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.wire {
+  background: var(--ghost);
+  opacity: 0.55;
+}
+
+.wire-1 {
+  top: calc(var(--veh-w) * 2.5 / 240);
+}
+
+.wire-2 {
+  top: calc(var(--veh-w) * 11 / 240);
+}
+
+.road {
+  bottom: 0;
+  background: var(--line);
+}
+
+/* The runner spans the track; translating it by a share of its own width puts
+   the vehicle's centre over that point of the bar, kept inside the track. */
+.runner {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--pad);
+  right: var(--pad);
+  transform: translateX(clamp(calc(var(--veh-w) / 2), calc(var(--p, 0) * 100%), calc(100% - var(--veh-w) / 2)));
+}
+
+.vehicle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--veh-w);
+  margin-left: calc(var(--veh-w) / -2);
+}
+
+/* One 9 px bar per side on the shared scale. Wait is hatched, ride solid,
+   walks dotted; each is named in the legend, never by colour alone. */
+.bar {
+  display: flex;
+  height: var(--bar-h);
+  gap: 2px;
+}
+
+.seg {
+  position: relative;
+  flex: none;
+  width: calc(var(--w) * 100%);
+  min-width: 2px;
+  height: 100%;
+}
+
+.seg[data-empty] {
+  min-width: 0;
+}
+
+.seg-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  border-radius: 2px;
+}
+
+.lane-1938 {
+  --side: var(--ghost);
+}
+
+.lane-today {
+  --side: var(--today);
+}
+
+.seg-ride .seg-fill {
+  background: var(--side);
+}
+
+.seg-wait .seg-fill {
+  background: repeating-linear-gradient(-45deg, var(--side) 0 2px, transparent 2px 5px);
+  opacity: 0.8;
+}
+
+.seg-walk-to-stop .seg-fill,
+.seg-walk-from-stop .seg-fill {
+  background: radial-gradient(circle, var(--side) 1.4px, transparent 1.6px) 0 50% / 6px 6px repeat-x;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 7px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: var(--fs-legend);
+}
+
+.no-bus {
+  color: var(--muted);
+}
+
+/* ---- Result box --------------------------------------------------------------- */
+
+/* The same box, size, weight and position for every result; only the colour of
+   the result line differs (P8). */
+.result {
+  margin-top: 10px;
+  padding: 10px 16px 12px;
+  background: var(--sign);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line);
+}
+
+.result-line {
+  font-size: var(--fs-result);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.result-totals {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.result[data-result='1938'] .result-line {
+  color: var(--ghost);
+}
+
+.result[data-result='today'] .result-line {
+  color: var(--today);
+}
+
+.result[data-result='photo_finish'] .result-line,
+.result[data-result='no_one_seat_ride'] .result-line {
+  color: var(--ink);
+}
+
+/* ---- Honest line --------------------------------------------------------------- */
+
+.honest {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.honest strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---- Numbers, links and buttons --------------------------------------------------- */
+
+/* Every number is a button with a dotted underline that opens its source. Its
+   hit area is at least 44 px tall without changing the line. */
+.num {
+  position: relative;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.num::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 32px);
+  height: var(--tap);
+  transform: translate(-50%, -50%);
+}
+
+.link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.button {
+  flex: 1;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+.button-outline {
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.button-filled {
+  background: var(--ink);
+  color: var(--night);
+  font-weight: 600;
+}
+
+.card-footer {
+  color: var(--muted);
+}
+
+.footer-line {
+  color: var(--muted);
+}
+
+/* ---- Data error (task 15.4 completes this state) ------------------------------------ */
+
+.data-error {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.data-error-title {
+  font-size: var(--fs-result);
+  line-height: 1.15;
+}
+
+.data-error-line {
+  color: var(--muted);
+}
+
+.data-error .button {
+  flex: none;
+  min-width: 170px;
+}

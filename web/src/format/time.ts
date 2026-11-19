@@ -100,10 +100,35 @@ export function defaultMinute(now: Date, first: string, last: string): number {
 }
 
 const DATE_LABEL = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
+const LONG_DATE = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long', day: 'numeric', year: 'numeric' });
+const WEEKDAY_DATE = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC',
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
 
-/** "Nov 4, 2026" from "2026-11-04". Read as a UTC date, so it never shifts a day. */
-export function serviceDateLabel(iso: string): string {
+/** The UTC midnight of a "yyyy-mm-dd" date, so formatting never shifts a day. */
+function utcDate(iso: string): Date {
   const m = ISO_DATE.exec(iso);
   if (!m) throw new Error(`not a yyyy-mm-dd date: ${iso}`);
-  return DATE_LABEL.format(new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))));
+  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+}
+
+/** "Nov 4, 2026" from "2026-11-04". */
+export function serviceDateLabel(iso: string): string {
+  return DATE_LABEL.format(utcDate(iso));
+}
+
+/** "March 6, 1938" from "1938-03-06", for the Sources date line. */
+export function longDateLabel(iso: string): string {
+  return LONG_DATE.format(utcDate(iso));
+}
+
+/** "Wed Nov 4, 2026" from "2026-11-04", for the Sources date line. */
+export function weekdayDateLabel(iso: string): string {
+  const parts = WEEKDAY_DATE.formatToParts(utcDate(iso));
+  const part = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? '';
+  return `${part('weekday')} ${part('month')} ${part('day')}, ${part('year')}`;
 }

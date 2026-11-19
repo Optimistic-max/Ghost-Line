@@ -79,13 +79,13 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## The card
 
-- [ ] 10. Static card: pair row, slider, lanes, result box, honest line, buttons (R3, R5.3, R6, R7, R9, section 13.3, 13.4)
-  - [ ] 10.1 view/pairrow.ts, slider.ts (native range, minus/plus, end labels from the race file, 12-hour time, aria-valuetext), buttons.ts, footer.ts.
-  - [ ] 10.2 view/numbers.ts: number buttons with the dotted underline and accessible labels, and the per-render source registry.
-  - [ ] 10.3 view/layout.ts and view/lanes.ts: one shared scale, hatched, solid and dotted phases with text labels, status lines and legends, vehicles on their hairlines; finished-state drawing only (no playback yet).
-  - [ ] 10.4 view/resultbox.ts and view/honest.ts: the sign box, the four results, the two honest-line forms, "When today wins" link; identical geometry for every result.
-  - [ ] 10.5 The first running page: loads the lead pair from web/public/data and shows its finished state with every number a button.
-  - [ ] 10.6 DOM tests with real data: 1938 win (lead pair 10:00), today win (Westwood & Carey to Preston & Caroline 11:23), photo finish (lead pair 10:30): shown parts add up, margin is the difference of shown totals, "walking included (estimated)", both honest-line forms, a today win and a 1938 win have the same box geometry (P8).
+- [x] 10. Static card: pair row, slider, lanes, result box, honest line, buttons (R3, R5.3, R6, R7, R9, section 13.3, 13.4)
+  - [x] 10.1 view/pairrow.ts, slider.ts (native range, minus/plus, end labels from the race file, 12-hour time, aria-valuetext), buttons.ts, footer.ts.
+  - [x] 10.2 view/numbers.ts: number buttons with the dotted underline and accessible labels, and the per-render source registry.
+  - [x] 10.3 view/layout.ts and view/lanes.ts: one shared scale, hatched, solid and dotted phases with text labels, status lines and legends, vehicles on their hairlines; finished-state drawing only (no playback yet).
+  - [x] 10.4 view/resultbox.ts and view/honest.ts: the sign box, the four results, the two honest-line forms, "When today wins" link; identical geometry for every result.
+  - [x] 10.5 The first running page: loads the lead pair from web/public/data and shows its finished state with every number a button.
+  - [x] 10.6 DOM tests with real data: 1938 win (lead pair 10:00), today win (Westwood & Carey to Preston & Caroline 11:23), photo finish (lead pair 10:30): shown parts add up, margin is the difference of shown totals, "walking included (estimated)", both honest-line forms, a today win and a 1938 win have the same box geometry (P8).
   - Depends on: tasks 5, 6, 8, 9
 
 ## Playback
