@@ -41,6 +41,8 @@ for (const size of SIZES) {
 
     await page.goto('./');
     await page.evaluate(() => document.fonts.ready);
+    // The display face is loaded, not the system fallback.
+    expect(await page.evaluate(() => document.fonts.check('600 24px "Barlow Condensed"'))).toBe(true);
     await page.screenshot({ path: resolve(OUT, `shell-${size.name}.png`) });
 
     // Nothing scrolls sideways at the design sizes.

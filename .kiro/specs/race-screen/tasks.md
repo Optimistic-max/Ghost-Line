@@ -66,9 +66,9 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 7.4 Contrast test: compute WCAG ratios for every text/background pair used (text on --panel, --night, the result box, chips) from the tokens and fail under 4.5.
   - Depends on: task 1
 
-- [ ] 8. Font (R12.2)
-  - [ ] 8.1 Add the `@fontsource/barlow-condensed` npm package (needs the network: ask first). Import only `@fontsource/barlow-condensed/latin-600.css` (weight 600, Latin subset) so Vite bundles the one WOFF2 it names, with `font-display: swap`; add a preload link for that file. The package's OFL licence file comes with it in node_modules. Credit the font in the credits sheet (task 13.3).
-  - [ ] 8.2 Test that only the latin-600 stylesheet of the package is imported (no other weight or subset), that the built CSS names one WOFF2, and that the package's licence file is present.
+- [x] 8. Font (R12.2)
+  - [x] 8.1 Add the `@fontsource/barlow-condensed` npm package (needs the network: ask first). Import only `@fontsource/barlow-condensed/latin-600.css` (weight 600, Latin subset) so Vite bundles the one WOFF2 it names, with `font-display: swap`; add a preload link for that file. The package's OFL licence file comes with it in node_modules. Credit the font in the credits sheet (task 13.3).
+  - [x] 8.2 Test that only the latin-600 stylesheet of the package is imported (no other weight or subset), that the built CSS names one WOFF2, and that the package's licence file is present.
   - Depends on: task 7
 
 - [ ] 9. Vehicles (R12.3, section 14)

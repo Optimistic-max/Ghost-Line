@@ -1,4 +1,10 @@
 /* The one stylesheet of the first screen; Vite bundles these imports into one file. */
+
+/* Barlow Condensed 600, Latin subset only, from the Fontsource package (SIL Open
+   Font Licence 1.1; the licence file ships in the package). Its font rule uses
+   font-display: swap, and index.html preloads the WOFF2 file it names. */
+@import '@fontsource/barlow-condensed/latin-600.css';
+
 @import './tokens.css';
 @import './base.css';
 @import './layout-phone.css';
