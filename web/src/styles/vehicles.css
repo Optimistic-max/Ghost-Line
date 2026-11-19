@@ -1,0 +1,181 @@
+/* The vehicles (screen-brief 3A.2). Only the 1938 trolley glows: its glow is two
+   blurred copies of its outline, separate layers under the drawing. The blur is
+   fixed here and never animated; motion (task 11) changes only their opacity.
+   --ghost and --lit are for the trolley only, --today for the bus only. */
+
+.trolley,
+.marker,
+.bus {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.trolley svg,
+.marker svg,
+.bus svg {
+  display: block;
+  height: auto;
+  overflow: visible;
+}
+
+/* The glow layers sit exactly under the drawing. */
+.trolley-glow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+
+.trolley-glow-wide {
+  filter: blur(7px);
+  opacity: 0.85;
+}
+
+.trolley-glow-tight {
+  filter: blur(1.5px);
+}
+
+.trolley-art {
+  position: relative;
+}
+
+.v-glow-lines {
+  fill: none;
+  stroke: var(--ghost);
+  stroke-width: 3;
+}
+
+/* The drawing: outline in --ghost, body fill about 15%, windows brighter. */
+.v-body {
+  fill: var(--ghost);
+  fill-opacity: 0.15;
+  stroke: var(--ghost);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.v-wire {
+  stroke: var(--ghost);
+  stroke-width: 0.6;
+}
+
+.v-pole {
+  stroke: var(--ghost);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.v-shoe,
+.v-bumper,
+.v-hub-dot {
+  fill: var(--ghost);
+}
+
+.v-rope {
+  fill: none;
+  stroke: var(--ghost);
+  stroke-width: 0.6;
+  opacity: 0.55;
+}
+
+.v-pole-base {
+  fill: var(--ghost);
+  fill-opacity: 0.5;
+  stroke: var(--ghost);
+  stroke-width: 0.8;
+}
+
+.v-window {
+  fill: var(--lit);
+  fill-opacity: 0.55;
+  stroke: var(--ghost);
+  stroke-width: 1;
+}
+
+.v-door {
+  fill: var(--lit);
+  fill-opacity: 0.3;
+  stroke: var(--ghost);
+  stroke-width: 1;
+}
+
+/* The passengers are the ghosts: kept faint. */
+.v-passenger {
+  fill: var(--night);
+  opacity: 0.35;
+}
+
+.v-trim {
+  stroke: var(--ghost);
+  stroke-width: 0.8;
+  stroke-opacity: 0.8;
+}
+
+.v-sign {
+  fill: var(--lit);
+  fill-opacity: 0.7;
+}
+
+.v-lamp {
+  fill: var(--lit);
+}
+
+.v-number {
+  fill: var(--ghost);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 9px;
+}
+
+.v-tyre {
+  fill: var(--night);
+  stroke: var(--ghost);
+  stroke-width: 2;
+}
+
+.v-hub circle {
+  fill: none;
+  stroke: var(--ghost);
+  stroke-width: 1.4;
+}
+
+.v-hub line {
+  stroke: var(--ghost);
+  stroke-width: 1.2;
+}
+
+/* The map marker: a solid body with a dark window strip. */
+.m-body {
+  fill: var(--ghost);
+}
+
+.m-window {
+  fill: var(--night);
+}
+
+.m-wheel {
+  fill: var(--night);
+  stroke: var(--ghost);
+  stroke-width: 1.4;
+}
+
+.m-pole {
+  stroke: var(--ghost);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+/* Today's bus: flat and plain, no glow. */
+.b-body {
+  fill: var(--today);
+}
+
+.b-window {
+  fill: var(--panel);
+}
+
+.b-wheel {
+  fill: var(--panel);
+  stroke: var(--today);
+  stroke-width: 2;
+}

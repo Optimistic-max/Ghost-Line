@@ -80,4 +80,9 @@ describe('the scan itself', () => {
   it('keeps line numbers', () => {
     expect(codeOnly("a\n'b\nc'\nd").split('\n')).toHaveLength(4);
   });
+
+  it('finds an operator whose operands are on different lines, and names its line', () => {
+    expect(arithmeticLines('const a =\n  b +\n  c;')).toEqual([{ line: 2, text: 'b +' }]);
+    expect(arithmeticLines("const s =\n  'x' +\n  'y';")).toEqual([{ line: 2, text: "'x' +" }]);
+  });
 });

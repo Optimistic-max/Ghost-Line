@@ -87,19 +87,32 @@ export function codeOnly(source: string): string {
   return out.join('');
 }
 
-const BINARY = /[\w$)\]]\s*[-+*/%](?![=+\-*/])\s*[\w$(\[.]/;
+// An operand, an operator, an operand. Quotes count as operands, so joining
+// strings with + is flagged too: modules outside the allowed list use template
+// literals or arrays instead.
+const BINARY = /[\w$)\]'"`]\s*[-+*/%](?![=+\-*/])\s*[\w$(\['"`.]/;
 const COMPOUND = /[-+*/%]=/;
 const STEP = /\+\+|--/;
 const MATH = /\bMath\./;
 
-/** The lines of `source` (1-based) with arithmetic in their code. Import lines are skipped. */
+/**
+ * The lines of `source` (1-based) with arithmetic in their code. An operator
+ * whose operands sit on different lines counts, on the operator's line.
+ * Import lines are skipped.
+ */
 export function arithmeticLines(source: string): { line: number; text: string }[] {
-  const code = codeOnly(source).split('\n');
+  const code = codeOnly(source)
+    .split('\n')
+    .map((c) => (/^\s*import\b/.test(c) ? ' '.repeat(c.length) : c))
+    .join('\n');
   const lines = source.split('\n');
-  const found: { line: number; text: string }[] = [];
-  code.forEach((c, k) => {
-    if (/^\s*import\b/.test(c)) return;
-    if (BINARY.test(c) || COMPOUND.test(c) || STEP.test(c) || MATH.test(c)) found.push({ line: k + 1, text: lines[k]!.trim() });
-  });
-  return found;
+  const hits = new Set<number>();
+  const lineAt = (offset: number): number => code.slice(0, offset).split('\n').length;
+  for (const re of [BINARY, COMPOUND, STEP, MATH]) {
+    for (const m of code.matchAll(new RegExp(re.source, 'g'))) {
+      const operator = m[0].search(/[-+*/%]|Math\./);
+      hits.add(lineAt((m.index ?? 0) + Math.max(0, operator)));
+    }
+  }
+  return [...hits].sort((a, b) => a - b).map((line) => ({ line, text: lines[line - 1]!.trim() }));
 }

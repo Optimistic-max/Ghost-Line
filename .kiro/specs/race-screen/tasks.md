@@ -71,10 +71,10 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 8.2 Test that only the latin-600 stylesheet of the package is imported (no other weight or subset), that the built CSS names one WOFF2, and that the package's licence file is present.
   - Depends on: task 7
 
-- [ ] 9. Vehicles (R12.3, section 14)
-  - [ ] 9.1 src/view/vehicles.ts: the detailed trolley SVG to screen-brief 3A.2 (two poles to two wires, retriever ropes, tyres, five windows, curved cab window, two doors, passenger silhouettes, belt rail, destination bar, headlamp, bumpers, route number from index.json, no rails); the simplified map marker; the flat bus. Original drawings, not traced.
-  - [ ] 9.2 Tests: the trolley markup has exactly two pole elements and two wire elements and no rail element; the route number node is present only when given; the bus has no pole or wire; sizes per ui.md for phone and desktop come from config.
-  - [ ] 9.3 A static sheet page (dev only, not shipped) showing the vehicles at the four sizes for visual comparison with mockup 18.
+- [x] 9. Vehicles (R12.3, section 14)
+  - [x] 9.1 src/view/vehicles.ts: the detailed trolley SVG to screen-brief 3A.2 (two poles to two wires, retriever ropes, tyres, five windows, curved cab window, two doors, passenger silhouettes, belt rail, destination bar, headlamp, bumpers, route number from index.json, no rails); the simplified map marker; the flat bus. Original drawings, not traced.
+  - [x] 9.2 Tests: the trolley markup has exactly two pole elements and two wire elements and no rail element; the route number node is present only when given; the bus has no pole or wire; sizes per ui.md for phone and desktop come from config.
+  - [x] 9.3 A static sheet page (dev only, not shipped) showing the vehicles at the four sizes for visual comparison with mockup 18.
   - Depends on: task 7
 
 ## The card
