@@ -126,7 +126,9 @@ const RENDERED: Record<string, string> = {
   METHOD_CAR_1938: C.METHOD_CAR_1938,
   METHOD_TOTAL_1938: C.METHOD_TOTAL_1938,
   methodWalk: C.methodWalk(N),
-  methodWaitBus: C.methodWaitBus('{h:mm}'),
+  METHOD_WAIT_BUS: C.METHOD_WAIT_BUS,
+  DATA_INCOMPLETE: C.DATA_INCOMPLETE,
+  photoFinishMeaning: C.photoFinishMeaning(n('{photo_finish_min}')),
   METHOD_RIDE_BUS: C.METHOD_RIDE_BUS,
   methodBusTrip: C.methodBusTrip('{route}', '{headsign}', '{stop_id}', '{h:mm}'),
   methodTotalToday: C.methodTotalToday('{h:mm}'),
@@ -231,7 +233,13 @@ describe('helpers', () => {
     expect(Object.values(C.WHAT)).toEqual([...row.matchAll(/"([^"]*)"/g)].map((m) => m[1]));
   });
 
-  it('builds the number label of the brief from the draft templates', () => {
+  it('reads the photo-finish meaning with the real band as approved', () => {
+    expect(C.photoFinishMeaning(1)).toBe(
+      'Photo finish: the two totals are less than 1 minute apart. Walks are estimates, so neither side counts as a win.',
+    );
+  });
+
+  it('builds the number label of the brief from the approved templates', () => {
     expect(C.numberLabel(C.minutes(9), C.WHAT.ride1938)).toBe('9 minutes, scheduled 1938 ride. Show source.');
     expect(C.numberLabel(C.minutes(1), C.WHAT.wait1938)).toBe('1 minute, scheduled 1938 wait. Show source.');
   });
@@ -281,6 +289,7 @@ describe('minute words (R15.5)', () => {
     C.everyMinutes(k),
     C.everyMinutesOr(k, k),
     C.numberLabel(C.minutes(k), C.WHAT.ride1938),
+    C.photoFinishMeaning(k),
     A.announce1938Wins({ ...bus, trolley: k, bus: k, walk: k, margin: k }),
     A.announceTodayWins({ ...bus, trolley: k, bus: k, walk: k, margin: k }),
     A.announcePhotoFinish({ ...bus, trolley: k, bus: k, walk: k }),

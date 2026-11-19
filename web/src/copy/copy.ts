@@ -218,6 +218,7 @@ export function badLink(origin: string, dest: string): string {
 }
 
 export const DATA_ERROR = "The timetable data didn't load. Check your connection and try again.";
+export const DATA_INCOMPLETE = 'No numbers are shown until the data is complete.';
 export const TRY_AGAIN = 'Try again';
 export const MAP_UNAVAILABLE = 'Map unavailable. Showing the route diagram.';
 export const MAP_CREDIT = 'Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred.';
@@ -254,6 +255,11 @@ export const BASE_MAP_CREDIT = SOURCE_URLS.baseMapCredit;
 export const NOT_ENDORSED = 'Not endorsed by MDOT MTA.';
 export const FONT_CREDIT = 'Font: Barlow Condensed, SIL Open Font Licence 1.1.';
 export const VEHICLE_CREDIT = 'Vehicle drawings: original illustrations.';
+
+/** What a photo finish means; `band` is index.json's photo_finish_min. */
+export function photoFinishMeaning(band: number): string {
+  return `Photo finish: the two totals are less than ${band} ${minuteWord(band)} apart. Walks are estimates, so neither side counts as a win.`;
+}
 export const CHECKED_BY_HAND = ' and checked by hand against the scans';
 
 /** "How it was made"; the checked-by-hand clause only when index.json's street_order_checked is true (R10.4). */
@@ -283,7 +289,8 @@ export function clockReadout(hm: string): string {
 }
 
 // =================================================================================
-// Draft rows (Nov 19), for Emmanuel's review: drafted from the mockups and the brief.
+// Rows drafted on Nov 19 from the mockups and the brief, approved by Emmanuel with
+// his changes the same day.
 // =================================================================================
 
 // ---- Lanes and the departures board (draft) ----------------------------------
@@ -343,7 +350,7 @@ export const WHAT = {
   totalToday: "today's scheduled total, walking included (estimated)",
   busDeparture: 'scheduled bus departure',
   margin: 'difference of the two scheduled totals',
-  wins1938: 'races the 1938 trolley is first',
+  wins1938: 'races where the 1938 trolley arrives first',
   races: 'races on this line',
   rideSame: 'corner pairs with about the same scheduled ride',
   pairs: 'corner pairs on this line',
@@ -382,9 +389,7 @@ export function methodWalk(metres: number): string {
   return `Straight-line ${metres} m from the corner to the stop.`;
 }
 
-export function methodWaitBus(hm: string): string {
-  return `From ${hm}, after the walk, to the scheduled departure.`;
-}
+export const METHOD_WAIT_BUS = 'Time at the stop, from arriving after the walk to the scheduled departure.';
 
 export const METHOD_RIDE_BUS = "From the trip's scheduled departure to its scheduled arrival.";
 
@@ -411,7 +416,7 @@ export function dateFeed(feedVersion: string, date: string): string {
   return `MTA feed version ${feedVersion}, service date ${date}`;
 }
 
-/** R7.7: a shown part that is not the plain rounding of its stored value. */
+/** R7.7: a shown part that is not the plain rounding of its stored value. `exact` is the stored value with three decimals. */
 export function exactValue(exact: string, shownTotal: number): string {
   return `Exact value ${exact} min. Parts are rounded so they add up to the ${shownTotal} min total.`;
 }

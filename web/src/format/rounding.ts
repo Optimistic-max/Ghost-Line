@@ -66,6 +66,11 @@ export function photoTotals(shownA: number, shownB: number): PhotoTotals {
     : { form: 'about', n: Math.min(shownA, shownB), m: Math.max(shownA, shownB) };
 }
 
+/** A stored value as the "Exact value" line shows it: three decimals (R7.7, Emmanuel, Nov 19). */
+export function storedText(stored: number): string {
+  return round6(stored).toFixed(3);
+}
+
 /** The sum of shown parts, such as the spoken walking total (R7.5). */
 export function sumShown(shown: readonly number[]): number {
   return shown.reduce((sum, p) => sum + p, 0);

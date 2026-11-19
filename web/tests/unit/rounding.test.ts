@@ -6,6 +6,7 @@ import {
   roundParts,
   roundTotal,
   shownMargin,
+  storedText,
   sumShown,
 } from '../../src/format/rounding';
 
@@ -58,6 +59,13 @@ describe('margin, sums and the exact-value rule', () => {
   it('sums shown parts', () => {
     expect(sumShown([2, 4])).toBe(6);
     expect(sumShown([])).toBe(0);
+  });
+
+  it('shows a stored value with three decimals for the exact-value line', () => {
+    expect(storedText(30.458)).toBe('30.458');
+    expect(storedText(2.25)).toBe('2.250');
+    expect(storedText(6)).toBe('6.000');
+    expect(storedText(0.0005)).toBe('0.001');
   });
 
   it('flags a part that is not the plain rounding of its stored value', () => {
