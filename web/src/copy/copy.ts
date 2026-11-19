@@ -296,7 +296,7 @@ export function clockReadout(hm: string): string {
 // his changes the same day.
 // =================================================================================
 
-// ---- Lanes and the departures board (draft) ----------------------------------
+// ---- Lanes and the departures board ------------------------------------------
 
 export const LANE_TITLE_1938 = '1938 trackless trolley';
 /** Today's lane title, and the bus row label of the departures board. */
@@ -333,7 +333,7 @@ export function boardGapEqual(n: number): string {
   return `${n} min apart`;
 }
 
-// ---- Number buttons and the Sources sheet (draft) ---------------------------
+// ---- Number buttons and the Sources sheet -----------------------------------
 
 /** A number button's accessible name: "9 minutes, scheduled 1938 ride. Show source." */
 export function numberLabel(value: string, what: string): string {
@@ -424,7 +424,7 @@ export function exactValue(exact: string, shownTotal: number): string {
   return `Exact value ${exact} min. Parts are rounded so they add up to the ${shownTotal} min total.`;
 }
 
-// ---- Controls, the desktop headline, the today-wins list, the map (draft) ----
+// ---- Controls, the desktop headline, the today-wins list, the map ------------
 
 export const START_TIME = 'Start time';
 
