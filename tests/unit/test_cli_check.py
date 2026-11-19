@@ -159,6 +159,87 @@ def test_the_validate_half_of_quick_passes_on_this_repository():
     assert cli.QUICK_PYTEST_ARGS[-2:] == ["-m", "not requires_feed and not timing"]
 
 
+# --- check --timing and the default exclusion of timing tests ---------------------
+
+
+def test_timing_runs_only_the_timing_tests_in_the_repo_root(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "run_build", lambda *a, **k: pytest.fail("--timing must not build"))
+    monkeypatch.setattr(cli, "run_validate", lambda *a, **k: pytest.fail("--timing must not validate"))
+    runner = Runner(0)
+    lines = []
+    assert cli.run_check_timing(tmp_path, say=lines.append, runner=runner) == 0
+    (cmd, cwd), = runner.calls
+    assert cmd == [sys.executable, "-m", "pytest", "-q", "-m", "timing"] and cwd == str(tmp_path)
+    assert any("quiet" in ln or "close other programs" in ln for ln in lines)
+
+
+@pytest.mark.parametrize("pytest_code", [0, 1, 5])
+def test_timing_returns_pytests_exit_code(tmp_path, pytest_code):
+    assert cli.run_check_timing(tmp_path, say=lambda s: None, runner=Runner(pytest_code)) == pytest_code
+
+
+def test_cmd_check_picks_timing_from_the_flag(monkeypatch):
+    seen = []
+    monkeypatch.setattr(cli, "run_check", lambda root: seen.append("full") or 0)
+    monkeypatch.setattr(cli, "run_check_quick", lambda root: seen.append("quick") or 0)
+    monkeypatch.setattr(cli, "run_check_timing", lambda root: seen.append("timing") or 0)
+    cli.cmd_check(argparse.Namespace(quick=False, timing=True))
+    cli.cmd_check(argparse.Namespace(quick=True, timing=False))
+    cli.cmd_check(argparse.Namespace(quick=False, timing=False))
+    assert seen == ["timing", "quick", "full"]
+
+
+def test_timing_flag_is_wired_and_exits_with_pytests_code(monkeypatch):
+    monkeypatch.setattr(cli, "run_check_timing", lambda root: 9)
+    with patch("sys.argv", ["pipeline", "check", "--timing"]):
+        with pytest.raises(SystemExit) as exc:
+            cli.main()
+    assert exc.value.code == 9
+
+
+def test_quick_and_timing_cannot_be_combined(capsys):
+    with patch("sys.argv", ["pipeline", "check", "--quick", "--timing"]):
+        with pytest.raises(SystemExit) as exc:
+            cli.main()
+    assert exc.value.code == 2
+    assert "not allowed with" in capsys.readouterr().err
+
+
+def test_check_help_lists_both_flags(capsys):
+    with patch("sys.argv", ["pipeline", "check", "--help"]):
+        with pytest.raises(SystemExit):
+            cli.main()
+    out = capsys.readouterr().out
+    assert "--quick" in out and "--timing" in out
+
+
+def test_pytest_leaves_timing_tests_out_by_default():
+    import tomllib
+
+    opts = tomllib.loads((REPO / "pyproject.toml").read_text(encoding="utf-8"))["tool"]["pytest"]["ini_options"]
+    assert "not timing" in opts["addopts"]
+    result = _pytest(["tests/unit/test_cli_validate.py", "--collect-only", "-q"], REPO)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "deselected" in result.stdout
+    assert "_is_fast" not in result.stdout  # the validate timing test is not collected by default
+
+
+def test_dash_m_timing_selects_exactly_the_timing_tests():
+    result = _pytest(["tests/unit/test_cli_validate.py", "--collect-only", "-q", "-m", "timing"], REPO)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "test_validate_on_this_repository_reads_no_feed_uses_no_network_and_is_fast" in result.stdout
+    assert "1/18 tests collected" in result.stdout
+
+
+def test_the_timing_limits_are_unchanged():
+    validate_test = (REPO / "tests" / "unit" / "test_cli_validate.py").read_text(encoding="utf-8-sig")
+    build_test = (REPO / "tests" / "test_integration.py").read_text(encoding="utf-8-sig")
+    golden_build = (REPO / "tests" / "golden" / "test_build_golden.py").read_text(encoding="utf-8-sig")
+    assert "elapsed < 10.0" in validate_test
+    assert "seconds < 60.0" in build_test
+    assert "elapsed < 60.0" in golden_build
+
+
 def test_missing_feed_makes_check_fail_before_pytest(tmp_path):
     runner = Runner(0)
     lines = []

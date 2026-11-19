@@ -25,7 +25,10 @@ where = ["."]
 include = ["pipeline*"]
 
 [tool.pytest.ini_options]
+# Timing tests assert wall-clock limits and can fail on a loaded machine, so a plain
+# pytest run leaves them out. Run them alone with: python -m pipeline check --timing
+addopts = "-m 'not timing'"
 markers = [
     "requires_feed: reads the pinned feed zip in raw/; skipped with a visible warning when it is absent",
-    "timing: asserts a wall-clock limit; can fail on a loaded machine, so the editor hook leaves it out",
+    "timing: asserts a wall-clock limit; excluded by default, run with python -m pipeline check --timing on a quiet machine",
 ]

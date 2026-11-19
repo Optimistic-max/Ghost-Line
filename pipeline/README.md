@@ -57,7 +57,14 @@ python -m pipeline check
 ```
 
 Runs the build, then runs pytest. The exit code is 1 if the build fails,
-otherwise it is pytest's own exit code. Run it before every commit.
+otherwise it is pytest's own exit code. Run it before every commit. The timing
+tests are not part of it.
+
+Two variants:
+
+- `python -m pipeline check --quick` runs validate, then the tests that do not
+  need the feed and are not timing tests. It does not build. The editor hook uses it.
+- `python -m pipeline check --timing` runs only the timing tests.
 
 **verify**
 
@@ -137,8 +144,11 @@ tests and property tests.
   `raw/mta_local_bus.zip` is present. When it is absent, as on a hosted build,
   they are skipped with a visible message and a warning. The clock and route
   golden tests do not read the zip, so they always run.
-- Tests marked `timing` check a wall-clock limit. They can fail on a busy
-  machine. To leave them out, run `python -m pytest -m "not timing"`.
+- Tests marked `timing` check a wall-clock limit (validate and the build). They
+  can fail on a busy machine, so a plain `python -m pytest` and the normal
+  `check` leave them out. Run them alone with `python -m pipeline check --timing`,
+  on a quiet machine with nothing else running, before submission. The limits
+  themselves do not change.
 - If a computed value differs from a golden value, stop and look at why. Do not
   edit a golden value, the facts file or a test to make a check pass.
 

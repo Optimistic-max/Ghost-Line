@@ -300,14 +300,41 @@ def run_check_quick(root: Path, say=print, runner=None) -> int:
     return code
 
 
+TIMING_PYTEST_ARGS = ["-q", "-m", "timing"]
+
+
+def run_check_timing(root: Path, say=print, runner=None) -> int:
+    """Run only the timing tests (the 10 s validate limit and the 60 s build limit).
+
+    These are left out of every other run because they fail on a busy machine.
+    Run this on a quiet machine, with nothing else running, before submission.
+    The limits themselves are unchanged. Returns pytest's exit code.
+    """
+    import subprocess
+
+    runner = runner or subprocess.run
+    say("check --timing: running only the timing tests; close other programs first")
+    result = runner([sys.executable, "-m", "pytest", *TIMING_PYTEST_ARGS], cwd=str(root))
+    code = int(result.returncode)
+    say(f"check --timing: pytest exited with {code}")
+    return code
+
+
 def cmd_check(args: argparse.Namespace) -> None:
     """Run the full build, then run pytest. Used before commits.
 
     The exit code is 1 if the build fails, otherwise pytest's exit code.
+    The normal run leaves out the timing tests.
     With --quick: run validate, then pytest without the requires_feed and
     timing tests, and skip the build. That is the form the editor hook uses.
+    With --timing: run only the timing tests, on a quiet machine, before submission.
     """
-    code = run_check_quick(ROOT) if getattr(args, "quick", False) else run_check(ROOT)
+    if getattr(args, "timing", False):
+        code = run_check_timing(ROOT)
+    elif getattr(args, "quick", False):
+        code = run_check_quick(ROOT)
+    else:
+        code = run_check(ROOT)
     if code != 0:
         sys.exit(code)
 
@@ -442,10 +469,16 @@ def main() -> None:
             "Intended for use by pre-commit and CI hooks."
         ),
     )
-    p_check.add_argument(
+    mode = p_check.add_mutually_exclusive_group()
+    mode.add_argument(
         "--quick",
         action="store_true",
         help="Validate, then pytest without requires_feed and timing tests. No build.",
+    )
+    mode.add_argument(
+        "--timing",
+        action="store_true",
+        help="Run only the timing tests (10 s validate, 60 s build). Use a quiet machine.",
     )
     p_check.set_defaults(func=cmd_check)
 
