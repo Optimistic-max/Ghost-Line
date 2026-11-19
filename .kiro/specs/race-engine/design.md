@@ -865,10 +865,12 @@ Test: Run build twice, compare outputs byte-for-byte.
 9. **Checked-by-hand flag (task 35).** index.json has one boolean `street_order_checked`, the 1938 facts file's own flag. The 1933 file is not read by the pipeline.
 
 ## Pending Items
-- Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)
-- .gitattributes LF enforcement (Prompt 3) (B6)
-- Window-average method: brief corrections remain open
-- Future reader test for blank stop_times rows (B22)
+
+None open. Each former item is decided or done:
+- The committed 2026-11-01 data/osm/ways.json snapshot (B10): done in task 33; the build reads it and never fetches.
+- .gitattributes LF enforcement (B6): done in task 32 (`text eol=lf` for `web/public/data/**` and `data/osm/*.json`).
+- Window-average method: decided in task 34.1. It is not shown in the app and stays a pipeline check against the plan only (tests/golden/test_window_average_golden.py). The brief corrections are in docs/planning/race-brief.md, "Corrections (2026-11-19)".
+- Reader test for blank stop_times rows (B22): done in tasks 7.5, 7.6 and 31 (tests/unit/test_gtfs_reader.py, test_blank_time_row_skipped_and_logged).
 
 ## Success Criteria (from Requirements)
 

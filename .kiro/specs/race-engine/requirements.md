@@ -358,9 +358,11 @@ See race-brief.md sections 5.1 through 5.8 for complete test tables. (Table 5.9,
 - 1933 line processing (only 1938 for this spec)
 
 ## Pending Decisions / Open Items
-- .gitattributes LF enforcement rules (Prompt 3 task) (B6)
-- Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)
-- Window-average method (brief corrections remain open)
+
+None open. Each former item is decided or done:
+- .gitattributes LF enforcement rules (B6): done in task 32. The repository-root .gitattributes sets `text eol=lf` for `web/public/data/**` and `data/osm/*.json`.
+- The committed 2026-11-01 data/osm/ways.json snapshot (B10): done in task 33. The build reads it and never fetches.
+- Window-average method: decided in task 34.1. It is not shown in the app and stays a pipeline check against the plan only (tests/golden/test_window_average_golden.py). The brief corrections are in docs/planning/race-brief.md, "Corrections (2026-11-19)".
 
 ## Success Criteria
 
