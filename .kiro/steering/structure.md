@@ -38,8 +38,8 @@ inclusion: always
 
 - Route geometry derives from OpenStreetMap: ODbL, credit "OpenStreetMap
   contributors".
-- 1938 and 1933 scans: link to Digital Maryland. Do not copy scan images into
-  the repo or the site.
+- 1938 scans: link to Digital Maryland. Do not copy scan images into the repo
+  or the site.
 - MDOT MTA data: credit it, use no logos, say "not endorsed by MDOT MTA".
 - HOLC layer, when built: credit "Source: Mapping Inequality", CC BY-NC 2.5,
   kept separate from the code licence.

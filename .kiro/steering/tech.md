@@ -51,6 +51,8 @@ constants block that cites this list. Do not add a URL anywhere else.
   downloads from it.
 - osm: https://www.openstreetmap.org/copyright
   OSM's required attribution page.
+- repository: https://github.com/Optimistic-max/Ghost-Line
+  The project's git remote (origin). Link only, for the credits.
 
 ## Numbers
 
