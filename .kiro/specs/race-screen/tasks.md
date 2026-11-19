@@ -50,11 +50,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 5.3 Banned-word helper used by later DOM tests (live, real-time, realtime, "arriving now", "right now", with the one allowed phrase); tested on its own with deliver, olive and lives.
   - Depends on: task 1
 
-- [ ] 6. State, derived view and the made-up fixture (R5, R6, section 4, section 5)
-  - [ ] 6.1 src/state/store.ts, model.ts, actions.ts: pure reducers for pair, minute, sheet, picker, banner, race phase (`idle`, `running`, `finished`, `resultShown`), motion level, map status.
-  - [ ] 6.2 src/state/derive.ts: from state and data to `RaceView`: the two lanes' phases (stored and shown), shown totals, shown margin, result, notices, board data, frequency, honest line. Lookups and rounding only.
-  - [ ] 6.3 web/tests/fixtures/: a made-up line named fake (5 corners with made-up names, race files including rows with `today: null`, an empty trips list, null gaps, and a today win), shaped exactly like the generated files, never under public/. The fixture carries the tag text of the copy table.
-  - [ ] 6.4 Real-data tests (P9): for all 20 pairs and 293 minutes, the view's result, margin sign and winner colour equal the stored row; every shown total is the stored total rounded; each lane's shown parts add up; `resultAt` (task 11 uses it) is the first arrival for every win and the later one for every photo finish. Principle test: modules other than rounding, gaps, time, timeline, clock, layout and lookup contain no arithmetic on stored minutes (a source scan with a documented allowlist).
+- [x] 6. State, derived view and the made-up fixture (R5, R6, section 4, section 5)
+  - [x] 6.1 src/state/store.ts, model.ts, actions.ts: pure reducers for pair, minute, sheet, picker, banner, race phase (`idle`, `running`, `finished`, `resultShown`), motion level, map status.
+  - [x] 6.2 src/state/derive.ts: from state and data to `RaceView`: the two lanes' phases (stored and shown), shown totals, shown margin, result, notices, board data, frequency, honest line. Lookups and rounding only.
+  - [x] 6.3 web/tests/fixtures/: a made-up line named fake (5 corners with made-up names, race files including rows with `today: null`, an empty trips list, null gaps, and a today win), shaped exactly like the generated files, never under public/. The fixture carries the tag text of the copy table.
+  - [x] 6.4 Real-data tests (P9): for all 20 pairs and 293 minutes, the view's result, margin sign and winner colour equal the stored row; every shown total is the stored total rounded; each lane's shown parts add up; `resultAt` (task 11 uses it) is the first arrival for every win and the later one for every photo finish. Principle test: modules other than rounding, gaps, time, timeline, clock, layout and lookup contain no arithmetic on stored minutes (a source scan with a documented allowlist).
   - Depends on: tasks 3, 4
 
 ## Layout and drawing

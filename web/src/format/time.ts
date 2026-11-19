@@ -28,6 +28,11 @@ export function minuteAfter(hhmm: string): string {
   return clockOf(minutesOf(hhmm) + 1);
 }
 
+/** The slider minute after a minus (-1) or plus (+1) press, kept inside [first, last]. */
+export function stepMinute(minute: number, step: -1 | 1, first: string, last: string): number {
+  return Math.min(minutesOf(last), Math.max(minutesOf(first), minute + step));
+}
+
 /** "hh:mm" from a GTFS "hh:mm:ss": the seconds are dropped, not rounded. */
 export function dropSeconds(hhmmss: string): string {
   const m = HHMMSS.exec(hhmmss);

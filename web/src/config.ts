@@ -22,6 +22,9 @@ export const TIMINGS = {
   dataTimeoutMs: 3000,
 } as const;
 
+/** How many departures the board lists on each side (screen-brief 3A.5, R8.2). */
+export const BOARD = { cars1938: 4, buses: 3 } as const;
+
 /** Layout breakpoints in CSS pixels (R1.1, R1.3). */
 export const BREAKPOINTS = {
   /** Phone layout below this width; desktop layout from it up. */

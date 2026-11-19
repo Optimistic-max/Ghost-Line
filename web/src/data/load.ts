@@ -79,7 +79,7 @@ export function createLoader(options: LoaderOptions): Loader {
   let route: Route | null = null;
 
   async function get(name: string, signal?: AbortSignal): Promise<unknown> {
-    const response = await fetchImpl(options.baseUrl + name, { signal });
+    const response = await fetchImpl(`${options.baseUrl}${name}`, { signal });
     if (!response.ok) throw new Error(`HTTP ${response.status} for ${name}`);
     return response.json();
   }

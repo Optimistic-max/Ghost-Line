@@ -54,6 +54,18 @@ export function shownMargin(shownTotalA: number, shownTotalB: number): number {
   return Math.abs(shownTotalA - shownTotalB);
 }
 
+export type PhotoTotals = { form: 'both'; n: number } | { form: 'about'; n: number; m: number };
+
+/**
+ * Photo-finish copy (R7.6): "Both about N minutes" when the two shown totals
+ * are equal, otherwise "About N and M minutes" with the smaller first.
+ */
+export function photoTotals(shownA: number, shownB: number): PhotoTotals {
+  return shownA === shownB
+    ? { form: 'both', n: shownA }
+    : { form: 'about', n: Math.min(shownA, shownB), m: Math.max(shownA, shownB) };
+}
+
 /** The sum of shown parts, such as the spoken walking total (R7.5). */
 export function sumShown(shown: readonly number[]): number {
   return shown.reduce((sum, p) => sum + p, 0);
