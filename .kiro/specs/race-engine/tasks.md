@@ -190,7 +190,7 @@ Corrections to finished tasks 1, 2, 4 and 5 (tasks 29 to 34). Their completed it
   - Depends on: none
 
 - [x] 34. Record the pending decisions
-  - [x] 34.1 Window-average method and brief corrections. Decided: the window average is not shown in the app; it stays a pipeline check against the plan only. The brief corrections are listed in docs/planning/race-brief.md, "Corrections (2026-11-19)".
+  - [x] 34.1 Window-average method and brief corrections. Decided: the window average is not shown in the app; it stays a pipeline check against the plan only (tests/golden/test_window_average_golden.py: 1938 12.767 ± 0.001, today 32.637 ± 0.01). The brief corrections are listed in docs/planning/race-brief.md, "Corrections (2026-11-19)".
   - [x] 34.2 Gzip size limits (B19). Decided: 20 KB gzip per race file, 10 KB for index/summary/route.
   - Depends on: none
 
