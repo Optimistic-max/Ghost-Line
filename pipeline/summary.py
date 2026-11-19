@@ -43,7 +43,17 @@ def find_gaps(trips, window_start: float, window_end: float) -> tuple[float, flo
     leave no gap to measure, so this raises ValueError rather than invent one.
     The caller decides how to report that pair.
     """
-    deps = sorted(t.dep for t in trips if window_start <= t.dep < window_end)
+    return gaps_in_window([t.dep for t in trips], window_start, window_end)
+
+
+def gaps_in_window(times, window_start: float, window_end: float) -> tuple[float, float]:
+    """Smallest and largest difference between adjacent times (minutes after
+    midnight) that fall in [window_start, window_end).
+
+    Used for the bus departures and for the 1938 passes at a corner. Fewer than
+    two times in the window raises ValueError: no gap is invented.
+    """
+    deps = sorted(t for t in times if window_start <= t < window_end)
     if len(deps) < 2:
         raise ValueError(
             f"need at least two departures in [{window_start}, {window_end}) "

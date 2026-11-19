@@ -854,11 +854,15 @@ Test: Run build twice, compare outputs byte-for-byte.
 
 ## Decisions (Emmanuel, 2026-11-17)
 
-1. **today.trips.** Every trip referenced by any of the 293 race rows, plus the next 3 trips after the last referenced one (for the departures board), sorted by departure. `i` is the 0-based index in that list. `i` is not a golden value; the race-brief 4.5 example index does not apply.
+1. **today.trips.** *Superseded by Decision 6 (task 35).* Was: every trip referenced by any of the 293 race rows, plus the next 3 after the last one. `i` is not a golden value; the race-brief 4.5 example index does not apply.
 2. **Size limits.** Every output file is limited by gzip size, which is what the phone downloads. Raw sizes are reported but are not limits. Gzip limits: race files 20 KB each; index.json, summary.json and route.geojson 10 KB each. All per-file raw limits (including the 45 KB race limit) are removed. No compaction of race files. A test reports raw and gzip sizes and fails only over a gzip limit.
 3. **summary.json per-pair section.** summary.schema.json gains `pairs`: one entry per directed pair with origin, dest, races, wins_1938, wins_today, photo_finishes, ride_1938, ride_today_median, delta and ride_verdict (the last three null when there is no one-seat ride). It is emitted from PairSummary and covered by the race-derived source IDs.
 4. **Gap nulls.** today.gap_min and today.gap_max may be null only when today.trips is empty. With trips present but fewer than two departures in the window, emit raises ValidationError.
 5. **PairSummary.delta** is in the field list in section 7.
+6. **today.trips (task 35).** Every eligible trip departing the boarding stop at or after 09:00, in departure order, through the third trip after the last trip any race row uses (or to the end of the day if fewer remain). `i` is the 0-based index in that list. The bus gaps are still computed from all eligible trips in [09:00, 14:00); `gap_min` and `gap_max` are null only when the list is empty.
+7. **Source labels (task 35).** Every entry of the index.json source catalog has a `label`, for example "1938 route diagram, Digital Maryland". The walk formula text stays only in the method entry's `what`.
+8. **1938 spacing, window and route names (task 35).** `y1938.gap_min` and `y1938.gap_max` (smallest and largest gap between consecutive 1938 passes at the origin corner in [09:00, 14:00)); `today.window_from` and `today.window_to` ("09:00", "14:00"); `route_display` on each trip and `today.route_names` (distinct display names, first-seen order). Display rule: all-capital words of two or more letters become capitalised ("LIME" to "Lime"); digit-only names become "Route 54".
+9. **Checked-by-hand flag (task 35).** index.json has one boolean `street_order_checked`, the 1938 facts file's own flag. The 1933 file is not read by the pipeline.
 
 ## Pending Items
 - Supply the committed 2026-11-01 data/osm/ways.json snapshot (B10)

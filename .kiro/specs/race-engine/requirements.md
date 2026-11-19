@@ -150,6 +150,7 @@ For each directed corner pair and each whole minute from 9:00 to 13:52 (293 slid
   - Timing points too far from route
 
 ### 9. Output Generation and Validation
+- **FR-9.0** (task 35): index.json source catalog entries carry a `label`; index.json carries the boolean `street_order_checked` (1938 facts file only); race files carry `y1938.gap_min`, `y1938.gap_max`, `today.window_from`, `today.window_to`, `today.route_names`, and each trip carries `route_display`; `today.trips` holds every eligible trip from 09:00 through the third after the last trip a race row uses (design.md, Decisions 6 to 9).
 - **FR-9.1**: Write files to web/public/data/:
   - index.json: Line metadata, 5 corners, 20 pairs, service date, feed version and hash, source catalog
   - summary.json: Honest-line counts, per-pair ride verdicts, today-wins list

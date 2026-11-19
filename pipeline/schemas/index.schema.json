@@ -14,6 +14,7 @@
     "service_date",
     "feed_version",
     "feed_sha256",
+    "street_order_checked",
     "sources"
   ],
   "additionalProperties": false,
@@ -65,6 +66,10 @@
       "type": "string",
       "description": "SHA-256 hex digest of the pinned GTFS zip.",
       "pattern": "^[0-9a-f]{64}$"
+    },
+    "street_order_checked": {
+      "type": "boolean",
+      "description": "The street_order_checked flag of the 1938 facts file: true once a person has checked the street order against the scans. The credits clause 'checked by hand' depends on this flag alone."
     },
     "sources": {
       "type": "object",
@@ -146,9 +151,14 @@
     },
     "SourceEntry": {
       "type": "object",
-      "required": ["what", "year", "where", "url"],
+      "required": ["label", "what", "year", "where", "url"],
       "additionalProperties": false,
       "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable source name shown beside its link, for example '1938 route diagram, Digital Maryland'."
+        },
         "what": {
           "type": "string",
           "minLength": 1,
@@ -172,9 +182,14 @@
     },
     "MethodEntry": {
       "type": "object",
-      "required": ["what", "year", "where", "url"],
+      "required": ["label", "what", "year", "where", "url"],
       "additionalProperties": false,
       "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable source name shown beside its link, for example '1938 route diagram, Digital Maryland'."
+        },
         "what": {
           "type": "string",
           "minLength": 1

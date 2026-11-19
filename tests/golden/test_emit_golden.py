@@ -130,13 +130,14 @@ def test_before_table_rows_start_at_covered_from(lead):
     assert len(doc["races"]) == 293
 
 
-def test_trips_list_follows_decision_1(lead):
+def test_trips_list_follows_the_task_35_rule(lead):
     _, doc = lead
     trips = doc["today"]["trips"]
     used = sorted({r["today"]["trip"] for r in doc["races"] if r["today"]})
     assert [t["i"] for t in trips] == list(range(len(trips)))
-    assert len(trips) == len(used) + 3  # the last used trip is not the last of the day
+    assert len(trips) - 1 - max(used) == 3  # through the third trip after the last one a race uses
     assert [t["dep"] for t in trips] == sorted(t["dep"] for t in trips)
+    assert trips[0]["dep"] >= "09:00:00"
 
 
 def test_size_is_reported_and_within_the_gzip_limit(lead):

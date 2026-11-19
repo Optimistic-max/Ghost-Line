@@ -4,6 +4,7 @@
 # Named "fake" to distinguish from real data.
 line: fake-no21
 mode: trackless_trolley
+street_order_checked: false
 effective: "1938-01-01"
 source: https://example.com/fake-source
 pages:

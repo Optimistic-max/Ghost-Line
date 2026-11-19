@@ -76,6 +76,7 @@ class FactsFile:
     legs: dict[str, list[LegSpec]]
     source: str
     pages: dict[str, str]
+    street_order_checked: bool = False  # the facts file's own flag; a person sets it
 
 
 # --- helpers -----------------------------------------------------------------
@@ -286,6 +287,10 @@ def load_facts(facts_path: Path) -> FactsFile:
     if not isinstance(pages, dict):
         raise _bad("pages", "expected a mapping")
 
+    flag = raw.get("street_order_checked")
+    if not isinstance(flag, bool):
+        raise _bad("street_order_checked", f"expected true or false, got {flag!r}")
+
     timing_points = _parse_timing_points(raw.get("timing_points"))
     departures = _parse_departures(raw.get("midday_departures"))
     legs = _parse_legs(raw.get("legs"))
@@ -304,4 +309,5 @@ def load_facts(facts_path: Path) -> FactsFile:
         legs=legs,
         source=str(source),
         pages={str(k): str(v) for k, v in pages.items()},
+        street_order_checked=flag,
     )

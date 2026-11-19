@@ -141,7 +141,7 @@
     },
     "Clock1938": {
       "type": "object",
-      "required": ["ride_min", "covered_from", "passes", "sources"],
+      "required": ["ride_min", "covered_from", "passes", "gap_min", "gap_max", "sources"],
       "additionalProperties": false,
       "properties": {
         "ride_min": {
@@ -163,6 +163,16 @@
             "pattern": "^\\d{2}:\\d{2}$"
           }
         },
+        "gap_min": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Smallest gap in minutes between consecutive 1938 passes at the origin corner in [09:00, 14:00)."
+        },
+        "gap_max": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Largest gap in minutes between consecutive 1938 passes at the origin corner in [09:00, 14:00)."
+        },
         "sources": {
           "type": "object",
           "description": "Source URLs keyed by field name.",
@@ -183,7 +193,7 @@
     },
     "TodayTrips": {
       "type": "object",
-      "required": ["gap_min", "gap_max", "trips"],
+      "required": ["gap_min", "gap_max", "window_from", "window_to", "route_names", "trips"],
       "additionalProperties": false,
       "if": { "properties": { "trips": { "minItems": 1 } } },
       "then": { "properties": { "gap_min": { "type": "number" }, "gap_max": { "type": "number" } } },
@@ -198,9 +208,24 @@
           "minimum": 0,
           "description": "Largest gap in minutes between consecutive eligible departures in [09:00, 14:00). Null only when trips is empty."
         },
+        "window_from": {
+          "type": "string",
+          "pattern": "^\\d{2}:\\d{2}$",
+          "description": "Start of the window the bus gaps cover (HH:MM)."
+        },
+        "window_to": {
+          "type": "string",
+          "pattern": "^\\d{2}:\\d{2}$",
+          "description": "End of the window the bus gaps cover (HH:MM), excluded."
+        },
+        "route_names": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "The distinct display route names (route_display) of the trips in the list, in order of first appearance."
+        },
         "trips": {
           "type": "array",
-          "description": "The trips referenced by any race row plus the next 3 trips after the last referenced one, sorted by departure. i is the 0-based index in this list.",
+          "description": "Every eligible trip departing the boarding stop at or after 09:00, in departure order, through the third trip after the last trip any race row uses. i is the 0-based index in this list.",
           "items": {
             "$ref": "#/$defs/Trip"
           }
@@ -209,7 +234,7 @@
     },
     "Trip": {
       "type": "object",
-      "required": ["i", "trip_id", "route", "headsign", "board", "alight", "dep", "arr", "ride_min"],
+      "required": ["i", "trip_id", "route", "route_display", "headsign", "board", "alight", "dep", "arr", "ride_min"],
       "additionalProperties": false,
       "properties": {
         "i": {
@@ -224,6 +249,11 @@
         "route": {
           "type": "string",
           "description": "Human-readable route name, e.g. 'CityLink Lime'."
+        },
+        "route_display": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Route name as the card shows it, for example 'CityLink Lime'."
         },
         "headsign": {
           "type": "string",

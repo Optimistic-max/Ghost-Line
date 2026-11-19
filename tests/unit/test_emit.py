@@ -188,7 +188,7 @@ def test_route_geojson_legs_carry_required_properties(tmp_path):
         assert set(f["properties"]) >= {"direction", "street", "method", "note", "length_m"}
 
 
-# --- today.trips selection (Decision 1) --------------------------------------
+# --- today.trips selection (task 35.4, replacing Decision 1) -------------------
 
 
 def _rows_using(trips):
@@ -197,16 +197,34 @@ def _rows_using(trips):
     return [SimpleNamespace(today=SimpleNamespace(trip=t)) for t in trips] + [SimpleNamespace(today=None)]
 
 
-def test_select_trips_keeps_used_plus_next_three_after_last():
+def test_select_trips_keeps_every_trip_from_0900_through_three_after_the_last_used():
     trips = [make_trip(600 + 10 * k) for k in range(12)]
-    used = [trips[2], trips[4], trips[5]]
-    chosen = select_trips(trips, _rows_using(used))
-    assert chosen == [trips[2], trips[4], trips[5], trips[6], trips[7], trips[8]]
+    chosen = select_trips(trips, _rows_using([trips[2], trips[4], trips[5]]))
+    # trips[3] is never used by a row but leaves between two used ones: it stays.
+    assert chosen == trips[0:9]
 
 
-def test_select_trips_stops_at_end_of_list():
+def test_select_trips_drops_trips_before_0900():
+    early = [make_trip(500), make_trip(539)]  # 08:20 and 08:59
+    trips = early + [make_trip(540 + 10 * k) for k in range(6)]  # from 09:00
+    chosen = select_trips(trips, _rows_using([trips[3]]))
+    assert chosen == trips[2:7]  # 09:00 onward, through three after the used trip
+    assert all(t.dep >= 540 for t in chosen)
+
+
+def test_select_trips_keeps_a_trip_leaving_exactly_at_0900():
+    trips = [make_trip(540), make_trip(550)]
+    assert select_trips(trips, _rows_using([trips[1]])) == trips
+
+
+def test_select_trips_stops_at_end_of_day_when_fewer_than_three_remain():
     trips = [make_trip(600 + 10 * k) for k in range(5)]
-    assert select_trips(trips, _rows_using([trips[3]])) == [trips[3], trips[4]]
+    assert select_trips(trips, _rows_using([trips[3]])) == trips
+
+
+def test_select_trips_takes_exactly_three_after_the_last_used():
+    trips = [make_trip(600 + 10 * k) for k in range(12)]
+    assert select_trips(trips, _rows_using([trips[1]])) == trips[0:5]
 
 
 def test_select_trips_empty_when_no_row_uses_a_trip():
@@ -222,7 +240,120 @@ def test_race_rows_point_at_the_index_in_the_emitted_list(tmp_path):
     assert [t["dep"] for t in trips] == sorted(t["dep"] for t in trips)
     used = {r["today"]["trip"] for r in race["races"] if r["today"]}
     assert used <= set(range(len(trips)))
-    assert len(trips) == len(used) + min(3, len(trips) - 1 - max(used))
+    assert len(trips) == min(max(used) + 1 + 3, 10)  # through three after the last used, 10 eligible trips
+
+
+def test_emitted_list_has_no_departure_before_0900_and_no_hole(tmp_path):
+    early = [make_trip(480), make_trip(520)]
+    later = [make_trip(600 + 30 * k) for k in range(10)]
+    run_emit(tmp_path, a_to_b_trips=early + later)
+    trips = load(tmp_path / "race" / f"{A}__{B}.json")["today"]["trips"]
+    assert [t["trip_id"] for t in trips] == [t.trip_id for t in later]
+
+
+# --- task 35: labels, flag, 1938 spacing, window, route names ----------------
+
+
+def test_every_catalog_entry_has_a_label(tmp_path):
+    run_emit(tmp_path)
+    sources = load(tmp_path / "index.json")["sources"]
+    assert {k: v["label"] for k, v in sources.items()} == {
+        "guide1938_diagram": "1938 route diagram, Digital Maryland",
+        "guide1938_timetable": "1938 timetable, Digital Maryland",
+        "guide1938_route": "1938 route description, Digital Maryland",
+        "mta_gtfs": "MDOT MTA local bus schedule (GTFS feed)",
+        "osm": "OpenStreetMap contributors",
+        "method": "Ghost Line method",
+    }
+
+
+def test_street_order_checked_flag_comes_from_the_facts_file(tmp_path):
+    facts, races, eligible, summary, route, clocks = world()
+    assert facts.street_order_checked is False
+    emit_all(facts, races, eligible, summary, route, clocks, SHA, "fake1", "2026-11-04", tmp_path / "a")
+    assert load(tmp_path / "a" / "index.json")["street_order_checked"] is False
+    facts.street_order_checked = True
+    emit_all(facts, races, eligible, summary, route, clocks, SHA, "fake1", "2026-11-04", tmp_path / "b")
+    assert load(tmp_path / "b" / "index.json")["street_order_checked"] is True
+
+
+def test_1938_spacing_comes_from_the_clock_passes_in_the_window(tmp_path):
+    facts, races, eligible, summary, route, clocks = world()
+    run_emit(tmp_path)
+    y = load(tmp_path / "race" / f"{A}__{B}.json")["y1938"]
+    passes = [p for p in clocks["eastbound"][A].passes if 540.0 <= p < 840.0]
+    gaps = [b - a for a, b in zip(passes, passes[1:])]
+    assert (y["gap_min"], y["gap_max"]) == (min(gaps), max(gaps))
+    assert list(y)[:5] == ["ride_min", "covered_from", "passes", "gap_min", "gap_max"]
+
+
+def test_the_bus_window_is_written_from_the_summary_constants(tmp_path):
+    run_emit(tmp_path)
+    today = load(tmp_path / "race" / f"{A}__{B}.json")["today"]
+    assert (today["window_from"], today["window_to"]) == ("09:00", "14:00")
+
+
+def test_route_names_are_the_distinct_display_names_in_order(tmp_path):
+    from dataclasses import replace
+
+    trips = [make_trip(600), make_trip(630), make_trip(660), make_trip(690)]
+    trips = [replace(t, route=r) for t, r in zip(trips, ["CityLink NAVY", "CityLink LIME", "CityLink NAVY", "54"])]
+    run_emit(tmp_path, a_to_b_trips=trips + [make_trip(700 + 30 * k) for k in range(8)])
+    race = load(tmp_path / "race" / f"{A}__{B}.json")["today"]
+    assert race["route_names"][:3] == ["CityLink Navy", "CityLink Lime", "Route 54"]
+    by_id = {t["trip_id"]: t for t in race["trips"]}
+    assert by_id["fake-600"]["route"] == "CityLink NAVY"  # the GTFS name stays
+    assert by_id["fake-600"]["route_display"] == "CityLink Navy"
+
+
+def test_route_names_are_empty_when_the_list_is_empty(tmp_path):
+    run_emit(tmp_path)
+    assert load(tmp_path / "race" / f"{B}__{A}.json")["today"]["route_names"] == []
+
+
+@pytest.mark.parametrize(
+    "name, shown",
+    [
+        ("CityLink LIME", "CityLink Lime"),
+        ("CityLink NAVY", "CityLink Navy"),
+        ("CityLink Lime", "CityLink Lime"),
+        ("54", "Route 54"),
+        ("Fake Route", "Fake Route"),
+        ("A", "A"),  # a one-letter word is left alone
+        ("  CityLink   GOLD ", "CityLink Gold"),
+        ("MARC", "Marc"),
+        ("54 EXPRESS", "54 Express"),
+    ],
+)
+def test_display_route_name_rule(name, shown):
+    assert emit.display_route_name(name) == shown
+
+
+@pytest.mark.parametrize("name", ["", "   ", None])
+def test_display_route_name_rejects_an_empty_name(name):
+    with pytest.raises(ValueError):
+        emit.display_route_name(name)
+
+
+def test_schema_requires_the_task_35_fields(tmp_path):
+    run_emit(tmp_path)
+    path = tmp_path / "race" / f"{A}__{B}.json"
+    doc = load(path)
+    cases = [
+        (lambda d: d["y1938"].pop("gap_min"), "gap_min"),
+        (lambda d: d["y1938"].pop("gap_max"), "gap_max"),
+        (lambda d: d["today"].pop("window_from"), "window_from"),
+        (lambda d: d["today"].pop("window_to"), "window_to"),
+        (lambda d: d["today"].pop("route_names"), "route_names"),
+        (lambda d: d["today"]["trips"][0].pop("route_display"), "route_display"),
+    ]
+    for mutate, field in cases:
+        bad = json.loads(json.dumps(doc))
+        mutate(bad)
+        target = tmp_path / "bad.json"
+        target.write_text(json.dumps(bad), encoding="utf-8")
+        with pytest.raises(ValidationError, match=field):
+            validate_against_schema(target, emit.SCHEMA_DIR / "race.schema.json")
 
 
 # --- gap nulls (Decision 4), both ways ---------------------------------------

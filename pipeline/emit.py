@@ -25,7 +25,7 @@ from pipeline.facts import FactsFile
 from pipeline.race import PHOTO_FINISH_MIN, SLIDER_FIRST_MIN, SLIDER_LAST_MIN, RaceRow
 from pipeline.route import RouteLeg
 from pipeline.stops import DEFAULT_STOP_RADIUS_M, Stop
-from pipeline.summary import GAP_WINDOW_END, GAP_WINDOW_START, Summary, find_gaps
+from pipeline.summary import GAP_WINDOW_END, GAP_WINDOW_START, Summary, find_gaps, gaps_in_window
 
 if TYPE_CHECKING:  # annotation only; keeps pandas out of validate
     from pipeline.eligible import EligibleTrip
@@ -132,24 +132,28 @@ def build_source_catalog(facts: FactsFile, feed_sha256: str, feed_version: str, 
     pages = facts.pages
     return {
         "guide1938_diagram": {
+            "label": "1938 route diagram, Digital Maryland",
             "what": "1938 route diagram with minutes between timing points, No. 21 trackless trolley",
             "year": 1938,
             "where": f"Digital Maryland, page id/{_page_id(pages['route_diagram'])}",
             "url": pages["route_diagram"],
         },
         "guide1938_timetable": {
+            "label": "1938 timetable, Digital Maryland",
             "what": "1938 timetable for the No. 21 trackless trolley, effective " + facts.effective,
             "year": 1938,
             "where": f"Digital Maryland, page id/{_page_id(pages['timetable'])}",
             "url": pages["timetable"],
         },
         "guide1938_route": {
+            "label": "1938 route description, Digital Maryland",
             "what": "1938 written route description for the No. 21 trackless trolley",
             "year": 1938,
             "where": f"Digital Maryland, page id/{_page_id(pages['route_text'])}",
             "url": pages["route_text"],
         },
         "mta_gtfs": {
+            "label": "MDOT MTA local bus schedule (GTFS feed)",
             "what": "MDOT MTA local bus GTFS schedule feed, not endorsed by MDOT MTA",
             "year": int(service_date[:4]),
             "where": (
@@ -159,12 +163,14 @@ def build_source_catalog(facts: FactsFile, feed_sha256: str, feed_version: str, 
             "url": MTA_GTFS_URL,
         },
         "osm": {
+            "label": "OpenStreetMap contributors",
             "what": "OpenStreetMap contributors, ODbL: street geometry for the 1938 route",
             "year": int(OSM_SNAPSHOT_DATE[:4]),
             "where": f"data/osm/ways.json snapshot of {OSM_SNAPSHOT_DATE}",
             "url": OSM_URL,
         },
         "method": {
+            "label": "Ghost Line method",
             "what": (
                 f"Ghost Line race method: walk minutes = metres x 1.3 / 1.2 / 60, "
                 f"{int(DEFAULT_STOP_RADIUS_M)} m stop radius, photo finish under {PHOTO_FINISH_MIN} minute"
@@ -202,6 +208,7 @@ def _index_doc(
         "service_date": service_date,
         "feed_version": feed_version,
         "feed_sha256": feed_sha256,
+        "street_order_checked": bool(facts.street_order_checked),
         "sources": build_source_catalog(facts, feed_sha256, feed_version, service_date),
     }
 
@@ -275,19 +282,38 @@ def _trip_key(trip: EligibleTrip) -> tuple:
     return (trip.trip_id, trip.dep, trip.board_stop.stop_id, trip.alight_stop.stop_id)
 
 
+def display_route_name(name: str) -> str:
+    """The route name as the card shows it (race-screen requirements, R8.5).
+
+    A word made only of capital letters, two or more of them, keeps its first
+    letter and lower-cases the rest ("LIME" becomes "Lime"). Other words are
+    unchanged ("CityLink" stays). A name of digits only becomes "Route " plus
+    the digits ("54" becomes "Route 54"). An empty name raises ValueError.
+    """
+    text = (name or "").strip()
+    if not text:
+        raise ValueError("a route name is needed for the display name")
+    if text.isdigit():
+        return f"Route {text}"
+    words = [w.capitalize() if len(w) >= 2 and w.isalpha() and w.isupper() else w for w in text.split()]
+    return " ".join(words)
+
+
 def select_trips(all_trips: list[EligibleTrip], rows: list[RaceRow]) -> list[EligibleTrip]:
-    """Trips for today.trips: every trip a race row uses, plus the next 3 after the last one.
+    """Trips for today.trips: every trip departing at or after 09:00, through
+    the third trip after the last trip any race row uses (or to the end of the
+    day if fewer remain). design.md, Decisions 1 as changed by task 35.
 
     all_trips must be sorted by departure. The result keeps that order, so
-    the 0-based index in it is the "i" the race rows point at.
+    the 0-based index in it is the "i" the race rows point at. No trip is used
+    by any row: the list is empty.
     """
     used = {_trip_key(r.today.trip) for r in rows if r.today is not None}
     positions = [i for i, t in enumerate(all_trips) if _trip_key(t) in used]
     if not positions:
         return []
-    last = positions[-1]
-    keep = set(positions) | set(range(last + 1, min(last + 1 + EXTRA_TRIPS_AFTER_LAST, len(all_trips))))
-    return [t for i, t in enumerate(all_trips) if i in keep]
+    end = min(positions[-1] + EXTRA_TRIPS_AFTER_LAST, len(all_trips) - 1)
+    return [t for t in all_trips[: end + 1] if t.dep >= GAP_WINDOW_START]
 
 
 def _race_row(row: RaceRow, trip_index: dict[tuple, int]) -> dict:
@@ -330,6 +356,15 @@ def _race_doc(
     all_trips = sorted(trips, key=lambda t: (t.dep, t.trip_id))
     ordered = select_trips(all_trips, rows)
     trip_index = {_trip_key(t): i for i, t in enumerate(ordered)}
+    try:
+        pass_gap_min, pass_gap_max = gaps_in_window(clock.passes, GAP_WINDOW_START, GAP_WINDOW_END)
+    except ValueError as exc:
+        raise ValidationError(f"Race file {origin} -> {dest} needs the 1938 spacing: {exc}") from exc
+    try:
+        route_displays = [display_route_name(t.route) for t in ordered]
+    except ValueError as exc:
+        raise ValidationError(f"Race file {origin} -> {dest}: {exc}") from exc
+    route_names = list(dict.fromkeys(route_displays))
     if not ordered:
         gap_min = gap_max = None  # allowed only when today.trips is empty
     else:
@@ -353,16 +388,22 @@ def _race_doc(
             "ride_min": _r(ride_minutes(origin, dest, facts)),
             "covered_from": _hhmm(clock.covered_from),
             "passes": [_hhmm(p) for p in clock.passes],
+            "gap_min": _r(pass_gap_min),
+            "gap_max": _r(pass_gap_max),
             "sources": {"ride_min": facts.pages["route_diagram"], "passes": facts.pages["timetable"]},
         },
         "today": {
             "gap_min": None if gap_min is None else _r(gap_min),
             "gap_max": None if gap_max is None else _r(gap_max),
+            "window_from": _hhmm(GAP_WINDOW_START),
+            "window_to": _hhmm(GAP_WINDOW_END),
+            "route_names": route_names,
             "trips": [
                 {
                     "i": i,
                     "trip_id": t.trip_id,
                     "route": t.route,
+                    "route_display": display,
                     "headsign": t.headsign,
                     "board": _stop_ref(t.board_stop),
                     "alight": _stop_ref(t.alight_stop),
@@ -370,7 +411,7 @@ def _race_doc(
                     "arr": _hhmmss(t.arr_str),
                     "ride_min": _r(t.ride_min),
                 }
-                for i, t in enumerate(ordered)
+                for i, (t, display) in enumerate(zip(ordered, route_displays))
             ],
         },
         "races": [_race_row(r, trip_index) for r in rows],

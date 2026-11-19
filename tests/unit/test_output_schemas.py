@@ -33,7 +33,7 @@ def test_schema_is_valid(name):
 # ---------- builders ----------
 
 def entry(year=1938):
-    return {"what": "w", "year": year, "where": "p. 1", "url": "https://example.com/x"}
+    return {"label": "l", "what": "w", "year": year, "where": "p. 1", "url": "https://example.com/x"}
 
 
 def index_doc():
@@ -44,10 +44,11 @@ def index_doc():
                      "lonlat": [-76.64, 39.30], "inferred": False, "note": None}],
         "pairs": [{"origin": "westwood-carey", "dest": "dolphin-myrtle"}],
         "service_date": "2026-11-04", "feed_version": "20260821", "feed_sha256": SHA,
+        "street_order_checked": False,
         "sources": {
             "guide1938_diagram": entry(), "guide1938_timetable": entry(),
             "guide1938_route": entry(), "mta_gtfs": entry(2026), "osm": entry(2026),
-            "method": {"what": "m", "year": None, "where": "docs", "url": None},
+            "method": {"label": "m", "what": "m", "year": None, "where": "docs", "url": None},
         },
     }
 
@@ -71,9 +72,12 @@ def race_doc(rows=293):
         "service_date": "2026-11-04", "feed_version": "20260821", "feed_sha256": SHA,
         "radius_m": 400,
         "y1938": {"ride_min": 9, "covered_from": "09:21", "passes": ["09:21", "09:28"],
+                  "gap_min": 7, "gap_max": 8,
                   "sources": {"ride_min": "https://example.com/201", "passes": "https://example.com/202"}},
-        "today": {"gap_min": 34.0, "gap_max": 39.0, "trips": [{
-            "i": 0, "trip_id": "4110804", "route": "CityLink Lime", "headsign": "HARBOR EAST",
+        "today": {"gap_min": 34.0, "gap_max": 39.0, "window_from": "09:00", "window_to": "14:00",
+                  "route_names": ["CityLink Lime"], "trips": [{
+            "i": 0, "trip_id": "4110804", "route": "CityLink LIME", "route_display": "CityLink Lime",
+            "headsign": "HARBOR EAST",
             "board": {"stop_id": "8564", "name": "B", "walk_m": 125.07, "walk_min": 2.258},
             "alight": {"stop_id": "9486", "name": "A", "walk_m": 230.15, "walk_min": 4.156},
             "dep": "10:32:43", "arr": "10:41:00", "ride_min": 8.283}]},
@@ -195,7 +199,7 @@ def test_index_catalog_rejects_unknown_id():
     assert errors("index", doc)
 
 
-@pytest.mark.parametrize("field", ["what", "year", "where", "url"])
+@pytest.mark.parametrize("field", ["label", "what", "year", "where", "url"])
 def test_index_catalog_entry_incomplete_rejected(field):
     doc = index_doc()
     del doc["sources"]["osm"][field]
