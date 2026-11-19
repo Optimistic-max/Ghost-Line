@@ -39,6 +39,12 @@ export const VEHICLE_SIZES = {
   desktop: { trolley: 200, bus: 104, mapMarker: 58 },
 } as const;
 
+/**
+ * The trolley's route number is drawn only from this width up: narrower, it
+ * renders as specks (Emmanuel, Nov 19). In CSS pixels.
+ */
+export const ROUTE_NUMBER_MIN_WIDTH = 150;
+
 /** Type sizes in CSS pixels (screen-brief 3.3 for the phone, 3A.1 for desktop). */
 export const FONT_SIZES = {
   phone: {

@@ -369,15 +369,17 @@ Rules:
 
 ### 3A.2 The trolley illustration (replaces the vehicle rows in 3.5)
 
-Mockup 22 is the reference sheet. One original drawing, side view, facing right, at 240 × 104 proportions:
+Mockup 18 (`18-trolley-sheet.png`) is the reference sheet. One original drawing, side view, facing right, at 240 × 104 proportions. Updated Nov 19 to match the approved drawing:
 
-- A long, rounded 1930s body: curved rear, sloping streamlined front, a crowned roof line.
-- **Two trolley poles** rising from a base on the roof and trailing back to **two overhead wires**, each pole ending in a small shoe. Two thin retriever ropes hang from the pole tips to the rear of the car.
-- Rubber tyres with hub rings. **No rails.**
-- Five lit side windows, a curved cab window, and two double-leaf doors (centre and front) that reach nearly to the floor.
-- Three passenger silhouettes in the windows. They are the "ghosts"; keep them faint.
-- A belt rail (two lines) along the body, a lower trim line, a small destination-sign bar over the cab window, a headlamp at the front, small bumpers, and the route number 21 near the rear.
-- Outline in `--ghost`; body fill about 15% opacity; windows a brighter tint; soft outer glow.
+- A tall, rounded 1930s body: curved rear, a gently crowned roof line, a front that curves down to the bumper, and wheel arches over both wheels.
+- The body is **lit from inside**: a warm `--ghost` fill with a soft glow under it, and its outline in `--ghost` over the fill. It is not a dark fill with a glowing outline.
+- Five side windows, a curved cab window, and two double-leaf doors (centre and front) that reach nearly to the floor. The windows are **bright panes** of `--lit` glass.
+- Three passengers in the windows. Each is a **gap in the bright pane**, so the dimmer car interior shows through as a dark silhouette.
+- **Two separate trolley poles** rising from a base on the roof and trailing back to **two overhead wires**, each pole ending in a small shoe on its own wire. The poles run parallel and stay clearly apart at every size, never merging into one. Two thin retriever ropes hang from the pole tips to the rear of the car. The two wires cross the whole drawing.
+- Rubber tyres with **concentric hub rings** (tyre, rim, hub ring, centre dot) and one faint mark on each hub so turning shows while moving. **No rails.**
+- A belt rail (two lines) along the body, broken by the doors; a lower trim line; a small destination-sign bar over the cab window; a headlamp at the front; small bumpers.
+- The route number on the rear panel under the belt rails, in the display face, built from index.json (never typed). It is shown only on trolleys 150 px wide or more: narrower, it renders as specks. So the phone's finished trolley (104 px) carries none; the racing trolley (150 px) and the desktop trolley (200 px) do. It is absent in the data-error state.
+- Painted in `--ghost` and `--lit` only. The dark parts (the passengers, the inside of the wheels, the gap between the poles) are left unpainted, so the card shows through. Only the trolley glows.
 
 Sizes: on a phone, 150 px wide while racing and 104 px after the finish; on desktop, 200 px at all times. Today's bus is 84 px wide on a phone and 104 px on desktop (it was 64 px; raised so the size gap does not read as a claim about the vehicles). Vehicle size is style, not data: only the bars are drawn to scale. Below about 60 px the detailed drawing loses its detail, so the **map marker is a separate simplified drawing**: a solid `--ghost` body with a dark window strip, two wheels and the two poles, 28 px wide on a phone map and 58 px on desktop.
 

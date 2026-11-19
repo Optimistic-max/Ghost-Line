@@ -13,7 +13,7 @@
 //
 // The drawings are decoration: the lane titles carry the words, so every SVG is
 // aria-hidden. Sizes are style, not data (ui.md); they come from config.ts.
-import { VEHICLE_SIZES } from '../config';
+import { ROUTE_NUMBER_MIN_WIDTH, VEHICLE_SIZES } from '../config';
 
 export type Layout = 'phone' | 'desktop';
 
@@ -209,10 +209,12 @@ function trolleyArt(routeNumber: string | null): string[] {
 /**
  * The detailed trolley at `width` CSS pixels: two blurred outline layers under
  * the drawing. `routeNumber` is null in the data-error state, and the number is
- * then left out (R12.3).
+ * then left out (R12.3). It is also left out on trolleys narrower than
+ * ROUTE_NUMBER_MIN_WIDTH, where it would render as specks.
  */
 export function trolleySvg(options: { routeNumber: string | null; width: number }): string {
-  const { routeNumber, width } = options;
+  const { width } = options;
+  const routeNumber = width < ROUTE_NUMBER_MIN_WIDTH ? null : options.routeNumber;
   return [
     '<span class="trolley" data-vehicle="trolley">',
     svg('trolley-glow trolley-glow-wide', TROLLEY_VIEWBOX, width, trolleyGlow(true)),

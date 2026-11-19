@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import { type Page, expect, test } from '@playwright/test';
+import { ROUTE_NUMBER_MIN_WIDTH } from '../../src/config';
 import { routeNumberOf } from '../../src/format/line';
 
 const FIXTURE = resolve(import.meta.dirname, '..', 'fixtures', 'fake');
@@ -74,9 +75,13 @@ test('vehicle sheet (dev only), beside mockup 18', async ({ browser }) => {
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: resolve(OUT, 'vehicles.png'), fullPage: true });
   expect(await page.locator('#sheet [data-vehicle]').count()).toBe(9);
-  // Every trolley carries the number from the data, except the data-error one.
-  const trolleys = await page.locator('#sheet [data-vehicle="trolley"]').count();
+  // Trolleys from the cut-off width up carry the number from the data; narrower ones and the data-error one do not.
+  const widths = await page
+    .locator('#sheet [data-vehicle="trolley"] .trolley-art')
+    .evaluateAll((svgs) => svgs.map((s) => Number(s.getAttribute('width'))));
+  const numbered = widths.filter((w) => w >= ROUTE_NUMBER_MIN_WIDTH).length;
+  expect(numbered).toBeGreaterThan(0);
   const numbers = await page.locator('#sheet [data-part="route-number"]').allTextContents();
-  expect(numbers).toEqual(Array(trolleys - 1).fill(expected));
+  expect(numbers).toEqual(Array(numbered).fill(expected));
   await context.close();
 });

@@ -1,6 +1,6 @@
 // Task 9.2: the vehicle drawings.
 import { describe, expect, it } from 'vitest';
-import { VEHICLE_SIZES } from '../../src/config';
+import { ROUTE_NUMBER_MIN_WIDTH, VEHICLE_SIZES } from '../../src/config';
 import { routeNumberOf } from '../../src/format/line';
 import { busSvg, markerSvg, trolleySvg, vehicleWidths } from '../../src/view/vehicles';
 import { readRepoText } from '../support/files';
@@ -137,8 +137,23 @@ describe('the 1938 trackless trolley', () => {
     expect(routeNumber).not.toBeNull();
     const number = art.querySelector('[data-part="route-number"]');
     expect(number?.textContent).toBe(routeNumber);
-    expect(mount(trolleySvg({ routeNumber: null, width: 104 })).querySelector('[data-part="route-number"]')).toBeNull();
-    expect(mount(trolleySvg({ routeNumber: null, width: 104 })).textContent).toBe('');
+    for (const width of [ROUTE_NUMBER_MIN_WIDTH, 200, 360]) {
+      expect(mount(trolleySvg({ routeNumber: null, width })).querySelector('[data-part="route-number"]'), `${width}`).toBeNull();
+      expect(mount(trolleySvg({ routeNumber: null, width })).textContent, `${width}`).toBe('');
+    }
+  });
+
+  it('hides the route number on trolleys narrower than the cut-off, and shows it from there up', () => {
+    const shown = (width: number): boolean =>
+      mount(trolleySvg({ routeNumber, width })).querySelector('[data-part="route-number"]') !== null;
+    const sizes = [vehicleWidths('phone'), vehicleWidths('desktop')].flatMap((w) => [w.trolleyRacing, w.trolleyFinished]);
+    for (const width of [...sizes, 360]) expect(shown(width), `${width} px`).toBe(width >= ROUTE_NUMBER_MIN_WIDTH);
+    expect(shown(ROUTE_NUMBER_MIN_WIDTH - 1)).toBe(false);
+    expect(shown(ROUTE_NUMBER_MIN_WIDTH)).toBe(true);
+    // The phone's finished trolley (104 px) carries no number; racing (150 px) and desktop (200 px) do.
+    expect(shown(vehicleWidths('phone').trolleyFinished)).toBe(false);
+    expect(shown(vehicleWidths('phone').trolleyRacing)).toBe(true);
+    expect(shown(vehicleWidths('desktop').trolleyRacing)).toBe(true);
   });
 
   it('places the number as in mockup 18: under the first window, between the belt rails and the lower trim', () => {
@@ -154,7 +169,7 @@ describe('the 1938 trackless trolley', () => {
   });
 
   it('escapes the route number', () => {
-    const odd = mount(trolleySvg({ routeNumber: '<b>&', width: 104 }));
+    const odd = mount(trolleySvg({ routeNumber: '<b>&', width: ROUTE_NUMBER_MIN_WIDTH }));
     expect(odd.querySelector('b')).toBeNull();
     expect(odd.querySelector('[data-part="route-number"]')?.textContent).toBe('<b>&');
   });
