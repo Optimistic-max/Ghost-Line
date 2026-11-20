@@ -17,3 +17,15 @@ A dated log of the moments where Kiro shaped the build, checked against `git log
 | 2026-11-17 | The facts loader and 1938 clock were built and every clock golden value matched. | Spec task execution, golden tests | The 1938 side of the race matches the timetable values in the brief. | 321dc90, tests/golden/test_clock_golden.py |
 | 2026-11-17 | Walk-formula unit test case 2 missed by 0.000514 min against a 0.0005 tolerance; Kiro stopped instead of changing the value. The brief paired a rounded input (230.15 m) with the result from stop 9486's real distance (230.153500791945 m). Emmanuel chose to correct the test input's expected value to 4.155 and the golden test now confirms the real stop gives 4.156. | Spec task execution, golden tests | The stop-and-report rule worked on a real mismatch, and no golden value was edited to pass. | b418bba, tests/unit/test_stops.py, tests/golden/test_stops_golden.py |
 | 2026-11-17 | When the task-status tool was unavailable, the task orchestrator would not dispatch or write the code itself and reported the blocker; work resumed after the task was re-run. | Spec task orchestration | Kiro did not bypass its own task workflow to finish faster. | Chat session only, not in git (then b418bba) |
+
+## Final timing checks (race-screen task 23.4)
+
+Run before submission, on Nov 20, 2026, each on its own, as the task requires (R17.7). Where git or `.kiro/` cannot show a result, it is marked "(unverified)".
+
+| Check | Result | Run by | Where to see it |
+|---|---|---|---|
+| `python -m pipeline check --timing` (the pipeline's 10 s validate and 60 s build limits) | Passed: 3 passed, on a quiet machine. Reported by Emmanuel; the run's output is not in git (unverified). | Emmanuel | The three `timing` tests: `tests/golden/test_build_golden.py`, `tests/test_integration.py`, `tests/unit/test_cli_validate.py` |
+| `npm run perf` on the deployed site, https://optimistic-max.github.io/Ghost-Line/ (first race, `race-start` mark, five cold loads, slow 4G and a 4x slower processor, map tiles blocked) | Median 1,738 ms against the 5,000 ms limit; runs 1,667, 1,876, 1,884, 1,738 and 1,696 ms. Run by Kiro from Emmanuel's machine after the first deploy. | Kiro, at Emmanuel's request | `web/tests/e2e/perf.spec.ts`, `web/tests/e2e/perf-config.ts`, c282663 |
+| First race on a real phone, on mobile data | Pending. Steps are in `web/README.md`. | Emmanuel | |
+
+Note on the second row: Emmanuel's note described this measurement as a Lighthouse run. It was made with `npm run perf`, which drives the browser's own throttling through Playwright; Lighthouse was not approved for this project (requirements R16.2), so it is recorded here as the Playwright run.
