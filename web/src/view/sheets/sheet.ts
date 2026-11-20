@@ -10,13 +10,17 @@ export type SheetParts = {
   /** The sheet's name, for the store and for tests. */
   name: string;
   title: string;
-  body: Node[];
+  body: (Node | null)[];
+  /** The closing button's label: "Close", or "Cancel" for the corner picker. */
+  closeLabel?: string;
 };
 
 export type OpenSheet = {
   el: HTMLElement;
   /** Shut the sheet. With `returnFocus`, focus goes back to the control that opened it. */
   close(returnFocus: boolean): void;
+  /** Show new content in the open sheet, without sliding it again (the picker's second step). */
+  update(parts: SheetParts): void;
 };
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -65,7 +69,7 @@ export function openSheet(
     h('div', { class: 'sheet-handle', 'aria-hidden': 'true' }),
     title,
     h('div', { class: 'sheet-body' }, ...parts.body),
-    h('button', { type: 'button', class: 'button button-outline sheet-close', 'data-action': 'close-sheet' }, CLOSE),
+    h('button', { type: 'button', class: 'button button-outline sheet-close', 'data-action': 'close-sheet' }, parts.closeLabel ?? CLOSE),
   );
   el.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
@@ -83,6 +87,11 @@ export function openSheet(
   let closed = false;
   return {
     el,
+    update(next) {
+      title.textContent = next.title;
+      el.querySelector('.sheet-body')?.replaceChildren(...next.body.filter((n): n is Node => n !== null));
+      el.dataset['sheet'] = next.name;
+    },
     close(returnFocus) {
       if (closed) return;
       closed = true;

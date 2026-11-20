@@ -10,9 +10,32 @@
   min-width: 0;
 }
 
-.pair-row {
+.pair-names-wrap {
+  position: relative;
   flex: 1;
   min-width: 0;
+}
+
+.pair-row {
+  min-width: 0;
+}
+
+/* The picker button lies over the names: the names are what you tap (R4.1). */
+.pair-pick {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+}
+
+/* At least 44 px tall to tap, however short the line of names (R1.4). */
+.pair-pick::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: max(100%, var(--tap));
+  transform: translateY(-50%);
 }
 
 .pair-row .arrow {

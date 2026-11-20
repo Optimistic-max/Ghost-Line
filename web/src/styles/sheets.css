@@ -107,6 +107,78 @@
   color: var(--ink);
 }
 
+/* ---- The corner picker (mockup 19) --------------------------------------------- */
+
+.picker-step,
+.picker-note {
+  color: var(--muted);
+}
+
+.corner-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.corner-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.corner-choice .corner-name {
+  font-size: var(--fs-corner);
+  line-height: 1.15;
+}
+
+/* The chosen start: outlined, tagged "Start", and not choosable again. */
+.corner-choice.is-start {
+  border-color: var(--ghost);
+  cursor: default;
+}
+
+.start-tag {
+  margin-left: auto;
+  color: var(--ghost);
+}
+
+.chip-inferred {
+  padding: 0 8px;
+  border: 1px dashed var(--ghost);
+  border-radius: 999px;
+  color: var(--ghost);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.picker-note {
+  margin-top: 8px;
+}
+
+/* ---- The share banner (mockups 08 and 20) ---------------------------------------- */
+
+/* A light pill that slides down over the top of the screen, holds, and slides up. */
+.banner {
+  max-width: 420px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--night);
+  transform: translateY(calc(-100% - 8px));
+  transition: transform var(--banner-slide) var(--ease-in);
+}
+
+.banner.is-open {
+  transform: translateY(0);
+  transition: transform var(--banner-slide) var(--ease-out);
+}
+
 /* ---- The info button ------------------------------------------------------------ */
 
 /* "i" in a ring at the top right: in the phone's top bar, at the top of the

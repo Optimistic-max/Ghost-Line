@@ -39,9 +39,14 @@ type State = {
   query?: string;
   /** A racing state: this many real milliseconds into the race (0 is the pause before it starts). */
   racing?: number;
-  /** A control to click before the picture, to open a sheet. */
-  open?: string;
+  /** The picture shows the link's banner. */
+  banner?: boolean;
+  /** Controls to click before the picture, in order, to open a sheet. */
+  open?: string | string[];
 };
+
+/** The picker in its second step, with Preston & Caroline chosen as the start (mockup 19). */
+const PICKER_STEP_TWO = ['#card-scroll [data-action="picker"]', `.corner-choice[data-slug="${slug('Preston & Caroline')}"]`];
 
 const STATES: State[] = [
   // 20:00 is outside the slider range, so the start falls back to 10:00 (mockups 01 to 03, 13 to 15).
@@ -59,6 +64,12 @@ const STATES: State[] = [
   { file: '10-sources', size: PHONE, at: '20:00', open: '#card-scroll button.num[data-source="wait-1938"]' },
   { file: '11-credits', size: PHONE, at: '20:00', open: '#app > button.info' },
   { file: '17-desktop-sources', size: DESKTOP, at: '20:00', open: '#card-scroll button.num[data-source="wait-1938"]' },
+  // The corner picker and the link banners, over the race about to start (mockups 08, 19, 20, 23, 24).
+  { file: '19-corners', size: PHONE, at: '20:00', racing: 0, open: PICKER_STEP_TWO },
+  { file: '23-desktop-corners', size: DESKTOP, at: '20:00', racing: 0, open: PICKER_STEP_TWO },
+  { file: '08-sharelink', size: PHONE, at: '20:00', racing: 0, banner: true, query: `?from=${slug('Preston & Caroline')}&to=${slug('Aliceanna & Bond')}` },
+  { file: '20-badshare', size: PHONE, at: '20:00', racing: 0, banner: true, query: '?from=nowhere&to=aliceanna-bond' },
+  { file: '24-desktop-badshare', size: DESKTOP, at: '20:00', racing: 0, banner: true, query: '?from=nowhere&to=aliceanna-bond' },
 ];
 
 async function fontsReady(page: Page): Promise<void> {
@@ -90,9 +101,12 @@ async function shoot(browser: Browser, state: State): Promise<void> {
     await expect(page.locator('.result')).toHaveCount(0);
   }
   if (state.open) {
-    await page.locator(state.open).click();
+    for (const selector of [state.open].flat()) await page.locator(selector).click();
     await page.locator('.sheet.is-open').waitFor();
   }
+  // A link opens with its banner: kept for the banner states, waited out (5 s) for the others.
+  if (state.query && state.banner) await page.locator('#banner-root .banner.is-open').waitFor();
+  else if (state.query) await page.locator('#banner-root .banner').waitFor({ state: 'detached', timeout: 10_000 });
   // CSS animations run on the real clock: finite ones (the trolley's fade-in) are shown at their end, loops at rest.
   await page.screenshot({ path: resolve(OUT, `${state.file}.png`), animations: 'disabled' });
   // Nothing scrolls sideways at the design sizes.

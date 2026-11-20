@@ -18,6 +18,8 @@ export const TIMINGS = {
   linkCopiedMs: 2000,
   /** The share banner holds this long between its slide in and slide out (R4.5). */
   bannerHoldMs: 5000,
+  /** The share banner's slide in and out; the same as --banner-slide in tokens.css (R4.5). */
+  bannerSlideMs: 200,
   /** Without valid data after this long, the data-error state shows (R2.2). */
   dataTimeoutMs: 3000,
 } as const;

@@ -118,11 +118,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Pair, link and states
 
-- [ ] 14. Corner picker, swap, share link, address bar (R4)
-  - [ ] 14.1 sheets/corners.ts: two-step picker, five buttons west to east, Start tag, inferred chip, note, Cancel, the start disabled in step two.
-  - [ ] 14.2 Swap; `history.replaceState` with the query only on every pair change (P12); decoding at boot; the bad-link and shared-link banners (5 s, 200 ms in and out).
-  - [ ] 14.3 Share button: `navigator.share` with the link only; AbortError does nothing; otherwise copy (clipboard, then textarea fallback) and "Link copied" for 2 s with a separate polite region; the button keeps its size.
-  - [ ] 14.4 Tests: all 20 pairs selectable by three taps; picker keyboard use; swap; each share path (share available, cancelled, failing and falling back, clipboard unavailable); the address bar after every change; shared link; each bad link of race-brief 5.9.
+- [x] 14. Corner picker, swap, share link, address bar (R4)
+  - [x] 14.1 sheets/corners.ts: two-step picker, five buttons west to east, Start tag, inferred chip, note, Cancel, the start disabled in step two.
+  - [x] 14.2 Swap; `history.replaceState` with the query only on every pair change (P12); decoding at boot; the bad-link and shared-link banners (5 s, 200 ms in and out).
+  - [x] 14.3 Share button: `navigator.share` with the link only; AbortError does nothing; otherwise copy (clipboard, then textarea fallback) and "Link copied" for 2 s with a separate polite region; the button keeps its size.
+  - [x] 14.4 Tests: all 20 pairs selectable by three taps; picker keyboard use; swap; each share path (share available, cancelled, failing and falling back, clipboard unavailable); the address bar after every change; shared link; each bad link of race-brief 5.9.
   - Depends on: tasks 4, 10, 13
 
 - [ ] 15. Remaining states (R2, R6.6 to R6.8, R14, R2.2)

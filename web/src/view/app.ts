@@ -5,13 +5,23 @@
 // the result is inserted at the result moment, and the finish is applied in
 // place, so nothing is rebuilt while it moves.
 import { BREAKPOINTS, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
-import { ABOUT_AND_CREDITS, DATA_ERROR, DATA_INCOMPLETE, TRY_AGAIN, lineLabel } from '../copy/copy';
+import {
+  ABOUT_AND_CREDITS,
+  DATA_ERROR,
+  DATA_INCOMPLETE,
+  LINK_COPIED,
+  SHARE_THIS_RACE,
+  TRY_AGAIN,
+  badLink,
+  lineLabel,
+  sharedRace,
+} from '../copy/copy';
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
-import { sliderRange } from '../data/lookup';
+import { cornerName, sliderRange } from '../data/lookup';
 import type { Index, Pair, RaceFile, Summary } from '../data/types';
 import { routeNumberOf, yearOf } from '../format/line';
-import { decode } from '../format/share';
+import { decode, encode, namesAPair } from '../format/share';
 import { defaultStart, minutesOf } from '../format/time';
 import { type PageTimers, browserTimers, createClock } from '../play/clock';
 import { initialMotion, motionClass, watchMotion } from '../play/motion';
@@ -41,6 +51,9 @@ import { aboutSheet } from './sheets/about';
 import { type OpenSheet, type SheetParts, openSheet } from './sheets/sheet';
 import { showTarget, sourcesSheet } from './sheets/sources';
 import { whenTodaySheet } from './sheets/whentoday';
+import { cornersSheet, firstChoice } from './sheets/corners';
+import { type ShareDeps, browserShareDeps, shareLink } from './sharing';
+import { createBanner } from './banner';
 import { updateSlider } from './slider';
 import { type Layout, vehicleWidths } from './vehicles';
 
@@ -57,6 +70,10 @@ export type AppOptions = {
   motion: MotionLevel;
   /** Frames, timeouts, randomness and performance marks. */
   timers: PageTimers;
+  /** The share sheet and clipboard the browser has (R4.8). */
+  share: ShareDeps;
+  /** The page's address: where it is, and how to change its query without a history entry (R4.7). */
+  address: { origin: string; path: string; replace(url: string): void };
 };
 
 export type App = {
@@ -108,6 +125,11 @@ export function createApp(options: AppOptions): App {
     GLYPH.info,
   );
   byId(doc, 'app').append(info);
+
+  const shareStatus = byId(doc, 'share-status');
+  const banner = createBanner(byId(doc, 'banner-root'), timers.later, timers.cancel);
+  /** The timer that puts "Share this race" back after "Link copied". */
+  let copied: number | null = null;
 
   /** The sheet on screen, what it shows, and the control outside any sheet that opened it. */
   let sheet: OpenSheet | null = null;
@@ -168,7 +190,7 @@ export function createApp(options: AppOptions): App {
     info.hidden = data.status !== 'ready';
   }
 
-  /** The parts of the sheet the state names; none for the corner picker until task 14. */
+  /** The parts of the sheet the state names. */
   function sheetParts(state: AppState): SheetParts | null {
     if (state.data.status !== 'ready') return null;
     switch (state.sheet) {
@@ -178,6 +200,8 @@ export function createApp(options: AppOptions): App {
         return aboutSheet(state.data.index);
       case 'whentoday':
         return whenTodaySheet(registry, state.data.index, state.data.summary);
+      case 'corners':
+        return state.picker ? cornersSheet(state.data.index, state.picker) : null;
       default:
         return null;
     }
@@ -186,10 +210,18 @@ export function createApp(options: AppOptions): App {
   /** Open, swap or close the sheet to match the state (R1.5). */
   function syncSheet(): void {
     const state = store.get();
-    const shown = state.sheet === null ? '' : `${state.sheet} ${state.sourcesTarget ?? ''}`;
+    const step = state.picker ? `${state.picker.step} ${state.picker.step === 'end' ? state.picker.start : ''}` : '';
+    const shown = state.sheet === null ? '' : `${state.sheet} ${state.sourcesTarget ?? ''} ${step}`;
     if (shown === sheetShown) return;
+    const wasCorners = sheetShown.startsWith('corners');
     sheetShown = shown;
     const parts = sheetParts(state);
+    // The picker's second step is the same sheet with new content (R4.1).
+    if (sheet && parts && wasCorners && parts.name === 'corners') {
+      sheet.update(parts);
+      firstChoice(sheet.el)?.focus();
+      return;
+    }
     const old = sheet;
     sheet = null;
     if (old) {
@@ -203,6 +235,38 @@ export function createApp(options: AppOptions): App {
     if (!parts) return;
     sheet = openSheet(doc, sheetRoot, scrim, parts, opener, () => store.dispatch({ type: 'sheet/close' }));
     if (parts.name === 'sources') showTarget(sheet.el);
+  }
+
+  /** The share banner follows the state: shown for a shared or a bad link, then gone (R4.5, R4.6). */
+  function syncBanner(state: AppState, previous: AppState): void {
+    if (state.banner === previous.banner) return;
+    if (!state.banner || state.data.status !== 'ready') {
+      banner.hide();
+      return;
+    }
+    const { index } = state.data;
+    const name = (slug: string): string => cornerName(index, slug) ?? slug;
+    const text =
+      state.banner.kind === 'bad'
+        ? badLink(name(LEAD_PAIR.origin), name(LEAD_PAIR.dest))
+        : sharedRace(name(state.banner.pair.origin), name(state.banner.pair.dest));
+    banner.show(text, () => store.dispatch({ type: 'banner/hide' }));
+  }
+
+  /** "Share this race": the link of the pair on screen, shared or copied (R4.8). */
+  async function shareRace(button: HTMLElement): Promise<void> {
+    const url = `${options.address.origin}${options.address.path}${encode(store.get().pair)}`;
+    const outcome = await shareLink(url, options.share);
+    if (outcome !== 'copied') return;
+    // "Link copied" for 2 s on the button, which keeps its size, and in its own polite region.
+    if (copied !== null) timers.cancel(copied);
+    button.textContent = LINK_COPIED;
+    shareStatus.textContent = LINK_COPIED;
+    copied = timers.later(() => {
+      copied = null;
+      button.textContent = SHARE_THIS_RACE;
+      shareStatus.textContent = '';
+    }, TIMINGS.linkCopiedMs);
   }
 
   /** A "When today wins" entry: that pair at that time, raced at once (R6.5). */
@@ -450,6 +514,12 @@ export function createApp(options: AppOptions): App {
     if (!samePair(store.get().pair, pair)) store.dispatch({ type: 'pair/set', pair });
     const { first, last } = sliderRange(race);
     store.dispatch({ type: 'data/ready', index, summary, race, start: defaultStart(options.now(), first, last) });
+    // With index.json read, the link is judged against the real corners (R4.5, R4.6, race-brief 5.9).
+    if (namesAPair(options.query)) {
+      const checked = decode(options.query, new Set(index.corners.map((c) => c.slug)));
+      const good = !checked.bad && samePair(checked.pair, pair);
+      store.dispatch({ type: 'banner/show', banner: good ? { kind: 'shared', pair } : { kind: 'bad' } });
+    }
     scheduleRace();
   }
 
@@ -468,13 +538,20 @@ export function createApp(options: AppOptions): App {
     if (pairChanged) {
       stopRace();
       held = false;
+      // The address bar follows the pair, query only, with no history entry (R4.7, P12).
+      options.address.replace(`${options.address.path}${encode(state.pair)}`);
     }
     render();
     syncSheet();
+    syncBanner(state, previous);
     if (pairChanged) void changePair();
   });
 
+  /** An app acts only while its own shell is on the page (a replaced page leaves its listeners behind). */
+  const onPage = (): boolean => scroll.isConnected;
+
   doc.addEventListener('click', (event) => {
+    if (!onPage()) return;
     if (event.target === scrim) {
       store.dispatch({ type: 'sheet/close' });
       return;
@@ -505,6 +582,18 @@ export function createApp(options: AppOptions): App {
       case 'today-win':
         selectTodayWin(Number(target.dataset['index']));
         break;
+      case 'picker':
+        store.dispatch({ type: 'picker/open' });
+        break;
+      case 'pick':
+        store.dispatch({ type: 'picker/choose', slug: target.dataset['slug'] ?? '' });
+        break;
+      case 'swap':
+        store.dispatch({ type: 'pair/swap' });
+        break;
+      case 'share':
+        void shareRace(target);
+        break;
       case 'minus':
         holdRace();
         store.dispatch({ type: 'minute/step', step: -1 });
@@ -525,7 +614,7 @@ export function createApp(options: AppOptions): App {
   });
   const isSlider = (event: Event): boolean => (event.target as Element | null)?.id === 'start-time';
   doc.addEventListener('input', (event) => {
-    if (!isSlider(event)) return;
+    if (!onPage() || !isSlider(event)) return;
     // Read the thumb first: stopping the race redraws the time label from the minute before.
     const minute = Number((event.target as HTMLInputElement).value);
     holdRace();
@@ -534,10 +623,10 @@ export function createApp(options: AppOptions): App {
   });
   // The next race starts 300 ms after the thumb is released (R3.5).
   doc.addEventListener('change', (event) => {
-    if (isSlider(event) && held) scheduleRace();
+    if (onPage() && isSlider(event) && held) scheduleRace();
   });
   doc.addEventListener('pointerdown', (event) => {
-    if (isSlider(event)) dragging = true;
+    if (onPage() && isSlider(event)) dragging = true;
   });
   const release = (): void => {
     if (!dragging) return;
@@ -548,7 +637,7 @@ export function createApp(options: AppOptions): App {
   doc.addEventListener('pointercancel', release);
   // Escape shuts an open sheet even when focus has left it.
   doc.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && store.get().sheet !== null) store.dispatch({ type: 'sheet/close' });
+    if (onPage() && event.key === 'Escape' && store.get().sheet !== null) store.dispatch({ type: 'sheet/close' });
   });
 
   // The display font arrives after the first paint; the pair names are fitted again with its real widths.
@@ -597,6 +686,12 @@ export function startPage(doc: Document, win: Window): App {
     query: win.location.search,
     motion: initialMotion(win),
     timers: browserTimers(win),
+    share: browserShareDeps(win),
+    address: {
+      origin: win.location.origin,
+      path: win.location.pathname,
+      replace: (url) => win.history.replaceState(null, '', url),
+    },
   });
   media.addEventListener('change', () => app.render());
   watchMotion(win, (level) => app.setMotion(level));

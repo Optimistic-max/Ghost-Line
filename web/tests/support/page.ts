@@ -6,6 +6,7 @@ import { type FetchLike, createLoader } from '../../src/data/load';
 import type { Pair } from '../../src/data/types';
 import type { MotionLevel } from '../../src/state/model';
 import { type App, createApp } from '../../src/view/app';
+import type { ShareDeps } from '../../src/view/sharing';
 import type { Layout } from '../../src/view/vehicles';
 import { readRepoJson, readRepoText, repoFileExists } from './files';
 import { type FakeTime, fakeTime } from './time';
@@ -42,6 +43,8 @@ export type PageOptions = {
   leadPair?: Pair;
   /** Changed copies of data files, by file name. */
   override?: Record<string, unknown>;
+  /** The share sheet and clipboard to offer; none by default. */
+  share?: ShareDeps;
 };
 
 /** Mount index.html's body and boot the app. Resolves when the first boot has finished. */
@@ -63,6 +66,13 @@ export async function bootPage(options: PageOptions = {}): Promise<App> {
     query: options.query ?? '',
     motion: options.motion ?? 'full',
     timers: options.time ?? fakeTime(),
+    share: options.share ?? {},
+    // jsdom's own address bar: tests read window.location after a change.
+    address: {
+      origin: window.location.origin,
+      path: window.location.pathname,
+      replace: (url) => window.history.replaceState(null, '', url),
+    },
   });
   await app.boot();
   return app;

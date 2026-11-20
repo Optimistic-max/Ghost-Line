@@ -9,6 +9,17 @@ export function encode(pair: Pair): string {
 
 export type Decoded = { pair: Pair; bad: boolean };
 
+/** True when a query carries a `from` or a `to`: a shared link, good or bad. Never throws. */
+export function namesAPair(query: unknown): boolean {
+  if (typeof query !== 'string') return false;
+  try {
+    const params = new URLSearchParams(query);
+    return params.has('from') || params.has('to');
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The pair a query names. Only `from` and `to` are read; any other parameter
  * (such as a tracking tag a social app adds) is ignored. `from` and `to`, once
