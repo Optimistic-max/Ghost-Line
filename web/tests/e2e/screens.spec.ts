@@ -41,6 +41,8 @@ type State = {
   racing?: number;
   /** The picture shows the link's banner. */
   banner?: boolean;
+  /** Serve the data differently: summary.json failing, for the data error. */
+  data?: 'fail-summary';
   /** Controls to click before the picture, in order, to open a sheet. */
   open?: string | string[];
 };
@@ -70,6 +72,12 @@ const STATES: State[] = [
   { file: '08-sharelink', size: PHONE, at: '20:00', racing: 0, banner: true, query: `?from=${slug('Preston & Caroline')}&to=${slug('Aliceanna & Bond')}` },
   { file: '20-badshare', size: PHONE, at: '20:00', racing: 0, banner: true, query: '?from=nowhere&to=aliceanna-bond' },
   { file: '24-desktop-badshare', size: DESKTOP, at: '20:00', racing: 0, banner: true, query: '?from=nowhere&to=aliceanna-bond' },
+  // The remaining states (mockups 06, 07, 09): before the table at the first minute, an inferred pair, and
+  // the data error with summary.json failing. No one-seat ride (21, 25) exists only on the made-up fixture
+  // line, which the page cannot load (index.json must list the lead pair); jsdom tests cover it.
+  { file: '06-beforetable', size: PHONE, at: '09:00' },
+  { file: '07-inferred', size: PHONE, at: '20:00', query: `?from=${slug('Brevard & Preston')}&to=${slug('Aliceanna & Bond')}` },
+  { file: '09-dataerror', size: PHONE, at: '20:00', data: 'fail-summary' },
 ];
 
 async function fontsReady(page: Page): Promise<void> {
@@ -92,8 +100,9 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   } else {
     await page.clock.setFixedTime(newYork(state.at));
   }
+  if (state.data === 'fail-summary') await page.route('**/data/summary.json', (route) => route.fulfill({ status: 404, body: '' }));
   await page.goto(`./${state.query ?? ''}`);
-  await page.locator(racing ? '.clock-row' : '.result').waitFor();
+  await page.locator(state.data === 'fail-summary' ? '.data-error' : racing ? '.clock-row' : '.result').waitFor();
   await fontsReady(page);
   if (racing && state.racing) {
     await page.clock.runFor(TIMINGS.racePauseMs);

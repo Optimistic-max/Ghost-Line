@@ -4,11 +4,12 @@
 // 9): the card is drawn once per race; the clock then moves it through racer.ts,
 // the result is inserted at the result moment, and the finish is applied in
 // place, so nothing is rebuilt while it moves.
-import { BREAKPOINTS, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
+import { BREAKPOINTS, FIXTURE_LINE, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
 import {
   ABOUT_AND_CREDITS,
   DATA_ERROR,
   DATA_INCOMPLETE,
+  FIXTURE_TAG,
   LINK_COPIED,
   SHARE_THIS_RACE,
   TRY_AGAIN,
@@ -44,6 +45,7 @@ import {
 } from './card';
 import { h, setVar } from './dom';
 import { GLYPH } from './glyphs';
+import { vehicleMarkup } from './lanes';
 import { fitOneLine } from './layout';
 import { SourceRegistry } from './numbers';
 import { type Racer, createRacer } from './racer';
@@ -125,6 +127,10 @@ export function createApp(options: AppOptions): App {
     GLYPH.info,
   );
   byId(doc, 'app').append(info);
+  const headline = doc.getElementById('headline');
+  const headlineLine = headline?.querySelector<HTMLElement>('.headline-line') ?? null;
+  const fixtureTag = h('p', { class: 'fixture-tag', hidden: true }, FIXTURE_TAG);
+  byId(doc, 'map-area').append(fixtureTag);
 
   const shareStatus = byId(doc, 'share-status');
   const banner = createBanner(byId(doc, 'banner-root'), timers.later, timers.cancel);
@@ -188,6 +194,13 @@ export function createApp(options: AppOptions): App {
     label.textContent = n && year ? lineLabel(n, year) : '';
     label.hidden = !(n && year);
     info.hidden = data.status !== 'ready';
+    // The headline's second line names the year 1938; during the data error it leaves the page, so
+    // the DOM holds no number at all, and "Same ride, longer wait." stays (P7; Emmanuel, Nov 19).
+    if (headlineLine && headline) {
+      if (data.status === 'error') headlineLine.remove();
+      else if (!headlineLine.isConnected) headline.append(headlineLine);
+    }
+    fixtureTagFor(state);
   }
 
   /** The parts of the sheet the state names. */
@@ -291,14 +304,21 @@ export function createApp(options: AppOptions): App {
     for (const each of LEVELS) root.classList.toggle(motionClass(each), each === level);
   }
 
-  /** The data error: corner names stay, no number anywhere (R14.1); task 15.4 completes this state. */
+  /**
+   * The data error (R14.1, R14.2, mockup 09): the corner names stay; the trolley
+   * is drawn dim and without its route number; the message and "Try again".
+   * No number anywhere.
+   */
   function errorView(): HTMLElement[] {
     const names = doc.getElementById('pair-names')?.cloneNode(true) as HTMLElement | undefined;
+    // The names keep their text only: the picker and the inferred chip belong to a race on screen.
+    names?.querySelectorAll('.pair-chip').forEach((chip) => chip.remove());
     return [
       names ?? h('span'),
       h(
         'div',
         { class: 'data-error', role: 'alert' },
+        h('div', { class: 'data-error-art', 'aria-hidden': 'true' }, vehicleMarkup('1938', vehicleWidths(options.layout()).trolleyRacing, null)),
         h('p', { class: 'data-error-title display' }, DATA_ERROR),
         h('p', { class: 'data-error-line' }, DATA_INCOMPLETE),
         h('button', { type: 'button', class: 'button button-filled', 'data-action': 'retry' }, TRY_AGAIN),
@@ -306,8 +326,16 @@ export function createApp(options: AppOptions): App {
     ];
   }
 
+  /** The fixture line (tests only) always carries its tag over the map (R6.8, mockup 21). */
+  function fixtureTagFor(state: AppState): void {
+    fixtureTag.hidden = !(state.data.status === 'ready' && state.data.index.line === FIXTURE_LINE);
+  }
+
   function drawError(): void {
     stopRace();
+    // An earlier race's announcement leaves with it: no number anywhere (R14.1).
+    const said = doc.getElementById('result-status');
+    if (said) said.textContent = '';
     run = null;
     drawn = null;
     racer = null;

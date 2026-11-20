@@ -98,7 +98,12 @@ describe('the first running page', () => {
   it('shows the data error, with no number anywhere and the corner names kept, when a file fails', async () => {
     const app = await bootPage({ fail: new Set(['summary.json']) });
     expect(app.store.get().data.status).toBe('error');
-    expect([...document.querySelector('.data-error')!.children].map(text)).toEqual([C.DATA_ERROR, C.DATA_INCOMPLETE, C.TRY_AGAIN]);
+    const box = document.querySelector('.data-error')!;
+    // Task 15.4: the trolley is drawn too (mockup 09), dim and without its route number (R14.1).
+    const art = box.querySelector('.data-error-art')!;
+    expect(art.querySelector('[data-vehicle="trolley"]')).not.toBeNull();
+    expect(art.querySelector('[data-part="route-number"]')).toBeNull();
+    expect([...box.children].filter((c) => c !== art).map(text)).toEqual([C.DATA_ERROR, C.DATA_INCOMPLETE, C.TRY_AGAIN]);
     expect(document.getElementById('line-label')!.hidden).toBe(true);
     // The card and the top bar hold no digit. (The desktop headline's approved second line names
     // the year 1938 in its wording; whether P7 covers it is open for task 15.6.)

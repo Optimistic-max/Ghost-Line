@@ -5,7 +5,7 @@ import { LEAD_PAIR, TIMINGS } from '../../src/config';
 import { type FetchLike, createLoader } from '../../src/data/load';
 import type { Pair } from '../../src/data/types';
 import type { MotionLevel } from '../../src/state/model';
-import { type App, createApp } from '../../src/view/app';
+import { type App, type AppOptions, createApp } from '../../src/view/app';
 import type { ShareDeps } from '../../src/view/sharing';
 import type { Layout } from '../../src/view/vehicles';
 import { readRepoJson, readRepoText, repoFileExists } from './files';
@@ -18,10 +18,16 @@ const BASE = '/Ghost-Line/data/';
  * and `override` serves changed copies of files by name (for example a
  * summary.json with other counts).
  */
-export function folderFetch(folder: string, fail: ReadonlySet<string> = new Set(), override: Record<string, unknown> = {}): FetchLike {
+export function folderFetch(
+  folder: string,
+  fail: ReadonlySet<string> = new Set(),
+  override: Record<string, unknown> = {},
+  hang: ReadonlySet<string> = new Set(),
+): FetchLike {
   return async (url) => {
     const name = url.slice(BASE.length);
     const path = `${folder}/${name}`;
+    if (hang.has(name)) return new Promise(() => {});
     if (name in override) return { ok: true, status: 200, json: async () => structuredClone(override[name]) };
     const ok = !fail.has(name) && repoFileExists(path);
     return { ok, status: ok ? 200 : 404, json: async () => readRepoJson(path) };
@@ -45,20 +51,19 @@ export type PageOptions = {
   override?: Record<string, unknown>;
   /** The share sheet and clipboard to offer; none by default. */
   share?: ShareDeps;
+  /** Files whose request never answers. */
+  hang?: ReadonlySet<string>;
 };
 
-/** Mount index.html's body and boot the app. Resolves when the first boot has finished. */
-export async function bootPage(options: PageOptions = {}): Promise<App> {
-  const html = readRepoText('web/index.html');
-  const body = /<body>([\s\S]*)<\/body>/.exec(html)?.[1] ?? '';
-  document.body.innerHTML = body.replace(/<script[\s\S]*?<\/script>/g, '');
-  const app = createApp({
+/** The app's options for a test page. */
+function appOptions(options: PageOptions): AppOptions {
+  return {
     doc: document,
     loader: createLoader({
       baseUrl: BASE,
       timeoutMs: TIMINGS.dataTimeoutMs,
       leadPair: options.leadPair ?? LEAD_PAIR,
-      fetch: folderFetch(options.folder ?? 'web/public/data', options.fail, options.override),
+      fetch: folderFetch(options.folder ?? 'web/public/data', options.fail, options.override, options.hang),
     }),
     // 20:00 in New York is outside the slider range, so the start falls back to 10:00.
     now: () => options.now ?? new Date('2026-11-04T20:00:00-05:00'),
@@ -73,7 +78,20 @@ export async function bootPage(options: PageOptions = {}): Promise<App> {
       path: window.location.pathname,
       replace: (url) => window.history.replaceState(null, '', url),
     },
-  });
+  };
+}
+
+/** Mount index.html's body and create the app without booting it (for the loading state). */
+export function mountPage(options: PageOptions = {}): App {
+  const html = readRepoText('web/index.html');
+  const body = /<body>([\s\S]*)<\/body>/.exec(html)?.[1] ?? '';
+  document.body.innerHTML = body.replace(/<script[\s\S]*?<\/script>/g, '');
+  return createApp(appOptions(options));
+}
+
+/** Mount index.html's body and boot the app. Resolves when the first boot has finished. */
+export async function bootPage(options: PageOptions = {}): Promise<App> {
+  const app = mountPage(options);
   await app.boot();
   return app;
 }

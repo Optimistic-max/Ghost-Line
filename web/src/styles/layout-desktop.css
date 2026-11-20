@@ -80,9 +80,20 @@
   }
 
   /* The pair names stay on one line; app.ts shrinks their font for a long pair (R1.3). */
-  .pair-row {
+  .card .pair-row,
+  .card .pair-row[data-chip] {
+    font-size: var(--fs-corner);
     white-space: nowrap;
     overflow-x: clip;
+  }
+
+  /* The fixture tag sits over the map, at its foot. */
+  .map-area .fixture-tag {
+    top: auto;
+    bottom: 16px;
+    left: var(--column-pad);
+    right: auto;
+    max-width: 470px;
   }
 
   /* Buttons directly under the content, not pinned. */

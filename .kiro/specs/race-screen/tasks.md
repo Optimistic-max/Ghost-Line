@@ -125,13 +125,13 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 14.4 Tests: all 20 pairs selectable by three taps; picker keyboard use; swap; each share path (share available, cancelled, failing and falling back, clipboard unavailable); the address bar after every change; shared link; each bad link of race-brief 5.9.
   - Depends on: tasks 4, 10, 13
 
-- [ ] 15. Remaining states (R2, R6.6 to R6.8, R14, R2.2)
-  - [ ] 15.1 Loading (the line under the pair names, top bar shows only "Ghost Line"), Ready (schedule line, "Start time is the time now." only for a clock-derived time), and the first race starting by itself.
-  - [ ] 15.2 Before the midday table: notice naming `row.start`, thumb unmoved, lanes and board from `row.start`; inferred corner: chip, caution line, dashed dot and stretch; notices as tinted strips that hide the schedule line.
-  - [ ] 15.3 No one-seat ride: the 1938 lane, the no-bus sentence, "No one-seat ride today", "Trolley {n} min. No winner is called.", no bus lane, vehicle, total or margin; shown from the fixture with the fixture tag, never from the shipped data.
-  - [ ] 15.4 Data error: message, "Try again", no number anywhere (top bar, trolley route number, counts), corner names stay; "Try again" recovers without a reload; the 3 s timeout.
-  - [ ] 15.5 "No. 21, 1938" and the trolley's route number built from index.json's `line` and `effective` after the shape check, omitted when `line` does not match; absent in the error state.
-  - [ ] 15.6 Tests for each state of R17.1 from real data where a real state exists (today win, photo finish, before the table at 9:00, an inferred pair) and from the fixture otherwise; P7: in the data-error state the DOM contains no digit.
+- [x] 15. Remaining states (R2, R6.6 to R6.8, R14, R2.2)
+  - [x] 15.1 Loading (the line under the pair names, top bar shows only "Ghost Line"), Ready (schedule line, "Start time is the time now." only for a clock-derived time), and the first race starting by itself.
+  - [x] 15.2 Before the midday table: notice naming `row.start`, thumb unmoved, lanes and board from `row.start`; inferred corner: chip, caution line, dashed dot and stretch; notices as tinted strips that hide the schedule line.
+  - [x] 15.3 No one-seat ride: the 1938 lane, the no-bus sentence, "No one-seat ride today", "Trolley {n} min. No winner is called.", no bus lane, vehicle, total or margin; shown from the fixture with the fixture tag, never from the shipped data.
+  - [x] 15.4 Data error: message, "Try again", no number anywhere (top bar, trolley route number, counts), corner names stay; "Try again" recovers without a reload; the 3 s timeout.
+  - [x] 15.5 "No. 21, 1938" and the trolley's route number built from index.json's `line` and `effective` after the shape check, omitted when `line` does not match; absent in the error state.
+  - [x] 15.6 Tests for each state of R17.1 from real data where a real state exists (today win, photo finish, before the table at 9:00, an inferred pair) and from the fixture otherwise; P7: in the data-error state the DOM contains no digit.
   - Depends on: tasks 11, 12, 13, 14
 
 ## Map

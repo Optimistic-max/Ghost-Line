@@ -3,7 +3,16 @@
 // and the honest line once the result is shown, and the departures board. Every
 // number in the race is a number button registered in the card's source
 // registry.
-import { NO_SINGLE_BUS, SKIP_TO_RESULT, START_IS_NOW, minutes, ready } from '../copy/copy';
+import {
+  INFERRED_CAUTION,
+  LANE_TITLE_TODAY,
+  NO_SINGLE_BUS,
+  SKIP_TO_RESULT,
+  START_IS_NOW,
+  beforeTable,
+  minutes,
+  ready,
+} from '../copy/copy';
 import type { Index, RaceFile, Summary } from '../data/types';
 import { sliderRange } from '../data/lookup';
 import { routeNumberOf } from '../format/line';
@@ -15,7 +24,7 @@ import { h } from './dom';
 import { honestLine } from './honest';
 import { type Stage, laneView } from './lanes';
 import { type RaceLayout, raceLayout } from './layout';
-import type { SourceRegistry } from './numbers';
+import { type SourceRegistry, sentence } from './numbers';
 import { pairRow } from './pairrow';
 import { resultBox } from './resultbox';
 import { slider } from './slider';
@@ -84,12 +93,22 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   const { first, last } = sliderRange(race);
   const trolleyWidth = stage === 'finished' ? widths.trolleyFinished : widths.trolleyRacing;
 
-  const schedule = h(
-    'p',
-    { class: 'schedule' },
-    ready(serviceDateLabel(index.service_date)),
-    input.minuteFromClock ? ` ${START_IS_NOW}` : '',
-  );
+  // Under the slider: the notices when there are any (they hide the schedule line), else the schedule line (R6.6, R6.7).
+  const under =
+    view.notices.length > 0
+      ? h(
+          'div',
+          { class: 'notices' },
+          ...view.notices.map((notice) =>
+            notice === 'before-table'
+              ? // The covered-from time is the first listed car at this corner, row.start: a number with its source.
+                h('p', { class: 'notice', 'data-notice': notice }, sentence(registry, beforeTable, nums.lane1938.next))
+              : h('p', { class: 'notice', 'data-notice': notice }, INFERRED_CAUTION),
+          ),
+        )
+      : h('p', { class: 'schedule' }, ready(serviceDateLabel(index.service_date)), input.minuteFromClock ? ` ${START_IS_NOW}` : '');
+  const inferredSlug = index.corners.find((c) => c.inferred)?.slug;
+  const inferredEnd = !view.inferred ? null : view.pair.origin === inferredSlug ? 'origin' : view.pair.dest === inferredSlug ? 'dest' : null;
 
   const lane1938 = laneView(
     registry,
@@ -111,14 +130,20 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
           },
           { vehicleWidth: widths.bus, routeNumber, stage },
         )
-      : h('p', { class: 'no-bus' }, NO_SINGLE_BUS);
+      : // No one-seat ride: in place of the bus lane, its title and the sentence; no vehicle, total or margin (R6.8).
+        h(
+          'section',
+          { class: 'lane-none', 'aria-label': LANE_TITLE_TODAY },
+          h('h3', { class: 'lane-title display' }, LANE_TITLE_TODAY),
+          h('p', { class: 'no-bus' }, NO_SINGLE_BUS),
+        );
 
   // The clock row sits right under the lanes while racing, so the result arriving
   // under it never pushes it out of sight on a phone (R1.2); it goes at the finish.
   return [
-    pairRow(view.originName, view.destName),
+    pairRow(view.originName, view.destName, inferredEnd),
     slider({ first, last, minute: input.minute }),
-    schedule,
+    under,
     h('div', { class: 'lanes' }, lane1938, today),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),

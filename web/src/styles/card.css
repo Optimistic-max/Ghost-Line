@@ -42,6 +42,11 @@
   color: var(--muted);
 }
 
+/* A corner's name never breaks inside itself; on a phone the pair wraps between names. */
+.pair-row .corner {
+  white-space: nowrap;
+}
+
 .nowrap {
   white-space: nowrap;
 }
@@ -116,6 +121,58 @@
 .schedule {
   margin-top: 4px;
   color: var(--muted);
+}
+
+/* Notices under the slider (before the midday table; inferred corner): tinted
+   strips with a --ghost left edge, in place of the schedule line (R6.6, R6.7). */
+.notices {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.notice {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ghost) 8%, var(--panel));
+  box-shadow: inset 3px 0 0 var(--ghost);
+  color: var(--ink);
+}
+
+/* The inferred corner's chip by its name; the names step down a size to make room (screen-brief 3.3). */
+.pair-row[data-chip] {
+  font-size: var(--fs-corner-chip);
+}
+
+.pair-chip {
+  margin: 0 0.25em;
+  padding: 0 0.5em;
+  font-size: 0.8em;
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+
+/* No one-seat ride: the bus lane's title and the sentence, nothing else (R6.8). */
+.lane-none .lane-title {
+  color: var(--today);
+}
+
+.lane-none .no-bus {
+  margin-top: 2px;
+}
+
+/* The made-up test line's tag, over the map (R6.8, mockup 21). */
+.fixture-tag {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  left: var(--pad);
+  right: var(--pad);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--night);
+  font-weight: 600;
 }
 
 /* ---- Lanes ------------------------------------------------------------------------ */
@@ -624,6 +681,16 @@
 
 .data-error-line {
   color: var(--muted);
+}
+
+/* The trolley, dim and unlit, without its route number (R14.1, mockup 09). */
+.data-error-art {
+  line-height: 0;
+  opacity: 0.45;
+}
+
+.data-error-art .trolley-glow {
+  display: none;
 }
 
 .data-error .button {

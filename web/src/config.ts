@@ -24,6 +24,12 @@ export const TIMINGS = {
   dataTimeoutMs: 3000,
 } as const;
 
+/**
+ * The made-up test line's `line` in index.json (tests/fixtures/fake). When the page
+ * shows it, the fixture tag says so (R6.8). The shipped data never has it.
+ */
+export const FIXTURE_LINE = 'fake';
+
 /** How many departures the board lists on each side (screen-brief 3A.5, R8.2). */
 export const BOARD = { cars1938: 4, buses: 3 } as const;
 
