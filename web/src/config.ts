@@ -134,6 +134,24 @@ export const MAP_LAYOUT = {
   labelStep: 0.5,
   /** Room kept between the standing trolley marker and a street name, in pixels. */
   markerRoom: 1,
+  /**
+   * How far a browser's glyph boxes for the display face reach above and below the baseline, in ems
+   * (measured in Chromium, Nov 20: 11.2 px above and 2 px below at 11 px). The marker is kept clear
+   * of the whole glyph box, which is more than the ink.
+   */
+  glyphBox: { above: 1.02, below: 0.18 },
+  /**
+   * When no place along its leg is clear of the marker, a street name moves out from its
+   * leg, a pixel at a time up to this far (the near edge of its letters from the line),
+   * on either side, and is left out only if nothing fits (Emmanuel, Nov 20).
+   */
+  labelMaxOffset: 20,
+  labelOffsetStep: 1,
+  /** Along a leg, a name moved out looks for its place in steps of this many pixels. */
+  labelOffsetAlongStep: 2,
+  /** A name moved out keeps this far from the route's lines, and this far from the names already set, in pixels. */
+  lineRoom: 2.5,
+  labelRoom: 4,
   /** The radius of the target round each corner dot: a 44 px tap target (R1.4). */
   hit: 22,
 } as const;

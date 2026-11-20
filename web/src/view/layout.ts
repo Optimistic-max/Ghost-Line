@@ -272,8 +272,23 @@ function normal(a: Pt, b: Pt): Pt {
   return length > 0 ? { x: (b.y - a.y) / length, y: (a.x - b.x) / length } : { x: 0, y: -1 };
 }
 
-/** Points on the band a name of `width` and `fontPx` covers, centred at the share `along` of the chord it is set along. */
-export function labelSamples(chord: Chord, width: number, fontPx: number, along = 0.5): Pt[] {
+/** The rows, as shares of the font size above the baseline, that the letters of a name cover. */
+export const INK_ROWS: readonly number[] = [0, 0.35, 0.7];
+
+/**
+ * The rows a browser's glyph boxes cover, from below the baseline to above the
+ * capitals: the ascent and descent of the face, in ems (config.ts MAP_LAYOUT.glyphBox).
+ * A name must clear the trolley marker by this much, not only by its ink.
+ */
+export function glyphRows(box: { above: number; below: number }): number[] {
+  return [-box.below, 0, box.above / 3, (box.above * 2) / 3, box.above];
+}
+
+/**
+ * Points on the band a name of `width` and `fontPx` covers, centred at the share
+ * `along` of the chord it is set along, on each of `rows` above its baseline.
+ */
+export function labelSamples(chord: Chord, width: number, fontPx: number, along = 0.5, rows: readonly number[] = INK_ROWS): Pt[] {
   const { from, to, length } = chord;
   if (length === 0) return [from];
   const u = { x: (to.x - from.x) / length, y: (to.y - from.y) / length };
@@ -283,11 +298,71 @@ export function labelSamples(chord: Chord, width: number, fontPx: number, along 
   const steps = Math.max(1, Math.ceil(width / 3));
   for (let i = 0; i <= steps; i += 1) {
     const along = (i / steps - 0.5) * width;
-    for (const up of [0, 0.35, 0.7]) {
+    for (const up of rows) {
       out.push({ x: mid.x + u.x * along + n.x * up * fontPx, y: mid.y + u.y * along + n.y * up * fontPx });
     }
   }
   return out;
+}
+
+/**
+ * The offsets from a leg, in order, at which a street name moved out of the
+ * marker's way is tried: the near edge of its letters `d` pixels from the line,
+ * `d` from the usual gap up to `max` in steps, on the usual side and then the
+ * other (a negative offset: the letters stand on the other side, so the baseline
+ * lies a letters' height beyond the edge). The usual side at the usual gap is the
+ * place already tried.
+ */
+export function nameOffsets(fontPx: number, gap: number, max: number, step: number): number[] {
+  const reach = fontPx * 0.7;
+  const out: number[] = [];
+  for (let d = gap; d <= max; d += step) {
+    if (d > gap) out.push(d);
+    out.push(-(d + reach));
+  }
+  return out;
+}
+
+/** Whether a point is further than `room` pixels from every one of the points. */
+export function apartFrom(p: Pt, points: readonly Pt[], room: number): boolean {
+  return points.every((q) => Math.hypot(p.x - q.x, p.y - q.y) > room);
+}
+
+/**
+ * A test for whether a point is within `room` pixels of any of the lines. The
+ * segments are filed once in a grid of square cells, so a point is measured only
+ * against the few segments whose reach covers its cell.
+ */
+export function lineProximity(lines: readonly (readonly Pt[])[], room: number): (p: Pt) => boolean {
+  const cell = 16;
+  const grid = new Map<string, [Pt, Pt][]>();
+  const key = (cx: number, cy: number): string => `${cx},${cy}`;
+  for (const line of lines) {
+    for (let i = 0; i + 1 < line.length; i += 1) {
+      const a = line[i]!;
+      const b = line[i + 1]!;
+      const [x0, x1] = [Math.floor((Math.min(a.x, b.x) - room) / cell), Math.floor((Math.max(a.x, b.x) + room) / cell)];
+      const [y0, y1] = [Math.floor((Math.min(a.y, b.y) - room) / cell), Math.floor((Math.max(a.y, b.y) + room) / cell)];
+      for (let cx = x0; cx <= x1; cx += 1) {
+        for (let cy = y0; cy <= y1; cy += 1) {
+          const k = key(cx, cy);
+          const bucket = grid.get(k);
+          if (bucket) bucket.push([a, b]);
+          else grid.set(k, [[a, b]]);
+        }
+      }
+    }
+  }
+  return (p) => {
+    for (const [a, b] of grid.get(key(Math.floor(p.x / cell), Math.floor(p.y / cell))) ?? []) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const span = dx * dx + dy * dy;
+      const t = span > 0 ? Math.min(1, Math.max(0, ((p.x - a.x) * dx + (p.y - a.y) * dy) / span)) : 0;
+      if (Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy)) <= room) return true;
+    }
+    return false;
+  };
 }
 
 export function insideBox(p: Pt, box: Box, margin = 0): boolean {

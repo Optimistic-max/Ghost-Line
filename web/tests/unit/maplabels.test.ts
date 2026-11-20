@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { MAP_LAYOUT, VEHICLE_SIZES } from '../../src/config';
 import { pairKey } from '../../src/data/files';
 import { planDrawing } from '../../src/map/routedrawing';
-import { alongSpots, markerTrack, readingChord, textWidth, trackPoint } from '../../src/view/layout';
+import { alongSpots, markerTrack, nameOffsets, readingChord, textWidth, trackPoint } from '../../src/view/layout';
 import { markerSvg } from '../../src/view/vehicles';
 import { realData } from '../support/realdata';
 
@@ -28,8 +28,15 @@ function markerHeight(width: number): number {
 
 const markerWidth = { phone: VEHICLE_SIZES.phone.mapMarker, desktop: VEHICLE_SIZES.desktop.mapMarker };
 
-/** The four corners of the band a name covers: `width` along its line, centred at `along`, from its baseline up 0.7 em. */
-function nameOutline(from: P, to: P, along: number, width: number, font: number): P[] {
+/** The ink of a name: from its baseline up 0.7 em. */
+const INK = { above: 0.7, below: 0 };
+
+/**
+ * The four corners of the band a name covers: `width` along its line, centred at `along`, from
+ * `band.below` ems under its baseline to `band.above` ems over it. The browser's glyph boxes
+ * (config.ts glyphBox) are the larger band; the ink is the smaller.
+ */
+function nameOutline(from: P, to: P, along: number, width: number, font: number, band = INK): P[] {
   const length = Math.hypot(to.x - from.x, to.y - from.y);
   const u = { x: (to.x - from.x) / length, y: (to.y - from.y) / length };
   // The side the text stands on: left of the reading direction, on a screen whose y runs down.
@@ -37,8 +44,8 @@ function nameOutline(from: P, to: P, along: number, width: number, font: number)
   const c = { x: from.x + (to.x - from.x) * along, y: from.y + (to.y - from.y) * along };
   const at = (s: number, t: number): P => ({ x: c.x + u.x * s + n.x * t, y: c.y + u.y * s + n.y * t });
   const half = width / 2;
-  const up = font * 0.7;
-  return [at(-half, 0), at(half, 0), at(half, up), at(-half, up)];
+  const [low, high] = [-band.below * font, band.above * font];
+  return [at(-half, low), at(half, low), at(half, high), at(-half, high)];
 }
 
 /** Whether a convex polygon and a box overlap (separating axes). */
@@ -86,7 +93,15 @@ describe('street names and the standing trolley marker', () => {
           expect(b.y, pairKey(pair)).toBeCloseTo(boxes[k]!.y, 6);
         });
         for (const label of plan.labels) {
-          const outline = nameOutline(label.from, label.to, label.along, textWidth(label.street, look.streetFont, MAP_LAYOUT.glyphEm), look.streetFont);
+          // The marker is kept off the whole glyph box, as a browser reports it, not only off the ink.
+          const outline = nameOutline(
+            label.from,
+            label.to,
+            label.along,
+            textWidth(label.street, look.streetFont, MAP_LAYOUT.glyphEm),
+            look.streetFont,
+            MAP_LAYOUT.glyphBox,
+          );
           for (const [k, box] of boxes.entries()) {
             expect(overlaps(outline, box), `${layout} ${pairKey(pair)}: ${label.street} under the marker ${k === 0 ? 'at the origin' : 'short of the destination'}`).toBe(false);
           }
@@ -113,12 +128,128 @@ describe('street names and the standing trolley marker', () => {
     expect(preston!.along * length + width / 2).toBeLessThanOrEqual(length);
   });
 
+  it('keeps Caroline Street visible for the lead pair on both layouts (Emmanuel, Nov 20)', () => {
+    const lead = { origin: 'preston-caroline', dest: 'aliceanna-bond' };
+    const race = races.get(pairKey(lead))!;
+    // (The drawing and the map are checked from this plan in tests/dom/map.test.ts and mapstyle.test.ts.)
+    for (const layout of ['phone', 'desktop'] as const) {
+      const plan = planDrawing({ index, route, pair: lead, layout, direction: race.direction });
+      expect(plan.labels.map((l) => l.street), layout).toContain('Caroline Street');
+      expect(plan.mapLabels.map((l) => l.street), `${layout}: on the map`).toContain('Caroline Street');
+    }
+    // On the phone, along the leg alone it cannot clear both marker places and the corner names: it stands beside its leg.
+    const phone = planDrawing({ index, route, pair: lead, layout: 'phone', direction: race.direction });
+    const caroline = phone.labels.find((l) => l.street === 'Caroline Street')!;
+    expect(caroline.offset).not.toBe(MAP_LAYOUT.gap);
+    expect(Math.abs(caroline.offset)).toBeGreaterThan(MAP_LAYOUT.gap);
+    // The desktop name stays where it always was.
+    const desktop = planDrawing({ index, route, pair: lead, layout: 'desktop', direction: race.direction });
+    expect(desktop.labels.find((l) => l.street === 'Caroline Street')!.offset).toBe(MAP_LAYOUT.gap);
+  });
+
+  it('keeps a name moved out from its leg beside that leg, off the other lines and off the other names (every pair, both layouts)', () => {
+    let moved = 0;
+    for (const layout of ['phone', 'desktop'] as const) {
+      const look = MAP_LAYOUT[layout];
+      for (const pair of index.pairs) {
+        const race = races.get(pairKey(pair))!;
+        const plan = planDrawing({ index, route, pair, layout, direction: race.direction });
+        const outlines = plan.labels.map((l) => ({
+          label: l,
+          shape: nameOutline(l.from, l.to, l.along, textWidth(l.street, look.streetFont, MAP_LAYOUT.glyphEm), look.streetFont),
+        }));
+        for (const { label, shape } of outlines) {
+          if (label.offset === MAP_LAYOUT.gap) continue;
+          moved += 1;
+          const where = `${layout} ${pairKey(pair)}: ${label.street}`;
+          // Beside its own leg: the letters' near edge is at most labelMaxOffset from the line (checked from the offset).
+          const near = label.offset > 0 ? label.offset : -label.offset - look.streetFont * 0.7;
+          expect(near, where).toBeLessThanOrEqual(MAP_LAYOUT.labelMaxOffset + 1e-9);
+          expect(near, where).toBeGreaterThanOrEqual(MAP_LAYOUT.gap - 1e-9);
+          // Off every line of the route, its own included, by more than the line's own width.
+          for (const line of plan.legs) {
+            expect(distanceToPolyline(shape, line), where).toBeGreaterThan(1.5);
+          }
+          // Off the other names.
+          for (const other of outlines) {
+            if (other.label === label) continue;
+            expect(polygonsApart(shape, other.shape), `${where} and ${other.label.street}`).toBe(true);
+          }
+        }
+      }
+    }
+    // Some name really was moved out, so the checks above ran.
+    expect(moved).toBeGreaterThan(0);
+  });
+
+  it('leaves a name out when nothing fits: no offset up to the limit clears the marker', () => {
+    // With the search held to the usual offset, Caroline Street cannot clear the marker on the phone, and is left out.
+    const lead = { origin: 'preston-caroline', dest: 'aliceanna-bond' };
+    const race = races.get(pairKey(lead))!;
+    const saved = MAP_LAYOUT.labelMaxOffset;
+    try {
+      (MAP_LAYOUT as { labelMaxOffset: number }).labelMaxOffset = MAP_LAYOUT.gap;
+      const plan = planDrawing({ index, route, pair: lead, layout: 'phone', direction: race.direction });
+      expect(plan.labels.map((l) => l.street)).not.toContain('Caroline Street');
+    } finally {
+      (MAP_LAYOUT as { labelMaxOffset: number }).labelMaxOffset = saved;
+    }
+  });
+
   it('without the race file there is no track yet, and the names are set as before', () => {
     const lead = { origin: 'preston-caroline', dest: 'aliceanna-bond' };
     const plan = planDrawing({ index, route, pair: lead, layout: 'phone' });
     expect(plan.track).toBeNull();
     expect(plan.markerBoxes).toEqual([]);
     for (const label of plan.labels) expect(label.along).toBe(0.5);
+  });
+});
+
+/** The distance from a point to a segment. */
+function pointToSegment(p: P, a: P, b: P): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const span = dx * dx + dy * dy;
+  const t = span > 0 ? Math.min(1, Math.max(0, ((p.x - a.x) * dx + (p.y - a.y) * dy) / span)) : 0;
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+/** The points of a quadrilateral's edges, every pixel and a half, for distances. */
+function edgePoints(poly: P[]): P[] {
+  const out: P[] = [];
+  poly.forEach((a, i) => {
+    const b = poly[(i + 1) % poly.length]!;
+    const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 1.5));
+    for (let k = 0; k <= steps; k += 1) out.push({ x: a.x + ((b.x - a.x) * k) / steps, y: a.y + ((b.y - a.y) * k) / steps });
+  });
+  return out;
+}
+
+/** The least distance from a name's outline to a polyline, taken over points along the outline's edges. */
+function distanceToPolyline(poly: P[], line: readonly P[]): number {
+  let least = Infinity;
+  for (const p of edgePoints(poly)) {
+    for (let i = 0; i + 1 < line.length; i += 1) least = Math.min(least, pointToSegment(p, line[i]!, line[i + 1]!));
+  }
+  // A line crossing the outline crosses an edge, so some edge point is near it: the least distance is then small.
+  return least;
+}
+
+/** Whether two quadrilaterals keep apart: no edge point of either inside, or within a pixel of, the other. */
+function polygonsApart(a: P[], b: P[]): boolean {
+  const inside = (p: P, poly: P[]): boolean => overlaps(poly, { x: p.x - 0.5, y: p.y - 0.5, width: 1, height: 1 });
+  return !edgePoints(a).some((p) => inside(p, b)) && !edgePoints(b).some((p) => inside(p, a));
+}
+
+describe('nameOffsets', () => {
+  it('tries the other side at the usual gap, then each step out on the usual side and then the other, up to the limit', () => {
+    const font = 10;
+    const offsets = nameOffsets(font, 5, 8, 1);
+    // The letters stand 7 px tall (0.7 of the font); on the other side the baseline is that much further out.
+    expect(offsets.map((o) => Number(o.toFixed(6)))).toEqual([-12, 6, -13, 7, -14, 8, -15]);
+    // The usual side at the usual gap (offset 5) is the place already tried.
+    expect(offsets).not.toContain(5);
+    expect(nameOffsets(font, 5, 5, 1)).toEqual([-12]);
   });
 });
 

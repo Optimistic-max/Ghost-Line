@@ -12,22 +12,27 @@ import { MAP_INFERRED } from '../copy/copy';
 import type { Corner, Index, Pair, RaceFile, Route, RouteLeg } from '../data/types';
 import {
   type Box,
+  type Chord,
   type NamePlace,
   type Pt,
   type Size,
   type Track,
   alongPercent,
   alongSpots,
+  apartFrom,
   bestPlace,
   dotBox,
   fitProjection,
+  glyphRows,
   insideBox,
   labelAnchor,
   labelSamples,
   linesMeet,
   markerBox,
   markerTrack,
+  lineProximity,
   nameAnchor,
+  nameOffsets,
   namePlaces,
   readingChord,
   textWidth,
@@ -59,8 +64,12 @@ export type DrawingPlan = {
   legs: Pt[][];
   dots: PlannedDot[];
   names: PlannedName[];
-  /** The street names the drawing sets, each on the line it is set along, centred at the share `along` of it. */
-  labels: { street: string; from: Pt; to: Pt; along: number }[];
+  /**
+   * The street names the drawing sets, each on the line it is set along, centred at the share `along` of it.
+   * `offset` is how far that line lies from the street's own leg, to the side the letters stand on (negative:
+   * the other side); the usual offset is MAP_LAYOUT.gap, and another means the name was moved out of the marker's way.
+   */
+  labels: { street: string; from: Pt; to: Pt; along: number; offset: number }[];
   /** The trolley marker's track for the race's direction, or null before its race file is in. */
   track: Track | null;
   /** The boxes the trolley marker covers where it stands: at the origin, and short of the destination. */
@@ -175,20 +184,45 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
   const markerBoxes = track ? [trackPoint(track, 0), trackPoint(track, 1)].map((p) => markerBox(project(p), markerWidth)) : [];
 
   // The drawing sets a name only where it fits along its leg and clears the corners and the edges. Where the
-  // standing trolley marker would cover it, the name moves along its leg until it is clear, or is left out.
+  // standing trolley marker would cover it, the name first moves along its leg; if no place along it is clear,
+  // it moves out from its leg, to the side that clears, a pixel at a time; and it is left out only when nothing fits
+  // (Emmanuel, Nov 20). A name moved out also keeps off the route's other lines and the names already set.
   const blocked = [...nameBoxes, ...dots.map((d) => d.box)];
+  const font = look.streetFont;
+  const offsets = nameOffsets(font, MAP_LAYOUT.gap, MAP_LAYOUT.labelMaxOffset, MAP_LAYOUT.labelOffsetStep);
+  const placed: Pt[] = [];
+  const nearRoute = lineProximity(legs, MAP_LAYOUT.lineRoom);
   const labels = named.flatMap(({ leg, at }) => {
     const street = leg.properties.street;
-    const chord = readingChord(legs[at] ?? [], MAP_LAYOUT.gap);
-    const width = textWidth(street, look.streetFont, MAP_LAYOUT.glyphEm);
-    if (chord.length < width) return [];
-    const clear = (along: number, markers: readonly Box[]): boolean =>
-      !labelSamples(chord, width, look.streetFont, along).some(
-        (p) => !insideBox(p, view) || blocked.some((b) => insideBox(p, b, 1)) || markers.some((b) => insideBox(p, b, MAP_LAYOUT.markerRoom)),
-      );
-    if (!clear(0.5, [])) return [];
-    const along = alongSpots(chord, width, MAP_LAYOUT.labelStep).find((spot) => clear(spot, markerBoxes));
-    return along === undefined ? [] : [{ street, from: chord.from, to: chord.to, along }];
+    const width = textWidth(street, font, MAP_LAYOUT.glyphEm);
+    const base = readingChord(legs[at] ?? [], MAP_LAYOUT.gap);
+    if (base.length < width) return [];
+    /**
+     * Whether the name set on `chord` at `along` is clear; `outside` adds the checks for a name moved out.
+     * The markers are kept off the name's whole glyph boxes, which stand higher and lower than its ink.
+     */
+    const clear = (chord: Chord, along: number, markers: readonly Box[], outside: boolean): boolean =>
+      labelSamples(chord, width, font, along).every(
+        (p) => insideBox(p, view) && !blocked.some((b) => insideBox(p, b, 1)) && (!outside || (apartFrom(p, placed, MAP_LAYOUT.labelRoom) && !nearRoute(p))),
+      ) &&
+      (markers.length === 0 ||
+        labelSamples(chord, width, font, along, glyphRows(MAP_LAYOUT.glyphBox)).every(
+          (p) => !markers.some((b) => insideBox(p, b, MAP_LAYOUT.markerRoom)),
+        ));
+    const set = (chord: Chord, along: number, offset: number): { street: string; from: Pt; to: Pt; along: number; offset: number }[] => {
+      placed.push(...labelSamples(chord, width, font, along));
+      return [{ street, from: chord.from, to: chord.to, along, offset }];
+    };
+    if (!clear(base, 0.5, [], false)) return [];
+    const along = alongSpots(base, width, MAP_LAYOUT.labelStep).find((spot) => clear(base, spot, markerBoxes, false));
+    if (along !== undefined) return set(base, along, MAP_LAYOUT.gap);
+    // Beside the leg: the text's near edge `d` pixels from the line, on its usual side and then the other, nearest first.
+    for (const offset of offsets) {
+      const chord = readingChord(legs[at] ?? [], offset);
+      const spot = alongSpots(chord, width, MAP_LAYOUT.labelOffsetAlongStep).find((s) => clear(chord, s, markerBoxes, true));
+      if (spot !== undefined) return set(chord, spot, offset);
+    }
+    return [];
   });
 
   // The map fits the same bounds with the same padding, so its names go where the drawing's do.

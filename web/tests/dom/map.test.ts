@@ -198,6 +198,22 @@ describe('the map area on the page (16.1, 16.2)', () => {
     expect(credit().hidden).toBe(true);
   });
 
+  it('draws Caroline Street for the lead pair on both layouts, a phone name standing beside its leg (Emmanuel, Nov 20)', async () => {
+    for (const layout of ['phone', 'desktop'] as const) {
+      const app = await bootPage({ layout });
+      await settle();
+      const svg = area().querySelector('.route-drawing')!;
+      const labels = streetLabels(svg);
+      expect(labels, layout).toContain('Caroline Street');
+      expect(labels.filter((l) => l === 'Caroline Street'), layout).toHaveLength(1);
+      expect(app.store.get().pair).toEqual(LEAD_PAIR);
+      // The textPath's line is the one the plan chose, shifted from the leg.
+      const path = svg.querySelector(`.street-label textPath[href^="#route-label"]`);
+      expect(path).not.toBeNull();
+      document.body.innerHTML = '';
+    }
+  });
+
   it('draws the pair on screen: a swap moves the filled dot to the new origin', async () => {
     const app = await bootPage();
     await settle();
