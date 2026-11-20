@@ -1,32 +1,40 @@
-// Screenshots of the screen states built so far, named after the mockup each one
-// matches, for side-by-side review with docs/planning/ui-mockups/; and the
-// dev-only vehicle sheet.
+// Screenshots of every mockup state (01 to 26), each named after the mockup it
+// matches, for side-by-side review with docs/planning/ui-mockups/ (task 20.4);
+// 18 is the dev-only vehicle sheet. Desktop versions of 05 to 12 are not drawn
+// as mockups and are not taken.
 // Run from web/:  npm run screens      PNGs go to test-results/screens/ (git-ignored).
 //
-// The page reads the real files in web/public/data from the dev server. The
+// The page reads the real files in web/public/data from the dev server, except
+// the no-one-seat-ride states (21, 25), which exist only on the made-up fixture
+// line: for them every data request is answered from tests/fixtures/fake by
+// request interception (support.ts), so no test-only route is in the build. The
 // start time comes from the page's own rule (the New York time of day, or 10:00
 // outside the slider range), so each state sets the browser clock. Racing
 // states run on Playwright's fake clock, paused, and advance it to the moment
 // of the mockup; finished states use the device's reduced-motion setting, which
 // draws the finished state at once. Phone pictures are taken at 2x, like the
 // phone mockups (750 x 1334).
-import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { type Browser, type BrowserContext, type Page, expect, test } from '@playwright/test';
+import { type Browser, type Page, expect, test } from '@playwright/test';
 import { FONT_SIZES, ROUTE_NUMBER_MIN_WIDTH, TIMINGS } from '../../src/config';
+import { FIXTURE_TAG } from '../../src/copy/copy';
 import { routeNumberOf } from '../../src/format/line';
+import {
+  DESKTOP,
+  FIXTURE_NO_RIDE,
+  INDEX,
+  PHONE,
+  beforeNewYork,
+  fontsReady,
+  guardNetwork,
+  mapSettled,
+  newYork,
+  query,
+  serveFixture,
+  slug,
+} from './support';
 
 const OUT = resolve(import.meta.dirname, '..', '..', 'test-results', 'screens');
-const INDEX = JSON.parse(readFileSync(resolve(import.meta.dirname, '..', '..', 'public', 'data', 'index.json'), 'utf8'));
-
-const PHONE = { width: 375, height: 667, deviceScaleFactor: 2 };
-const DESKTOP = { width: 1280, height: 800, deviceScaleFactor: 1 };
-
-/** A New York wall time on the service date. */
-const newYork = (hhmm: string): Date => new Date(`${INDEX.service_date}T${hhmm}:00-05:00`);
-/** Half a minute before: the fake clock is installed there, so pausing at the wall time is never in its past, however slow the machine. */
-const beforeNewYork = (hhmm: string): Date => new Date(newYork(hhmm).getTime() - 30_000);
-const slug = (name: string): string => INDEX.corners.find((c: { name: string }) => c.name === name).slug;
 const westToPreston = `?from=${slug('Westwood & Carey')}&to=${slug('Preston & Caroline')}`;
 
 /** Real milliseconds of race before the picture: 2 s is 8 scheduled minutes ("10:08 scheduled"). */
@@ -41,8 +49,8 @@ type State = {
   racing?: number;
   /** The picture shows the link's banner. */
   banner?: boolean;
-  /** Serve the data differently: summary.json failing, for the data error. */
-  data?: 'fail-summary';
+  /** Serve the data differently: summary.json failing, for the data error; or the made-up fixture line, which has no map. */
+  data?: 'fail-summary' | 'fixture';
   /** Block the tile host too, so the map is unavailable and the route drawing stays (mockups 22, 26). */
   noTiles?: boolean;
   /** Controls to click before the picture, in order, to open a sheet. */
@@ -75,47 +83,17 @@ const STATES: State[] = [
   { file: '20-badshare', size: PHONE, at: '20:00', racing: 0, banner: true, query: '?from=nowhere&to=aliceanna-bond' },
   { file: '24-desktop-badshare', size: DESKTOP, at: '20:00', racing: 0, banner: true, query: '?from=nowhere&to=aliceanna-bond' },
   // The remaining states (mockups 06, 07, 09): before the table at the first minute, an inferred pair, and
-  // the data error with summary.json failing. No one-seat ride (21, 25) exists only on the made-up fixture
-  // line, which the page cannot load (index.json must list the lead pair); jsdom tests cover it.
+  // the data error with summary.json failing.
   { file: '06-beforetable', size: PHONE, at: '09:00' },
   { file: '07-inferred', size: PHONE, at: '20:00', query: `?from=${slug('Brevard & Preston')}&to=${slug('Aliceanna & Bond')}` },
   { file: '09-dataerror', size: PHONE, at: '20:00', data: 'fail-summary' },
+  // No one-seat ride (mockups 21, 25): only on the made-up fixture line, tagged, with no map.
+  { file: '21-noseat-fixture', size: PHONE, at: '20:00', data: 'fixture', query: query(FIXTURE_NO_RIDE) },
+  { file: '25-desktop-noseat-fixture', size: DESKTOP, at: '20:00', data: 'fixture', query: query(FIXTURE_NO_RIDE) },
   // The map unavailable (mockups 22, 26): the tile host blocked, the lead pair finished at 10:00.
   { file: '22-mapunavailable', size: PHONE, at: '20:00', noTiles: true },
   { file: '26-desktop-mapunavailable', size: DESKTOP, at: '20:00', noTiles: true },
 ];
-
-/** The only host outside the dev server the page may reach: the map's style, tiles and glyphs (tech.md, approved). */
-const TILE_HOST = 'tiles.openfreemap.org';
-
-/**
- * Let through the dev server and the tile host only; any other request is
- * blocked and recorded, and the state fails. With `noTiles` the tile host is
- * blocked too. Returns the hosts blocked that were not meant to be.
- */
-async function guardNetwork(context: BrowserContext, noTiles: boolean): Promise<string[]> {
-  const strange: string[] = [];
-  await context.route('**/*', (route) => {
-    const url = new URL(route.request().url());
-    const local = url.hostname === '127.0.0.1' || url.protocol === 'data:' || url.protocol === 'blob:';
-    if (local || (url.hostname === TILE_HOST && !noTiles)) return route.continue();
-    if (url.hostname !== TILE_HOST) strange.push(url.host);
-    return route.abort('blockedbyclient');
-  });
-  return strange;
-}
-
-/** The map has either drawn its first frame (the drawing faded) or given up (the notice shows). */
-async function mapSettled(page: Page): Promise<'ready' | 'unavailable'> {
-  await page.waitForFunction(
-    () => document.querySelector('.route-drawing.is-faded') !== null || document.querySelector<HTMLElement>('.map-notice')?.hidden === false,
-    null,
-    { timeout: 20_000 },
-  );
-  // Tiles still arriving after the first frame: let the map go quiet before the picture.
-  await page.waitForTimeout(1500);
-  return (await page.locator('.route-drawing.is-faded').count()) > 0 ? 'ready' : 'unavailable';
-}
 
 type Rect = { left: number; top: number; right: number; bottom: number; what: string };
 
@@ -209,19 +187,16 @@ async function checkMapArea(page: Page, state: State): Promise<void> {
   }
 }
 
-async function fontsReady(page: Page): Promise<void> {
-  await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => document.fonts.check('600 24px "Barlow Condensed"'))).toBe(true);
-}
-
 async function shoot(browser: Browser, state: State): Promise<void> {
   const racing = state.racing !== undefined;
+  const fixture = state.data === 'fixture';
   const context = await browser.newContext({
     viewport: { width: state.size.width, height: state.size.height },
     deviceScaleFactor: state.size.deviceScaleFactor,
     reducedMotion: racing ? 'no-preference' : 'reduce',
   });
   const strange = await guardNetwork(context, state.noTiles ?? false);
+  if (fixture) await serveFixture(context);
   const page = await context.newPage();
   // Kept for the failure message if the map gives up when it should not.
   const failedRequests: string[] = [];
@@ -237,10 +212,16 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   await page.goto(`./${state.query ?? ''}`);
   await page.locator(state.data === 'fail-summary' ? '.data-error' : racing ? '.clock-row' : '.result').waitFor();
   await fontsReady(page);
+  // The made-up line has no map: its area holds only the fixture tag (R6.8, mockups 21 and 25).
+  if (fixture) {
+    await expect(page.locator('.fixture-tag')).toHaveText(FIXTURE_TAG);
+    await expect(page.locator('.route-drawing, .map-canvas')).toHaveCount(0);
+    await expect(page.locator('.result')).toHaveAttribute('data-result', 'no_one_seat_ride');
+  }
   // The route drawing is the map area's placeholder. On the paused clock of a racing state the map
   // never starts (it waits for an idle moment), so those pictures show the drawing; the others wait
   // for the map to draw or give up.
-  if (state.data !== 'fail-summary') {
+  if (state.data !== 'fail-summary' && !fixture) {
     await page.locator('.route-drawing').waitFor();
     if (!racing) {
       let map = await mapSettled(page);
@@ -273,7 +254,7 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   else if (state.query) await page.locator('#banner-root .banner').waitFor({ state: 'detached', timeout: 10_000 });
   // CSS animations run on the real clock: finite ones (the trolley's fade-in) are shown at their end, loops at rest.
   await page.screenshot({ path: resolve(OUT, `${state.file}.png`), animations: 'disabled' });
-  if (state.data !== 'fail-summary') await checkMapArea(page, state);
+  if (state.data === undefined) await checkMapArea(page, state);
   // Nothing scrolls sideways at the design sizes.
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await context.close();
@@ -449,7 +430,7 @@ test('vehicle sheet (dev only), beside mockup 18', async ({ browser }) => {
   await page.goto('./dev/vehicles.html');
   await page.locator('#sheet figure').first().waitFor();
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: resolve(OUT, 'vehicles.png'), fullPage: true });
+  await page.screenshot({ path: resolve(OUT, '18-trolley-sheet.png'), fullPage: true });
   expect(await page.locator('#sheet [data-vehicle]').count()).toBe(9);
   // Trolleys from the cut-off width up carry the number from the data; narrower ones and the data-error one do not.
   const widths = await page

@@ -167,11 +167,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## End to end, budgets and deploy
 
-- [ ] 20. Playwright end-to-end (R17, R5.11, R11.4, R1.4)
-  - [ ] 20.1 Install Playwright's Chromium (done Nov 19, approved). Config for a phone (375 × 667) and a laptop (1280 × 800) project; web/playwright.config.ts already starts the Vite dev server for `npm run screens`.
-  - [ ] 20.2 Scripts `test:e2e` (one command). Tests: the first race on both layouts; the result appears at the first arrival and the slower side runs on; skip; the whole race with the tile host blocked and WebGL absent; reduced motion (no animation, finished at once); keyboard-only run through every control; no horizontal scroll at 320, 375, 899, 900, 1280 and 1920 px wide; the data-error state with the data blocked, then "Try again".
-  - [ ] 20.3 axe-core in the browser on both layouts for the states where layout matters.
-  - [ ] 20.4 A screenshot per mockup state (01 to 26) saved under web/test-results/screens/ (git-ignored) for side-by-side review against docs/planning/ui-mockups/; Emmanuel reviews them. Extends `npm run screens` (tests/e2e/screens.spec.ts, added Nov 19), which answers every data request from the made-up fixture by request interception, so no test-only route is in the build.
+- [x] 20. Playwright end-to-end (R17, R5.11, R11.4, R1.4)
+  - [x] 20.1 Install Playwright's Chromium (done Nov 19, approved). Config for a phone (375 × 667) and a laptop (1280 × 800) project; web/playwright.config.ts already starts the Vite dev server for `npm run screens`. As built: three projects (phone, laptop, screens); the screenshots keep their own sizes.
+  - [x] 20.2 Scripts `test:e2e` (one command). Tests: the first race on both layouts; the result appears at the first arrival and the slower side runs on; skip; the whole race with the tile host blocked and WebGL absent; reduced motion (no animation, finished at once); keyboard-only run through every control; no horizontal scroll at 320, 375, 899, 900, 1280 and 1920 px wide; the data-error state with the data blocked, then "Try again". As built: tests/e2e/race.spec.ts; every request goes through the network guard, which fails a test that reaches any host but the dev server and the map's tiles.
+  - [x] 20.3 axe-core in the browser on both layouts for the states where layout matters. As built: every rule on, colour contrast and label-in-name included (Emmanuel, Nov 20: number buttons' names start with their visible text); racing, the finished states, each sheet, the picker, the map drawn and unavailable, the data error and the no-ride fixture.
+  - [x] 20.4 A screenshot per mockup state (01 to 26) saved under web/test-results/screens/ (git-ignored) for side-by-side review against docs/planning/ui-mockups/; Emmanuel reviews them. Extends `npm run screens` (tests/e2e/screens.spec.ts, added Nov 19), which answers every data request from the made-up fixture by request interception, so no test-only route is in the build. As built: 21 and 25 come from the fixture (approved Nov 20); the fixture's first two corners answer to the lead pair's slugs while it is served, because the page requires index.json to list the lead pair. 18 is the dev vehicle sheet.
   - Depends on: tasks 18, 19
 
 - [ ] 21. Build budget and chunks (R16.1)
