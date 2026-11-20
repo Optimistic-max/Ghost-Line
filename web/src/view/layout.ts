@@ -69,7 +69,21 @@ export type Size = { width: number; height: number };
  * middle latitude (the city is small, so this keeps its shape), fitted inside
  * the padding and centred. The points fix the bounds.
  */
-export function fitProjection(points: readonly (readonly number[])[], size: Size, padding: Padding): (lonlat: readonly number[]) => Pt {
+export type Projection = {
+  project: (lonlat: readonly number[]) => Pt;
+  /** The [lon, lat] of a point of the box. */
+  unproject: (p: Pt) => [number, number];
+  /** CSS pixels per metre on the ground. */
+  pxPerMetre: number;
+};
+
+/** Metres per degree of latitude (the mean earth radius); enough at the scale of one city. */
+const METRES_PER_DEGREE = 111_195;
+
+export type Bounds = [[number, number], [number, number]];
+
+/** The south-west and north-east corners around the points, as [lon, lat] pairs. */
+export function lonLatBounds(points: readonly (readonly number[])[]): Bounds {
   let [minLon, maxLon, minLat, maxLat] = [Infinity, -Infinity, Infinity, -Infinity];
   for (const [lon = 0, lat = 0] of points) {
     minLon = Math.min(minLon, lon);
@@ -77,7 +91,12 @@ export function fitProjection(points: readonly (readonly number[])[], size: Size
     minLat = Math.min(minLat, lat);
     maxLat = Math.max(maxLat, lat);
   }
-  if (!Number.isFinite(minLon)) [minLon, maxLon, minLat, maxLat] = [0, 0, 0, 0];
+  if (!Number.isFinite(minLon)) return [[0, 0], [0, 0]];
+  return [[minLon, minLat], [maxLon, maxLat]];
+}
+
+export function fitProjection(points: readonly (readonly number[])[], size: Size, padding: Padding): Projection {
+  const [[minLon, minLat], [maxLon, maxLat]] = lonLatBounds(points);
   const k = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
   const spanX = (maxLon - minLon) * k;
   const spanY = maxLat - minLat;
@@ -87,8 +106,109 @@ export function fitProjection(points: readonly (readonly number[])[], size: Size
   const scale = Number.isFinite(fit) ? fit : 1;
   const left = padding.left + (innerW - spanX * scale) / 2;
   const top = padding.top + (innerH - spanY * scale) / 2;
-  return ([lon = 0, lat = 0]) => ({ x: left + (lon - minLon) * k * scale, y: top + (maxLat - lat) * scale });
+  return {
+    project: ([lon = 0, lat = 0]) => ({ x: left + (lon - minLon) * k * scale, y: top + (maxLat - lat) * scale }),
+    unproject: ({ x, y }) => [minLon + (x - left) / (k * scale), maxLat - (y - top) / scale],
+    pxPerMetre: scale / METRES_PER_DEGREE,
+  };
 }
+
+/**
+ * The centre of a street name set along a line (as the drawing sets it: its
+ * baseline on the line, standing to the line's left), and the line's angle in
+ * degrees clockwise, for the map's symbol at the same place.
+ */
+export function labelAnchor(from: Pt, to: Pt, fontPx: number): { at: Pt; angle: number } {
+  const n = normal(from, to);
+  const up = fontPx * 0.35;
+  return {
+    at: { x: (from.x + to.x) / 2 + n.x * up, y: (from.y + to.y) / 2 + n.y * up },
+    angle: (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI,
+  };
+}
+
+/** The point a corner's name hangs from on the map: its anchor side, half way down its line. */
+export function nameAnchor(place: { anchor: 'start' | 'middle' | 'end'; x: number; box: Box }): { at: Pt; anchor: 'left' | 'center' | 'right' } {
+  const anchor = place.anchor === 'start' ? 'left' : place.anchor === 'end' ? 'right' : 'center';
+  return { at: { x: place.x, y: place.box.y + place.box.height / 2 }, anchor };
+}
+
+// ---- The map marker's track (design 12.2) ---------------------------------------------
+// The trolley marker moves along the joined route line of the race's direction,
+// by distance along the line's own segments, from the origin's place on it to a
+// short way before the destination's. Ride progress p (0 to 1) picks the point.
+
+export type Track = {
+  /** The joined line, [lon, lat] points. */
+  points: number[][];
+  /** Metres along the line at each point. */
+  at: number[];
+  /** Where the marker starts and stops, in metres along the line. */
+  from: number;
+  to: number;
+};
+
+function metresBetween(a: readonly number[], b: readonly number[]): number {
+  const [lonA = 0, latA = 0] = a;
+  const [lonB = 0, latB = 0] = b;
+  const k = Math.cos((((latA + latB) / 2) * Math.PI) / 180);
+  return Math.hypot((lonB - lonA) * k, latB - latA) * METRES_PER_DEGREE;
+}
+
+/** The place along the line nearest to a point, in metres from its start. */
+function locate(points: readonly number[][], at: readonly number[], p: readonly number[]): number {
+  let best = 0;
+  let nearest = Infinity;
+  for (let i = 0; i + 1 < points.length; i += 1) {
+    const a = points[i]!;
+    const b = points[i + 1]!;
+    const k = Math.cos(((a[1] ?? 0) * Math.PI) / 180);
+    const ax = (a[0] ?? 0) * k;
+    const ay = a[1] ?? 0;
+    const dx = (b[0] ?? 0) * k - ax;
+    const dy = (b[1] ?? 0) - ay;
+    const px = (p[0] ?? 0) * k - ax;
+    const py = (p[1] ?? 0) - ay;
+    const span = dx * dx + dy * dy;
+    const t = span > 0 ? Math.min(1, Math.max(0, (px * dx + py * dy) / span)) : 0;
+    const off = Math.hypot(px - t * dx, py - t * dy);
+    if (off < nearest) {
+      nearest = off;
+      best = at[i]! + t * (at[i + 1]! - at[i]!);
+    }
+  }
+  return best;
+}
+
+/**
+ * The marker's track: the legs (in travel order) joined into one line, from the
+ * origin's place on it to `stopPx` before the destination's at the drawing's scale.
+ */
+export function markerTrack(legs: readonly (readonly number[][])[], origin: readonly number[], dest: readonly number[], stopPx: number, pxPerMetre: number): Track {
+  const points = legs.flatMap((leg) => leg.map((p) => [...p]));
+  const at: number[] = [];
+  points.forEach((p, i) => at.push(i === 0 ? 0 : at[i - 1]! + metresBetween(points[i - 1]!, p)));
+  const from = locate(points, at, origin);
+  const end = locate(points, at, dest);
+  const stop = pxPerMetre > 0 ? stopPx / pxPerMetre : 0;
+  return { points, at, from, to: Math.max(from, end - stop) };
+}
+
+/** The marker's point at ride progress p, clamped to 0 to 1. */
+export function trackPoint(track: Track, p: number): [number, number] {
+  const share = Math.min(1, Math.max(0, Number.isFinite(p) ? p : 0));
+  const d = track.from + (track.to - track.from) * share;
+  const { points, at } = track;
+  let i = at.findIndex((m) => m >= d);
+  if (i === -1) i = points.length - 1;
+  const b = points[i] ?? [0, 0];
+  if (i === 0) return [b[0] ?? 0, b[1] ?? 0];
+  const a = points[i - 1]!;
+  const span = at[i]! - at[i - 1]!;
+  const t = span > 0 ? (d - at[i - 1]!) / span : 0;
+  return [(a[0] ?? 0) + ((b[0] ?? 0) - (a[0] ?? 0)) * t, (a[1] ?? 0) + ((b[1] ?? 0) - (a[1] ?? 0)) * t];
+}
+
 
 /** The width of a line of display type before it is drawn, from the face's average glyph advance. */
 export function textWidth(text: string, fontPx: number, glyphEm: number): number {

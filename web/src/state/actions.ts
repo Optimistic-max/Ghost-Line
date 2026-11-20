@@ -27,6 +27,9 @@ export type Action =
   | { type: 'sheet/close' }
   | { type: 'picker/open' }
   | { type: 'picker/choose'; slug: string }
+  /** A corner tapped on the map is the start: on a phone in the Corners sheet, on desktop over the map (design 12.4). */
+  | { type: 'picker/start'; slug: string; sheet: boolean }
+  | { type: 'picker/cancel' }
   | { type: 'banner/show'; banner: Banner }
   | { type: 'banner/hide' }
   | { type: 'map/status'; status: MapStatus };
@@ -159,6 +162,16 @@ export function reduce(state: AppState, action: Action): AppState {
       if (action.slug === picker.start) return state;
       return setPair({ ...state, picker: null, sheet: null }, { origin: picker.start, dest: action.slug });
     }
+
+    case 'picker/start': {
+      if (state.data.status !== 'ready' || !state.data.index.corners.some((c) => c.slug === action.slug)) return state;
+      const sheet = action.sheet ? 'corners' : state.sheet === 'corners' ? null : state.sheet;
+      return { ...state, picker: { step: 'end', start: action.slug }, sheet, sourcesTarget: null };
+    }
+
+    case 'picker/cancel':
+      if (state.picker === null) return state;
+      return { ...state, picker: null, sheet: state.sheet === 'corners' ? null : state.sheet };
 
     case 'banner/show':
       return { ...state, banner: action.banner };

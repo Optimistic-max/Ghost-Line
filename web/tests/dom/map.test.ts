@@ -3,15 +3,18 @@
 // draws it once route.geojson arrives after the first race card, keeps the plain
 // background before that, and shows "Map unavailable" only on failure.
 import { afterEach, describe, expect, it } from 'vitest';
-import { LEAD_PAIR } from '../../src/config';
-import { MAP_CREDIT, MAP_INFERRED, MAP_UNAVAILABLE } from '../../src/copy/copy';
+import { LEAD_PAIR, TIMINGS } from '../../src/config';
+import { MAP_CREDIT, MAP_INFERRED, MAP_UNAVAILABLE, PICKER_STEP_END, PICKER_STEP_START } from '../../src/copy/copy';
 import type { Index, Pair, Route } from '../../src/data/types';
-import { mapName, routeDrawing } from '../../src/map/routedrawing';
+import type { MapStart } from '../../src/map/map';
+import { type DrawingPlan, mapName, routeDrawing } from '../../src/map/routedrawing';
+import type { MapModule } from '../../src/view/mapview';
 import type { Layout } from '../../src/view/vehicles';
 import { stylesheets } from '../support/css';
 import { FIXTURE_DIR, fixtureData } from '../support/fixture';
 import { bootPage, mountPage } from '../support/page';
 import { realData, slugNamed } from '../support/realdata';
+import { fakeTime } from '../support/time';
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -216,6 +219,220 @@ describe('the map area on the page (16.1, 16.2)', () => {
     expect(notice().hidden).toBe(true);
     expect(credit().hidden).toBe(true);
     expect(area().querySelector<HTMLElement>('.fixture-tag')!.hidden).toBe(false);
+  });
+});
+
+// ---- Task 17: the map chunk, failures, picking on the map, the trolley marker ----------
+
+type Started = { start: MapStart; corners: DrawingPlan[]; markers: ([number, number] | null)[]; removed: boolean };
+
+/** A stand-in for the map chunk: it records how it was started and lets a test draw or fail the map. */
+function fakeChunk(): { load: () => Promise<MapModule>; started: Started[] } {
+  const started: Started[] = [];
+  const module: MapModule = {
+    startMap(start) {
+      const run: Started = { start, corners: [], markers: [], removed: false };
+      started.push(run);
+      return {
+        corners: (plan) => run.corners.push(plan),
+        marker: (point) => run.markers.push(point),
+        remove: () => {
+          run.removed = true;
+        },
+      };
+    },
+  };
+  return { load: () => Promise.resolve(module), started };
+}
+
+const now = (run: () => void): void => run();
+
+describe('the map chunk (17.1, 17.3)', () => {
+  const area = (): HTMLElement => document.getElementById('map-area')!;
+  const drawingEl = (): Element => area().querySelector('.route-drawing')!;
+
+  it('is imported only once the race card is on screen and the page is idle, and starts with the drawing plan', async () => {
+    const chunk = fakeChunk();
+    const idle: (() => void)[] = [];
+    const waits: number[] = [];
+    const app = mountPage({
+      loadMap: chunk.load,
+      whenIdle: (run, ms) => {
+        idle.push(run);
+        waits.push(ms);
+      },
+    });
+    await app.boot();
+    await settle();
+    expect(document.querySelector('#card-scroll .lanes')).not.toBeNull();
+    expect(chunk.started).toHaveLength(0);
+    expect(idle).toHaveLength(1);
+    expect(waits).toEqual([TIMINGS.mapIdleMs]);
+    idle[0]!();
+    await settle();
+    expect(chunk.started).toHaveLength(1);
+    const { start } = chunk.started[0]!;
+    expect(start.layout).toBe('phone');
+    expect(start.plan.dots.map((d) => d.corner.slug)).toEqual(realData().index.corners.map((c) => c.slug));
+    // The map sits under the drawing until its first frame.
+    expect(area().firstElementChild?.classList.contains('map-canvas')).toBe(true);
+    expect(start.container.isConnected).toBe(true);
+    expect(app.store.get().mapStatus).toBe('pending');
+  });
+
+  it('fades the drawing out only when the first map frame is drawn, and moves the marker onto the map', async () => {
+    const chunk = fakeChunk();
+    const app = await bootPage({ loadMap: chunk.load, whenIdle: now, motion: 'reduced' });
+    await settle();
+    expect(drawingEl().classList.contains('is-faded')).toBe(false);
+    expect(area().querySelector<HTMLElement>('.drawing-marker')!.hidden).toBe(false);
+    chunk.started[0]!.start.ready();
+    expect(app.store.get().mapStatus).toBe('ready');
+    expect(drawingEl().classList.contains('is-faded')).toBe(true);
+    expect(area().querySelector<HTMLElement>('.map-credit')!.hidden).toBe(false);
+    expect(area().querySelector<HTMLElement>('.map-notice')!.hidden).toBe(true);
+    expect(area().querySelector<HTMLElement>('.drawing-marker')!.hidden).toBe(true);
+    expect(chunk.started[0]!.markers.at(-1)).not.toBeNull();
+  });
+
+  it('on a failure, removes the map, keeps the drawing, shows the notice and leaves the data and the race alone', async () => {
+    const chunk = fakeChunk();
+    const app = await bootPage({ loadMap: chunk.load, whenIdle: now });
+    await settle();
+    const data = app.store.get().data;
+    const run = chunk.started[0]!;
+    run.start.failed('timeout');
+    expect(app.store.get().mapStatus).toBe('unavailable');
+    expect(app.store.get().data).toBe(data);
+    expect(run.removed).toBe(true);
+    expect(area().querySelector('.map-canvas')).toBeNull();
+    expect(drawingEl().classList.contains('is-faded')).toBe(false);
+    expect(area().querySelector<HTMLElement>('.map-notice')!.hidden).toBe(false);
+    expect(document.querySelector('#card-scroll .lanes')).not.toBeNull();
+  });
+
+  it('shows the notice when the chunk cannot be imported, and the race plays on', async () => {
+    const app = await bootPage({ loadMap: () => Promise.reject(new Error('blocked')), whenIdle: now });
+    await settle();
+    expect(app.store.get().mapStatus).toBe('unavailable');
+    expect(app.store.get().data.status).toBe('ready');
+    expect(area().querySelector('.map-canvas')).toBeNull();
+    expect(area().querySelectorAll('.route-drawing')).toHaveLength(1);
+    expect(area().querySelector<HTMLElement>('.map-notice')!.hidden).toBe(false);
+    expect(document.querySelector('#card-scroll .lanes')).not.toBeNull();
+  });
+
+  it('never loads the map for the made-up line', async () => {
+    const chunk = fakeChunk();
+    const pair = fixtureData().index.pairs[0]!;
+    await bootPage({ folder: FIXTURE_DIR, query: `?from=${pair.origin}&to=${pair.dest}`, leadPair: pair, loadMap: chunk.load, whenIdle: now });
+    await settle();
+    expect(chunk.started).toHaveLength(0);
+  });
+
+  it('gives the map the new pair, and starts it again for the other layout', async () => {
+    const chunk = fakeChunk();
+    let layout: Layout = 'phone';
+    const app = await bootPage({ loadMap: chunk.load, whenIdle: now, layout: () => layout });
+    await settle();
+    document.querySelector<HTMLElement>('[data-action="swap"]')!.click();
+    expect(chunk.started[0]!.corners.at(-1)?.dots.find((d) => d.role === 'origin')?.corner.slug).toBe(LEAD_PAIR.dest);
+    layout = 'desktop';
+    app.render();
+    await settle();
+    expect(chunk.started[0]!.removed).toBe(true);
+    expect(chunk.started).toHaveLength(2);
+    expect(chunk.started[1]!.start.layout).toBe('desktop');
+  });
+});
+
+describe('picking on the map (17.2)', () => {
+  const corner = (slug: string): HTMLElement =>
+    document.querySelector<HTMLElement>(`#map-area [data-action="map-corner"][data-slug="${slug}"]`)!;
+  const hint = (): HTMLElement => document.querySelector<HTMLElement>('#map-area .map-hint')!;
+  const westwood = slugNamed('Westwood & Carey');
+  const preston = slugNamed('Preston & Caroline');
+
+  it('every corner dot of the drawing sits in a 44 px target', async () => {
+    await bootPage();
+    await settle();
+    for (const c of realData().index.corners) {
+      expect(Number(corner(c.slug).querySelector('.corner-hit')!.getAttribute('r'))).toBeGreaterThanOrEqual(22);
+    }
+  });
+
+  it('on a phone, a tapped corner is the start and the Corners sheet opens at its second step', async () => {
+    const app = await bootPage({ layout: 'phone' });
+    await settle();
+    corner(westwood).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(app.store.get().sheet).toBe('corners');
+    expect(app.store.get().picker).toEqual({ step: 'end', start: westwood });
+    const sheet = document.querySelector('.sheet.is-open')!;
+    expect(sheet.textContent).toContain(PICKER_STEP_END);
+    expect(sheet.querySelector<HTMLButtonElement>(`.corner-choice[data-slug="${westwood}"]`)!.disabled).toBe(true);
+  });
+
+  it('on desktop, one click sets the start with the hint strip, a second completes the pair, and no sheet opens', async () => {
+    const app = await bootPage({ layout: 'desktop' });
+    await settle();
+    expect(hint().hidden).toBe(true);
+    corner(westwood).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(app.store.get().sheet).toBeNull();
+    expect(app.store.get().picker).toEqual({ step: 'end', start: westwood });
+    expect(hint().hidden).toBe(false);
+    expect(hint().textContent).toBe(PICKER_STEP_END);
+    corner(preston).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(app.store.get().pair).toEqual({ origin: westwood, dest: preston });
+    expect(app.store.get().picker).toBeNull();
+    expect(hint().hidden).toBe(true);
+    expect(window.location.search).toBe(`?from=${westwood}&to=${preston}`);
+  });
+
+  it('on desktop, shows the first step line over a corner, and lets go on the start again or on Escape', async () => {
+    const app = await bootPage({ layout: 'desktop' });
+    await settle();
+    corner(westwood).dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    expect(hint().hidden).toBe(false);
+    expect(hint().textContent).toBe(PICKER_STEP_START);
+    document.getElementById('map-area')!.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(hint().hidden).toBe(true);
+    corner(westwood).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    corner(westwood).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(app.store.get().picker).toBeNull();
+    corner(westwood).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(app.store.get().picker).toBeNull();
+    expect(app.store.get().pair).toEqual(LEAD_PAIR);
+  });
+});
+
+describe('the trolley marker (R5.9)', () => {
+  const marker = (): HTMLElement => document.querySelector<HTMLElement>('#map-area .drawing-marker')!;
+  const at = (): string => `${marker().style.getPropertyValue('--mx')} ${marker().style.getPropertyValue('--my')}`;
+
+  it('waits at the origin before the race, moves during the 1938 ride only, and stops short of the destination', async () => {
+    const time = fakeTime();
+    const app = await bootPage({ time });
+    await settle();
+    expect(marker().hidden).toBe(false);
+    expect(marker().querySelector('[data-vehicle="marker"]')).not.toBeNull();
+    const start = at();
+    time.advance(TIMINGS.racePauseMs);
+    // Each frame is drawn; positions are read at the start, during the ride and after the finish.
+    const seen = new Set<string>([start]);
+    for (let k = 0; k < 200 && app.store.get().race.phase !== 'finished'; k += 1) {
+      time.advance(100);
+      seen.add(at());
+    }
+    expect(app.store.get().race.phase).toBe('finished');
+    const end = at();
+    expect(end).not.toBe(start);
+    expect(seen.size).toBeGreaterThan(2);
+    // After the finish it stands at the track's end, as reduced motion draws it at once.
+    document.body.innerHTML = '';
+    await bootPage({ motion: 'reduced' });
+    await settle();
+    expect(at()).toBe(end);
   });
 });
 

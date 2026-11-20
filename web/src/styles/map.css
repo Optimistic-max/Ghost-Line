@@ -84,13 +84,110 @@
   stroke-width: 3px;
 }
 
+/* The map (MapLibre) sits under the drawing; the drawing fades out once the map's first frame is drawn.
+   MapLibre's own stylesheet makes its container position: relative; the map area's rule wins. */
+.map-area .map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.route-drawing.is-faded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.motion-full .route-drawing,
+.motion-lite .route-drawing {
+  transition: opacity 400ms var(--ease-out);
+}
+
+/* Each corner dot sits in a 44 px target that feeds the picker (design 12.4). */
+.route-drawing .corner,
+.map-corner {
+  cursor: pointer;
+}
+
+.route-drawing .corner-hit {
+  fill: transparent;
+  stroke: none;
+}
+
+.map-corner {
+  width: var(--tap);
+  height: var(--tap);
+}
+
+.map-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  border: 1.5px solid var(--ghost);
+  border-radius: 50%;
+  background: var(--night);
+  transform: translate(-50%, -50%);
+}
+
+.map-dot.is-origin {
+  background: var(--ghost);
+}
+
+.map-dot.is-dest {
+  border-width: 2.5px;
+}
+
+.map-dot.is-inferred {
+  border-style: dashed;
+}
+
+/* The trolley marker: on the map a MapLibre marker, on the drawing placed by --mx and --my, wheels on the line. */
+.map-trolley,
+.drawing-marker {
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px var(--ghost));
+}
+
+.drawing-marker {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  transform: translate(var(--mx), var(--my)) translate(-50%, -100%);
+}
+
+.route-drawing.is-faded ~ .drawing-marker {
+  opacity: 0;
+}
+
+/* MapLibre's attribution in palette B: muted text on the night background, never faint (R11.3). */
+.map-area .maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: var(--night);
+  color: var(--muted);
+}
+
+.map-area .maplibregl-ctrl.maplibregl-ctrl-attrib a {
+  color: var(--muted);
+}
+
+/* The compact button's own icon is drawn dark for a light map; on this one it shows as a light disc. */
+.map-area .maplibregl-ctrl.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: var(--ink);
+}
+
+/* The hint strip for picking a pair on the map: desktop only. */
+.map-hint {
+  display: none;
+}
+
 /* The map's line of text: top left on a phone (mockup 22), at the foot on desktop (mockups 13, 26). */
 .map-lines {
   position: absolute;
   z-index: 2;
   top: 5px;
   left: var(--pad);
-  right: var(--pad);
+  /* Clear of the map's attribution button, top right. */
+  right: var(--tap);
   color: var(--muted);
   font-size: 10px;
   line-height: 1.25;
@@ -128,5 +225,30 @@
     right: var(--column-pad);
     font-size: var(--fs-body-small);
     line-height: 1.35;
+  }
+
+  .map-dot {
+    border-width: 2px;
+  }
+
+  .map-dot.is-dest,
+  .map-dot.is-inferred.is-origin,
+  .map-dot.is-inferred.is-dest {
+    border-width: 3px;
+  }
+
+  .map-hint {
+    display: block;
+    position: absolute;
+    z-index: 3;
+    left: var(--column-pad);
+    bottom: 44px;
+    max-width: 470px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+    color: var(--ink);
+    pointer-events: none;
   }
 }

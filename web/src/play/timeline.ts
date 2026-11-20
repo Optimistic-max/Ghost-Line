@@ -138,6 +138,12 @@ export function laneFrame(lane: Lane, timeline: Timeline, elapsed: number, trave
   return { fills, reached, current, countdown, vehicle, moving, arrived };
 }
 
+/** A side's ride filled at `elapsed`, 0 to 1: the map marker's progress along the route (R5.9). */
+export function rideShare(timeline: Timeline, side: Side, elapsed: number): number {
+  const ride = timeline.segments.find((s) => s.side === side && s.kind === 'ride');
+  return ride ? fillOf(ride, elapsed) : 0;
+}
+
 /** Real milliseconds between pole sparks: a random gap of 1.5 to 4 s (screen-brief 3A.6). */
 export const SPARK = { minGapMs: 1500, maxGapMs: 4000, flashMs: 120 } as const;
 

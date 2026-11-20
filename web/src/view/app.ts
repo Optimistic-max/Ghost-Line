@@ -11,8 +11,6 @@ import {
   DATA_INCOMPLETE,
   FIXTURE_TAG,
   LINK_COPIED,
-  MAP_CREDIT,
-  MAP_UNAVAILABLE,
   SHARE_THIS_RACE,
   TRY_AGAIN,
   badLink,
@@ -22,14 +20,13 @@ import {
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
 import { cornerName, sliderRange } from '../data/lookup';
-import type { Index, Pair, RaceFile, Route, Summary } from '../data/types';
+import type { Index, Pair, RaceFile, Summary } from '../data/types';
 import { routeNumberOf, yearOf } from '../format/line';
-import { routeDrawing } from '../map/routedrawing';
 import { decode, encode, namesAPair } from '../format/share';
 import { defaultStart, minutesOf } from '../format/time';
 import { type PageTimers, browserTimers, createClock } from '../play/clock';
 import { initialMotion, motionClass, watchMotion } from '../play/motion';
-import { SPARK, type Timeline, buildTimeline, sparkGapMs } from '../play/timeline';
+import { SPARK, type Timeline, buildTimeline, rideShare, sparkGapMs } from '../play/timeline';
 import { initialState } from '../state/actions';
 import { derive } from '../state/derive';
 import type { AppState, MotionLevel, RaceView } from '../state/model';
@@ -50,6 +47,7 @@ import { h, setVar } from './dom';
 import { GLYPH } from './glyphs';
 import { vehicleMarkup } from './lanes';
 import { fitOneLine } from './layout';
+import { type MapModule, createMapView } from './mapview';
 import { SourceRegistry } from './numbers';
 import { type Racer, createRacer } from './racer';
 import { aboutSheet } from './sheets/about';
@@ -79,6 +77,10 @@ export type AppOptions = {
   share: ShareDeps;
   /** The page's address: where it is, and how to change its query without a history entry (R4.7). */
   address: { origin: string; path: string; replace(url: string): void };
+  /** Loads the map chunk by a lazy import (design 12.2). Without it the route drawing stays (tests). */
+  loadMap?: () => Promise<MapModule>;
+  /** Runs once the page is idle, or after `timeoutMs` at the latest; a plain timeout by default. */
+  whenIdle?: (run: () => void, timeoutMs: number) => void;
 };
 
 export type App = {
@@ -134,14 +136,19 @@ export function createApp(options: AppOptions): App {
   const headlineLine = headline?.querySelector<HTMLElement>('.headline-line') ?? null;
   const mapArea = byId(doc, 'map-area');
   const fixtureTag = h('p', { class: 'fixture-tag', hidden: true }, FIXTURE_TAG);
-  // The map's line of text: the credit while the route is on screen, the notice only when the map is unavailable (R11.3, R11.4).
-  const mapNotice = h('p', { class: 'map-notice', hidden: true }, MAP_UNAVAILABLE);
-  const mapCredit = h('p', { class: 'map-credit', hidden: true }, MAP_CREDIT);
-  mapArea.append(fixtureTag, h('div', { class: 'map-lines' }, mapNotice, mapCredit));
-  /** route.geojson once it has arrived, and the drawing of it on screen (design 12.1). */
-  let route: Route | null = null;
-  let routeAsked = false;
-  let drawing: { svg: SVGSVGElement; pair: Pair; layout: Layout } | null = null;
+  mapArea.append(fixtureTag);
+  /** The map area: the route drawing, the map chunk, its line of text and the trolley marker (design 12). */
+  const mapView = createMapView({
+    doc,
+    area: mapArea,
+    loader,
+    layout: options.layout,
+    state: () => store.get(),
+    dispatch: (action) => store.dispatch(action),
+    loadMap: options.loadMap ?? null,
+    whenIdle: options.whenIdle ?? ((run, ms) => void timers.later(run, ms)),
+    onPage: () => scroll.isConnected,
+  });
 
   const shareStatus = byId(doc, 'share-status');
   const banner = createBanner(byId(doc, 'banner-root'), timers.later, timers.cancel);
@@ -177,6 +184,8 @@ export function createApp(options: AppOptions): App {
     frame(elapsed) {
       racer?.frame(elapsed);
       setVar(root, '--elapsed', elapsed);
+      // The trolley on the map moves in step with the 1938 lane, during its ride only (R5.9).
+      if (timeline) mapView.ride(rideShare(timeline, '1938', elapsed));
     },
     arrive(side) {
       racer?.arrive(side);
@@ -342,45 +351,22 @@ export function createApp(options: AppOptions): App {
     fixtureTag.hidden = !(state.data.status === 'ready' && state.data.index.line === FIXTURE_LINE);
   }
 
-  /** The made-up line has no map: its area shows only the fixture tag (mockups 21 and 25). */
-  const hasMap = (state: AppState): boolean => state.data.status === 'ready' && state.data.index.line !== FIXTURE_LINE;
-
-  /** The map area's size, once it has one. */
-  function areaSize(): { width: number; height: number } | undefined {
-    const { clientWidth: width, clientHeight: height } = mapArea;
-    return width > 0 && height > 0 ? { width, height } : undefined;
-  }
-
-  /** The route drawing follows the pair and the layout; the line of text follows the map's status (design 12.1). */
-  function syncMap(state: AppState): void {
-    if (route && hasMap(state) && state.data.status === 'ready') {
-      const layout = options.layout();
-      if (!drawing || !samePair(drawing.pair, state.pair) || drawing.layout !== layout) {
-        const made = routeDrawing(doc, { index: state.data.index, route, pair: state.pair, layout, size: areaSize() });
-        if (drawing) drawing.svg.replaceWith(made.svg);
-        else mapArea.prepend(made.svg);
-        drawing = { svg: made.svg, pair: state.pair, layout };
-      }
-    }
-    const unavailable = state.mapStatus === 'unavailable';
-    mapNotice.hidden = !unavailable;
-    mapCredit.hidden = unavailable || drawing === null;
-  }
-
-  /** route.geojson loads once, after the first race card is on screen; it never holds up the race (R2.4, R14.3). */
-  function requestRoute(): void {
+  /**
+   * A corner tapped or clicked on the map (or on the drawing's dot) feeds the picker (design 12.4).
+   * Phone: it is the start, and the Corners sheet opens at its second step. Desktop: the first click
+   * is the start, the second completes the pair, the start again lets go; no sheet opens.
+   */
+  function pickOnMap(slug: string): void {
     const state = store.get();
-    if (routeAsked || !hasMap(state)) return;
-    routeAsked = true;
-    void loader.route().then((loaded) => {
-      if (!onPage()) return;
-      if (!loaded) {
-        store.dispatch({ type: 'map/status', status: 'unavailable' });
-        return;
-      }
-      route = loaded;
-      syncMap(store.get());
-    });
+    if (state.data.status !== 'ready') return;
+    if (options.layout() === 'phone') {
+      store.dispatch({ type: 'picker/start', slug, sheet: true });
+      return;
+    }
+    const picking = state.picker?.step === 'end' && state.sheet === null ? state.picker : null;
+    if (!picking) store.dispatch({ type: 'picker/start', slug, sheet: false });
+    else if (picking.start === slug) store.dispatch({ type: 'picker/cancel' });
+    else store.dispatch({ type: 'picker/choose', slug });
   }
 
   function drawError(): void {
@@ -408,7 +394,7 @@ export function createApp(options: AppOptions): App {
     foot.replaceChildren(...footer());
     fitPairRow();
     painted = true;
-    requestRoute();
+    mapView.painted();
     const { index, summary, race, minute, layout, stage, resultShown } = input;
     drawn = { index, summary, race, minute, layout, stage, resultShown };
     racer = null;
@@ -459,7 +445,7 @@ export function createApp(options: AppOptions): App {
   function render(): void {
     const state = store.get();
     topBar(state);
-    syncMap(state);
+    mapView.sync(state);
     motionClasses(state.motion);
     root.dataset['race'] = state.race.phase;
     const derived = derive(state);
@@ -670,6 +656,9 @@ export function createApp(options: AppOptions): App {
       case 'pick':
         store.dispatch({ type: 'picker/choose', slug: target.dataset['slug'] ?? '' });
         break;
+      case 'map-corner':
+        pickOnMap(target.dataset['slug'] ?? '');
+        break;
       case 'swap':
         store.dispatch({ type: 'pair/swap' });
         break;
@@ -717,9 +706,12 @@ export function createApp(options: AppOptions): App {
   };
   doc.addEventListener('pointerup', release);
   doc.addEventListener('pointercancel', release);
-  // Escape shuts an open sheet even when focus has left it.
+  // Escape shuts an open sheet even when focus has left it, and lets go of a pair half picked on the map.
   doc.addEventListener('keydown', (event) => {
-    if (onPage() && event.key === 'Escape' && store.get().sheet !== null) store.dispatch({ type: 'sheet/close' });
+    if (!onPage() || event.key !== 'Escape') return;
+    const state = store.get();
+    if (state.sheet !== null) store.dispatch({ type: 'sheet/close' });
+    else if (state.picker !== null) store.dispatch({ type: 'picker/cancel' });
   });
 
   // The display font arrives after the first paint; the pair names are fitted again with its real widths.
@@ -773,6 +765,12 @@ export function startPage(doc: Document, win: Window): App {
       origin: win.location.origin,
       path: win.location.pathname,
       replace: (url) => win.history.replaceState(null, '', url),
+    },
+    // The map is its own chunk, imported only here, after the race card is on screen (tech.md).
+    loadMap: () => import('../map/map'),
+    whenIdle: (run, timeoutMs) => {
+      if (typeof win.requestIdleCallback === 'function') win.requestIdleCallback(run, { timeout: timeoutMs });
+      else win.setTimeout(run, timeoutMs);
     },
   });
   media.addEventListener('change', () => app.render());

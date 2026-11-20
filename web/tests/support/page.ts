@@ -53,6 +53,10 @@ export type PageOptions = {
   share?: ShareDeps;
   /** Files whose request never answers. */
   hang?: ReadonlySet<string>;
+  /** A stand-in for the map chunk; none by default, so the route drawing stays. */
+  loadMap?: AppOptions['loadMap'];
+  /** When the page is idle; by default the app's own timeout on the fake clock. */
+  whenIdle?: AppOptions['whenIdle'];
 };
 
 /** The app's options for a test page. */
@@ -78,6 +82,8 @@ function appOptions(options: PageOptions): AppOptions {
       path: window.location.pathname,
       replace: (url) => window.history.replaceState(null, '', url),
     },
+    loadMap: options.loadMap,
+    whenIdle: options.whenIdle,
   };
 }
 

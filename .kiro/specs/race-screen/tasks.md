@@ -142,11 +142,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 16.3 Tests: leg count equals the file's features; inferred legs dashed; corner labels per layout; the drawing builds from the fixture's route (the fixture has no map, so the area shows nothing).
   - Depends on: task 15
 
-- [ ] 17. MapLibre chunk (R11, section 12.2 to 12.4)
-  - [ ] 17.1 map/map.ts loaded by dynamic import after the card is painted (idle callback with a 1 s fallback): the OpenFreeMap dark style from config, recoloured to palette B by map/style.ts; route, inferred dashes, street names along the route, corners, desktop-only names for all five; the simplified trolley as a DOM marker moved along the route in step with the ride phase and stopping short of the destination.
-  - [ ] 17.2 Corner clicks drive the picker as in section 12.4 (phone opens the sheet; desktop advances the picker with the hint strip using the existing step lines).
-  - [ ] 17.3 Failure paths (import, WebGL, style or tile error, 8 s timeout) set `mapStatus: 'unavailable'` and never touch the data state. The route drawing fades out only when the first map frame renders.
-  - [ ] 17.4 Unit tests of style.ts (every palette-B colour present, no label below 80% opacity) and of the marker position helper (geometry only); the map itself is exercised in tasks 20 to 22.
+- [x] 17. MapLibre chunk (R11, section 12.2 to 12.4)
+  - [x] 17.1 map/map.ts loaded by dynamic import after the card is painted (idle callback with a 1 s fallback): the OpenFreeMap dark style from config, recoloured to palette B by map/style.ts; route, inferred dashes, street names along the route, corners, desktop-only names for all five; the simplified trolley as a DOM marker moved along the route in step with the ride phase and stopping short of the destination.
+  - [x] 17.2 Corner clicks drive the picker as in section 12.4 (phone opens the sheet; desktop advances the picker with the hint strip using the existing step lines).
+  - [x] 17.3 Failure paths (import, WebGL, style or tile error, 8 s timeout) set `mapStatus: 'unavailable'` and never touch the data state. The route drawing fades out only when the first map frame renders.
+  - [x] 17.4 Unit tests of style.ts (every palette-B colour present, no label below 80% opacity) and of the marker position helper (geometry only); the map itself is exercised in tasks 20 to 22.
   - Depends on: task 16
 
 ## Quality

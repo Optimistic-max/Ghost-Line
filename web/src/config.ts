@@ -22,6 +22,10 @@ export const TIMINGS = {
   bannerSlideMs: 200,
   /** Without valid data after this long, the data-error state shows (R2.2). */
   dataTimeoutMs: 3000,
+  /** The map chunk loads when the page is idle, or after this long at the latest (design 12.2). */
+  mapIdleMs: 1000,
+  /** Without a first map frame this long after the map is created, the map is unavailable (design 12.3). */
+  mapTimeoutMs: 8000,
 } as const;
 
 /**
@@ -95,6 +99,10 @@ export const MAP_LAYOUT = {
     nameFont: 13,
     otherNameFont: 11,
     dot: { chosen: 5, other: 3.5 },
+    /** The trolley marker stops this far before the destination dot: half its width and the dot. */
+    markerStop: 20,
+    /** Line widths on the map: the route, its blurred copy, the dashed stretch, minor and main streets. */
+    lines: { route: 2.5, glow: 6, inferred: 2, street: 0.6, main: 1.2 },
   },
   desktop: {
     size: { width: 840, height: 800 },
@@ -103,6 +111,10 @@ export const MAP_LAYOUT = {
     nameFont: 16,
     otherNameFont: 13,
     dot: { chosen: 7, other: 4.5 },
+    markerStop: 36,
+    lines: { route: 3.5, glow: 9, inferred: 3, street: 0.8, main: 1.6 },
+    /** Street and water names from the tiles (desktop only): size and opacity, never below 80% (R11.3). */
+    tileLabels: { size: 11, opacity: 0.9 },
   },
   /** The display face's average glyph advance, in ems, for fitting names before they are drawn. */
   glyphEm: 0.38,
@@ -110,6 +122,8 @@ export const MAP_LAYOUT = {
   gap: 5,
   /** Two legs meet when an end of one is this near an end of the other, in pixels. */
   meet: 3,
+  /** The radius of the target round each corner dot: a 44 px tap target (R1.4). */
+  hit: 22,
 } as const;
 
 /** Where the licence file sits in the repository, for the "MIT licence" link (R10.3). */

@@ -12,7 +12,7 @@
 // phone mockups (750 x 1334).
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { type Browser, type Page, expect, test } from '@playwright/test';
+import { type Browser, type BrowserContext, type Page, expect, test } from '@playwright/test';
 import { FONT_SIZES, ROUTE_NUMBER_MIN_WIDTH, TIMINGS } from '../../src/config';
 import { routeNumberOf } from '../../src/format/line';
 
@@ -43,6 +43,8 @@ type State = {
   banner?: boolean;
   /** Serve the data differently: summary.json failing, for the data error. */
   data?: 'fail-summary';
+  /** Block the tile host too, so the map is unavailable and the route drawing stays (mockups 22, 26). */
+  noTiles?: boolean;
   /** Controls to click before the picture, in order, to open a sheet. */
   open?: string | string[];
 };
@@ -78,7 +80,42 @@ const STATES: State[] = [
   { file: '06-beforetable', size: PHONE, at: '09:00' },
   { file: '07-inferred', size: PHONE, at: '20:00', query: `?from=${slug('Brevard & Preston')}&to=${slug('Aliceanna & Bond')}` },
   { file: '09-dataerror', size: PHONE, at: '20:00', data: 'fail-summary' },
+  // The map unavailable (mockups 22, 26): the tile host blocked, the lead pair finished at 10:00.
+  { file: '22-mapunavailable', size: PHONE, at: '20:00', noTiles: true },
+  { file: '26-desktop-mapunavailable', size: DESKTOP, at: '20:00', noTiles: true },
 ];
+
+/** The only host outside the dev server the page may reach: the map's style, tiles and glyphs (tech.md, approved). */
+const TILE_HOST = 'tiles.openfreemap.org';
+
+/**
+ * Let through the dev server and the tile host only; any other request is
+ * blocked and recorded, and the state fails. With `noTiles` the tile host is
+ * blocked too. Returns the hosts blocked that were not meant to be.
+ */
+async function guardNetwork(context: BrowserContext, noTiles: boolean): Promise<string[]> {
+  const strange: string[] = [];
+  await context.route('**/*', (route) => {
+    const url = new URL(route.request().url());
+    const local = url.hostname === '127.0.0.1' || url.protocol === 'data:' || url.protocol === 'blob:';
+    if (local || (url.hostname === TILE_HOST && !noTiles)) return route.continue();
+    if (url.hostname !== TILE_HOST) strange.push(url.host);
+    return route.abort('blockedbyclient');
+  });
+  return strange;
+}
+
+/** The map has either drawn its first frame (the drawing faded) or given up (the notice shows). */
+async function mapSettled(page: Page): Promise<'ready' | 'unavailable'> {
+  await page.waitForFunction(
+    () => document.querySelector('.route-drawing.is-faded') !== null || document.querySelector<HTMLElement>('.map-notice')?.hidden === false,
+    null,
+    { timeout: 20_000 },
+  );
+  // Tiles still arriving after the first frame: let the map go quiet before the picture.
+  await page.waitForTimeout(1500);
+  return (await page.locator('.route-drawing.is-faded').count()) > 0 ? 'ready' : 'unavailable';
+}
 
 async function fontsReady(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
@@ -92,7 +129,11 @@ async function shoot(browser: Browser, state: State): Promise<void> {
     deviceScaleFactor: state.size.deviceScaleFactor,
     reducedMotion: racing ? 'no-preference' : 'reduce',
   });
+  const strange = await guardNetwork(context, state.noTiles ?? false);
   const page = await context.newPage();
+  // Kept for the failure message if the map gives up when it should not.
+  const failedRequests: string[] = [];
+  page.on('requestfailed', (request) => failedRequests.push(`${request.failure()?.errorText ?? ''} ${request.url()}`));
   if (racing) {
     // A paused fake clock: nothing moves until the test runs it forward.
     await page.clock.install({ time: beforeNewYork(state.at) });
@@ -104,6 +145,28 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   await page.goto(`./${state.query ?? ''}`);
   await page.locator(state.data === 'fail-summary' ? '.data-error' : racing ? '.clock-row' : '.result').waitFor();
   await fontsReady(page);
+  // The route drawing is the map area's placeholder. On the paused clock of a racing state the map
+  // never starts (it waits for an idle moment), so those pictures show the drawing; the others wait
+  // for the map to draw or give up.
+  if (state.data !== 'fail-summary') {
+    await page.locator('.route-drawing').waitFor();
+    if (!racing) {
+      let map = await mapSettled(page);
+      let cause = await page.locator('#map-area').getAttribute('data-map-failed');
+      // Headless Chromium draws the map in software; on a busy machine the first frame can miss the map's
+      // 8 s limit, and the page rightly shows the route drawing. That one cause gets one reload.
+      if (!state.noTiles && map === 'unavailable' && cause === 'timeout') {
+        await page.reload();
+        await page.locator('.result').waitFor();
+        await fontsReady(page);
+        map = await mapSettled(page);
+        cause = await page.locator('#map-area').getAttribute('data-map-failed');
+      }
+      expect(map, `${state.file}: the map (${cause ?? ''}; failed requests: ${failedRequests.slice(0, 5).join('; ')})`).toBe(
+        state.noTiles ? 'unavailable' : 'ready',
+      );
+    }
+  }
   if (racing && state.racing) {
     await page.clock.runFor(TIMINGS.racePauseMs);
     await page.clock.runFor(state.racing + 20);
@@ -121,6 +184,8 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   // Nothing scrolls sideways at the design sizes.
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await context.close();
+  // No request left for any host but the dev server and the tile host.
+  expect(strange, `${state.file}: blocked hosts`).toEqual([]);
 }
 
 for (const state of STATES) {
