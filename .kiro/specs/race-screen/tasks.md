@@ -186,8 +186,8 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - Depends on: tasks 20, 21
 
 - [ ] 23. Final validation
-  - [ ] 23.1 `npm test`, `npm run test:e2e`, `npm run check:size` pass.
-  - [ ] 23.2 `python -m pipeline check`, `python -m pipeline verify` and `python -m pipeline check_sources` pass (the site's text lives in web/, which check_sources scans).
-  - [ ] 23.3 Walk the mockup screenshots from task 20 against every requirement of R6 states and the visual rules; list any difference for Emmanuel; do not change the design to hide one.
+  - [x] 23.1 `npm test`, `npm run test:e2e`, `npm run check:size` pass. Nov 20: 816 site tests in 46 files; 41 browser tests passed, 1 skipped (the width test runs in one project); 67.5 KB of 100 KB served; both type checks clean.
+  - [x] 23.2 `python -m pipeline check`, `python -m pipeline verify` and `python -m pipeline check_sources` pass (the site's text lives in web/, which check_sources scans). Nov 20, with raw/ present and its SHA-256 matching the pin: `check` built and ran 722 pytest tests (3 timing tests deselected), the rebuild left the data unchanged; `verify` found web/public/data equal to a fresh build; `check_sources` clean.
+  - [x] 23.3 Walk the mockup screenshots from task 20 against every requirement of R6 states and the visual rules; list any difference for Emmanuel; do not change the design to hide one. Done Nov 20 against the 26 pictures of that day's run; the differences are listed in the summary of that session, none changed in the design.
   - [ ] 23.4 Emmanuel runs `python -m pipeline check --timing` and `npm run perf` on a quiet machine before submission; record the results in docs/kiro-usage.md.
   - Depends on: tasks 19 to 22
