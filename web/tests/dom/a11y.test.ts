@@ -6,36 +6,24 @@
 // Text contrast is computed from the tokens in tests/unit/contrast.test.ts.
 import axe from 'axe-core';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { LEAD_PAIR, TIMINGS } from '../../src/config';
+import { TIMINGS } from '../../src/config';
 import * as A from '../../src/copy/announce';
 import * as C from '../../src/copy/copy';
 import { rowAt } from '../../src/data/lookup';
-import type { Pair, RaceResult } from '../../src/data/types';
+import type { RaceResult } from '../../src/data/types';
 import { clockOf, label12 } from '../../src/format/time';
 import type { App } from '../../src/view/app';
 import { ANNOUNCE_DELAY_MS } from '../../src/view/a11y';
-import type { Layout } from '../../src/view/vehicles';
-import { FIXTURE_DIR, fixtureData } from '../support/fixture';
+import { FIXTURE_DIR } from '../support/fixture';
 import { controlName, press, tabOrder, tabTo } from '../support/keyboard';
-import { type PageOptions, bootPage, mountPage } from '../support/page';
-import { raceOf, realData, slugNamed } from '../support/realdata';
+import { type PageOptions, bootPage } from '../support/page';
+import { raceOf, realData } from '../support/realdata';
 import { text, value } from '../support/render';
+import { STATES, click, lead, newYork, noRide, query, settle, westToPreston } from '../support/states';
 import { type FakeTime, fakeTime } from '../support/time';
 
 const { index } = realData();
-const lead: Pair = { origin: LEAD_PAIR.origin, dest: LEAD_PAIR.dest };
-const westToPreston: Pair = { origin: slugNamed('Westwood & Carey'), dest: slugNamed('Preston & Caroline') };
-const inferredPair: Pair = { origin: index.corners.find((c) => c.inferred)!.slug, dest: slugNamed('Aliceanna & Bond') };
-const fixture = fixtureData();
-const noRide = fixture.index.pairs.find((p) => fixture.races.get(`${p.origin}__${p.dest}`)!.today.trips.length === 0)!;
-const newYork = (hhmm: string): Date => new Date(`${index.service_date}T${hhmm}:00-05:00`);
-const query = (p: Pair): string => `?from=${p.origin}&to=${p.dest}`;
 const STEP = 16;
-
-/** Let the loader's promises settle. */
-async function settle(): Promise<void> {
-  for (let k = 0; k < 5; k += 1) await new Promise((done) => setTimeout(done, 0));
-}
 
 beforeAll(() => {
   // jsdom has no canvas; axe asks for one to measure icon fonts and copes without it. Say so quietly.
@@ -60,117 +48,6 @@ async function violations(): Promise<string[]> {
   const result = await axe.run(document, { resultTypes: ['violations'], rules: { 'color-contrast': { enabled: false } } });
   return result.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
 }
-
-const click = (selector: string): void => document.querySelector<HTMLElement>(selector)!.click();
-
-type Reach = (layout: Layout) => Promise<void>;
-
-/** Each state of R17.1, the picker in both steps, each sheet, and reduced motion. */
-const STATES: [string, Reach][] = [
-  [
-    'loading',
-    async (layout) => {
-      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-      void mountPage({ layout, hang: new Set(['summary.json']) }).boot();
-      await vi.advanceTimersByTimeAsync(0);
-      expect(document.getElementById('loading-line')).not.toBeNull();
-      // The page stays loading (its 3 s limit is on the fake clock, which stops here); axe needs real timers.
-      vi.useRealTimers();
-    },
-  ],
-  ['ready, before the first race starts', async (layout) => void (await bootPage({ layout }))],
-  [
-    'racing',
-    async (layout) => {
-      const time = fakeTime();
-      await bootPage({ layout, time });
-      time.advance(TIMINGS.racePauseMs + 2000);
-      expect(document.querySelector('.clock-row')).not.toBeNull();
-    },
-  ],
-  ['1938 wins, reduced motion', async (layout) => void (await bootPage({ layout, motion: 'reduced' }))],
-  ['today wins', async (layout) => void (await bootPage({ layout, motion: 'reduced', query: query(westToPreston), now: newYork('11:23') }))],
-  ['photo finish', async (layout) => void (await bootPage({ layout, motion: 'reduced', now: newYork('10:30') }))],
-  ['before the midday table', async (layout) => void (await bootPage({ layout, motion: 'reduced', now: newYork(raceOf(lead).races[0]!.t) }))],
-  ['the inferred corner', async (layout) => void (await bootPage({ layout, motion: 'reduced', query: query(inferredPair) }))],
-  [
-    'no one-seat ride (the made-up fixture line)',
-    async (layout) => void (await bootPage({ layout, motion: 'reduced', folder: FIXTURE_DIR, query: query(noRide), leadPair: noRide })),
-  ],
-  [
-    'a shared link, with its banner',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced', query: query(lead) });
-      expect(document.querySelector('#banner-root .banner')).not.toBeNull();
-    },
-  ],
-  [
-    'a bad link, with its banner',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced', query: `?from=nowhere&to=${lead.dest}` });
-      expect(document.querySelector('#banner-root .banner')).not.toBeNull();
-    },
-  ],
-  ['the data error', async (layout) => void (await bootPage({ layout, fail: new Set(['summary.json']) }))],
-  [
-    'the map unavailable, with no route drawing',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced', fail: new Set(['route.geojson']) });
-      await settle();
-      expect(text(document.querySelector('.map-notice'))).toBe(C.MAP_UNAVAILABLE_NO_DRAWING);
-    },
-  ],
-  [
-    'the map unavailable, with the route drawing',
-    async (layout) => {
-      const app = await bootPage({ layout, motion: 'reduced' });
-      await settle();
-      app.store.dispatch({ type: 'map/status', status: 'unavailable' });
-      expect(document.querySelector('.route-drawing')).not.toBeNull();
-    },
-  ],
-  [
-    'the corner picker, first step',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced' });
-      click('[data-action="picker"]');
-      expect(document.querySelector('.sheet[data-sheet="corners"]')).not.toBeNull();
-    },
-  ],
-  [
-    'the corner picker, second step',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced' });
-      click('[data-action="picker"]');
-      click(`.corner-choice[data-slug="${lead.origin}"]`);
-      expect(document.querySelector('.corner-choice[disabled]')).not.toBeNull();
-    },
-  ],
-  [
-    'the Sources sheet at a number',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced' });
-      click('#card-scroll button.num[data-source="wait-1938"]');
-      expect(document.querySelector('.sheet .source-row.is-target')).not.toBeNull();
-    },
-  ],
-  [
-    'About and credits',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced' });
-      click('#app > button.info');
-      expect(document.querySelector('.sheet[data-sheet="about"]')).not.toBeNull();
-    },
-  ],
-  [
-    'When today wins',
-    async (layout) => {
-      await bootPage({ layout, motion: 'reduced' });
-      click('[data-action="whentoday"]');
-      expect(document.querySelector('.sheet[data-sheet="whentoday"]')).not.toBeNull();
-    },
-  ],
-];
 
 describe('axe-core finds nothing on any state (18.2, R13.4)', () => {
   for (const layout of ['phone', 'desktop'] as const) {

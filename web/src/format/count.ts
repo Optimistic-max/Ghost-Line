@@ -1,4 +1,4 @@
-// Counts as the screen prints them, with thousands separators ("5,582").
+// Counts as the screen prints them, with a comma between each group of three digits.
 // Display formatting only: the counts are read from summary.json.
 
 const COUNT = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });

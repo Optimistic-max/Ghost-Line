@@ -158,11 +158,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
   - [x] 18.4 Announcement tests: one write per race for each result type with the approved text built from shown numbers (the spoken walking total is the sum of the shown walk parts); nothing written during the animation.
   - Depends on: tasks 15, 17
 
-- [ ] 19. Wording and rule tests across the whole screen (R15, P5, P6)
-  - [ ] 19.1 Render every state and scan the text, the aria labels and the status messages for banned words, allowing only "Scheduled, not live."
-  - [ ] 19.2 Every time on screen carries the word scheduled in its line, label or accessible name; walks say estimate every time; "citywide" never appears.
-  - [ ] 19.3 Count test: a summary.json with different numbers changes every count on screen; no digit string from the real summary.json appears in any file under src/.
-  - [ ] 19.4 Every minute string uses the singular for 1 (P13) across all states.
+- [x] 19. Wording and rule tests across the whole screen (R15, P5, P6)
+  - [x] 19.1 Render every state and scan the text, the aria labels and the status messages for banned words, allowing only "Scheduled, not live."
+  - [x] 19.2 Every time on screen carries the word scheduled in its line, label or accessible name; walks say estimate every time; "citywide" never appears. As built: a walk time is a walk word and a number of minutes in one sentence; a sentence that mentions the walk and gives no time (the wait's method line) is not one.
+  - [x] 19.3 Count test: a summary.json with different numbers changes every count on screen; no digit string from the real summary.json appears in any file under src/. As built: the src/ scan covers the counts of 100 or more, in both written forms; smaller counts collide with layout and drawing constants, so the swap proves them read at run time. Two src/ comments that quoted the real 1938-wins count were reworded.
+  - [x] 19.4 Every minute string uses the singular for 1 (P13) across all states. As built: also every kind of real row whose shown numbers include a 1, on the card and in its Sources rows.
   - Depends on: task 18
 
 ## End to end, budgets and deploy

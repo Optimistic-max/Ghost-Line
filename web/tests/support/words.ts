@@ -6,8 +6,9 @@
  */
 export function minuteWordProblems(text: string): string[] {
   const problems: string[] = [];
-  for (const m of text.matchAll(/\b(\d+) (minutes?)\b/g)) {
-    const one = m[1] === '1';
+  // The whole number, decimals included: "1.0 minute" (the method entry's photo-finish band) is one minute.
+  for (const m of text.matchAll(/(?<![\d.])(\d+(?:\.\d+)?) (minutes?)\b/g)) {
+    const one = Number(m[1]) === 1;
     if (one !== (m[2] === 'minute')) problems.push(`"${m[0]}"`);
   }
   if (/\b1 minutes\b/.test(text)) problems.push('"1 minutes"');

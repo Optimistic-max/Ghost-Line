@@ -35,7 +35,7 @@ export type DateKind = 'effective' | 'feed' | 'both';
 export type SourceSpec = {
   /** Stable per number on screen, for example "wait-1938" or "board-today-1". */
   id: string;
-  /** The value as the row opens with it: "6 min", "10:06" or "5,582". */
+  /** The value as the row opens with it: "6 min", "10:06" or a count with its thousands comma. */
   value: string;
   /** What it is, as the number button's name says it. */
   what: string;
