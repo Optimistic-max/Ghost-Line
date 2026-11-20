@@ -125,7 +125,15 @@ type Rect = { left: number; top: number; right: number; bottom: number; what: st
  * corner names and dots, the visible line of text (credit or notice), the
  * map's attribution button and the card's top edge.
  */
-async function mapBoxes(page: Page): Promise<{ glyphs: Rect[]; marker: Rect | null; drawn: Rect[]; line: Rect | null; attribution: Rect | null; cardTop: number }> {
+async function mapBoxes(page: Page): Promise<{
+  glyphs: Rect[];
+  marker: Rect | null;
+  drawn: Rect[];
+  line: Rect | null;
+  lineRects: Rect[];
+  attribution: Rect | null;
+  cardTop: number;
+}> {
   return page.evaluate(() => {
     const box = (el: Element, what: string) => {
       const r = el.getBoundingClientRect();
@@ -151,12 +159,19 @@ async function mapBoxes(page: Page): Promise<{ glyphs: Rect[]; marker: Rect | nu
     }
     const markerArt = document.querySelector('#map-area .drawing-marker:not([hidden]) .marker-art');
     const line = [...document.querySelectorAll<HTMLElement>('#map-area .map-lines > p')].find((p) => !p.hidden);
+    // The line's text itself, line by line (its paragraph is as wide as the map area).
+    const range = document.createRange();
+    if (line) range.selectNodeContents(line);
+    const lineRects = line
+      ? [...range.getClientRects()].map((r) => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, what: line.textContent ?? '' }))
+      : [];
     const attribution = document.querySelector('#map-area .maplibregl-ctrl-attrib');
     return {
       glyphs,
       marker: drawing && markerArt ? box(markerArt, 'trolley marker') : null,
       drawn: [...drawn, ...glyphs],
       line: line ? box(line, line.textContent ?? '') : null,
+      lineRects,
       attribution: attribution ? box(attribution, 'attribution') : null,
       cardTop: document.getElementById('race-card')!.getBoundingClientRect().top,
     };
@@ -179,9 +194,12 @@ async function checkMapArea(page: Page, state: State): Promise<void> {
     expect(under, `${at}: street name glyphs under the standing trolley marker`).toEqual([]);
   }
   if (boxes.line) {
-    const covered = boxes.drawn.filter((d) => meet(d, boxes.line!)).map((d) => d.what);
+    expect(boxes.lineRects.length, `${at}: the line's text`).toBeGreaterThan(0);
+    const covered = boxes.drawn.filter((d) => boxes.lineRects.some((r) => meet(d, r))).map((d) => d.what);
     expect(covered, `${at}: the map's line of text over the drawing`).toEqual([]);
-    if (boxes.attribution) expect(meet(boxes.attribution, boxes.line), `${at}: attribution over the line`).toBe(false);
+    if (boxes.attribution) {
+      expect(boxes.lineRects.some((r) => meet(boxes.attribution!, r)), `${at}: attribution over the line`).toBe(false);
+    }
     if (state.size === PHONE) {
       expect(boxes.line.bottom, `${at}: the line above the card`).toBeLessThanOrEqual(boxes.cardTop);
       // At the foot of the map area: nearer the card than the top bar.
