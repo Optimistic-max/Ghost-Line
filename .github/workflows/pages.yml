@@ -1,0 +1,56 @@
+# Builds the site in web/ and publishes web/dist to GitHub Pages on every push to main.
+# The page is served at https://optimistic-max.github.io/Ghost-Line/ (Vite base "/Ghost-Line/").
+#
+# This workflow only builds the site. The generated data it serves (web/public/data) is committed,
+# so it never runs the pipeline, never installs Python and never reads raw/ (tech.md). Pages must be
+# set to "GitHub Actions" as its source in the repository settings (done Nov 20).
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+# Least privilege: read the code, write the Pages deployment, and the OIDC token Pages checks it with.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a newer push waits for the one running, and the newest wins.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Vite 8 needs Node 20.19, 22.12 or 24; the site is built and tested on 24.
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
