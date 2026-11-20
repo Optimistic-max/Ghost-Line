@@ -83,20 +83,19 @@ describe('the board for the lead pair at 10:00 (desktop, finished)', () => {
     expect(text(root.querySelector('.board-row-1938 .board-gaps'))).toBe(C.boardEveryOr(c, d));
   });
 
-  it('makes the spacing and the gaps number buttons, named in their sentence form (Emmanuel, Nov 19)', () => {
+  it('makes the spacing and the gaps number buttons, named from their visible text (Emmanuel, Nov 19 and 20)', () => {
     const { today, y1938 } = race;
     const spacing = root.querySelector<HTMLElement>('.board-row-1938 .board-gaps')!;
     const gaps = root.querySelector<HTMLElement>('.board-row-today .board-gaps')!;
     expect(spacing.matches('button.num')).toBe(true);
     expect(gaps.matches('button.num')).toBe(true);
-    expect(spacing.getAttribute('aria-label')).toBe(
-      C.numberLabel(C.everyMinutesOr(whole(y1938.gap_min), whole(y1938.gap_max)), C.WHAT.spacing1938),
-    );
+    const spacingText = C.boardEveryOr(whole(y1938.gap_min), whole(y1938.gap_max));
+    const gapsText = C.boardGapRange(whole(today.gap_min!), whole(today.gap_max!));
+    expect(text(spacing)).toBe(spacingText);
+    expect(text(gaps)).toBe(gapsText);
+    expect(spacing.getAttribute('aria-label')).toBe(C.numberLabel(spacingText, C.WHAT.spacing1938));
     expect(gaps.getAttribute('aria-label')).toBe(
-      C.numberLabel(
-        C.gapRange(whole(today.gap_min!), whole(today.gap_max!)),
-        C.whatBusGaps(label12(today.window_from), label12(today.window_to)),
-      ),
+      C.numberLabel(gapsText, C.whatBusGaps(label12(today.window_from), label12(today.window_to))),
     );
   });
 
@@ -132,7 +131,10 @@ describe('a pair served by two routes: Westwood & Carey to Aliceanna & Bond', ()
     expect(whole(race.today.gap_min!)).toBe(0);
     const max = whole(race.today.gap_max!);
     expect(text(root.querySelector('.board-row-today .board-gaps'))).toBe(C.boardGapUpTo(max));
-    expect(root.querySelector('.board-row-today .board-gaps')!.getAttribute('aria-label')).toContain(C.gapUpTo(max));
+    // The name starts with the printed short form; the Sources row's method line has the sentence form.
+    expect(root.querySelector('.board-row-today .board-gaps')!.getAttribute('aria-label')).toMatch(
+      new RegExp(`^${C.boardGapUpTo(max)}, `),
+    );
     expect(gapsMethod()).toContain(C.gapUpTo(max));
   });
 

@@ -24,7 +24,6 @@ import {
 } from '../copy/copy';
 import type { RaceFile, SourceId, Summary, Trip } from '../data/types';
 import { formatCount } from '../format/count';
-import { gapPart, spacing1938 } from '../format/gaps';
 import { isPlainRounding, roundWhole } from '../format/rounding';
 import { dropSeconds, label12, shortClock } from '../format/time';
 import type { Lane, Phase, RaceView } from './model';
@@ -60,26 +59,23 @@ export type SourceSpec = {
 
 /**
  * A number on screen with its source: `text` as printed alone ("15 min"), `bare`
- * inside a sentence whose template carries the unit ("15"), `spoken` in its
- * button's name, `n` for the minute words.
+ * inside a sentence whose template carries the unit ("15"), `n` for the minute
+ * words. The button's accessible name starts with the text as printed (numbers.ts).
  */
-export type Num = { spec: SourceSpec; text: string; bare: string; spoken: string; n: number };
+export type Num = { spec: SourceSpec; text: string; bare: string; n: number };
 
-/** The minute counts as spoken in a number button's name, for example "9 minutes" (built by the view). */
-export type Spoken = (n: number) => string;
-
-type Ctx = { race: RaceFile; view: RaceView; spoken: Spoken };
+type Ctx = { race: RaceFile; view: RaceView };
 
 const RACE_IDS: SourceId[] = ['guide1938_diagram', 'guide1938_timetable', 'mta_gtfs', 'method'];
 
-function minutesNum(ctx: Ctx, spec: Omit<SourceSpec, 'value'>, n: number): Num {
+function minutesNum(spec: Omit<SourceSpec, 'value'>, n: number): Num {
   const text = minShort(n);
-  return { spec: { ...spec, value: text }, text, bare: String(n), spoken: ctx.spoken(n), n };
+  return { spec: { ...spec, value: text }, text, bare: String(n), n };
 }
 
 function timeNum(spec: Omit<SourceSpec, 'value'>, hhmm: string): Num {
   const text = shortClock(hhmm);
-  return { spec: { ...spec, value: text }, text, bare: text, spoken: text, n: Number.NaN };
+  return { spec: { ...spec, value: text }, text, bare: text, n: Number.NaN };
 }
 
 function exactOf(phase: Phase, lane: Lane): SourceSpec['exact'] {
@@ -96,8 +92,8 @@ function tripLineOf(trip: Trip): string {
 }
 
 /** The numbers of one race on screen: phases, totals, next departures, margin and board times. */
-export function raceNumbers(race: RaceFile, view: RaceView, spoken: Spoken) {
-  const ctx: Ctx = { race, view, spoken };
+export function raceNumbers(race: RaceFile, view: RaceView) {
+  const ctx: Ctx = { race, view };
   const between = (what: string): string => whatBetween(what, view.originName, view.destName);
   const start = shortClock(view.start);
   const urls = race.y1938.sources;
@@ -105,7 +101,6 @@ export function raceNumbers(race: RaceFile, view: RaceView, spoken: Spoken) {
   const [wait1938, ride1938] = view.lane1938.phases as [Phase, Phase];
   const lane1938 = {
     wait: minutesNum(
-      ctx,
       {
         id: 'wait-1938',
         what: WHAT.wait1938,
@@ -119,7 +114,6 @@ export function raceNumbers(race: RaceFile, view: RaceView, spoken: Spoken) {
       wait1938.shown,
     ),
     ride: minutesNum(
-      ctx,
       {
         id: 'ride-1938',
         what: WHAT.ride1938,
@@ -133,7 +127,6 @@ export function raceNumbers(race: RaceFile, view: RaceView, spoken: Spoken) {
       ride1938.shown,
     ),
     total: minutesNum(
-      ctx,
       {
         id: 'total-1938',
         what: WHAT.total1938,
@@ -163,7 +156,6 @@ export function raceNumbers(race: RaceFile, view: RaceView, spoken: Spoken) {
   const margin =
     view.resultView.kind === '1938' || view.resultView.kind === 'today'
       ? minutesNum(
-          ctx,
           {
             id: 'margin',
             what: WHAT.margin,
@@ -217,8 +209,8 @@ export function frequencySentence(view: RaceView): string | null {
 }
 
 /**
- * The board's 1938 spacing and bus gaps as numbers on screen (Emmanuel, Nov 19):
- * printed in the board's short form, spoken in the sentence form.
+ * The board's 1938 spacing and bus gaps as numbers on screen (Emmanuel, Nov 19),
+ * in the board's short form, which is also what their names start with (Nov 20).
  */
 function boardSpacingNumbers(race: RaceFile, view: RaceView): { boardSpacing: Num; boardGaps: Num | null } {
   const sentenceText = frequencySentence(view);
@@ -238,7 +230,6 @@ function boardSpacingNumbers(race: RaceFile, view: RaceView): { boardSpacing: Nu
     },
     text: spacingText,
     bare: spacingText,
-    spoken: spacing1938(y1938.gap_min, y1938.gap_max),
     n: Number.NaN,
   };
   const gapsText = view.board.busGaps;
@@ -250,7 +241,6 @@ function boardSpacingNumbers(race: RaceFile, view: RaceView): { boardSpacing: Nu
     spec: { id: 'board-today-gaps', value: gapsText, what, rowWhat: what, sourceIds: ['mta_gtfs'], method: sentenceText, date: 'feed' },
     text: gapsText,
     bare: gapsText,
-    spoken: gapPart(today.gap_min, today.gap_max),
     n: Number.NaN,
   };
   return { boardSpacing, boardGaps };
@@ -260,7 +250,6 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
   const [walkTo, wait, ride, walkFrom] = lane.phases as [Phase, Phase, Phase, Phase];
   const walk = (id: string, what: string, phase: Phase, metres: number): Num =>
     minutesNum(
-      ctx,
       {
         id,
         what,
@@ -276,7 +265,6 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
   return {
     walkTo: walk('walk-to-stop', WHAT.walkToStop, walkTo, trip.board.walk_m),
     wait: minutesNum(
-      ctx,
       {
         id: 'wait-today',
         what: WHAT.waitBus,
@@ -291,7 +279,6 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
       wait.shown,
     ),
     ride: minutesNum(
-      ctx,
       {
         id: 'ride-today',
         what: WHAT.rideBus,
@@ -307,7 +294,6 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
     ),
     walkFrom: walk('walk-from-stop', WHAT.walkFromStop, walkFrom, trip.alight.walk_m),
     total: minutesNum(
-      ctx,
       {
         id: 'total-today',
         what: WHAT.totalToday,
@@ -342,7 +328,6 @@ export function countNum(summary: Summary, key: keyof Summary['sources'] & strin
     spec: { id, value: text, what, rowWhat: what, sourceIds: summary.sources[key] ?? RACE_IDS, method, date: 'both' },
     text,
     bare: text,
-    spoken: text,
     n,
   };
 }

@@ -108,9 +108,11 @@ describe('a 1938 win: the lead pair at 10:00', () => {
     }
   });
 
-  it('names each number button by what it is', () => {
+  it('names each number button by its visible text, then what it is', () => {
     const b = num(root, 'ride-1938');
-    expect(b.getAttribute('aria-label')).toBe(C.numberLabel(C.minutes(value(b)), C.WHAT.ride1938));
+    expect(text(b)).toBe(C.minShort(value(b)));
+    expect(b.getAttribute('aria-label')).toBe(C.numberLabel(text(b), C.WHAT.ride1938));
+    expect(b.getAttribute('aria-label')).toMatch(/^\d+ min, /);
   });
 });
 

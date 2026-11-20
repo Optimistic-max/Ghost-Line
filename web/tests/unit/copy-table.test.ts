@@ -242,9 +242,15 @@ describe('helpers', () => {
     );
   });
 
-  it('builds the number label of the brief from the approved templates', () => {
-    expect(C.numberLabel(C.minutes(9), C.WHAT.ride1938)).toBe('9 minutes, scheduled 1938 ride. Show source.');
-    expect(C.numberLabel(C.minutes(1), C.WHAT.wait1938)).toBe('1 minute, scheduled 1938 wait. Show source.');
+  it('builds a number\'s name from its visible text and the approved phrases (Emmanuel, Nov 20)', () => {
+    expect(C.numberLabel(C.minShort(6), C.WHAT.wait1938)).toBe('6 min, scheduled 1938 wait. Show source.');
+    expect(C.numberLabel(C.boardEveryOr(n('7'), n('8')), C.WHAT.spacing1938)).toBe(
+      'every 7 or 8 min, scheduled spacing of 1938 cars at this corner. Show source.',
+    );
+    expect(C.numberLabel('10:06', C.WHAT.car1938)).toBe('10:06, scheduled 1938 car. Show source.');
+    // Where a sentence prints the long unit, the name starts with the long unit.
+    expect(C.numberLabel(C.minutes(30), C.WHAT.margin)).toBe('30 minutes, difference of the two scheduled totals. Show source.');
+    expect(C.numberLabel(C.minutes(1), C.WHAT.margin)).toBe('1 minute, difference of the two scheduled totals. Show source.');
   });
 
   it('the honest-line parts are exactly the two honest lines, in order', () => {

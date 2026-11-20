@@ -10,7 +10,6 @@ import {
   SKIP_TO_RESULT,
   START_IS_NOW,
   beforeTable,
-  minutes,
   ready,
 } from '../copy/copy';
 import type { Index, RaceFile, Summary } from '../data/types';
@@ -51,7 +50,7 @@ export type CardInput = {
 
 /** The numbers of the race on screen, with their sources. */
 export function cardNumbers(input: CardInput): RaceNumbers {
-  return raceNumbers(input.race, input.view, minutes);
+  return raceNumbers(input.race, input.view);
 }
 
 export function cardLayout(input: CardInput): RaceLayout {

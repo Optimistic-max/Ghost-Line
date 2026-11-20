@@ -72,9 +72,33 @@ function says(unit: Element, el: Element, word: RegExp): boolean {
   return labelled || word.test(el.closest('button')?.getAttribute('aria-label') ?? '');
 }
 
+/**
+ * Label in name (WCAG 2.5.3, Emmanuel, Nov 20): a button or link that prints
+ * text has an accessible name that holds it, and a number button's name starts
+ * with it ("6 min, scheduled 1938 wait. Show source.").
+ */
+function labelBreaks(root: ParentNode): string[] {
+  const found: string[] = [];
+  const norm = (s: string): string => s.replace(/\s+/g, ' ').trim().toLowerCase();
+  for (const el of root.querySelectorAll('button[aria-label], a[aria-label]')) {
+    const shown = norm(el.textContent ?? '');
+    const name = norm(el.getAttribute('aria-label') ?? '');
+    // Symbols and single characters used as icons (plus, minus, swap, the italic "i") are not text, as in axe's own rule.
+    if (shown.length < 2 || !/[\p{L}\p{N}]/u.test(shown)) continue;
+    // Whole words, as speech and axe match them: "6 min" is not in "6 minutes".
+    const escaped = shown.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const asWords = new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u');
+    if (!asWords.test(name)) found.push(`a name without its visible text: "${el.textContent}" named "${el.getAttribute('aria-label')}"`);
+    else if (el.matches('button.num') && !name.startsWith(`${shown},`)) {
+      found.push(`a number button whose name does not start with its text: "${el.textContent}" named "${el.getAttribute('aria-label')}"`);
+    }
+  }
+  return found;
+}
+
 /** The rule breaks on the page as it stands, one line each. */
 function breaks(root: ParentNode = document.body): string[] {
-  const found: string[] = [];
+  const found: string[] = labelBreaks(root);
   const where = (s: Said): string => `${s.attribute ? `[${s.attribute}] ` : ''}"${s.text.trim()}"`;
   for (const s of everythingSaid(root)) {
     for (const term of bannedTerms(s.text)) found.push(`banned word "${term}": ${where(s)}`);
@@ -129,8 +153,19 @@ describe('the wording rules on every state (19.1, 19.2, 19.4)', () => {
     add('<p>Faster citywide</p>');
     add('<p>Wins by 1 minutes</p>');
     add('<button aria-label="10:06, 1938 car. Show source.">10:06</button>');
+    add('<button class="num" aria-label="6 minutes, scheduled 1938 wait. Show source.">6 min</button>');
+    add('<button class="num" aria-label="Scheduled 1938 wait, 6 min. Show source.">6 min</button>');
     const found = breaks();
-    for (const kind of ['banned word "Arriving now"', 'a time without "scheduled": "Next car 10:06"', 'a walk without "estimate"', '"citywide"', 'minute word', '[aria-label] "10:06, 1938 car. Show source."']) {
+    for (const kind of [
+      'banned word "Arriving now"',
+      'a time without "scheduled": "Next car 10:06"',
+      'a walk without "estimate"',
+      '"citywide"',
+      'minute word',
+      '[aria-label] "10:06, 1938 car. Show source."',
+      'a name without its visible text: "6 min" named "6 minutes, scheduled',
+      'a number button whose name does not start with its text: "6 min" named "Scheduled 1938 wait',
+    ]) {
       expect(found.some((f) => f.includes(kind)), kind).toBe(true);
     }
   });

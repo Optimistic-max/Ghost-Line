@@ -341,7 +341,7 @@ export function boardGapEqual(n: number): string {
 
 // ---- Number buttons and the Sources sheet -----------------------------------
 
-/** A number button's accessible name: "9 minutes, scheduled 1938 ride. Show source." */
+/** A number button's accessible name, which starts with its visible text: "9 min, scheduled 1938 ride. Show source." */
 export function numberLabel(value: string, what: string): string {
   return `${value}, ${what}. Show source.`;
 }

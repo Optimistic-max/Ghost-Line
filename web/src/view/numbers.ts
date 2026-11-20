@@ -36,17 +36,21 @@ export class SourceRegistry {
 }
 
 /**
- * A number on screen: its source, its text as printed alone ("15 min"), the
- * number without its unit for use inside a sentence ("15"), and its spoken value.
+ * A number on screen: its source, its text as printed alone ("15 min"), and the
+ * number without its unit for use inside a sentence ("15").
  */
-export type NumberSlot = { spec: SourceSpec; text: string; bare: string; spoken: string };
+export type NumberSlot = { spec: SourceSpec; text: string; bare: string };
 
-/** A number button. Its text is printed as given; its name says what it is and that it opens its source. */
+/**
+ * A number button. Its text is printed as given; its name starts with that same
+ * text, then says what it is and that it opens its source ("6 min, scheduled 1938
+ * wait. Show source."), so the visible text is part of the name (WCAG 2.5.3).
+ */
 export function numberButton(registry: SourceRegistry, slot: NumberSlot): HTMLButtonElement {
   registry.add(slot.spec);
   return h(
     'button',
-    { type: 'button', class: 'num', 'data-source': slot.spec.id, 'aria-label': numberLabel(slot.spoken, slot.spec.what) },
+    { type: 'button', class: 'num', 'data-source': slot.spec.id, 'aria-label': numberLabel(slot.text, slot.spec.what) },
     slot.text,
   );
 }
