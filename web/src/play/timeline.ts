@@ -102,18 +102,23 @@ export type LaneFrame = {
   current: number;
   /** Whole minutes left of the current phase, counting down from its shown part (R5.4). */
   countdown: number;
-  /** The vehicle's position as a share of its travel: still while waiting or walking, linear while riding. */
+  /**
+   * The filled end of the ride portion, as a share of the scale: the ride's
+   * start before it, linear in time during it, its end after it. The vehicle's
+   * front edge sits there, never nearer the lane start than its own width
+   * (card.css), so it moves during the ride only (Emmanuel, Nov 19).
+   */
   vehicle: number;
   /** True while the ride phase is under way: the vehicle is moving. */
   moving: boolean;
   arrived: boolean;
 };
 
-/**
- * One lane at `elapsed`. `park` is where the vehicle ends (layout.ts): it moves
- * from the start of the track to there during the ride phase only (R5.5).
- */
-export function laneFrame(lane: Lane, timeline: Timeline, elapsed: number, park: number): LaneFrame {
+/** Where a lane's ride portion starts and ends, as shares of the scale (layout.ts). */
+export type Travel = { from: number; to: number };
+
+/** One lane at `elapsed`. */
+export function laneFrame(lane: Lane, timeline: Timeline, elapsed: number, travel: Travel): LaneFrame {
   const segments = timeline.segments.filter((s) => s.side === lane.side);
   const fills = segments.map((s) => fillOf(s, elapsed));
   // The first phase is under way from the start; a later one once the race has moved past its start.
@@ -128,7 +133,7 @@ export function laneFrame(lane: Lane, timeline: Timeline, elapsed: number, park:
   const countdown = phase ? Math.max(0, Math.ceil(phase.shown * (1 - fill) - 1e-9)) : 0;
   const ride = segments.find((s) => s.kind === 'ride');
   const rideFill = ride ? fillOf(ride, elapsed) : 0;
-  const vehicle = park * rideFill;
+  const vehicle = travel.from + (travel.to - travel.from) * rideFill;
   const moving = rideFill > 0 && rideFill < 1;
   return { fills, reached, current, countdown, vehicle, moving, arrived };
 }

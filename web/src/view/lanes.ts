@@ -56,8 +56,9 @@ function bar(lane: Lane, layout: LaneLayout): HTMLElement {
     'div',
     { class: 'bar', 'aria-hidden': 'true' },
     ...lane.phases.map((phase, k) => segment(phase, layout.widths[k] ?? 0)),
-    // The end of the bar, which brightens and settles at the first arrival (R5.6).
-    h('span', { class: 'bar-cap' }),
+    // The end of the bar: a small glowing marker that always shows the finish point
+    // (Emmanuel, Nov 19), and the flash that brightens and settles at the first arrival (R5.6).
+    h('span', { class: 'bar-end' }, h('span', { class: 'bar-mark' }), h('span', { class: 'bar-cap' })),
   );
 }
 
@@ -116,7 +117,9 @@ function vehicleRow(lane: Lane, layout: LaneLayout, options: LaneOptions): HTMLE
     vehicleMarkup(lane.side, options.vehicleWidth, options.routeNumber),
   );
   const runner = h('div', { class: 'runner' }, vehicle);
-  setVar(runner, '--p', layout.park);
+  // The vehicle's front edge: the end of its ride portion when parked (racer.ts moves it during the ride).
+  setVar(runner, '--x', layout.park);
+  setVar(runner, '--gaps', layout.gapsBefore);
   const row = h(
     'div',
     { class: `vehicle-row vehicle-row-${lane.side}`, 'aria-hidden': 'true' },

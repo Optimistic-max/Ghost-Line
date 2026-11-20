@@ -153,6 +153,64 @@ test('phone race layout: lanes, status lines and clock row clear of the button s
   await context.close();
 });
 
+// Design 9.3 (Emmanuel, Nov 19): a vehicle's front edge is the filled end of its
+// ride portion, never nearer the lane start than its own width, so it never
+// reaches past the lane start and moves during its ride only. The finish
+// marker sits at the end of each bar the whole time. The lead pair at 10:00,
+// measured at moments across the race and after the finish.
+for (const size of [PHONE, DESKTOP]) {
+  test(`vehicle front edges on the filled end of the ride (${size.width} x ${size.height})`, async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: size.width, height: size.height } });
+    const page = await context.newPage();
+    await page.clock.install({ time: beforeNewYork('20:00') });
+    await page.clock.pauseAt(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    // Real milliseconds after the pause: 1938 waiting, riding twice, arrived; bus waiting, riding twice, the last walk; finished.
+    const pause = TIMINGS.racePauseMs;
+    const moments = [0, pause + 1000, pause + 2500, pause + 3600, pause + 5000, pause + 8600, pause + 9800, pause + 11000, pause + 12500];
+    const lefts: Record<string, number[]> = { '1938': [], today: [] };
+    let at = 0;
+    for (const moment of moments) {
+      await page.clock.runFor(moment - at);
+      at = moment;
+      const lanes = await page.evaluate(() =>
+        (['1938', 'today'] as const).map((side) => {
+          const lane = document.querySelector(`.lane-${side}`)!;
+          const box = (selector: string) => lane.querySelector(selector)!.getBoundingClientRect();
+          const segs = [...lane.querySelectorAll('.seg')];
+          const mark = box('.bar-mark');
+          return {
+            side,
+            laneStart: box('.bar').left,
+            vehicle: box('.vehicle'),
+            rideFilled: box('.seg-ride .seg-fill').right,
+            barEnd: segs.at(-1)!.getBoundingClientRect().right,
+            markCentre: (mark.left + mark.right) / 2,
+            markOpacity: Number(getComputedStyle(lane.querySelector('.bar-mark')!).opacity),
+          };
+        }),
+      );
+      for (const l of lanes) {
+        const label = `${l.side} at ${moment} ms`;
+        const front = Math.max(l.laneStart + l.vehicle.width, l.rideFilled);
+        expect(Math.abs(l.vehicle.right - front), label).toBeLessThanOrEqual(1.5);
+        expect(l.vehicle.left, label).toBeGreaterThanOrEqual(l.laneStart - 0.5);
+        expect(Math.abs(l.markCentre - l.barEnd), label).toBeLessThanOrEqual(1.5);
+        expect(l.markOpacity, label).toBe(1);
+        lefts[l.side]!.push(l.vehicle.left);
+      }
+    }
+    // The bus stays put through its first walk and its wait, and again through its last walk.
+    expect(lefts.today![0]).toBeCloseTo(lefts.today![4]!, 1);
+    expect(lefts.today![7]).toBeCloseTo(lefts.today![8]!, 1);
+    // It moves during its ride.
+    expect(lefts.today![6]!).toBeGreaterThan(lefts.today![5]!);
+    await context.close();
+  });
+}
+
 // R1.3 (Emmanuel, Nov 19): on desktop the pair names stay on one line, the font
 // shrinking as far as a long pair needs. Every pair is tried, the longest included.
 test('desktop pair names on one line, for every pair (1280 x 800)', async ({ browser }) => {

@@ -88,13 +88,13 @@ export function createRacer(root: ParentNode, registry: SourceRegistry, input: R
   }
 
   function drawLane(b: BoundLane, elapsed: number): void {
-    const f = laneFrame(b.lane, timeline, elapsed, b.layout.park);
+    const f = laneFrame(b.lane, timeline, elapsed, { from: b.layout.rideFrom, to: b.layout.park });
     b.segs.forEach((seg, k) => {
       setVar(seg, '--f', f.fills[k] ?? 0);
       seg.toggleAttribute('data-reached', f.reached[k] ?? false);
       seg.toggleAttribute('data-current', k === f.current && !f.arrived);
     });
-    if (b.runner) setVar(b.runner, '--p', f.vehicle);
+    if (b.runner) setVar(b.runner, '--x', f.vehicle);
     b.el.classList.toggle('is-moving', f.moving);
     b.el.toggleAttribute('data-arrived', f.arrived);
     if (!f.arrived) b.el.classList.remove('is-arriving');

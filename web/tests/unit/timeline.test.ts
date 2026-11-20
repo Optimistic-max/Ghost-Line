@@ -135,6 +135,8 @@ describe('the result moment', () => {
 });
 
 describe('positions in time', () => {
+  /** A ride portion for the cases where the vehicle's place does not matter. */
+  const HALF = { from: 0.25, to: 0.5 };
   it('turns real time into scheduled minutes linearly, stopping at the finish (property)', () => {
     fc.assert(
       fc.property(parts1938, partsToday, fc.double({ min: 0, max: 20000, noNaN: true }), (a, b, ms) => {
@@ -158,21 +160,31 @@ describe('positions in time', () => {
     );
   });
 
-  it('keeps the vehicle still while waiting or walking, moves it linearly while riding, and parks it (property)', () => {
+  it('puts the vehicle\'s front at the filled end of its ride portion: still before and after the ride, linear during it (property)', () => {
     fc.assert(
-      fc.property(partsToday, fc.double({ min: 0, max: 1, noNaN: true }), fc.double({ min: 0.1, max: 1, noNaN: true }), (b, x, park) => {
-        const view = viewOf([1, 1], b, 'today');
-        const t = buildTimeline(view);
-        const ride = t.segments.find((s) => s.side === 'today' && s.kind === 'ride')!;
-        const at = (e: number) => laneFrame(view.laneToday!, t, e, park);
-        expect(at(ride.from).vehicle).toBe(0);
-        expect(at(ride.from).moving).toBe(false);
-        expect(at(ride.from + x * (ride.to - ride.from)).vehicle).toBeCloseTo(park * x, 9);
-        expect(at(ride.to).vehicle).toBeCloseTo(park, 9);
-        expect(at(t.finishAt).vehicle).toBeCloseTo(park, 9);
-        expect(at(t.finishAt).arrived).toBe(true);
-        if (x > 1e-6 && x < 1 - 1e-6) expect(at(ride.from + x * (ride.to - ride.from)).moving).toBe(true);
-      }),
+      fc.property(
+        partsToday,
+        fc.double({ min: 0, max: 1, noNaN: true }),
+        fc.double({ min: 0, max: 0.6, noNaN: true }),
+        fc.double({ min: 0.05, max: 0.4, noNaN: true }),
+        (b, x, from, length) => {
+          const view = viewOf([1, 1], b, 'today');
+          const t = buildTimeline(view);
+          const ride = t.segments.find((s) => s.side === 'today' && s.kind === 'ride')!;
+          const travel = { from, to: from + length };
+          const at = (e: number) => laneFrame(view.laneToday!, t, e, travel);
+          // Parked through the first walk and the wait, at the start of the ride portion.
+          expect(at(0).vehicle).toBe(from);
+          expect(at(ride.from).vehicle).toBe(from);
+          expect(at(ride.from).moving).toBe(false);
+          expect(at(ride.from + x * (ride.to - ride.from)).vehicle).toBeCloseTo(from + length * x, 9);
+          // Parked at the end of its ride while the last walk completes.
+          expect(at(ride.to).vehicle).toBeCloseTo(travel.to, 9);
+          expect(at(t.finishAt).vehicle).toBeCloseTo(travel.to, 9);
+          expect(at(t.finishAt).arrived).toBe(true);
+          if (x > 1e-6 && x < 1 - 1e-6) expect(at(ride.from + x * (ride.to - ride.from)).moving).toBe(true);
+        },
+      ),
     );
   });
 
@@ -180,20 +192,20 @@ describe('positions in time', () => {
     const view = realView(lead, '10:00');
     const t = buildTimeline(view);
     const wait = view.lane1938.phases[0]!;
-    const start = laneFrame(view.lane1938, t, 0, 0.5);
+    const start = laneFrame(view.lane1938, t, 0, HALF);
     expect([start.current, start.countdown, start.arrived]).toEqual([0, wait.shown, false]);
     // Just before the wait ends, one minute is left; at its end the ride is under way, from its own shown part.
-    expect(laneFrame(view.lane1938, t, wait.stored - 1e-6, 0.5).countdown).toBe(1);
-    const riding = laneFrame(view.lane1938, t, wait.stored, 0.5);
+    expect(laneFrame(view.lane1938, t, wait.stored - 1e-6, HALF).countdown).toBe(1);
+    const riding = laneFrame(view.lane1938, t, wait.stored, HALF);
     expect([riding.current, riding.countdown]).toEqual([1, view.lane1938.phases[1]!.shown]);
-    expect(laneFrame(view.lane1938, t, t.end1938, 0.5).arrived).toBe(true);
+    expect(laneFrame(view.lane1938, t, t.end1938, HALF).arrived).toBe(true);
   });
 
   it('dims only the phases not yet reached', () => {
     const view = realView(lead, '10:00');
     const t = buildTimeline(view);
-    expect(laneFrame(view.laneToday!, t, 0, 0.5).reached).toEqual([true, false, false, false]);
-    expect(laneFrame(view.laneToday!, t, t.endToday!, 0.5).reached).toEqual([true, true, true, true]);
+    expect(laneFrame(view.laneToday!, t, 0, HALF).reached).toEqual([true, false, false, false]);
+    expect(laneFrame(view.laneToday!, t, t.endToday!, HALF).reached).toEqual([true, true, true, true]);
   });
 });
 

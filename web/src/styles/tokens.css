@@ -48,6 +48,8 @@
   /* The pinned button strip: 8 px above the 52 px buttons, 6 px below them. */
   --strip-h: calc(8px + 52px + var(--buttons-bottom));
   --bar-h: 9px;
+  /* The gap between a bar's phases; the vehicles' positions count it too. */
+  --seg-gap: 2px;
 
   /* Vehicles (ui.md). Style, not data: only the bars are drawn to scale. */
   --trolley-w: 150px;

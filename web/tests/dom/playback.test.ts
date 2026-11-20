@@ -259,7 +259,7 @@ describe('the result and the announcement', () => {
     page.time.advance(realMs(view, t.end1938) + 100);
     expect(page.app.store.get().race).toEqual({ phase: 'running', resultShown: true });
     const status = text(lane('today')!.querySelector('.status'));
-    const p = (): number => Number(lane('today')!.querySelector<HTMLElement>('.runner')!.style.getPropertyValue('--p'));
+    const p = (): number => Number(lane('today')!.querySelector<HTMLElement>('.runner')!.style.getPropertyValue('--x'));
     const before = p();
     // A minute before the bus side's own finish: its ride is done and it walks on.
     page.time.advance(realMs(view, t.endToday! - 1) - page.time.current());

@@ -8,18 +8,23 @@ export type LaneLayout = {
   widths: number[];
   /** Where the lane's bar ends, as a share of the scale. */
   end: number;
-  /** Where the vehicle is parked when the race is finished: the end of the ride phase. */
+  /** Where the ride phase starts, as a share of the scale. */
+  rideFrom: number;
+  /** Where the ride phase ends, as a share of the scale: the vehicle's front edge after the ride. */
   park: number;
+  /** The gaps between phases drawn before the ride, which also shift its start (card.css --seg-gap). */
+  gapsBefore: number;
 };
 
 export type RaceLayout = { lane1938: LaneLayout; laneToday: LaneLayout | null };
 
 function laneLayout(lane: Lane, longest: number): LaneLayout {
   const widths = lane.phases.map((p) => (longest > 0 ? p.stored / longest : 0));
-  const rideIndex = lane.phases.findIndex((p) => p.kind === 'ride');
-  const park = widths.slice(0, rideIndex + 1).reduce((a, b) => a + b, 0);
+  const rideIndex = Math.max(0, lane.phases.findIndex((p) => p.kind === 'ride'));
+  const rideFrom = widths.slice(0, rideIndex).reduce((a, b) => a + b, 0);
+  const park = rideFrom + (widths[rideIndex] ?? 0);
   const end = widths.reduce((a, b) => a + b, 0);
-  return { widths, end, park };
+  return { widths, end, rideFrom, park, gapsBefore: rideIndex };
 }
 
 /**
