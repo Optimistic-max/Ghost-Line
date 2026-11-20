@@ -8,7 +8,8 @@
     "build": "vite build",
     "test": "vitest run",
     "screens": "playwright test tests/e2e/screens.spec.ts",
-    "test:e2e": "playwright test --project=phone --project=laptop"
+    "test:e2e": "playwright test --project=phone --project=laptop",
+    "check:size": "node scripts/check-size.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",

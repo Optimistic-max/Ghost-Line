@@ -15,10 +15,15 @@ export default defineConfig({
         codeSplitting: {
           // MapLibre and the map module form their own chunk, loaded by a lazy
           // import after the race card is on screen (tech.md, design 12.2).
+          // Only those modules: by default a group also captures what they import,
+          // which pulled the layout, vehicle and drawing code the first screen needs
+          // into the map chunk, so the page loaded the map before the first race
+          // (found by task 21's size check, Nov 20).
           groups: [
             {
               name: 'map',
               test: /node_modules[\\/]maplibre-gl[\\/]|[\\/]src[\\/]map[\\/]map\.ts$/,
+              includeDependenciesRecursively: false,
             },
           ],
         },
