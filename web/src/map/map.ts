@@ -158,9 +158,9 @@ export function startMap(start: MapStart): MapHandle {
     return { corners() {}, marker() {}, remove };
   }
 
-  // MapLibre adds the style's own attribution. On a phone it sits top right, clear of the card's rounded top,
-  // as its compact button; on desktop it is written out.
-  map.addControl(new AttributionControl({ compact: layout === 'phone' }), layout === 'phone' ? 'top-right' : 'bottom-right');
+  // MapLibre adds the style's own attribution, bottom right beside the credit line. On a phone it is its compact
+  // button, lifted clear of the card's rounded top (map.css); on desktop it is written out.
+  map.addControl(new AttributionControl({ compact: layout === 'phone' }), 'bottom-right');
   // The style failing is final at once; a tile failing is covered by the timeout, since others may still arrive (design 12.3).
   map.on('error', (event) => {
     if (!('sourceId' in event) && !('tile' in event)) fail(event.error?.message ?? 'style error');

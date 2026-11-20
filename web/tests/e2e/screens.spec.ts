@@ -117,6 +117,80 @@ async function mapSettled(page: Page): Promise<'ready' | 'unavailable'> {
   return (await page.locator('.route-drawing.is-faded').count()) > 0 ? 'ready' : 'unavailable';
 }
 
+type Rect = { left: number; top: number; right: number; bottom: number; what: string };
+
+/**
+ * What the map area draws, as boxes on the page: each glyph of each street name
+ * on the route drawing (when it shows), the trolley marker standing on it, the
+ * corner names and dots, the visible line of text (credit or notice), the
+ * map's attribution button and the card's top edge.
+ */
+async function mapBoxes(page: Page): Promise<{ glyphs: Rect[]; marker: Rect | null; drawn: Rect[]; line: Rect | null; attribution: Rect | null; cardTop: number }> {
+  return page.evaluate(() => {
+    const box = (el: Element, what: string) => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, what };
+    };
+    const drawing = document.querySelector<SVGSVGElement>('.route-drawing:not(.is-faded)');
+    const glyphs: Rect[] = [];
+    const drawn: Rect[] = [];
+    if (drawing) {
+      const ctm = drawing.getScreenCTM()!;
+      for (const text of drawing.querySelectorAll<SVGTextElement>('.street-label')) {
+        for (let i = 0; i < text.getNumberOfChars(); i += 1) {
+          const e = text.getExtentOfChar(i);
+          const pts = [[e.x, e.y], [e.x + e.width, e.y], [e.x, e.y + e.height], [e.x + e.width, e.y + e.height]].map(([x, y]) =>
+            new DOMPoint(x, y).matrixTransform(ctm),
+          );
+          const xs = pts.map((p) => p.x);
+          const ys = pts.map((p) => p.y);
+          glyphs.push({ left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys), what: `${text.textContent} [${i}]` });
+        }
+      }
+      for (const el of drawing.querySelectorAll('.corner-name, .corner-dot')) drawn.push(box(el, el.textContent || el.getAttribute('class') || ''));
+    }
+    const markerArt = document.querySelector('#map-area .drawing-marker:not([hidden]) .marker-art');
+    const line = [...document.querySelectorAll<HTMLElement>('#map-area .map-lines > p')].find((p) => !p.hidden);
+    const attribution = document.querySelector('#map-area .maplibregl-ctrl-attrib');
+    return {
+      glyphs,
+      marker: drawing && markerArt ? box(markerArt, 'trolley marker') : null,
+      drawn: [...drawn, ...glyphs],
+      line: line ? box(line, line.textContent ?? '') : null,
+      attribution: attribution ? box(attribution, 'attribution') : null,
+      cardTop: document.getElementById('race-card')!.getBoundingClientRect().top,
+    };
+  });
+}
+
+const meet = (a: Rect, b: Rect): boolean => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+
+/**
+ * Emmanuel, Nov 20: no street name lies under the trolley marker where it
+ * stands at a corner; the map's line of text sits at the foot of the map area,
+ * clear of the drawing, the attribution button and (on a phone) the card.
+ */
+async function checkMapArea(page: Page, state: State): Promise<void> {
+  const boxes = await mapBoxes(page);
+  const at = `${state.file}`;
+  // The marker stands at a corner before the race and after the finish; while it rides it may pass a name.
+  if (boxes.marker && state.racing !== TEN_OH_EIGHT) {
+    const under = boxes.glyphs.filter((g) => meet(g, boxes.marker!)).map((g) => g.what);
+    expect(under, `${at}: street name glyphs under the standing trolley marker`).toEqual([]);
+  }
+  if (boxes.line) {
+    const covered = boxes.drawn.filter((d) => meet(d, boxes.line!)).map((d) => d.what);
+    expect(covered, `${at}: the map's line of text over the drawing`).toEqual([]);
+    if (boxes.attribution) expect(meet(boxes.attribution, boxes.line), `${at}: attribution over the line`).toBe(false);
+    if (state.size === PHONE) {
+      expect(boxes.line.bottom, `${at}: the line above the card`).toBeLessThanOrEqual(boxes.cardTop);
+      // At the foot of the map area: nearer the card than the top bar.
+      expect(boxes.cardTop - boxes.line.bottom, `${at}: the line at the foot`).toBeLessThan(10);
+      if (boxes.attribution) expect(boxes.attribution.bottom, `${at}: attribution above the card`).toBeLessThanOrEqual(boxes.cardTop);
+    }
+  }
+}
+
 async function fontsReady(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
   expect(await page.evaluate(() => document.fonts.check('600 24px "Barlow Condensed"'))).toBe(true);
@@ -181,6 +255,7 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   else if (state.query) await page.locator('#banner-root .banner').waitFor({ state: 'detached', timeout: 10_000 });
   // CSS animations run on the real clock: finite ones (the trolley's fade-in) are shown at their end, loops at rest.
   await page.screenshot({ path: resolve(OUT, `${state.file}.png`), animations: 'disabled' });
+  if (state.data !== 'fail-summary') await checkMapArea(page, state);
   // Nothing scrolls sideways at the design sizes.
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await context.close();

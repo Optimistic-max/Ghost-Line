@@ -4,8 +4,8 @@
 // picked on the map; and the trolley marker, moved along the route during the
 // 1938 ride (R5.9). Positions come from layout.ts; nothing here does arithmetic.
 // The race never waits for any of it, and no map failure touches the data state.
-import { FIXTURE_LINE, MAP_LAYOUT, TIMINGS } from '../config';
-import { MAP_CREDIT, MAP_UNAVAILABLE, PICKER_STEP_END, PICKER_STEP_START } from '../copy/copy';
+import { FIXTURE_LINE, TIMINGS } from '../config';
+import { MAP_CREDIT, MAP_UNAVAILABLE, MAP_UNAVAILABLE_NO_DRAWING, PICKER_STEP_END, PICKER_STEP_START } from '../copy/copy';
 import { pairKey } from '../data/files';
 import type { Loader } from '../data/load';
 import type { Index, Pair, RaceFile, Route } from '../data/types';
@@ -14,8 +14,10 @@ import { type DrawingPlan, routeDrawing } from '../map/routedrawing';
 import type { Action } from '../state/actions';
 import type { AppState } from '../state/model';
 import { h, setVar } from './dom';
-import { type Track, markerTrack, trackPoint } from './layout';
+import { trackPoint } from './layout';
 import { type Layout, markerSvg, vehicleWidths } from './vehicles';
+
+type Direction = RaceFile['direction'];
 
 /** What the lazy map chunk offers (map/map.ts). */
 export type MapModule = { startMap(start: MapStart): MapHandle };
@@ -53,11 +55,6 @@ function samePair(a: Pair, b: Pair): boolean {
   return a.origin === b.origin && a.dest === b.dest;
 }
 
-/** The legs of the race's direction, in travel order, as [lon, lat] lines. */
-function legsOf(route: Route, race: RaceFile): number[][][] {
-  return route.features.filter((f) => f.properties.direction === race.direction).map((f) => f.geometry.coordinates);
-}
-
 export function createMapView(deps: MapViewDeps): MapView {
   const { doc, area, loader } = deps;
   const notice = h('p', { class: 'map-notice', hidden: true }, MAP_UNAVAILABLE);
@@ -68,8 +65,7 @@ export function createMapView(deps: MapViewDeps): MapView {
 
   let route: Route | null = null;
   let routeAsked = false;
-  let drawing: { svg: SVGSVGElement; plan: DrawingPlan; pair: Pair; layout: Layout } | null = null;
-  let track: { key: string; track: Track } | null = null;
+  let drawing: { svg: SVGSVGElement; plan: DrawingPlan; pair: Pair; layout: Layout; direction: Direction | null } | null = null;
   let progress = 0;
   let map: MapHandle | null = null;
   let mapLayout: Layout | null = null;
@@ -82,39 +78,26 @@ export function createMapView(deps: MapViewDeps): MapView {
     return width > 0 && height > 0 ? { width, height } : undefined;
   }
 
+  /**
+   * The drawing for the pair and layout on screen. It is drawn again once the pair's race file is in: its
+   * direction gives the trolley marker's track, which the street names keep clear of where the marker stands.
+   */
   function drawFor(state: AppState & { data: { status: 'ready'; index: Index } }, layout: Layout): void {
     if (!route) return;
-    if (drawing && samePair(drawing.pair, state.pair) && drawing.layout === layout) return;
-    const made = routeDrawing(doc, { index: state.data.index, route, pair: state.pair, layout, size: areaSize() });
+    const direction = state.data.races.get(pairKey(state.pair))?.direction ?? null;
+    if (drawing && samePair(drawing.pair, state.pair) && drawing.layout === layout && drawing.direction === direction) return;
+    const made = routeDrawing(doc, { index: state.data.index, route, pair: state.pair, layout, size: areaSize(), direction });
     if (drawing) drawing.svg.replaceWith(made.svg);
     else if (mapCanvas) mapCanvas.after(made.svg);
     else area.prepend(made.svg);
-    drawing = { svg: made.svg, plan: made.plan, pair: state.pair, layout };
+    drawing = { svg: made.svg, plan: made.plan, pair: state.pair, layout, direction };
     map?.corners(made.plan);
-  }
-
-  /** The marker's track for the pair on screen, once its race file is in. */
-  function trackFor(state: AppState, layout: Layout): void {
-    if (!route || !drawing || state.data.status !== 'ready') return;
-    const race = state.data.races.get(pairKey(state.pair));
-    const key = `${pairKey(state.pair)} ${layout} ${drawing.plan.size.width} ${drawing.plan.size.height}`;
-    if (!race) {
-      track = null;
-      return;
-    }
-    if (track?.key === key) return;
-    const corner = (slug: string): readonly number[] | undefined => state.data.status === 'ready'
-      ? state.data.index.corners.find((c) => c.slug === slug)?.lonlat
-      : undefined;
-    const origin = corner(state.pair.origin);
-    const dest = corner(state.pair.dest);
-    if (!origin || !dest) return;
-    track = { key, track: markerTrack(legsOf(route, race), origin, dest, MAP_LAYOUT[layout].markerStop, drawing.plan.pxPerMetre) };
   }
 
   /** The trolley marker at the current progress: on the map once it is drawn, on the drawing until then. */
   function placeMarker(state: AppState, layout: Layout): void {
-    const point = track ? trackPoint(track.track, progress) : null;
+    const track = drawing?.plan.track ?? null;
+    const point = track ? trackPoint(track, progress) : null;
     const onMap = state.mapStatus === 'ready' && map !== null;
     map?.marker(onMap ? point : null);
     trolley.hidden = onMap || !point || !drawing;
@@ -185,10 +168,7 @@ export function createMapView(deps: MapViewDeps): MapView {
 
   function sync(state: AppState): void {
     const layout = deps.layout();
-    if (hasMap(state)) {
-      drawFor(state, layout);
-      trackFor(state, layout);
-    }
+    if (hasMap(state)) drawFor(state, layout);
     // A change of layout draws the map again for the new one.
     if (map && mapLayout !== null && mapLayout !== layout && state.mapStatus !== 'unavailable') {
       stopMap();
@@ -198,6 +178,9 @@ export function createMapView(deps: MapViewDeps): MapView {
       });
     }
     const unavailable = state.mapStatus === 'unavailable';
+    // "Showing the route diagram" only while the drawing is on screen; without route.geojson there is none.
+    const noticeText = drawing?.svg.isConnected ? MAP_UNAVAILABLE : MAP_UNAVAILABLE_NO_DRAWING;
+    if (notice.textContent !== noticeText) notice.textContent = noticeText;
     notice.hidden = !unavailable;
     credit.hidden = unavailable || drawing === null;
     drawing?.svg.classList.toggle('is-faded', state.mapStatus === 'ready');

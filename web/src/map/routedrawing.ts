@@ -9,12 +9,15 @@
 // view/layout.ts; this module only arranges them.
 import { MAP_LAYOUT } from '../config';
 import { MAP_INFERRED } from '../copy/copy';
-import type { Corner, Index, Pair, Route, RouteLeg } from '../data/types';
+import type { Corner, Index, Pair, RaceFile, Route, RouteLeg } from '../data/types';
 import {
   type Box,
   type NamePlace,
   type Pt,
   type Size,
+  type Track,
+  alongPercent,
+  alongSpots,
   bestPlace,
   dotBox,
   fitProjection,
@@ -22,12 +25,15 @@ import {
   labelAnchor,
   labelSamples,
   linesMeet,
+  markerBox,
+  markerTrack,
   nameAnchor,
   namePlaces,
   readingChord,
   textWidth,
+  trackPoint,
 } from '../view/layout';
-import type { Layout } from '../view/vehicles';
+import { type Layout, vehicleWidths } from '../view/vehicles';
 
 export type DrawingInput = {
   index: Index;
@@ -36,6 +42,8 @@ export type DrawingInput = {
   layout: Layout;
   /** The map area's size in CSS pixels; the layout's design size when it has none (before layout, or in tests). */
   size?: Size;
+  /** The race file's direction, once it is in: it gives the trolley marker's track. */
+  direction?: RaceFile['direction'] | null;
 };
 
 export type Role = 'origin' | 'dest' | 'other';
@@ -51,8 +59,12 @@ export type DrawingPlan = {
   legs: Pt[][];
   dots: PlannedDot[];
   names: PlannedName[];
-  /** The street names the drawing sets, each on the line it is set along. */
-  labels: { street: string; from: Pt; to: Pt }[];
+  /** The street names the drawing sets, each on the line it is set along, centred at the share `along` of it. */
+  labels: { street: string; from: Pt; to: Pt; along: number }[];
+  /** The trolley marker's track for the race's direction, or null before its race file is in. */
+  track: Track | null;
+  /** The boxes the trolley marker covers where it stands: at the origin, and short of the destination. */
+  markerBoxes: Box[];
   /** The same street names for the map: the [lon, lat] of each one's centre, and its angle in degrees clockwise. */
   mapLabels: MapLabel[];
   /** The corner names for the map: where each hangs from, on which side, at which size. */
@@ -156,20 +168,32 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
     ({ leg }) => leg.properties.method !== 'inferred' && !(crowded && meetsInferred.has(leg.properties.street)),
   );
 
-  // The drawing sets a name only where it fits along its leg and clears the corners and the edges.
+  // The trolley marker stands at the origin before the ride and short of the destination after it (R5.9), on the
+  // track of the race's direction.
+  const track = markerTrackFor(input, pxPerMetre);
+  const markerWidth = vehicleWidths(layout).marker;
+  const markerBoxes = track ? [trackPoint(track, 0), trackPoint(track, 1)].map((p) => markerBox(project(p), markerWidth)) : [];
+
+  // The drawing sets a name only where it fits along its leg and clears the corners and the edges. Where the
+  // standing trolley marker would cover it, the name moves along its leg until it is clear, or is left out.
   const blocked = [...nameBoxes, ...dots.map((d) => d.box)];
   const labels = named.flatMap(({ leg, at }) => {
     const street = leg.properties.street;
     const chord = readingChord(legs[at] ?? [], MAP_LAYOUT.gap);
     const width = textWidth(street, look.streetFont, MAP_LAYOUT.glyphEm);
     if (chord.length < width) return [];
-    if (labelSamples(chord, width, look.streetFont).some((p) => !insideBox(p, view) || blocked.some((b) => insideBox(p, b, 1)))) return [];
-    return [{ street, from: chord.from, to: chord.to }];
+    const clear = (along: number, markers: readonly Box[]): boolean =>
+      !labelSamples(chord, width, look.streetFont, along).some(
+        (p) => !insideBox(p, view) || blocked.some((b) => insideBox(p, b, 1)) || markers.some((b) => insideBox(p, b, MAP_LAYOUT.markerRoom)),
+      );
+    if (!clear(0.5, [])) return [];
+    const along = alongSpots(chord, width, MAP_LAYOUT.labelStep).find((spot) => clear(spot, markerBoxes));
+    return along === undefined ? [] : [{ street, from: chord.from, to: chord.to, along }];
   });
 
   // The map fits the same bounds with the same padding, so its names go where the drawing's do.
-  const mapLabels = labels.map(({ street, from, to }): MapLabel => {
-    const { at, angle } = labelAnchor(from, to, look.streetFont);
+  const mapLabels = labels.map(({ street, from, to, along }): MapLabel => {
+    const { at, angle } = labelAnchor(from, to, look.streetFont, along);
     return { street, lonlat: unproject(at), angle };
   });
   const mapNames = names.map(({ dot, text, font, place }): MapName => {
@@ -177,7 +201,17 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
     return { text, lonlat: unproject(at), anchor, size: font, chosen: dot.role !== 'other' };
   });
 
-  return { size, project, pxPerMetre, legs, dots, names, labels, mapLabels, mapNames };
+  return { size, project, pxPerMetre, legs, dots, names, labels, track, markerBoxes, mapLabels, mapNames };
+}
+
+/** The trolley marker's track: the legs of the race's direction in travel order, from the origin to short of the destination. */
+function markerTrackFor(input: DrawingInput, pxPerMetre: number): Track | null {
+  const { index, route, pair, layout, direction } = input;
+  const origin = index.corners.find((c) => c.slug === pair.origin)?.lonlat;
+  const dest = index.corners.find((c) => c.slug === pair.dest)?.lonlat;
+  if (!direction || !origin || !dest) return null;
+  const legs = route.features.filter((f) => f.properties.direction === direction).map((f) => f.geometry.coordinates);
+  return markerTrack(legs, origin, dest, MAP_LAYOUT[layout].markerStop, pxPerMetre);
 }
 
 export function routeDrawing(doc: Document, input: DrawingInput): RouteDrawing {
@@ -207,11 +241,11 @@ export function routeDrawing(doc: Document, input: DrawingInput): RouteDrawing {
   });
 
   const streetNames = add(svg, 'g', { class: 'street-labels' });
-  plan.labels.forEach(({ street, from, to }, k) => {
+  plan.labels.forEach(({ street, from, to, along }, k) => {
     const id = `${LABEL_ID}-${k}`;
     add(defs, 'path', { id, d: pathData([from, to]) });
     const text = add(streetNames, 'text', { class: 'street-label', 'font-size': String(look.streetFont) });
-    add(text, 'textPath', { href: `#${id}`, startOffset: '50%', 'text-anchor': 'middle' }).textContent = street;
+    add(text, 'textPath', { href: `#${id}`, startOffset: alongPercent(along), 'text-anchor': 'middle' }).textContent = street;
   });
 
   // Each dot sits in a 44 px target: a tap or click on it feeds the corner picker (design 12.4).

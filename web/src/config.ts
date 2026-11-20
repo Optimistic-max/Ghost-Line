@@ -85,16 +85,20 @@ export const FONT_SIZES = {
 /**
  * The map area (design 12.1, 12.2, screen-brief 3A.3): the route drawing's design
  * size and the room kept around the route, shared with the map's fit. Phone: the
- * 150 px strip, with the notice line on top and the card's rounded top over its
- * lower edge. Desktop: the area left of the race column, with the headline top
- * left and the credit line at the foot. Type sizes and dot radii in CSS pixels.
- * Style, not data.
+ * 150 px strip, with the card's rounded top over its lower edge and the map's
+ * line of text at its foot, as on desktop (Emmanuel, Nov 20). Desktop: the area
+ * left of the race column, with the headline top left and the credit line at the
+ * foot. Type sizes and dot radii in CSS pixels. Style, not data.
  */
 export const MAP_LAYOUT = {
   phone: {
     size: { width: 375, height: 150 },
-    /** The top keeps room for the map's line of text, which takes two lines on a phone. */
-    padding: { top: 34, right: 16, bottom: 16, left: 16 },
+    /**
+     * The bottom keeps room above the card's edge for the map's line of text,
+     * which takes two lines on a phone, and for the attribution button beside it
+     * (map.css); the top needs only the names of the corners at the top.
+     */
+    padding: { top: 8, right: 16, bottom: 45, left: 16 },
     streetFont: 9,
     nameFont: 13,
     otherNameFont: 11,
@@ -122,6 +126,14 @@ export const MAP_LAYOUT = {
   gap: 5,
   /** Two legs meet when an end of one is this near an end of the other, in pixels. */
   meet: 3,
+  /**
+   * A street name the trolley marker would cover where it stands at a corner
+   * moves along its leg in steps of this many pixels until it is clear, and is
+   * left out when no place on the leg is (Emmanuel, Nov 20).
+   */
+  labelStep: 0.5,
+  /** Room kept between the standing trolley marker and a street name, in pixels. */
+  markerRoom: 1,
   /** The radius of the target round each corner dot: a 44 px tap target (R1.4). */
   hit: 22,
 } as const;

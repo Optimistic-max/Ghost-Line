@@ -229,6 +229,9 @@ export function trolleySvg(options: { routeNumber: string | null; width: number 
 
 // ---- The map marker ------------------------------------------------------------
 
+/** The marker's view box, in its own units: its height on the map follows from its width (layout.ts markerBox). */
+export const MARKER_VIEWBOX = { width: 58, height: 26 } as const;
+
 /** The simplified trolley for the map: solid body, dark window strip, two wheels, two poles. */
 export function markerSvg(options: { width: number }): string {
   const parts = [
@@ -239,7 +242,8 @@ export function markerSvg(options: { width: number }): string {
     '<circle class="m-wheel" data-part="wheel" cx="14" cy="22" r="3.4"/>',
     '<circle class="m-wheel" data-part="wheel" cx="45" cy="22" r="3.4"/>',
   ];
-  return `<span class="marker" data-vehicle="marker">${svg('marker-art', '0 0 58 26', options.width, parts)}</span>`;
+  const viewBox = `0 0 ${MARKER_VIEWBOX.width} ${MARKER_VIEWBOX.height}`;
+  return `<span class="marker" data-vehicle="marker">${svg('marker-art', viewBox, options.width, parts)}</span>`;
 }
 
 // ---- Today's bus ---------------------------------------------------------------

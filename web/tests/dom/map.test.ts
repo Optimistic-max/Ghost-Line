@@ -4,7 +4,14 @@
 // background before that, and shows "Map unavailable" only on failure.
 import { afterEach, describe, expect, it } from 'vitest';
 import { LEAD_PAIR, TIMINGS } from '../../src/config';
-import { MAP_CREDIT, MAP_INFERRED, MAP_UNAVAILABLE, PICKER_STEP_END, PICKER_STEP_START } from '../../src/copy/copy';
+import {
+  MAP_CREDIT,
+  MAP_INFERRED,
+  MAP_UNAVAILABLE,
+  MAP_UNAVAILABLE_NO_DRAWING,
+  PICKER_STEP_END,
+  PICKER_STEP_START,
+} from '../../src/copy/copy';
 import type { Index, Pair, Route } from '../../src/data/types';
 import type { MapStart } from '../../src/map/map';
 import { type DrawingPlan, mapName, routeDrawing } from '../../src/map/routedrawing';
@@ -167,12 +174,15 @@ describe('the map area on the page (16.1, 16.2)', () => {
     expect(app.store.get().mapStatus).toBe('pending');
   });
 
-  it('shows "Map unavailable" when route.geojson fails, keeps the plain background, and races as usual', async () => {
+  it('shows "Map unavailable." alone when route.geojson fails, keeps the plain background, and races as usual', async () => {
     const app = await bootPage({ fail: new Set(['route.geojson']) });
     await settle();
     expect(app.store.get().mapStatus).toBe('unavailable');
     expect(app.store.get().data.status).toBe('ready');
     expect(notice().hidden).toBe(false);
+    // No drawing is on screen, so the notice does not say it shows one (Emmanuel, Nov 20).
+    expect(notice().textContent).toBe(MAP_UNAVAILABLE_NO_DRAWING);
+    expect(area().textContent).not.toContain(MAP_UNAVAILABLE);
     expect(credit().hidden).toBe(true);
     expect(area().querySelector('.route-drawing')).toBeNull();
     expect(document.querySelector('#card-scroll .lanes')).not.toBeNull();
@@ -184,6 +194,7 @@ describe('the map area on the page (16.1, 16.2)', () => {
     app.store.dispatch({ type: 'map/status', status: 'unavailable' });
     expect(area().querySelectorAll('.route-drawing')).toHaveLength(1);
     expect(notice().hidden).toBe(false);
+    expect(notice().textContent).toBe(MAP_UNAVAILABLE);
     expect(credit().hidden).toBe(true);
   });
 

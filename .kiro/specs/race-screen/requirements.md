@@ -234,7 +234,7 @@ Placeholders in braces are read from the data at run time. These are the only st
 | Share banner | "Shared race: {origin} → {dest}." |
 | Bad link | "That link's corners weren't recognized. Showing Preston & Caroline → Aliceanna & Bond." |
 | Data error | "The timetable data didn't load. Check your connection and try again."; "No numbers are shown until the data is complete."; and the button "Try again" |
-| Map unavailable | "Map unavailable. Showing the route diagram." |
+| Map unavailable | "Map unavailable. Showing the route diagram." while the route drawing is on screen; "Map unavailable." alone when route.geojson fails, so there is no drawing (Emmanuel, Nov 20) |
 | Map credit | "Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred." plus the OpenFreeMap attribution |
 | Picker | "Choose two corners"; "Choose where the ride starts"; "Start is set. Now choose where the ride ends."; "Corners are listed west to east along the 1938 line. Brevard & Preston's position is inferred."; "Start"; "inferred"; "Cancel" |
 | Slider | range ends from the race file; label "{hh:mm AM/PM}" |

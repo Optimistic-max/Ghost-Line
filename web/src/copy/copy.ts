@@ -228,6 +228,8 @@ export const DATA_ERROR = "The timetable data didn't load. Check your connection
 export const DATA_INCOMPLETE = 'No numbers are shown until the data is complete.';
 export const TRY_AGAIN = 'Try again';
 export const MAP_UNAVAILABLE = 'Map unavailable. Showing the route diagram.';
+/** When route.geojson itself fails, there is no route drawing to show (Emmanuel, Nov 20). */
+export const MAP_UNAVAILABLE_NO_DRAWING = 'Map unavailable.';
 export const MAP_CREDIT = 'Streets © OpenStreetMap contributors. Dashed stretch of the route is inferred.';
 
 // ---- Corner picker ------------------------------------------------------------

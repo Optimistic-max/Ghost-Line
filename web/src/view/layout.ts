@@ -3,6 +3,7 @@
 // Allowed arithmetic: fractions of the longer stored total, and geometry of the
 // route's own coordinates. Nothing here reads a time or decides a result.
 import type { Lane, RaceView } from '../state/model';
+import { MARKER_VIEWBOX } from './vehicles';
 
 export type LaneLayout = {
   /** Each phase's share of the shared scale, in phase order. */
@@ -118,13 +119,43 @@ export function fitProjection(points: readonly (readonly number[])[], size: Size
  * baseline on the line, standing to the line's left), and the line's angle in
  * degrees clockwise, for the map's symbol at the same place.
  */
-export function labelAnchor(from: Pt, to: Pt, fontPx: number): { at: Pt; angle: number } {
+export function labelAnchor(from: Pt, to: Pt, fontPx: number, along = 0.5): { at: Pt; angle: number } {
   const n = normal(from, to);
   const up = fontPx * 0.35;
   return {
-    at: { x: (from.x + to.x) / 2 + n.x * up, y: (from.y + to.y) / 2 + n.y * up },
+    at: { x: from.x + (to.x - from.x) * along + n.x * up, y: from.y + (to.y - from.y) * along + n.y * up },
     angle: (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI,
   };
+}
+
+/** A share along a line as the drawing's startOffset: 0.5 is "50%". */
+export function alongPercent(along: number): string {
+  return `${Number((along * 100).toFixed(2))}%`;
+}
+
+/**
+ * Where the centre of a name `width` wide can sit along a chord, as shares of
+ * the chord from its start: the middle first, then `step` pixels further each
+ * way in turn (towards the start first), as long as the whole name stays on
+ * the chord.
+ */
+export function alongSpots(chord: Chord, width: number, step: number): number[] {
+  const { length } = chord;
+  const spots = [0.5];
+  if (length <= 0 || step <= 0) return spots;
+  const room = (length - width) / 2;
+  for (let shift = step; shift <= room; shift += step) spots.push(0.5 - shift / length, 0.5 + shift / length);
+  return spots;
+}
+
+/**
+ * The box the trolley marker covers when it stands at a point: its wheels on
+ * the point, centred across it (map.css .drawing-marker, the map's marker
+ * anchored at its bottom), its height from its width and its view box.
+ */
+export function markerBox(at: Pt, width: number): Box {
+  const height = (width * MARKER_VIEWBOX.height) / MARKER_VIEWBOX.width;
+  return { x: at.x - width / 2, y: at.y - height, width, height };
 }
 
 /** The point a corner's name hangs from on the map: its anchor side, half way down its line. */
@@ -241,13 +272,13 @@ function normal(a: Pt, b: Pt): Pt {
   return length > 0 ? { x: (b.y - a.y) / length, y: (a.x - b.x) / length } : { x: 0, y: -1 };
 }
 
-/** Points on the band a name of `width` and `fontPx` covers, centred on the chord it is set along. */
-export function labelSamples(chord: Chord, width: number, fontPx: number): Pt[] {
+/** Points on the band a name of `width` and `fontPx` covers, centred at the share `along` of the chord it is set along. */
+export function labelSamples(chord: Chord, width: number, fontPx: number, along = 0.5): Pt[] {
   const { from, to, length } = chord;
   if (length === 0) return [from];
   const u = { x: (to.x - from.x) / length, y: (to.y - from.y) / length };
   const n = normal(from, to);
-  const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+  const mid = { x: from.x + (to.x - from.x) * along, y: from.y + (to.y - from.y) * along };
   const out: Pt[] = [];
   const steps = Math.max(1, Math.ceil(width / 3));
   for (let i = 0; i <= steps; i += 1) {

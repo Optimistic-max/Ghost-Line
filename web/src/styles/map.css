@@ -180,18 +180,30 @@
   display: none;
 }
 
-/* The map's line of text: top left on a phone (mockup 22), at the foot on desktop (mockups 13, 26). */
+/* The map's line of text (the credit, or the notice): at the foot of the map area on both layouts (mockups 13,
+   26; on a phone just above the card's rounded top, Emmanuel, Nov 20). config.ts MAP_LAYOUT keeps the route
+   clear of it. */
+.map-area {
+  /* On a phone: how far above the map area's lower edge the card's top leaves its foot visible, plus 2 px. */
+  --map-foot: calc(var(--topbar-h) + var(--map-h) - var(--card-top) + 2px);
+}
+
 .map-lines {
   position: absolute;
   z-index: 2;
-  top: 5px;
+  bottom: var(--map-foot);
   left: var(--pad);
-  /* Clear of the map's attribution button, top right. */
+  /* Clear of the map's attribution button, bottom right. */
   right: var(--tap);
   color: var(--muted);
   font-size: 10px;
   line-height: 1.25;
   pointer-events: none;
+}
+
+/* On a phone the attribution button sits beside the line, its foot on the same line. */
+.map-area .maplibregl-ctrl-bottom-right > .maplibregl-ctrl-attrib.maplibregl-compact {
+  margin: 0 10px var(--map-foot) 0;
 }
 
 @media (min-width: 900px) {
