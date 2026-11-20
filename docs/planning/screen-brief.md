@@ -342,7 +342,7 @@ Numbers in the pictures are planning values. The built site reads every number f
 
 This part was added after a second round of mockups. **Where it differs from sections 2.1 and 3.1 to 3.9 above, this part wins.** Palette B was chosen on Nov 15; every colour value in section 3.2 is replaced by 3A.4.
 
-Phone sizes now: top bar 40 px, map 150 px, race card from 181 px down, buttons pinned 6 px above the bottom. If the card's content is taller than the screen (on a 667 px tall phone this happens in the two notice states, by about 14 px), the card scrolls inside itself and the two buttons stay pinned on a solid `--panel` strip, so text passes under them cleanly.
+Phone sizes now: top bar 40 px, map 150 px, race card from 181 px down, buttons pinned 6 px above the bottom. If the card's content is taller than the screen (on a 667 px tall phone this happens in the two notice states, by about 14 px), the card scrolls inside itself and the two buttons stay pinned on a solid `--panel` strip, so text passes under them cleanly. Superseded by section 3B (Nov 20): on a phone nothing is pinned and the card does not scroll inside itself.
 
 **The UI direction was frozen on Nov 15 after this change. No further design changes until the race-screen spec is built.**
 
@@ -381,7 +381,7 @@ Mockup 18 (`18-trolley-sheet.png`) is the reference sheet. One original drawing,
 - The route number on the rear panel under the belt rails, in the display face, built from index.json (never typed). It is shown only on trolleys 150 px wide or more: narrower, it renders as specks. So the phone's finished trolley (104 px) carries none; the racing trolley (150 px) and the desktop trolley (200 px) do. It is absent in the data-error state.
 - Painted in `--ghost` and `--lit` only. The dark parts (the passengers, the inside of the wheels, the gap between the poles) are left unpainted, so the card shows through. Only the trolley glows.
 
-Sizes: on a phone, 150 px wide while racing and 104 px after the finish; on desktop, 200 px at all times. Today's bus is 84 px wide on a phone and 104 px on desktop (it was 64 px; raised so the size gap does not read as a claim about the vehicles). Vehicle size is style, not data: only the bars are drawn to scale. Below about 60 px the detailed drawing loses its detail, so the **map marker is a separate simplified drawing**: a solid `--ghost` body with a dark window strip, two wheels and the two poles, 28 px wide on a phone map and 58 px on desktop.
+Sizes (section 3B, Nov 20): the illustration sits in the lane's title row at one fixed size, 104 px wide on a phone and 150 px on desktop, and no longer shrinks at the finish. Today's bus is 84 px wide on a phone and 104 px on desktop (it was 64 px; raised so the size gap does not read as a claim about the vehicles). Vehicle size is style, not data: only the bars are drawn to scale. Below about 60 px the detailed drawing loses its detail, so the **map marker is a separate simplified drawing**: a solid `--ghost` body with a dark window strip, two wheels and the two poles, 28 px wide on a phone map and 58 px on desktop.
 
 It is an original illustration in the general style of the period. It is not a drawing of one specific vehicle model, and it must not be traced from a photograph or a scan. Say "illustration" in the credits.
 
@@ -471,12 +471,12 @@ One clock drives everything. It is shown as the time and the word "scheduled" on
 | --- | --- | --- |
 | First paint | Card content appears with no entrance animation. The trolley fades in from 0 to full glow. | 400 ms, ease-out. One time only. |
 | Race start | The clock starts after a short pause once data is ready. | A fixed 300 ms pause, so the eye lands first. |
-| Waiting | The vehicle sits at the start of its bar. The wait segment fills left to right at clock speed. The status line counts down in whole minutes. | Linear. |
-| Departing | The vehicle moves along its lane at clock speed; its front edge tracks the filled end of the bar. | Linear. No acceleration curve. |
+| Waiting | The lane's marker sits at the start of its ride segment. The wait segment fills left to right at clock speed. The status line counts down in whole minutes. | Linear. |
+| Departing | The marker moves along its lane at clock speed, centred on the filled end of the ride segment. The illustration in the title row does not travel. | Linear. No acceleration curve. |
 | Trolley alive | A 2 px vertical bob. A spark at each pole shoe: a 3 px bright dot that flashes for 120 ms at random gaps of 1.5 to 4 s. Wheel hubs turn while moving. | Bob: 1,600 ms per cycle, ease-in-out, only while moving. |
 | Glow | Two layers: a tight 1.5 px blur and a wide 7 px blur of the drawing in `--ghost`. While moving, the wide layer breathes between 85% and 100% opacity. | 2,400 ms per cycle, ease-in-out. |
-| Bus | Slides at clock speed. No bob, no glow, no sparks. | Linear. |
-| Walking | The walk segment fills at clock speed; a small dot travels the dotted segment. The bus does not move during a walk. | Linear. |
+| Bus | Its marker slides at clock speed. No bob, no glow, no sparks. | Linear. |
+| Walking | The walk segment fills at clock speed; a small dot travels the dotted segment. The bus marker does not move during a walk: it waits at the start of the ride segment and parks at its end. | Linear. |
 | Map marker | The small trolley moves along the route in step with the lane, only during the ride phase. | Linear. |
 | First arrival | The end of the arriving side's bar brightens and settles, and its total appears. **The treatment is identical whichever side arrives first**: no extra glow, size or sound for a trolley win. The other side keeps racing. | 200 ms emphasis, then a 600 ms ease-out settle. |
 | The finish moment | Same place, size and weight whichever side won. The result box arrives like a roller sign turning: it scales from 96% to 100% and its text rolls up 8 px into place. Then the honest line fades in. | Box 260 ms, ease-out; honest line 200 ms, starting 150 ms later. |
@@ -495,7 +495,7 @@ Rules:
 - Nothing loops when no race is running, except the finished trolley's glow, held steady at 100%.
 - The screen reader hears one announcement, at the finish (section 2.8). Motion never carries information that text does not also carry.
 
-**Reduced motion** (the visitor's device asks for it): no clock, no movement, no bob, no sparks, no breathing, no entrance animations. On load and after every slider change, both lanes are drawn finished, the vehicles are parked at the end of their bars, and the result box is simply present. Sheets and the banner appear and disappear without sliding. "Skip to result" is not shown. On a phone the departures board is not shown, because the finished layout is used. Mockup 12.
+**Reduced motion** (the visitor's device asks for it): no clock, no movement, no bob, no sparks, no breathing, no entrance animations. On load and after every slider change, both lanes are drawn finished, the markers are parked at the end of their ride segments, the result box and the takeaway are simply present, and no caption sequence plays. Sheets and the banner appear and disappear without sliding. "Skip to result" is not shown. On a phone the departures board is not shown, because the finished layout is used. Mockup 12.
 
 ### 3A.7 Mockup list (replaces 3.9)
 
@@ -510,3 +510,29 @@ All pictures use palette B and the real street map.
 | `20-badshare.png`, `24-desktop-badshare.png` | Bad share link |
 | `21-noseat-fixture.png`, `25-desktop-noseat-fixture.png` | No one-seat ride (test fixture) |
 | `22-mapunavailable.png`, `26-desktop-mapunavailable.png` | Map unavailable |
+
+## 3B. Story layer (Nov 20, from the Astra review)
+
+3B wins over 3A where they differ. The story-layer spec holds the detail and
+the copy.
+
+The aim: in the first race a visitor sees the trolley passenger arrive while
+today's passenger is still waiting to board, then is invited to test whether
+that keeps happening at other start times.
+
+- First visit: with no valid share link, the lead pair races at the labelled
+  example start, 10:00 AM. A shared link keeps the clock-derived default.
+- Each lane has its illustration in the title row and a small marker on the
+  bar. The marker moves only during the ride, centred on its filled end. Bars
+  are unchanged.
+- One caption line says what each passenger is doing, chosen from the lane
+  phases. Captions carry no numbers.
+- After the result: the honest line, then "Where the time goes".
+- Three next steps: Try another time, Try other corners, Show a race today
+  wins. Sources and Share are secondary.
+- A start-time chart of the selected pair's scheduled totals sits directly
+  above the native slider. The slider stays the control.
+- Phone: normal page flow, nothing pinned, a compact route preview, the pair
+  on two lines.
+- Departures: an expandable "Scheduled departures" section.
+- Cut from the deadline: camera moves, sounds, new overlays, the map race.

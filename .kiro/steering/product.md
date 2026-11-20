@@ -17,11 +17,16 @@ did this neighborhood once have better scheduled service, and by how much?
 ## What the visitor does
 
 1. Opens the page. The line is preselected and a race starts by itself for the
-   lead pair: Preston & Caroline to Aliceanna & Bond.
-2. Moves a time slider, 9:00 to 13:52, in one-minute steps. Default: the current
-   America/New_York time of day if it is inside that range, otherwise 10:00.
-3. May pick any two of the five timing points, swap direction, tap any number to
-   see its source, copy a share link, or open About and credits.
+   lead pair, Preston & Caroline to Aliceanna & Bond, at the labelled example
+   start, 10:00 AM. Short captions say what each passenger is doing, and after
+   the finish the card shows where the time went.
+2. Moves a time slider, 9:00 AM to 1:52 PM, in one-minute steps, with a chart of
+   the scheduled journey minutes for every start beside it. A shared link opens
+   its pair at the current America/New_York time of day if it is inside that
+   range, otherwise 10:00.
+3. Is offered three next steps: try another time, try other corners, or show a
+   race today wins. May also swap direction, tap any number to see its source,
+   share a link, or open About and credits.
 
 ## Honesty rules (these outrank every other instruction)
 
