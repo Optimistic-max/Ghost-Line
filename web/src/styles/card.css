@@ -320,16 +320,21 @@
 .bar-mark {
   top: -3px;
   bottom: -3px;
-  box-shadow: 0 0 5px 1px var(--side);
 }
 
+/* Only the trolley glows (ui.md): the 1938 marker has a fixed glow, the bus
+   lane's is a solid --today tick. */
+.lane-1938 .bar-mark {
+  box-shadow: 0 0 5px 1px var(--ghost);
+}
+
+/* The arrival flash is the same for either side (R5.6), so it has no glow. */
 .bar-cap {
   top: -5px;
   bottom: -5px;
   left: -2px;
   width: 4px;
   border-radius: 2px;
-  box-shadow: 0 0 8px 2px var(--side);
   opacity: 0;
 }
 

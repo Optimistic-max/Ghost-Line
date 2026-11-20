@@ -189,6 +189,8 @@ for (const size of [PHONE, DESKTOP]) {
             barEnd: segs.at(-1)!.getBoundingClientRect().right,
             markCentre: (mark.left + mark.right) / 2,
             markOpacity: Number(getComputedStyle(lane.querySelector('.bar-mark')!).opacity),
+            markGlow: getComputedStyle(lane.querySelector('.bar-mark')!).boxShadow,
+            capGlow: getComputedStyle(lane.querySelector('.bar-cap')!).boxShadow,
           };
         }),
       );
@@ -199,6 +201,10 @@ for (const size of [PHONE, DESKTOP]) {
         expect(l.vehicle.left, label).toBeGreaterThanOrEqual(l.laneStart - 0.5);
         expect(Math.abs(l.markCentre - l.barEnd), label).toBeLessThanOrEqual(1.5);
         expect(l.markOpacity, label).toBe(1);
+        // Only the trolley glows (ui.md): the bus lane's marker is a solid tick; the arrival flash glows on neither side.
+        if (l.side === '1938') expect(l.markGlow, label).not.toBe('none');
+        else expect(l.markGlow, label).toBe('none');
+        expect(l.capGlow, label).toBe('none');
         lefts[l.side]!.push(l.vehicle.left);
       }
     }
