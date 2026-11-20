@@ -176,16 +176,17 @@ test.describe('the keyboard alone (20.2, R13.1)', () => {
   const focusMatches = (page: Page, selector: string): Promise<boolean> =>
     page.evaluate((s) => document.activeElement?.matches(s) ?? false, selector);
 
-  async function noShareSheet(context: BrowserContext): Promise<void> {
+  async function noShareSheet(context: BrowserContext, browserName: string): Promise<void> {
     // The system share sheet cannot be driven here: without it the page copies the link, as on a desktop without one.
     await context.addInitScript(() => {
       Object.defineProperty(Navigator.prototype, 'share', { value: undefined, configurable: true });
     });
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    // Only Chromium has these permissions to grant; WebKit rejects them, so there the clipboard is not read back.
+    if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   }
 
-  test('runs through every control with no pointer', async ({ page, context }) => {
-    await noShareSheet(context);
+  test('runs through every control with no pointer', async ({ page, context, browserName }) => {
+    await noShareSheet(context, browserName);
     await pausedAt(page, '20:00');
     await page.goto('./');
     await page.locator('.clock-row').waitFor();
@@ -258,7 +259,9 @@ test.describe('the keyboard alone (20.2, R13.1)', () => {
     await tabTo(page, '[data-action="share"]');
     await page.keyboard.press('Enter');
     await expect(page.locator('#share-status')).toHaveText(LINK_COPIED);
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(await page.evaluate(() => location.href));
+    if (browserName === 'chromium') {
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(await page.evaluate(() => location.href));
+    }
 
     // About and credits, from the info button; Escape returns focus to it.
     await tabTo(page, '#app > button.info');
@@ -288,8 +291,8 @@ test.describe('the keyboard alone (20.2, R13.1)', () => {
 });
 
 test.describe('nothing scrolls sideways (20.2, R1.4)', () => {
-  test('at 320, 375, 899, 900, 1280 and 1920 px wide: racing, finished, and with a sheet open', async ({ browser }, info) => {
-    test.skip(info.project.name !== 'phone', 'the widths are set here, so one project runs it');
+  // The widths are set here, so every project runs it: the project's own viewport does not matter.
+  test('at 320, 375, 899, 900, 1280 and 1920 px wide: racing, finished, and with a sheet open', async ({ browser }) => {
     for (const width of [320, 375, 899, 900, 1280, 1920]) {
       const height = width < 900 ? 667 : 800;
       for (const reducedMotion of ['no-preference', 'reduce'] as const) {

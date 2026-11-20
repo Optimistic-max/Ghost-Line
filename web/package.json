@@ -9,6 +9,7 @@
     "test": "vitest run",
     "screens": "playwright test tests/e2e/screens.spec.ts",
     "test:e2e": "playwright test --project=phone --project=laptop",
+    "test:e2e:webkit": "playwright test --project=phone-webkit --project=laptop-webkit",
     "check:size": "node scripts/check-size.ts",
     "perf": "playwright test --project=perf"
   },

@@ -18,6 +18,10 @@ export default defineConfig({
     // The design sizes of ui.md: a 375 x 667 phone (at 2x, like the phone mockups) and a 1280 x 800 laptop.
     { name: 'phone', testMatch: /race\.spec\.ts$/, use: { viewport: { width: 375, height: 667 }, deviceScaleFactor: 2 } },
     { name: 'laptop', testMatch: /race\.spec\.ts$/, use: { viewport: { width: 1280, height: 800 } } },
+    // The same two sizes in WebKit, the engine of Safari (Playwright's own WebKit build, not Safari itself):
+    // `npm run test:e2e:webkit`. A separate command, so the Chromium run stays the one the other checks use.
+    { name: 'phone-webkit', testMatch: /race\.spec\.ts$/, use: { browserName: 'webkit', viewport: { width: 375, height: 667 }, deviceScaleFactor: 2 } },
+    { name: 'laptop-webkit', testMatch: /race\.spec\.ts$/, use: { browserName: 'webkit', viewport: { width: 1280, height: 800 } } },
     // Each picture sets its own size.
     { name: 'screens', testMatch: /screens\.spec\.ts$/ },
     // The first-race measurement of the deployed page: tagged timing, run alone, on a quiet machine (npm run perf).
