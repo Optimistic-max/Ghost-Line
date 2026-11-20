@@ -11,6 +11,8 @@ import {
   DATA_INCOMPLETE,
   FIXTURE_TAG,
   LINK_COPIED,
+  MAP_CREDIT,
+  MAP_UNAVAILABLE,
   SHARE_THIS_RACE,
   TRY_AGAIN,
   badLink,
@@ -20,8 +22,9 @@ import {
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
 import { cornerName, sliderRange } from '../data/lookup';
-import type { Index, Pair, RaceFile, Summary } from '../data/types';
+import type { Index, Pair, RaceFile, Route, Summary } from '../data/types';
 import { routeNumberOf, yearOf } from '../format/line';
+import { routeDrawing } from '../map/routedrawing';
 import { decode, encode, namesAPair } from '../format/share';
 import { defaultStart, minutesOf } from '../format/time';
 import { type PageTimers, browserTimers, createClock } from '../play/clock';
@@ -129,8 +132,16 @@ export function createApp(options: AppOptions): App {
   byId(doc, 'app').append(info);
   const headline = doc.getElementById('headline');
   const headlineLine = headline?.querySelector<HTMLElement>('.headline-line') ?? null;
+  const mapArea = byId(doc, 'map-area');
   const fixtureTag = h('p', { class: 'fixture-tag', hidden: true }, FIXTURE_TAG);
-  byId(doc, 'map-area').append(fixtureTag);
+  // The map's line of text: the credit while the route is on screen, the notice only when the map is unavailable (R11.3, R11.4).
+  const mapNotice = h('p', { class: 'map-notice', hidden: true }, MAP_UNAVAILABLE);
+  const mapCredit = h('p', { class: 'map-credit', hidden: true }, MAP_CREDIT);
+  mapArea.append(fixtureTag, h('div', { class: 'map-lines' }, mapNotice, mapCredit));
+  /** route.geojson once it has arrived, and the drawing of it on screen (design 12.1). */
+  let route: Route | null = null;
+  let routeAsked = false;
+  let drawing: { svg: SVGSVGElement; pair: Pair; layout: Layout } | null = null;
 
   const shareStatus = byId(doc, 'share-status');
   const banner = createBanner(byId(doc, 'banner-root'), timers.later, timers.cancel);
@@ -331,6 +342,47 @@ export function createApp(options: AppOptions): App {
     fixtureTag.hidden = !(state.data.status === 'ready' && state.data.index.line === FIXTURE_LINE);
   }
 
+  /** The made-up line has no map: its area shows only the fixture tag (mockups 21 and 25). */
+  const hasMap = (state: AppState): boolean => state.data.status === 'ready' && state.data.index.line !== FIXTURE_LINE;
+
+  /** The map area's size, once it has one. */
+  function areaSize(): { width: number; height: number } | undefined {
+    const { clientWidth: width, clientHeight: height } = mapArea;
+    return width > 0 && height > 0 ? { width, height } : undefined;
+  }
+
+  /** The route drawing follows the pair and the layout; the line of text follows the map's status (design 12.1). */
+  function syncMap(state: AppState): void {
+    if (route && hasMap(state) && state.data.status === 'ready') {
+      const layout = options.layout();
+      if (!drawing || !samePair(drawing.pair, state.pair) || drawing.layout !== layout) {
+        const made = routeDrawing(doc, { index: state.data.index, route, pair: state.pair, layout, size: areaSize() });
+        if (drawing) drawing.svg.replaceWith(made.svg);
+        else mapArea.prepend(made.svg);
+        drawing = { svg: made.svg, pair: state.pair, layout };
+      }
+    }
+    const unavailable = state.mapStatus === 'unavailable';
+    mapNotice.hidden = !unavailable;
+    mapCredit.hidden = unavailable || drawing === null;
+  }
+
+  /** route.geojson loads once, after the first race card is on screen; it never holds up the race (R2.4, R14.3). */
+  function requestRoute(): void {
+    const state = store.get();
+    if (routeAsked || !hasMap(state)) return;
+    routeAsked = true;
+    void loader.route().then((loaded) => {
+      if (!onPage()) return;
+      if (!loaded) {
+        store.dispatch({ type: 'map/status', status: 'unavailable' });
+        return;
+      }
+      route = loaded;
+      syncMap(store.get());
+    });
+  }
+
   function drawError(): void {
     stopRace();
     // An earlier race's announcement leaves with it: no number anywhere (R14.1).
@@ -356,6 +408,7 @@ export function createApp(options: AppOptions): App {
     foot.replaceChildren(...footer());
     fitPairRow();
     painted = true;
+    requestRoute();
     const { index, summary, race, minute, layout, stage, resultShown } = input;
     drawn = { index, summary, race, minute, layout, stage, resultShown };
     racer = null;
@@ -406,6 +459,7 @@ export function createApp(options: AppOptions): App {
   function render(): void {
     const state = store.get();
     topBar(state);
+    syncMap(state);
     motionClasses(state.motion);
     root.dataset['race'] = state.race.phase;
     const derived = derive(state);

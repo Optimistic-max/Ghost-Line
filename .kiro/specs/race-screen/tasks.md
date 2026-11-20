@@ -136,10 +136,10 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Map
 
-- [ ] 16. Route drawing and the map area (R11.1, R11.4, section 12.1)
-  - [ ] 16.1 map/routedrawing.ts: SVG from route.geojson and index.json: legs, dashed inferred legs, street names along legs, corner dots and names (origin filled, destination ring, inferred dashed with "(inferred)"), plain background; phone shows only the chosen corners; used first as the placeholder, kept as the fallback.
-  - [ ] 16.2 The fallback notice "Map unavailable. Showing the route diagram." only on failure; the credit line on the map.
-  - [ ] 16.3 Tests: leg count equals the file's features; inferred legs dashed; corner labels per layout; the drawing builds from the fixture's route (the fixture has no map, so the area shows nothing).
+- [x] 16. Route drawing and the map area (R11.1, R11.4, section 12.1)
+  - [x] 16.1 map/routedrawing.ts: SVG from route.geojson and index.json: legs, dashed inferred legs, street names along legs, corner dots and names (origin filled, destination ring, inferred dashed with "(inferred)"), plain background; phone shows only the chosen corners; used first as the placeholder, kept as the fallback.
+  - [x] 16.2 The fallback notice "Map unavailable. Showing the route diagram." only on failure; the credit line on the map.
+  - [x] 16.3 Tests: leg count equals the file's features; inferred legs dashed; corner labels per layout; the drawing builds from the fixture's route (the fixture has no map, so the area shows nothing).
   - Depends on: task 15
 
 - [ ] 17. MapLibre chunk (R11, section 12.2 to 12.4)

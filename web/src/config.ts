@@ -78,6 +78,40 @@ export const FONT_SIZES = {
   },
 } as const;
 
+/**
+ * The map area (design 12.1, 12.2, screen-brief 3A.3): the route drawing's design
+ * size and the room kept around the route, shared with the map's fit. Phone: the
+ * 150 px strip, with the notice line on top and the card's rounded top over its
+ * lower edge. Desktop: the area left of the race column, with the headline top
+ * left and the credit line at the foot. Type sizes and dot radii in CSS pixels.
+ * Style, not data.
+ */
+export const MAP_LAYOUT = {
+  phone: {
+    size: { width: 375, height: 150 },
+    /** The top keeps room for the map's line of text, which takes two lines on a phone. */
+    padding: { top: 34, right: 16, bottom: 16, left: 16 },
+    streetFont: 9,
+    nameFont: 13,
+    otherNameFont: 11,
+    dot: { chosen: 5, other: 3.5 },
+  },
+  desktop: {
+    size: { width: 840, height: 800 },
+    padding: { top: 200, right: 150, bottom: 110, left: 110 },
+    streetFont: 11,
+    nameFont: 16,
+    otherNameFont: 13,
+    dot: { chosen: 7, other: 4.5 },
+  },
+  /** The display face's average glyph advance, in ems, for fitting names before they are drawn. */
+  glyphEm: 0.38,
+  /** Space between a dot and its name, and between a street name and its line. */
+  gap: 5,
+  /** Two legs meet when an end of one is this near an end of the other, in pixels. */
+  meet: 3,
+} as const;
+
 /** Where the licence file sits in the repository, for the "MIT licence" link (R10.3). */
 export const LICENCE_PATH = '/blob/main/LICENSE';
 

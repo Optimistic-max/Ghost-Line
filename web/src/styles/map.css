@@ -1,0 +1,132 @@
+/* The map area (design 12.1, screen-brief 3A.3): the route drawing on the plain
+   --night background, the line under it, and the map's one line of text (the
+   credit, or the notice when the map is unavailable). The 1938 line is the
+   brightest thing: --ghost over a blurred copy. Corner and street names carry a
+   dark outline so they stay readable over lines. */
+
+.route-drawing {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.route-drawing .leg,
+.route-drawing .leg-glow {
+  fill: none;
+  stroke: var(--ghost);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-drawing .leg {
+  stroke-width: 2.5px;
+}
+
+.route-drawing .leg-glow {
+  stroke-width: 6px;
+  opacity: 0.55;
+}
+
+/* The inferred stretch is dashed (R11.2). */
+.route-drawing .leg-inferred {
+  stroke-width: 2px;
+  stroke-linecap: butt;
+  stroke-dasharray: 4 3;
+}
+
+.route-drawing .street-label,
+.route-drawing .corner-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  paint-order: stroke fill;
+  stroke: var(--night);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.route-drawing .street-label {
+  fill: var(--ghost);
+}
+
+/* Names of the corners not chosen (desktop): muted, never faint (R11.3). */
+.route-drawing .corner-name {
+  fill: var(--muted);
+}
+
+.route-drawing .corner-name.is-chosen {
+  fill: var(--ink);
+}
+
+/* Corner dots: the origin filled, the destination a ring, the others small rings. */
+.route-drawing .corner-dot {
+  fill: var(--night);
+  stroke: var(--ghost);
+  stroke-width: 1.5px;
+}
+
+.route-drawing .corner-dot.is-origin {
+  fill: var(--ghost);
+}
+
+.route-drawing .corner-dot.is-dest {
+  stroke-width: 2.5px;
+}
+
+/* The inferred corner has a dashed outline. */
+.route-drawing .corner-dot.is-inferred {
+  stroke-dasharray: 2 1.5;
+}
+
+.route-drawing .corner-dot.is-inferred.is-origin,
+.route-drawing .corner-dot.is-inferred.is-dest {
+  stroke-width: 3px;
+}
+
+/* The map's line of text: top left on a phone (mockup 22), at the foot on desktop (mockups 13, 26). */
+.map-lines {
+  position: absolute;
+  z-index: 2;
+  top: 5px;
+  left: var(--pad);
+  right: var(--pad);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  .route-drawing .leg {
+    stroke-width: 3.5px;
+  }
+
+  .route-drawing .leg-glow {
+    stroke-width: 9px;
+  }
+
+  .route-drawing .leg-inferred {
+    stroke-width: 3px;
+    stroke-dasharray: 6 5;
+  }
+
+  .route-drawing .corner-dot {
+    stroke-width: 2px;
+  }
+
+  .route-drawing .corner-dot.is-dest,
+  .route-drawing .corner-dot.is-inferred.is-origin,
+  .route-drawing .corner-dot.is-inferred.is-dest {
+    stroke-width: 3px;
+  }
+
+  .map-lines {
+    top: auto;
+    bottom: 16px;
+    left: var(--column-pad);
+    right: var(--column-pad);
+    font-size: var(--fs-body-small);
+    line-height: 1.35;
+  }
+}

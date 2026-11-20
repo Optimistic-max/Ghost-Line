@@ -9,6 +9,7 @@
 @import './base.css';
 @import './layout-phone.css';
 @import './layout-desktop.css';
+@import './map.css';
 @import './card.css';
 @import './vehicles.css';
 @import './sheets.css';
