@@ -8,6 +8,7 @@ import { clockLabel } from '../format/time';
 import { type Timeline, laneFrame } from '../play/timeline';
 import type { Lane, RaceView, Side } from '../state/model';
 import type { Num } from '../state/specs';
+import { keepFocus } from './a11y';
 import { h, setVar } from './dom';
 import type { LaneLayout, RaceLayout } from './layout';
 import { statusKey, statusLine, vehicleMarkup } from './lanes';
@@ -66,14 +67,17 @@ function bind(root: ParentNode, lane: Lane, layout: LaneLayout | null, next: Num
   };
 }
 
-/** Replace a status line's content, keeping keyboard focus on its number button if it had it. */
-function setStatus(status: HTMLElement, content: DocumentFragment): void {
-  const focused = status.contains(status.ownerDocument.activeElement);
-  status.replaceChildren(content);
-  if (focused) status.querySelector<HTMLElement>('button')?.focus();
+/**
+ * Change a status line. Keyboard focus inside it stays on its number button if
+ * the new line has it again, and otherwise moves on to the next control (the
+ * legend's first number when the line gives way to it).
+ */
+function changeStatus(scope: HTMLElement, status: HTMLElement, change: () => void): void {
+  if (status.contains(status.ownerDocument.activeElement)) keepFocus(scope, change);
+  else change();
 }
 
-export function createRacer(root: ParentNode, registry: SourceRegistry, input: RacerInput): Racer {
+export function createRacer(root: HTMLElement, registry: SourceRegistry, input: RacerInput): Racer {
   const { view, timeline, layout } = input;
   const lanes = [
     bind(root, view.lane1938, layout.lane1938, input.next['1938']),
@@ -99,11 +103,12 @@ export function createRacer(root: ParentNode, registry: SourceRegistry, input: R
     b.el.toggleAttribute('data-arrived', f.arrived);
     if (!f.arrived) b.el.classList.remove('is-arriving');
     // Racing, a lane shows its status line; from its arrival, its total and its legend (design 9.3).
-    if (b.status) b.status.hidden = f.arrived;
+    const status = b.status;
     if (b.legend) b.legend.hidden = !f.arrived;
+    if (status && status.hidden !== f.arrived) changeStatus(root, status, () => void (status.hidden = f.arrived));
     const shown = f.arrived ? 'arrived' : statusKey(b.lane, f.current, f.countdown);
-    if (b.status && shown !== b.shown && !f.arrived) {
-      setStatus(b.status, statusLine(registry, b.lane, f.current, f.countdown, b.next));
+    if (status && shown !== b.shown && !f.arrived) {
+      changeStatus(root, status, () => status.replaceChildren(statusLine(registry, b.lane, f.current, f.countdown, b.next)));
     }
     b.shown = shown;
   }

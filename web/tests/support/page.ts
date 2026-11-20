@@ -91,6 +91,9 @@ function appOptions(options: PageOptions): AppOptions {
 export function mountPage(options: PageOptions = {}): App {
   const html = readRepoText('web/index.html');
   const body = /<body>([\s\S]*)<\/body>/.exec(html)?.[1] ?? '';
+  // The page's language and title come with it, as a browser would have them from index.html.
+  document.documentElement.lang = /<html[^>]*\slang="([^"]*)"/.exec(html)?.[1] ?? '';
+  document.title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '';
   document.body.innerHTML = body.replace(/<script[\s\S]*?<\/script>/g, '');
   return createApp(appOptions(options));
 }

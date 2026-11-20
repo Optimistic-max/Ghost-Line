@@ -31,7 +31,7 @@ import { initialState } from '../state/actions';
 import { derive } from '../state/derive';
 import type { AppState, MotionLevel, RaceView } from '../state/model';
 import { type Store, createStore } from '../state/store';
-import { announcement, createAnnouncer } from './a11y';
+import { announcement, createAnnouncer, keepFocus } from './a11y';
 import { cardButtons, footer } from './buttons';
 import {
   type CardInput,
@@ -118,6 +118,7 @@ export function createApp(options: AppOptions): App {
   const startPair: Pair = { origin: LEAD_PAIR.origin, dest: LEAD_PAIR.dest };
   const store = createStore(initialState(startPair, options.motion));
   const registry = new SourceRegistry();
+  const card = byId(doc, 'race-card');
   const scroll = byId(doc, 'card-scroll');
   const buttons = byId(doc, 'card-buttons');
   const foot = byId(doc, 'card-footer');
@@ -196,7 +197,8 @@ export function createApp(options: AppOptions): App {
     },
     finish() {
       stopSparks();
-      racer?.finish();
+      // The clock row leaves at the finish (R5.8); focus on it moves to the next control.
+      keepFocus(card, () => racer?.finish());
       if (drawn) drawn.stage = 'finished';
       store.dispatch({ type: 'race/finish' });
     },
@@ -380,18 +382,22 @@ export function createApp(options: AppOptions): App {
     timeline = null;
     const children = errorView();
     registry.clear();
-    scroll.replaceChildren(...children);
-    buttons.replaceChildren();
-    foot.replaceChildren();
+    keepFocus(card, () => {
+      scroll.replaceChildren(...children);
+      buttons.replaceChildren();
+      foot.replaceChildren();
+    });
   }
 
-  /** Draw the whole card for a race, at the clock's elapsed time when racing. */
+  /** Draw the whole card for a race, at the clock's elapsed time when racing. Keyboard focus stays where it was (R13.1). */
   function draw(input: CardInput): void {
     registry.clear();
     const firstPaint = !painted && input.stage === 'racing';
-    scroll.replaceChildren(...renderCard(registry, { ...input, firstPaint }));
-    buttons.replaceChildren(...cardButtons());
-    foot.replaceChildren(...footer());
+    keepFocus(card, () => {
+      scroll.replaceChildren(...renderCard(registry, { ...input, firstPaint }));
+      buttons.replaceChildren(...cardButtons());
+      foot.replaceChildren(...footer());
+    });
     fitPairRow();
     painted = true;
     mapView.painted();
@@ -431,7 +437,7 @@ export function createApp(options: AppOptions): App {
     const old = scroll.querySelector('.board');
     if (!old) return;
     old.querySelectorAll<HTMLElement>('button.num').forEach((b) => registry.delete(b.dataset['source'] ?? ''));
-    old.replaceWith(cardBoard(registry, input));
+    keepFocus(card, () => old.replaceWith(cardBoard(registry, input)));
   }
 
   /** The one announcement of a race, once its result is on screen (R13.2). */
@@ -675,9 +681,13 @@ export function createApp(options: AppOptions): App {
         store.dispatch({ type: 'minute/step', step: 1 });
         scheduleRace();
         break;
-      case 'skip':
+      case 'skip': {
+        const fromSkip = doc.activeElement === target;
         clock.skip();
+        // The button leaves with the clock row; focus goes to the result it asked for.
+        if (fromSkip && !target.isConnected) scroll.querySelector<HTMLElement>('.result button.num')?.focus();
         break;
+      }
       case 'retry':
         void boot();
         break;

@@ -151,11 +151,11 @@ Implements `requirements.md` and `design.md` in this folder. Requirement IDs (R1
 
 ## Quality
 
-- [ ] 18. Accessibility (R13)
-  - [ ] 18.1 view/a11y.ts: the result live region written once at the result moment (for a photo finish, when both have arrived; immediately under reduced motion), cleared first, 50 ms delay; `#share-status`; labels; sheets as modal dialogs; visible focus ring; landmarks.
-  - [ ] 18.2 axe-core in jsdom on every reachable state (each state of R17.1, picker open, each sheet open, reduced motion); the contrast test from task 7 extended to chips and sheet rows.
-  - [ ] 18.3 Keyboard test: slider, minus and plus, swap, picker, number buttons, sheets, skip, share, About, without a pointer.
-  - [ ] 18.4 Announcement tests: one write per race for each result type with the approved text built from shown numbers (the spoken walking total is the sum of the shown walk parts); nothing written during the animation.
+- [x] 18. Accessibility (R13)
+  - [x] 18.1 view/a11y.ts: the result live region written once at the result moment (for a photo finish, when both have arrived; immediately under reduced motion), cleared first, 50 ms delay; `#share-status`; labels; sheets as modal dialogs; visible focus ring; landmarks. As built: keyboard focus is also kept across the card's redraws (a new race, a status line giving way to its legend, the finish), and Skip to result moves focus to the result.
+  - [x] 18.2 axe-core in jsdom on every reachable state (each state of R17.1, picker open, each sheet open, reduced motion); the contrast test from task 7 extended to chips and sheet rows. As built: both layouts; every axe rule except colour contrast, which jsdom cannot draw (it is computed from the tokens, and axe checks it in the browser in task 20.3).
+  - [x] 18.3 Keyboard test: slider, minus and plus, swap, picker, number buttons, sheets, skip, share, About, without a pointer. As built: jsdom performs no default key actions, so tests/support/keyboard.ts does Tab, Enter, Space and the range keys the way a browser does; the real keyboard runs in task 20.2.
+  - [x] 18.4 Announcement tests: one write per race for each result type with the approved text built from shown numbers (the spoken walking total is the sum of the shown walk parts); nothing written during the animation.
   - Depends on: tasks 15, 17
 
 - [ ] 19. Wording and rule tests across the whole screen (R15, P5, P6)
