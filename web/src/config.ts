@@ -124,7 +124,20 @@ export const MAP_LAYOUT = {
    */
   phonePreview: {
     size: { width: 375, height: 100 },
-    padding: { top: 6, right: 16, bottom: 30, left: 16 },
+    /**
+     * The right padding is the button's column, so the drawing never runs under "View route"; the top padding
+     * leaves a line for a corner name over its dot, where the trolley marker leaves it no other clear place
+     * (checkpoint 18).
+     */
+    padding: { top: 20, right: 92, bottom: 30, left: 16 },
+    /**
+     * The View route / Hide route button's column, on the strip's right: its width, its distance from the
+     * right edge (map.css `.route-toggle` uses the same numbers) and the gap kept between it and the drawing.
+     * The drawing, its names and its marker stay left of `size.width - (width + right + gap)`.
+     */
+    button: { width: 80, height: 44, right: 8, top: 4, gap: 4 },
+    /** The race card's rounded top covers the strip's lowest 9 px (layout-phone.css `--card-top`); names stay above it. */
+    cardOverlap: 9,
   },
   desktop: {
     size: { width: 840, height: 800 },

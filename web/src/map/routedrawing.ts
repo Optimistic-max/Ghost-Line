@@ -15,6 +15,10 @@ import {
   type Chord,
   type NamePlace,
   type Pt,
+  type StripRule,
+  buttonColumn,
+  stripPlace,
+  usableView,
   type Size,
   type Track,
   alongPercent,
@@ -101,6 +105,16 @@ export type RouteDrawing = {
 const GLOW_ID = 'route-glow-blur';
 const LABEL_ID = 'route-label';
 
+/** The phone strip's corner names follow the map's street-name rule for the marker, with its numbers. */
+const STRIP_RULE: StripRule = {
+  gap: MAP_LAYOUT.gap,
+  maxOffset: MAP_LAYOUT.labelMaxOffset,
+  offsetStep: MAP_LAYOUT.labelOffsetStep,
+  slideStep: MAP_LAYOUT.labelOffsetAlongStep,
+  markerRoom: MAP_LAYOUT.markerRoom,
+  glyphBox: MAP_LAYOUT.glyphBox,
+};
+
 /** Every coordinate the drawing shows: the legs and the corners. The map fits the same bounds. */
 export function drawingPoints(index: Index, route: Route): number[][] {
   return [...route.features.flatMap((f) => f.geometry.coordinates), ...index.corners.map((c) => [...c.lonlat])];
@@ -147,7 +161,10 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
   const preview = input.preview === true && layout === 'phone';
   const frame = preview ? MAP_LAYOUT.phonePreview : look;
   const size = input.size ?? frame.size;
-  const view: Box = { x: 0, y: 0, width: size.width, height: size.height };
+  // On the strip the right-hand column belongs to the View route button, and the card's top covers the foot.
+  const view: Box = preview
+    ? usableView(size, buttonColumn(MAP_LAYOUT.phonePreview.button), MAP_LAYOUT.phonePreview.cardOverlap)
+    : usableView(size, 0, 0);
   const { project, unproject, pxPerMetre } = fitProjection(drawingPoints(index, route), size, frame.padding);
 
   const legs = route.features.map((f) => fromWest(f.geometry.coordinates.map(project)));
@@ -158,6 +175,12 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
     return { corner, role, radius, at, box: dotBox(at, radius) };
   });
 
+  // The trolley marker stands at the origin before the ride and short of the destination after it (R5.9), on the
+  // track of the race's direction.
+  const track = markerTrackFor(input, pxPerMetre);
+  const markerWidth = vehicleWidths(layout).marker;
+  const markerBoxes = track ? [trackPoint(track, 0), trackPoint(track, 1)].map((p) => markerBox(project(p), markerWidth)) : [];
+
   // Corner names: the chosen two first, so they get the best places; on a phone only they are named.
   const toName = [...dots.filter((d) => d.role !== 'other'), ...(layout === 'desktop' ? dots.filter((d) => d.role === 'other') : [])];
   const nameBoxes: Box[] = [];
@@ -166,7 +189,11 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
     const font = dot.role === 'other' ? look.otherNameFont : look.nameFont;
     const width = textWidth(text, font, MAP_LAYOUT.glyphEm);
     const others = dots.filter((o) => o !== dot).map((o) => o.box);
-    const place = bestPlace(namePlaces(dot.at, dot.radius, width, font, MAP_LAYOUT.gap), { lines: legs, boxes: [...nameBoxes, ...others], view }, 2);
+    // On the strip a corner name also keeps off the boxes the standing trolley marker covers, as the street names
+    // do on the map. (The map's own corner names keep their places: Caroline Street's place depends on them.)
+    const place = preview
+      ? stripPlace(dot, width, font, { lines: legs, boxes: [...nameBoxes, ...others], view }, markerBoxes, STRIP_RULE)
+      : bestPlace(namePlaces(dot.at, dot.radius, width, font, MAP_LAYOUT.gap), { lines: legs, boxes: [...nameBoxes, ...others], view }, 2);
     nameBoxes.push(place.box);
     return { dot, text, font, place };
   });
@@ -183,12 +210,6 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
   const named = legPerStreet(route.features).filter(
     ({ leg }) => !preview && leg.properties.method !== 'inferred' && !(crowded && meetsInferred.has(leg.properties.street)),
   );
-
-  // The trolley marker stands at the origin before the ride and short of the destination after it (R5.9), on the
-  // track of the race's direction.
-  const track = markerTrackFor(input, pxPerMetre);
-  const markerWidth = vehicleWidths(layout).marker;
-  const markerBoxes = track ? [trackPoint(track, 0), trackPoint(track, 1)].map((p) => markerBox(project(p), markerWidth)) : [];
 
   // The drawing sets a name only where it fits along its leg and clears the corners and the edges. Where the
   // standing trolley marker would cover it, the name first moves along its leg; if no place along it is clear,

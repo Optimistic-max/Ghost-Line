@@ -467,7 +467,7 @@ export function insideBox(p: Pt, box: Box, margin = 0): boolean {
   );
 }
 
-function boxesOverlap(a: Box, b: Box): boolean {
+export function boxesOverlap(a: Box, b: Box): boolean {
   return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 }
 
@@ -550,29 +550,120 @@ export function namePlaces(dot: Pt, radius: number, width: number, fontPx: numbe
 
 export type Obstacles = { lines: readonly (readonly Pt[])[]; boxes: readonly Box[]; view: Box };
 
+/** How many lines and boxes are in a place's way (100 more when it leaves the view). */
+export function placeHits(place: NamePlace, obstacles: Obstacles, margin: number): number {
+  const box = grow(place.box, margin);
+  let hits = insideBox({ x: place.box.x, y: place.box.y }, obstacles.view) &&
+    insideBox({ x: place.box.x + place.box.width, y: place.box.y + place.box.height }, obstacles.view)
+    ? 0
+    : 100;
+  for (const line of obstacles.lines) {
+    for (let i = 0; i + 1 < line.length; i += 1) {
+      if (segmentHitsBox(line[i]!, line[i + 1]!, box)) {
+        hits += 1;
+        break;
+      }
+    }
+  }
+  for (const other of obstacles.boxes) if (boxesOverlap(box, other)) hits += 1;
+  return hits;
+}
+
 /** The place with the fewest lines and boxes in its way, staying inside the view; the earlier place on a tie. */
 export function bestPlace(places: readonly NamePlace[], obstacles: Obstacles, margin: number): NamePlace {
   let best = places[0]!;
   let fewest = Infinity;
   for (const place of places) {
-    const box = grow(place.box, margin);
-    let hits = insideBox({ x: place.box.x, y: place.box.y }, obstacles.view) &&
-      insideBox({ x: place.box.x + place.box.width, y: place.box.y + place.box.height }, obstacles.view)
-      ? 0
-      : 100;
-    for (const line of obstacles.lines) {
-      for (let i = 0; i + 1 < line.length; i += 1) {
-        if (segmentHitsBox(line[i]!, line[i + 1]!, box)) {
-          hits += 1;
-          break;
-        }
-      }
-    }
-    for (const other of obstacles.boxes) if (boxesOverlap(box, other)) hits += 1;
+    const hits = placeHits(place, obstacles, margin);
     if (hits < fewest) {
       fewest = hits;
       best = place;
     }
   }
   return best;
+}
+
+/** The part of a drawing names may use: the whole size, less a column on the right and a band at the foot. */
+export function usableView(size: Size, rightColumn: number, footBand: number): Box {
+  return { x: 0, y: 0, width: size.width - rightColumn, height: size.height - footBand };
+}
+
+/** The width of the phone strip's button column: the button, its distance from the edge and the gap kept beside it. */
+export function buttonColumn(button: { width: number; right: number; gap: number }): number {
+  return button.width + button.right + button.gap;
+}
+
+export type StripRule = {
+  /** The usual space between a dot and its name. */
+  gap: number;
+  /** How far out, and in what steps, a name may move from its dot. */
+  maxOffset: number;
+  offsetStep: number;
+  /** The step of a name sliding sideways over or under its dot. */
+  slideStep: number;
+  /** Room kept between a name and the standing marker. */
+  markerRoom: number;
+  /** How far the browser's glyph boxes reach above and below the baseline, in ems (config.ts glyphBox). */
+  glyphBox: { above: number; below: number };
+};
+
+/** The box a name's glyphs fill in the browser, which stands higher and lower than its ink (namePlaces' baseline). */
+function glyphBoxOf(p: NamePlace, font: number, glyph: { above: number; below: number }): Box {
+  const top = p.y - glyph.above * font;
+  return { x: p.box.x, y: top, width: p.box.width, height: (glyph.above + glyph.below) * font };
+}
+
+/**
+ * A corner name's place on the phone strip (story-layer checkpoint 18). As with the map's street names, the
+ * standing trolley marker never covers it: the usual places beside the dot are tried first; where the marker,
+ * the strip's edge or the button's column is in the way of all of them, the same places a pixel further out
+ * each time, up to `rule.maxOffset`, a place over or under the dot also sliding sideways while it still spans
+ * the dot. A place clear of the route's lines, the other dots and the names already set as well wins where one
+ * exists. Only if nothing within the limit clears the marker does the name take the usual best place.
+ */
+export function stripPlace(
+  dot: { at: Pt; radius: number },
+  width: number,
+  font: number,
+  obstacles: Obstacles,
+  markers: readonly Box[],
+  rule: StripRule,
+): NamePlace {
+  const { view } = obstacles;
+  const inView = (b: Box): boolean => b.x >= view.x && b.y >= view.y && b.x + b.width <= view.x + view.width && b.y + b.height <= view.y + view.height;
+  const offMarker = (p: NamePlace): boolean => {
+    const glyphs = glyphBoxOf(p, font, rule.glyphBox);
+    return inView(glyphs) && !markers.some((m) => boxesOverlap(glyphs, grow(m, rule.markerRoom)));
+  };
+  const free = (p: NamePlace): boolean => offMarker(p) && placeHits(p, obstacles, 2) === 0;
+  for (const clear of [free, offMarker]) {
+    const found = placesOut(dot, width, font, rule, clear);
+    if (found.length > 0) return bestPlace(found, obstacles, 2);
+  }
+  return bestPlace(namePlaces(dot.at, dot.radius, width, font, rule.gap), obstacles, 2);
+}
+
+/** The places at the first step out (from the usual gap) at which some place passes `clear`. */
+function placesOut(dot: { at: Pt; radius: number }, width: number, font: number, rule: StripRule, clear: (p: NamePlace) => boolean): NamePlace[] {
+  for (let out = 0; out <= rule.maxOffset; out += rule.offsetStep) {
+    const usual = namePlaces(dot.at, dot.radius, width, font, rule.gap + out);
+    const slid = usual
+      .filter((p) => p.anchor === 'middle')
+      .flatMap((p) => slides(width, rule.slideStep).map((dx) => shiftedPlace(p, dx)))
+      .filter((p) => p.box.x <= dot.at.x && p.box.x + p.box.width >= dot.at.x);
+    const places = [...usual, ...slid].filter(clear);
+    if (places.length > 0) return places;
+  }
+  return [];
+}
+
+/** Sideways moves for a name `width` wide centred on its dot, nearest first, each way in turn, up to half its width. */
+function slides(width: number, step: number): number[] {
+  const out: number[] = [];
+  for (let d = step; d <= width / 2; d += step) out.push(-d, d);
+  return out;
+}
+
+function shiftedPlace(p: NamePlace, dx: number): NamePlace {
+  return { ...p, x: p.x + dx, box: { ...p.box, x: p.box.x + dx } };
 }

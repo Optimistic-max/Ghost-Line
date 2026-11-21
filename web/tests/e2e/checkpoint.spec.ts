@@ -95,3 +95,55 @@ for (const [label, size] of [['phone', PHONE], ['desktop', DESKTOP]] as const) {
     await context.close();
   });
 }
+
+// The phone's route strip: "View route" never covers the route drawing or a corner name, and the trolley
+// marker never covers a corner name, with the marker at the origin (before the race) and short of the
+// destination (finished).
+type Box = { x: number; y: number; width: number; height: number };
+const meets = (a: Box, b: Box): boolean => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+for (const moment of ['before the race', 'finished'] as const) {
+  test(`phone route strip, ${moment}: the button, the drawing, the names and the marker keep apart`, async ({ browser }) => {
+    const before = moment === 'before the race';
+    const context = await browser.newContext({ viewport: { width: PHONE.width, height: PHONE.height }, reducedMotion: before ? 'no-preference' : 'reduce' });
+    await guardNetwork(context, true);
+    const page = await context.newPage();
+    if (before) {
+      await page.clock.install({ time: beforeNewYork('20:00') });
+      await page.clock.pauseAt(newYork('20:00'));
+    } else {
+      await page.clock.setFixedTime(newYork('20:00'));
+    }
+    await page.goto('./');
+    await page.locator('.route-drawing .corner-name').first().waitFor();
+    await page.locator('.drawing-marker:not([hidden])').waitFor();
+    await fontsReady(page);
+    if (!before) await page.locator('.result').waitFor();
+    const m = await page.evaluate(() => {
+      const r = (el: Element | null) => {
+        if (!el) return null;
+        const b = el.getBoundingClientRect();
+        return { x: b.x, y: b.y, width: b.width, height: b.height };
+      };
+      return {
+        strip: r(document.querySelector('#map-area')),
+        button: r(document.querySelector('.route-toggle')),
+        legs: r(document.querySelector('.route-drawing .route-legs')),
+        dots: [...document.querySelectorAll('.route-drawing .corner-dot')].map(r),
+        names: [...document.querySelectorAll('.route-drawing .corner-name')].map((el) => ({ text: el.textContent, box: r(el) })),
+        marker: r(document.querySelector('.drawing-marker svg') ?? document.querySelector('.drawing-marker')),
+      };
+    });
+    console.log(`phone strip ${moment}: ${JSON.stringify(m)}`);
+    await context.close();
+    expect(m.strip!.height).toBe(100);
+    expect(m.button!.width).toBeGreaterThanOrEqual(44);
+    expect(m.button!.height).toBeGreaterThanOrEqual(44);
+    expect(meets(m.button!, m.legs!), 'button against the route').toBe(false);
+    for (const d of m.dots) expect(meets(m.button!, d!), 'button against a corner dot').toBe(false);
+    for (const n of m.names) {
+      expect(meets(m.button!, n.box!), `button against ${n.text}`).toBe(false);
+      expect(meets(m.marker!, n.box!), `marker against ${n.text}`).toBe(false);
+    }
+  });
+}
