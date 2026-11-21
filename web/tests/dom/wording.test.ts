@@ -425,4 +425,47 @@ describe('every count on screen comes from summary.json (19.3, P5, R15.4)', () =
       }
     }
   });
+
+  it('types none of the real summary.json digit strings into src/: every decimal, every clock time and every count of 100 or more, anywhere in the file', () => {
+    // 8.7, 16.7. No allowlist. A whole number under 100 (a pair's 8 wins, the 15 percent) is the same string as a
+    // pixel size or a loop bound, so a text scan cannot tell a typed copy from a constant; those are proven read
+    // at run time by the swap tests above. What a scan can check without a false positive is walked here:
+    // numbers with two or more decimals (margins, medians, deltas), "HH:MM" start times from
+    // today_wins, and whole numbers of 100 or more at any depth (the pairs' race counts).
+    const decimals = new Set<string>();
+    const clocks = new Set<string>();
+    const wholes = new Set<number>();
+    const walk = (v: unknown): void => {
+      if (typeof v === 'number') {
+        if (Number.isInteger(v)) {
+          if (Math.abs(v) >= 100) wholes.add(Math.abs(v));
+        } else if (/\.\d{2,}$/.test(String(v))) decimals.add(String(Math.abs(v)));
+        // A one-decimal value (the 1.5 minute rule) is also a stroke width or opacity in style.ts: read at run time instead.
+      } else if (typeof v === 'string') {
+        if (/^\d{1,2}:\d{2}$/.test(v)) clocks.add(v);
+      } else if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') Object.values(v).forEach(walk);
+    };
+    walk(real);
+    expect(decimals.size).toBeGreaterThan(10);
+    expect(clocks.size).toBeGreaterThan(10);
+    expect(wholes.size).toBeGreaterThan(3);
+    const files = listRepoFiles('web/src');
+    expect(files.length).toBeGreaterThan(20);
+    const edge = '(?<![\\d.,:])';
+    const tail = '(?![\\d]|[.,:]\\d)';
+    for (const file of files) {
+      // Comments are prose that quotes the spec's own examples ("10:08 scheduled"); only code and strings count.
+      const source = readRepoText(file).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(?<![:"'`\w])\/\/[^\n]*/g, '');
+      const find = (what: string, patterns: string[]) => {
+        for (const p of patterns) {
+          const hit = new RegExp(`${edge}${p}${tail}`).exec(source);
+          expect(hit?.[0] ?? null, `${file} holds the summary ${what} ${p}`).toBeNull();
+        }
+      };
+      find('decimal', [...decimals].map((d) => d.replace('.', '\\.')));
+      find('clock time', [...clocks].map((c) => c.replace(/^0/, '0?')));
+      find('count', [...wholes].flatMap((n) => [String(n), formatCount(n).replace(',', '\\,')]));
+    }
+  });
 });
