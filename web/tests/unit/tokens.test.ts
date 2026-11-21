@@ -1,7 +1,7 @@
 // Task 7.1 and 7.3: tokens follow ui.md and the brief, sizes match config.ts,
 // and the stylesheets keep the type and motion rules.
 import { describe, expect, it } from 'vitest';
-import { BREAKPOINTS, FONT_SIZES, VEHICLE_SIZES } from '../../src/config';
+import { BREAKPOINTS, FONT_SIZES, MAP_LAYOUT, VEHICLE_SIZES } from '../../src/config';
 import { stylesheets, tokenBlocks } from '../support/css';
 import { readRepoText } from '../support/files';
 
@@ -60,8 +60,8 @@ describe('sizes', () => {
   });
 
   it('matches the vehicle sizes of config.ts', () => {
-    expect(phone.get('--trolley-w')).toBe(px(VEHICLE_SIZES.phone.trolleyRacing));
-    expect(phone.get('--trolley-w-finished')).toBe(px(VEHICLE_SIZES.phone.trolleyFinished));
+    expect(phone.get('--trolley-w')).toBe(px(VEHICLE_SIZES.phone.trolley));
+    expect(phone.get('--trolley-w-finished')).toBe(px(VEHICLE_SIZES.phone.trolley));
     expect(phone.get('--bus-w')).toBe(px(VEHICLE_SIZES.phone.bus));
     expect(phone.get('--marker-w')).toBe(px(VEHICLE_SIZES.phone.mapMarker));
     expect(desktop.get('--trolley-w')).toBe(px(VEHICLE_SIZES.desktop.trolley));
@@ -71,13 +71,18 @@ describe('sizes', () => {
   });
 
   it('matches the phone zones of ui.md', () => {
-    const m = /top bar (\d+) px, map (\d+) px, race card from (\d+) px down/.exec(ui);
-    expect(m).not.toBeNull();
-    expect([phone.get('--topbar-h'), phone.get('--map-h'), phone.get('--card-top')]).toEqual([
-      px(Number(m![1])),
-      px(Number(m![2])),
-      px(Number(m![3])),
+    // ui.md: "top bar 40 px", "collapsed strip 100 px tall; expanded map 150 px tall".
+    // The race card is in normal page flow, so --card-top is no longer tested.
+    const bar = /Phone: top bar (\d+) px/.exec(ui);
+    const strip = /collapsed strip (\d+) px tall/.exec(ui);
+    const map = /expanded map (\d+) px tall/.exec(ui);
+    expect([bar, strip, map].every((m) => m !== null)).toBe(true);
+    expect([phone.get('--topbar-h'), phone.get('--map-strip-h'), phone.get('--map-h')]).toEqual([
+      px(Number(bar![1])),
+      px(Number(strip![1])),
+      px(Number(map![1])),
     ]);
+    expect(phone.get('--map-strip-h')).toBe(px(MAP_LAYOUT.phonePreview.size.height));
     // Section 3A's value; the superseded 3.4 table said 8 px.
     expect(phone.get('--buttons-bottom')).toBe(px(Number(/buttons pinned (\d+) px above the bottom/.exec(brief)![1])));
   });

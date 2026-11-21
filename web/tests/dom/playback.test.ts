@@ -135,9 +135,9 @@ describe('the first race starts by itself (R2.1, R2.5)', () => {
   it('draws the racing trolley at its racing size and gives it its finished size at the finish', async () => {
     const page = await open();
     const width = (): string | null => lane('1938')!.querySelector('.trolley-art')!.getAttribute('width');
-    expect(width()).toBe(String(VEHICLE_SIZES.phone.trolleyRacing));
+    expect(width()).toBe(String(VEHICLE_SIZES.phone.trolley));
     play(page, 13000);
-    expect(width()).toBe(String(VEHICLE_SIZES.phone.trolleyFinished));
+    expect(width()).toBe(String(VEHICLE_SIZES.phone.trolley));
   });
 
   it('marks race-start once, for the first race only', async () => {
@@ -431,7 +431,7 @@ describe('reduced motion (R5.11)', () => {
     expect(document.documentElement.classList.contains('motion-reduced')).toBe(true);
     expect(document.querySelector('.clock-row, button.skip, .status, .first-paint, .entering')).toBeNull();
     expect(document.querySelector('.result')).not.toBeNull();
-    expect(lane('1938')!.querySelector('.trolley-art')!.getAttribute('width')).toBe(String(VEHICLE_SIZES.phone.trolleyFinished));
+    expect(lane('1938')!.querySelector('.trolley-art')!.getAttribute('width')).toBe(String(VEHICLE_SIZES.phone.trolley));
     const first = play(page, 1000);
     expect(first.filter((s, k) => s.said !== '' && first[k - 1]?.said === '')).toHaveLength(1);
     // After a slider change: the new minute, finished, announced once more; no frame ever runs.

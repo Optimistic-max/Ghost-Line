@@ -42,9 +42,11 @@ function segmentDistance([a, b]: [Point, Point], [c, d]: [Point, Point]): number
 }
 
 describe('the 1938 trackless trolley', () => {
-  const markup = trolleySvg({ routeNumber, width: VEHICLE_SIZES.phone.trolleyRacing });
+  const markup = trolleySvg({ routeNumber, width: VEHICLE_SIZES.phone.trolley });
   const host = mount(markup);
   const art = host.querySelector('.trolley-art')!;
+  // The route number shows only from ROUTE_NUMBER_MIN_WIDTH up, so number checks use the desktop trolley.
+  const desktopArt = mount(trolleySvg({ routeNumber, width: VEHICLE_SIZES.desktop.trolley })).querySelector('.trolley-art')!;
 
   it('has exactly two poles, two shoes, two wires and two retriever ropes', () => {
     expect(count(host, 'pole')).toBe(2);
@@ -135,8 +137,9 @@ describe('the 1938 trackless trolley', () => {
 
   it('shows the route number from index.json on the rear panel, and leaves it out when there is none', () => {
     expect(routeNumber).not.toBeNull();
-    const number = art.querySelector('[data-part="route-number"]');
+    const number = desktopArt.querySelector('[data-part="route-number"]');
     expect(number?.textContent).toBe(routeNumber);
+    expect(art.querySelector('[data-part="route-number"]')).toBeNull();
     for (const width of [ROUTE_NUMBER_MIN_WIDTH, 200, 360]) {
       expect(mount(trolleySvg({ routeNumber: null, width })).querySelector('[data-part="route-number"]'), `${width}`).toBeNull();
       expect(mount(trolleySvg({ routeNumber: null, width })).textContent, `${width}`).toBe('');
@@ -150,18 +153,19 @@ describe('the 1938 trackless trolley', () => {
     for (const width of [...sizes, 360]) expect(shown(width), `${width} px`).toBe(width >= ROUTE_NUMBER_MIN_WIDTH);
     expect(shown(ROUTE_NUMBER_MIN_WIDTH - 1)).toBe(false);
     expect(shown(ROUTE_NUMBER_MIN_WIDTH)).toBe(true);
-    // The phone's finished trolley (104 px) carries no number; racing (150 px) and desktop (200 px) do.
+    // The phone trolley (104 px) carries no number; the desktop trolley (150 px) does.
+    expect(shown(vehicleWidths('phone').trolleyRacing)).toBe(false);
     expect(shown(vehicleWidths('phone').trolleyFinished)).toBe(false);
-    expect(shown(vehicleWidths('phone').trolleyRacing)).toBe(true);
     expect(shown(vehicleWidths('desktop').trolleyRacing)).toBe(true);
+    expect(shown(vehicleWidths('desktop').trolleyFinished)).toBe(true);
   });
 
   it('places the number as in mockup 18: under the first window, between the belt rails and the lower trim', () => {
-    const number = art.querySelector('[data-part="route-number"]')!;
-    const firstWindow = /^M([\d.]+) /.exec(art.querySelector('[data-part="window"] .v-frame')!.getAttribute('d')!)!;
+    const number = desktopArt.querySelector('[data-part="route-number"]')!;
+    const firstWindow = /^M([\d.]+) /.exec(desktopArt.querySelector('[data-part="window"] .v-frame')!.getAttribute('d')!)!;
     const left = Number(firstWindow[1]);
     const ys = (part: string): number[] =>
-      [...art.querySelectorAll(`[data-part="${part}"]`)].flatMap((p) => [...p.getAttribute('d')!.matchAll(/M[\d.]+ ([\d.]+)/g)].map((m) => Number(m[1])));
+      [...desktopArt.querySelectorAll(`[data-part="${part}"]`)].flatMap((p) => [...p.getAttribute('d')!.matchAll(/M[\d.]+ ([\d.]+)/g)].map((m) => Number(m[1])));
     expect(num(number, 'x')).toBeGreaterThanOrEqual(left);
     expect(num(number, 'x')).toBeLessThan(left + 17);
     expect(num(number, 'y')).toBeGreaterThan(Math.max(...ys('belt')));

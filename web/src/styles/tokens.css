@@ -41,6 +41,8 @@
   --topbar-h: 40px;
   --map-h: 150px;
   --card-top: 181px;
+  /* The collapsed route preview strip (ui.md, story-layer design 8.3). */
+  --map-strip-h: 100px;
   --card-radius: 18px;
   --pad: 16px;
   --tap: 44px;
@@ -52,7 +54,7 @@
   --seg-gap: 2px;
 
   /* Vehicles (ui.md). Style, not data: only the bars are drawn to scale. */
-  --trolley-w: 150px;
+  --trolley-w: 104px;
   --trolley-w-finished: 104px;
   --bus-w: 84px;
   --marker-w: 28px;
@@ -81,8 +83,8 @@
     --column-w: 440px;
     --column-pad: 28px;
 
-    --trolley-w: 200px;
-    --trolley-w-finished: 200px;
+    --trolley-w: 150px;
+    --trolley-w-finished: 150px;
     --bus-w: 104px;
     --marker-w: 58px;
   }

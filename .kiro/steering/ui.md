@@ -15,6 +15,8 @@ match them closely, except where section 3B changes the layout.
 - Phone: top bar 40 px, then a compact route preview that "View route"
   expands, then the race card in normal page flow: the page scrolls, nothing is
   pinned and nothing scrolls inside the card (story-layer spec). Sheets slide up.
+  Phone route preview: collapsed strip 100 px tall; expanded map 150 px tall.
+  The race card is in normal page flow below the top bar (no fixed card top).
 - Desktop: map on the left, a fixed 440 px race column on the right with the
   same content in the same order. The three next-step actions sit under the
   takeaway; Sources and Share this race follow as secondary buttons, then a

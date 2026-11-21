@@ -136,6 +136,30 @@
         "executionId": "57465531-004f-444d-ad59-dfac7a62b9ef",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795231593414
+      },
+      {
+        "executionId": "57465531-004f-444d-ad59-dfac7a62b9ef",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795231927849
+      }
+    ],
+    "1. Wait-most flag and same-ride tolerance (Req 1, Req 2)": [
+      {
+        "executionId": "57465531-004f-444d-ad59-dfac7a62b9ef",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795231928493
+      }
+    ],
+    "3.1 `web/src/config.ts`: add `EXAMPLE_START = '10:00'` beside `FALLBACK_START` (comment cites product.md, \"the labelled example start\"), `TIMINGS.orientationMs = 2000`, `VEHICLE_SIZES` as `{ phone: { trolley: 104, bus: 84, barMarker: 28, mapMarker: 28 }, desktop: { trolley: 150, bus: 104, barMarker: 28, mapMarker: 58 } }`, and `MAP_LAYOUT.phonePreview` (375 x 100 starting value). Update every use of the removed racing/finished trolley sizes so the build compiles; tests that assert the old sizes change only as needed and are named in the commit message.": [
+      {
+        "executionId": "e61adc51-6961-44b8-9489-ff913c3dd344",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795232795175
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795233767350
       }
     ]
   }

@@ -24,7 +24,7 @@ export type VehicleWidths = { trolleyRacing: number; trolleyFinished: number; bu
 export function vehicleWidths(layout: Layout): VehicleWidths {
   if (layout === 'phone') {
     const s = VEHICLE_SIZES.phone;
-    return { trolleyRacing: s.trolleyRacing, trolleyFinished: s.trolleyFinished, bus: s.bus, marker: s.mapMarker };
+    return { trolleyRacing: s.trolley, trolleyFinished: s.trolley, bus: s.bus, marker: s.mapMarker };
   }
   const s = VEHICLE_SIZES.desktop;
   return { trolleyRacing: s.trolley, trolleyFinished: s.trolley, bus: s.bus, marker: s.mapMarker };

@@ -168,11 +168,15 @@ describe('the data error (15.4)', () => {
 });
 
 describe('the line label and the route number (15.5)', () => {
-  it('builds "No. 21, 1938" and the trolley\'s number from index.json once it has passed its check', async () => {
-    await bootPage();
+  it('builds "No. 21, 1938" from index.json, and shows the trolley\'s number on desktop only (the 104 px phone trolley is under the cut-off)', async () => {
+    await bootPage({ layout: 'desktop' });
     const n = routeNumberOf(index.line)!;
     expect(text(document.getElementById('line-label'))).toBe(C.lineLabel(n, yearOf(index.effective)!));
     expect(text(document.querySelector('.lane-1938 [data-part="route-number"]'))).toBe(n);
+    document.body.innerHTML = '';
+    await bootPage({ layout: 'phone' });
+    expect(text(document.getElementById('line-label'))).toBe(C.lineLabel(n, yearOf(index.effective)!));
+    expect(document.querySelector('[data-part="route-number"]')).toBeNull();
   });
 
   it('leaves both out when the line is not of that form', async () => {

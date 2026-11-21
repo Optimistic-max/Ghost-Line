@@ -10,6 +10,13 @@ export const LEAD_PAIR = { origin: 'preston-caroline', dest: 'aliceanna-bond' } 
  */
 export const FALLBACK_START = '10:00';
 
+/**
+ * The start time of a guided first visit (product.md, "the labelled example
+ * start"): shown with the example label until the first Visitor_Input. A
+ * product rule, not a data value.
+ */
+export const EXAMPLE_START = '10:00';
+
 /** Wall-clock durations in milliseconds (screen-brief 3A.6, requirements R2 to R4). */
 export const TIMINGS = {
   /** Pause before a race starts, and after the last slider input (R2.5, R3.5). */
@@ -26,6 +33,8 @@ export const TIMINGS = {
   mapIdleMs: 1000,
   /** Without a first map frame this long after the map is created, the map is unavailable (design 12.3). */
   mapTimeoutMs: 8000,
+  /** On a guided first visit the race waits this long, orientation line showing, before it starts (story-layer Req 4.1). */
+  orientationMs: 2000,
 } as const;
 
 /**
@@ -47,8 +56,8 @@ export const BREAKPOINTS = {
 
 /** Vehicle widths in CSS pixels (ui.md, screen-brief 3A.2). Style, not data. */
 export const VEHICLE_SIZES = {
-  phone: { trolleyRacing: 150, trolleyFinished: 104, bus: 84, mapMarker: 28 },
-  desktop: { trolley: 200, bus: 104, mapMarker: 58 },
+  phone: { trolley: 104, bus: 84, barMarker: 28, mapMarker: 28 },
+  desktop: { trolley: 150, bus: 104, barMarker: 28, mapMarker: 58 },
 } as const;
 
 /**
@@ -107,6 +116,15 @@ export const MAP_LAYOUT = {
     markerStop: 20,
     /** Line widths on the map: the route, its blurred copy, the dashed stretch, minor and main streets. */
     lines: { route: 2.5, glow: 6, inferred: 2, street: 0.6, main: 1.2 },
+  },
+  /**
+   * The collapsed route preview on a phone (story-layer design 8.3): the bundled route
+   * drawing in a strip 100 px tall. A starting value; the padding is the phone padding
+   * scaled to the strip.
+   */
+  phonePreview: {
+    size: { width: 375, height: 100 },
+    padding: { top: 6, right: 16, bottom: 30, left: 16 },
   },
   desktop: {
     size: { width: 840, height: 800 },
