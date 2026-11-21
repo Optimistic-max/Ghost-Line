@@ -423,12 +423,6 @@ export function methodTotalToday(hm: string): string {
 export const METHOD_MARGIN = 'The difference of the two totals as shown.';
 export const METHOD_RACE_COUNTS =
   'Counted over every corner pair and every start minute that the 1938 midday timetable covers at the start corner. Earlier minutes, which race from the first listed car, are not counted.';
-/**
- * The race-screen ride-same line. Superseded by methodRideVerdicts; kept only because
- * state/specs.ts still imports it until task 16.1, which removes it.
- */
-export const METHOD_RIDE_VERDICTS =
-  "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.";
 
 /** The date line of 1938 numbers; `date` is effective in its long form. */
 export function dateEffective(date: string): string {

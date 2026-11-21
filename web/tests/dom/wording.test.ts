@@ -233,6 +233,7 @@ const real = readData<Summary>('summary.json');
 /** The count number buttons and the summary.json value each one shows (state/specs.ts names them). */
 const COUNTS: Record<string, (s: Summary) => number> = {
   'count-wins-1938': (s) => s.wins_1938,
+  'count-wins-today': (s) => s.wins_today,
   'count-races': (s) => s.races,
   'count-ride-same': (s) => s.ride_same,
   'count-pairs': (s) => s.pairs.length,

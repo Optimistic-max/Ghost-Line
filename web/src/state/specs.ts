@@ -7,7 +7,6 @@ import {
   METHOD_RACE_COUNTS,
   METHOD_RIDE_1938,
   METHOD_RIDE_BUS,
-  METHOD_RIDE_VERDICTS,
   METHOD_TOTAL_1938,
   METHOD_WAIT_BUS,
   METHOD_WALK_SUM,
@@ -15,6 +14,7 @@ import {
   frequency,
   methodBusTrip,
   methodNextCar,
+  methodRideVerdicts,
   methodTotalToday,
   methodWalk,
   minShort,
@@ -414,16 +414,23 @@ export function honestNumbers(summary: Summary) {
   };
 }
 
-/** The counts of the "When today wins" sentence (R6.5). */
+/**
+ * The counts of the "When today wins" sheet (R6.5, story-layer Req 13): the heading's `wins_today`
+ * and the sentence's four counts. The ride-verdict method line carries the same-ride tolerance as
+ * plain text read from summary.ride_same_rule (Req 13.3).
+ */
 export function verdictNumbers(summary: Summary) {
+  const rule = summary.ride_same_rule;
+  const verdicts = methodRideVerdicts(String(rule.minutes), String(rule.fraction_pct));
   return {
-    rideSame: countNum(summary, 'ride_same', WHAT.rideSame, METHOD_RIDE_VERDICTS, summary.ride_same, 'count-ride-same'),
-    pairs: countNum(summary, 'pairs', WHAT.pairs, METHOD_RIDE_VERDICTS, summary.pairs.length, 'count-pairs'),
+    winsToday: countNum(summary, 'wins_today', WHAT.winsToday, METHOD_RACE_COUNTS, summary.wins_today, 'count-wins-today'),
+    rideSame: countNum(summary, 'ride_same', WHAT.rideSame, verdicts, summary.ride_same, 'count-ride-same'),
+    pairs: countNum(summary, 'pairs', WHAT.pairs, verdicts, summary.pairs.length, 'count-pairs'),
     rideFaster: countNum(
       summary,
       'ride_faster_today',
       WHAT.rideFasterToday,
-      METHOD_RIDE_VERDICTS,
+      verdicts,
       summary.ride_faster_today,
       'count-ride-faster',
     ),
@@ -431,7 +438,7 @@ export function verdictNumbers(summary: Summary) {
       summary,
       'ride_slower_today',
       WHAT.rideSlowerToday,
-      METHOD_RIDE_VERDICTS,
+      verdicts,
       summary.ride_slower_today,
       'count-ride-slower',
     ),

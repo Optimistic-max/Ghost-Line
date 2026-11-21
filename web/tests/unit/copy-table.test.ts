@@ -137,7 +137,6 @@ const RENDERED: Record<string, string> = {
   methodTotalToday: C.methodTotalToday('{h:mm}'),
   METHOD_MARGIN: C.METHOD_MARGIN,
   METHOD_RACE_COUNTS: C.METHOD_RACE_COUNTS,
-  METHOD_RIDE_VERDICTS: C.METHOD_RIDE_VERDICTS,
   dateEffective: C.dateEffective('{date}'),
   dateFeed: C.dateFeed('{feed_version}', '{date}'),
   exactValue: C.exactValue('{x}', N),
@@ -211,18 +210,9 @@ const REPLACED = [
   'races where the 1938 trolley arrives first',
   'races on this line',
   'Counted over every race on this line, one per corner pair and slider minute.',
+  "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
 ];
 
-/**
- * Replaced race-screen wording that copy.ts still holds, because a view still imports it.
- * Each stays in the effective table with its old text; its task removes both.
- */
-const KEPT_UNTIL_VIEW_CHANGES: Record<string, { text: string; task: string }> = {
-  METHOD_RIDE_VERDICTS: {
-    text: "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
-    task: 'task 16.1 (specs.ts ride-same rows)',
-  },
-};
 
 /** The phrases of WHAT ("What a number is"), each a table string. */
 for (const [key, phrase] of Object.entries(C.WHAT)) RENDERED[`WHAT.${key}`] = phrase;
@@ -354,10 +344,8 @@ describe('helpers', () => {
     }
   });
 
-  it('keeps two replaced constants, with their old text, only until the view that imports them changes', () => {
-    for (const [name, { text, task }] of Object.entries(KEPT_UNTIL_VIEW_CHANGES)) {
-      expect((C as Record<string, unknown>)[name], `${name} stays until ${task}`).toBe(text);
-    }
+  it('the race-screen ride-same line is gone from copy.ts', () => {
+    expect((C as Record<string, unknown>).METHOD_RIDE_VERDICTS).toBeUndefined();
   });
 
   it('board row labels and header follow the story-layer departures row', () => {
