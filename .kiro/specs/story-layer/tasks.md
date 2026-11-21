@@ -163,11 +163,11 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 2.1, 13.2, 13.3, 13.4, 13.6, 16.6**
     - Depends on: task 16.1
 
-- [ ] 17. Map dimming on desktop (cut first if late; Req 14)
-  - [-] 17.1 Only if time allows, and only after task 18 is otherwise green: `web/src/map/map.ts` and `map/style.ts` add a source for the selected pair's stretch (the polyline `layout.ts` `markerTrack` builds), drawn bright over the route, with the route lines at lower `line-opacity`; symbol layers keep opacity at 0.8 or more; updated on pair change through `map.corners(plan)`; phone and fallback drawing unchanged. Extend the `style.ts` unit test (no label below 80% opacity). If skipped, record it as cut in the final report; nothing else depends on it.
+- [x] 17. Map dimming on desktop (cut first if late; Req 14)
+  - [x] 17.1 Only if time allows, and only after task 18 is otherwise green: `web/src/map/map.ts` and `map/style.ts` add a source for the selected pair's stretch (the polyline `layout.ts` `markerTrack` builds), drawn bright over the route, with the route lines at lower `line-opacity`; symbol layers keep opacity at 0.8 or more; updated on pair change through `map.corners(plan)`; phone and fallback drawing unchanged. Extend the `style.ts` unit test (no label below 80% opacity). If skipped, record it as cut in the final report; nothing else depends on it.
     - _Requirements: 14.1, 14.2, 14.3_
 
-- [ ] 18. Checkpoint: site features
+- [-] 18. Checkpoint: site features
   - Ensure all tests pass, ask the user if questions arise. Run `npm test`, `npm run build` and `npm run check:size` in web/. Report to Emmanuel whether task 17 is built or cut.
 
 ## Cross-cutting tests, pictures and budgets

@@ -24,6 +24,8 @@ export default defineConfig({
     { name: 'laptop-webkit', testMatch: /race\.spec\.ts$/, use: { browserName: 'webkit', viewport: { width: 1280, height: 800 } } },
     // Each picture sets its own size.
     { name: 'screens', testMatch: /screens\.spec\.ts$/ },
+    // Story-layer checkpoint pictures: the lead race at 10:00, 10:08 and finished, phone and laptop.
+    { name: 'checkpoint', testMatch: /checkpoint\.spec\.ts$/ },
     // The first-race measurement of the deployed page: tagged timing, run alone, on a quiet machine (npm run perf).
     { name: 'perf', testMatch: /perf\.spec\.ts$/ },
   ],

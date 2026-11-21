@@ -193,7 +193,7 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     }),
     sliderRow({ first, last, minute: input.minute }),
     schedule,
-    notices,
+    ...(notices ? [notices] : []),
     h('div', { class: 'lanes' }, lane1938, today),
     // Plain text, outside the announcer's region. Racing, racer.ts writes it; a finished card (the finish,
     // skip, reduced motion) is drawn with the finished caption, or the orientation line on a guided visit.
