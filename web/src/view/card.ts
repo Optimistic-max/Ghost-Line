@@ -22,7 +22,7 @@ import { routeNumberOf } from '../format/line';
 import { clockOf, label12, serviceDateLabel } from '../format/time';
 import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
-import { honestNumbers, raceNumbers, type RaceNumbers } from '../state/specs';
+import { honestNumbers, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
 import { boardView } from './board';
 import { h } from './dom';
 import { honestLine } from './honest';
@@ -31,6 +31,7 @@ import { type RaceLayout, raceLayout } from './layout';
 import { type SourceRegistry, sentence } from './numbers';
 import { pairRow } from './pairrow';
 import { resultBox } from './resultbox';
+import { takeawayView } from './takeaway';
 import { slider } from './slider';
 import { type Layout, vehicleWidths } from './vehicles';
 import { VEHICLE_SIZES } from '../config';
@@ -76,11 +77,13 @@ export function resultElements(registry: SourceRegistry, input: CardInput, enter
     margin: nums.margin,
   });
   const honest = honestLine(registry, input.view.honest, honestNumbers(input.summary));
+  const takeaway = takeawayView(registry, input.view, takeawayNumbers(input.race, input.view));
   if (entering) {
     box.classList.add('entering');
     honest.classList.add('entering');
+    takeaway.classList.add('entering');
   }
-  return [box, honest];
+  return [box, honest, takeaway];
 }
 
 /** The race clock row while anything moves: "10:08 scheduled" (racer.ts writes it) and "Skip to result". */

@@ -10,6 +10,7 @@ import {
   METHOD_RIDE_VERDICTS,
   METHOD_TOTAL_1938,
   METHOD_WAIT_BUS,
+  METHOD_WALK_SUM,
   WHAT,
   frequency,
   methodBusTrip,
@@ -200,6 +201,40 @@ export function raceNumbers(race: RaceFile, view: RaceView) {
   const { boardSpacing, boardGaps } = boardSpacingNumbers(race, view);
 
   return { lane1938, today, margin, boardCars, boardBuses, boardSpacing, boardGaps };
+}
+
+/**
+ * The numbers of the takeaway (story-layer Req 8): the lane legends' shown parts again, each with the
+ * source of the legend number it repeats under its own id, and the sum of the two shown walks.
+ * Null `today` when there is no one-seat ride.
+ */
+export function takeawayNumbers(race: RaceFile, view: RaceView) {
+  const nums = raceNumbers(race, view);
+  const again = (num: Num, id: string): Num => ({ ...num, spec: { ...num.spec, id } });
+  const today =
+    nums.today && view.takeaway.today
+      ? {
+          wait: again(nums.today.wait, 'take-wait-today'),
+          ride: again(nums.today.ride, 'take-ride-today'),
+          walk: minutesNum(
+            {
+              id: 'take-walk-today',
+              what: WHAT.walkSum,
+              rowWhat: whatBetween(WHAT.walkSum, view.originName, view.destName),
+              sourceIds: ['mta_gtfs', 'method'],
+              method: METHOD_WALK_SUM,
+              date: 'feed',
+              walk: true,
+            },
+            view.takeaway.today.walk,
+          ),
+        }
+      : null;
+  return {
+    wait1938: again(nums.lane1938.wait, 'take-wait-1938'),
+    ride1938: again(nums.lane1938.ride, 'take-ride-1938'),
+    today,
+  };
 }
 
 /** The frequency sentence (R8.5): the how-it-was-worked-out line of the board's spacing and gaps. Null without bus gaps. */

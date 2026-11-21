@@ -630,6 +630,32 @@
   font-weight: 700;
 }
 
+/* ---- Takeaway: where the time goes (body size, system font, sentence case) ---- */
+
+.takeaway {
+  margin-top: 12px;
+}
+
+.takeaway-heading {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.takeaway-row,
+.takeaway-most {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.takeaway-most {
+  color: var(--ink);
+}
+
 /* ---- Numbers, links and buttons --------------------------------------------------- */
 
 /* Every number is a button with a dotted underline that opens its source. Its

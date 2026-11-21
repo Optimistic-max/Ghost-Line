@@ -97,6 +97,16 @@ export type Frequency = {
 
 export type Honest = { form: 'plain' | 'today-wins'; wins1938: number; races: number };
 
+/** The "Where the time goes" values (Req 8): the lane legends' shown parts, and the stored wait_most flag. */
+export type Takeaway = {
+  wait1938: number;
+  ride1938: number;
+  /** Null for no one-seat ride. `walk` is the sum of the two shown walks. */
+  today: { wait: number; walk: number; ride: number } | null;
+  /** row.wait_most as stored; nothing in the site compares waits. */
+  waitMost: boolean;
+};
+
 export type RaceView = {
   pair: Pair;
   originName: string;
@@ -121,6 +131,7 @@ export type RaceView = {
   /** Null when there are no bus gaps (no trips). */
   frequency: Frequency | null;
   honest: Honest;
+  takeaway: Takeaway;
 };
 
 export type Derived = { status: 'loading' } | { status: 'error' } | { status: 'ready'; view: RaceView };

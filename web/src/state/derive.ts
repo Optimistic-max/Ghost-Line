@@ -100,6 +100,9 @@ export function buildView(index: Index, summary: Summary, race: RaceFile, hhmm: 
   if (race.inferred) notices.push('inferred');
   const walks = now ? now.phases.filter((p) => p.kind === 'walk-to-stop' || p.kind === 'walk-from-stop') : [];
 
+  const walkShown = now ? sumShown(walks.map((p) => p.shown)) : null;
+  const shownOf = (l: Lane, kind: PhaseKind): number => l.phases.find((p) => p.kind === kind)?.shown ?? 0;
+
   return {
     pair: { origin: race.origin, dest: race.dest },
     originName,
@@ -114,11 +117,18 @@ export function buildView(index: Index, summary: Summary, race: RaceFile, hhmm: 
     colour: COLOURS[row.result],
     lane1938: old,
     laneToday: now,
-    walkShown: now ? sumShown(walks.map((p) => p.shown)) : null,
+    walkShown,
     notices,
     board: board(race, row, trip),
     frequency: frequency(race),
     honest: { form: row.result === 'today' ? 'today-wins' : 'plain', wins1938: summary.wins_1938, races: summary.races },
+    takeaway: {
+      wait1938: shownOf(old, 'wait'),
+      ride1938: shownOf(old, 'ride'),
+      today:
+        now && walkShown !== null ? { wait: shownOf(now, 'wait'), walk: walkShown, ride: shownOf(now, 'ride') } : null,
+      waitMost: row.wait_most,
+    },
   };
 }
 

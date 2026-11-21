@@ -34,7 +34,9 @@
 }
 
 .motion-full .honest.entering,
-.motion-lite .honest.entering {
+.motion-lite .honest.entering,
+.motion-full .takeaway.entering,
+.motion-lite .takeaway.entering {
   animation: fade-in 200ms var(--ease-out) 150ms both;
 }
 

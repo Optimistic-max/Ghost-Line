@@ -351,6 +351,25 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795240435251
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240610062
+      }
+    ],
+    "8. Lane illustrations and bar markers (Req 5, Req 6)": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240610392
+      }
+    ],
+    "9.1 `web/src/state/derive.ts`: add `takeaway` to `RaceView` from the lane legends' shown parts and `sumShown` of the two shown walks, with `waitMost` read from `row.wait_most` (no comparison anywhere in the site). `web/src/state/specs.ts`: `takeawayNumbers` (`take-wait-1938`, `take-ride-1938`, `take-wait-today`, `take-ride-today`, `take-walk-today` with `walk: true` and the sum method line). New `web/src/view/takeaway.ts`; `resultElements` appends it after the honest line, so it shows with the result box and at once under reduced motion; trolley rows only when there is no one-seat ride; the \"most of the difference\" sentence only when `waitMost`.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240611490
       }
     ]
   }
