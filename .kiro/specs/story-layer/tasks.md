@@ -172,10 +172,10 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
 
 ## Cross-cutting tests, pictures and budgets
 
-- [ ] 19. Rule tests across the whole screen (Req 13, Req 15, Req 16)
+- [x] 19. Rule tests across the whole screen (Req 13, Req 15, Req 16)
   - [x] 19.1 Extend `web/tests/dom/wording.test.ts` and the P3 crawl: every new part and state (first visit, racing with a caption, finished with takeaway, today-win notice, open departures, expanded route preview, no-ride fixture) has no banned word except "Scheduled, not live." and "Start time is the time now."; no "citywide"; every time carries "scheduled"; walks say "estimate"; every new number is a Number_Button with a Sources row; singular for 1 in every new minute string. Extend the count test: a made-up summary changes every count on screen.
     - _Requirements: 13.4, 13.5, 13.6, 13.7, 16.6, 16.11_
-  - [-] 19.2 Digit scan and principle test: no digit string from the real `summary.json` appears under `web/src/` (extending race-screen 19.3), and `web/tests/unit/principle.test.ts` passes with its allowlist unchanged (all new arithmetic is in `format/rounding.ts`, `format/gaps.ts`, `format/time.ts`, `play/timeline.ts`, `play/clock.ts`, `view/layout.ts` or `data/lookup.ts`).
+  - [x] 19.2 Digit scan and principle test: no digit string from the real `summary.json` appears under `web/src/` (extending race-screen 19.3), and `web/tests/unit/principle.test.ts` passes with its allowlist unchanged (all new arithmetic is in `format/rounding.ts`, `format/gaps.ts`, `format/time.ts`, `play/timeline.ts`, `play/clock.ts`, `view/layout.ts` or `data/lookup.ts`).
     - _Requirements: 8.7, 16.7_
   - [x] 19.3 Extend the made-up race file test set: chart columns equal its stored totals, its before-table minutes are hatched, the readout, takeaway, "most of the difference" sentence (one row with `wait_most` false) and captions follow the fixture.
     - _Requirements: 16.8_
@@ -184,7 +184,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - Depends on: tasks 7 to 16
 
 - [ ] 20. Playwright end to end (Req 5, 6, 9, 12, 14, 16)
-  - [ ] 20.1 `web/tests/e2e/race.spec.ts` (extend): marker geometry for the lead race at 10:00 at ten clock moments on 375 x 667 and 1280 x 800, with the trolley marker travelling its full ride segment within 1 px; illustration box sizes unchanged at three moments; chart cursor and slider thumb centre within 1 px at the first, middle and last minute.
+  - [-] 20.1 `web/tests/e2e/race.spec.ts` (extend): marker geometry for the lead race at 10:00 at ten clock moments on 375 x 667 and 1280 x 800, with the trolley marker travelling its full ride segment within 1 px; illustration box sizes unchanged at three moments; chart cursor and slider thumb centre within 1 px at the first, middle and last minute.
     - _Requirements: 5.3, 6.3, 9.1, 16.1_
   - [ ] 20.2 `race.spec.ts` (extend): no sideways scroll at 320, 375 and 899 px; with no sheet and no banner no displayed element is fixed or sticky and nothing scrolls inside the card, and the DOM order matches Req 12.2; request log with no MapLibre chunk and no tile host until "View route", and after "Hide route" no map instance and no further tile requests; a bad-link Guided_Visit at 375 x 667 and 320 wide, at the result moment, the banner's box does not intersect the result box or any Next_Step_Action box (overlaps are reported by pixels, not fixed by shrinking); "Scheduled, not live." visible while each notice shows.
     - _Requirements: 7.13, 12.1, 12.2, 12.3, 12.6, 12.9, 12.11, 16.12, 16.19_

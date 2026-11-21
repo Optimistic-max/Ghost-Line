@@ -662,6 +662,25 @@
         "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795289292182
+      },
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795294921811
+      }
+    ],
+    "19. Rule tests across the whole screen (Req 13, Req 15, Req 16)": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795294922422
+      }
+    ],
+    "20.1 `web/tests/e2e/race.spec.ts` (extend): marker geometry for the lead race at 10:00 at ten clock moments on 375 x 667 and 1280 x 800, with the trolley marker travelling its full ride segment within 1 px; illustration box sizes unchanged at three moments; chart cursor and slider thumb centre within 1 px at the first, middle and last minute.": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795294926363
       }
     ]
   }

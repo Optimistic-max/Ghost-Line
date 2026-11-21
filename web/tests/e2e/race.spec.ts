@@ -155,6 +155,142 @@ test.describe('the race (20.2)', () => {
   });
 });
 
+// Task 20.1 (story layer, Req 5.3, 6.3, 9.1, 16.1): geometry measured in the browser, in pixels, against
+// the page's own elements. Every tolerance is 1 px. Run on the phone (375 x 667) and the laptop (1280 x 800)
+// projects.
+const TOLERANCE_PX = 1;
+
+type Rect = { x: number; y: number; width: number; height: number };
+
+/** Per side: the bar marker's centre, the ride segment's edges, and the ride's --f, all from the drawn page. */
+async function markerReading(page: Page): Promise<Record<'1938' | 'today', { centre: number; left: number; right: number; f: number; filled: number } | null>> {
+  return page.evaluate(() => {
+    const read = (side: string) => {
+      const lane = document.querySelector(`.lane-${side}`);
+      const marker = lane?.querySelector('.bar-marker > *');
+      const ride = lane?.querySelector('.seg-ride');
+      if (!marker || !ride) return null;
+      const m = marker.getBoundingClientRect();
+      const r = ride.getBoundingClientRect();
+      const raw = getComputedStyle(ride).getPropertyValue('--f').trim();
+      const f = raw === '' ? 1 : Number.parseFloat(raw);
+      return { centre: m.x + m.width / 2, left: r.x, right: r.x + r.width, f, filled: r.x + f * r.width };
+    };
+    return { '1938': read('1938'), today: read('today') };
+  });
+}
+
+/** The two illustrations' box sizes (the trolley and the bus in the lane title rows). */
+async function illustrationSizes(page: Page): Promise<Record<string, { art: [number, number]; svg: [number, number] }>> {
+  return page.evaluate(() => {
+    const out: Record<string, { art: [number, number]; svg: [number, number] }> = {};
+    for (const side of ['1938', 'today']) {
+      const vehicle = document.querySelector(`.lane-${side} .lane-art .vehicle`)?.getBoundingClientRect();
+      const svg = document.querySelector(`.lane-${side} .lane-art .vehicle svg`)?.getBoundingClientRect();
+      if (vehicle && svg) out[side] = { art: [vehicle.width, vehicle.height], svg: [svg.width, svg.height] };
+    }
+    return out;
+  });
+}
+
+test.describe('story-layer geometry (20.1)', () => {
+  test('the bar markers sit on the filled end of the ride at ten clock moments, and the trolley marker travels the whole ride segment', async ({ page }, info) => {
+    await pausedAt(page, '20:00');
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    await page.clock.runFor(TIMINGS.orientationMs + 50);
+    expect(await phase(page)).toBe('running');
+    const seen: string[] = [];
+    let first: Awaited<ReturnType<typeof markerReading>> | null = null;
+    const check = (label: string, r: Awaited<ReturnType<typeof markerReading>>): void => {
+      for (const side of ['1938', 'today'] as const) {
+        const s = r[side];
+        if (!s) continue;
+        const off = s.centre - s.filled;
+        seen.push(`${label} ${side}: marker ${s.centre.toFixed(2)}, ride ${s.left.toFixed(2)}..${s.right.toFixed(2)}, f ${s.f.toFixed(3)}, off ${off.toFixed(2)}`);
+        expect(Math.abs(off), `${info.project.name} ${label} ${side} marker against the ride's filled end`).toBeLessThanOrEqual(TOLERANCE_PX);
+      }
+    };
+    for (let k = 0; k < 10; k += 1) {
+      const reading = await markerReading(page);
+      first ??= reading;
+      check(`moment ${k + 1}`, reading);
+      await page.clock.runFor(900);
+    }
+    // Before the ride, the markers wait at the ride's start.
+    for (const side of ['1938', 'today'] as const) {
+      const s = first![side];
+      if (s) expect(Math.abs(s.centre - s.left), `${info.project.name} ${side} marker at the start of the ride`).toBeLessThanOrEqual(TOLERANCE_PX);
+    }
+    // After the finish, both sit at the ride's end: the trolley marker has crossed the whole segment.
+    await page.locator('.skip').click();
+    expect(await phase(page)).toBe('finished');
+    const done = await markerReading(page);
+    check('finished', done);
+    for (const side of ['1938', 'today'] as const) {
+      const s = done[side];
+      if (s) expect(Math.abs(s.centre - s.right), `${info.project.name} ${side} marker at the end of the ride`).toBeLessThanOrEqual(TOLERANCE_PX);
+    }
+    const travelled = done['1938']!.centre - first!['1938']!.centre;
+    seen.push(`1938 marker travelled ${travelled.toFixed(2)} px of a ${done['1938']!.right - done['1938']!.left} px ride segment`);
+    expect(Math.abs(travelled - (done['1938']!.right - done['1938']!.left))).toBeLessThanOrEqual(TOLERANCE_PX * 2);
+    console.log(`${info.project.name}\n${seen.join('\n')}`);
+  });
+
+  test('the illustrations keep their box sizes before the race, mid-race and finished', async ({ page }, info) => {
+    await pausedAt(page, '20:00');
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    const before = await illustrationSizes(page);
+    await page.clock.runFor(TIMINGS.orientationMs + 3000);
+    expect(await phase(page)).toBe('running');
+    const during = await illustrationSizes(page);
+    await page.locator('.skip').click();
+    expect(await phase(page)).toBe('finished');
+    const after = await illustrationSizes(page);
+    console.log(`${info.project.name} illustrations: ${JSON.stringify(before)}`);
+    expect(Object.keys(before).sort()).toEqual(['1938', 'today']);
+    for (const side of ['1938', 'today']) {
+      for (const part of ['art', 'svg'] as const) {
+        for (const [name, later] of [['mid-race', during], ['finished', after]] as const) {
+          const a = before[side]![part];
+          const b = later[side]![part];
+          expect(Math.abs(a[0] - b[0]), `${side} ${part} width, ${name}`).toBeLessThanOrEqual(0.01);
+          expect(Math.abs(a[1] - b[1]), `${side} ${part} height, ${name}`).toBeLessThanOrEqual(0.01);
+        }
+      }
+    }
+  });
+
+  test('the chart cursor sits over the slider thumb centre at the first, middle and last minute', async ({ page }, info) => {
+    await pausedAt(page, '20:00');
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    const slider = page.locator('#start-time');
+    const min = Number(await slider.getAttribute('min'));
+    const max = Number(await slider.getAttribute('max'));
+    const seen: string[] = [];
+    for (const [name, minute] of [['first', min], ['middle', Math.round((min + max) / 2)], ['last', max]] as const) {
+      await slider.fill(String(minute));
+      const m = await page.evaluate(() => {
+        const input = document.querySelector<HTMLInputElement>('#start-time')!.getBoundingClientRect();
+        const cursor = document.querySelector('.chart-cursor')!.getBoundingClientRect();
+        const thumb = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb'));
+        const el = document.querySelector<HTMLInputElement>('#start-time')!;
+        return { inputX: input.x, inputW: input.width, thumb, cursorCentre: cursor.x + cursor.width / 2, value: Number(el.value), min: Number(el.min), max: Number(el.max) };
+      });
+      expect(m.value).toBe(minute);
+      const thumbCentre = m.inputX + m.thumb / 2 + ((m.value - m.min) / (m.max - m.min)) * (m.inputW - m.thumb);
+      seen.push(`${name} (${minute}): thumb centre ${thumbCentre.toFixed(2)}, cursor centre ${m.cursorCentre.toFixed(2)}, off ${(m.cursorCentre - thumbCentre).toFixed(2)}`);
+      expect(Math.abs(m.cursorCentre - thumbCentre), `${info.project.name} ${name} minute`).toBeLessThanOrEqual(TOLERANCE_PX);
+    }
+    console.log(`${info.project.name}\n${seen.join('\n')}`);
+  });
+});
+
 test.describe('the keyboard alone (20.2, R13.1)', () => {
   /** Tab (or Shift+Tab) until `selector` has focus, then check its focus ring shows. */
   async function tabTo(page: Page, selector: string, shift = false): Promise<void> {
