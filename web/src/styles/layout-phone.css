@@ -1,15 +1,22 @@
-/* Phone layout, below 900 px wide (designed at 375 x 667): top bar 40 px, map
-   150 px, race card from 181 px down with its rounded top over the map's lower
-   edge, the two buttons pinned 6 px above the bottom on a solid panel strip.
-   The card scrolls inside itself; nothing scrolls sideways. */
+/* Phone layout, below 900 px wide (designed at 375 x 667): top bar 40 px, the
+   intro line, the map, then the race card with its rounded top over the map's
+   lower edge. Everything is in normal page flow: the page scrolls, nothing is
+   pinned and nothing scrolls inside the card; Sources and Share this race, then
+   About and credits, follow the content (story-layer Req 12). Only the overlays
+   (sheets, scrim, banners) are fixed. Nothing scrolls sideways. */
 
 .app {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* The phone intro line sits under the top bar (story-layer Req 12.2). */
+.intro-line {
+  flex: none;
+  padding: 0 var(--pad) 8px;
+  color: var(--muted);
 }
 
 .topbar {
@@ -36,15 +43,18 @@
 }
 
 .main {
-  flex: 1;
+  flex: none;
   display: grid;
-  grid-template-rows: var(--map-h) minmax(0, 1fr);
+  grid-template-rows: auto var(--map-h) auto;
   grid-template-columns: minmax(0, 1fr);
-  min-height: 0;
+}
+
+.intro-line {
+  grid-row: 1;
 }
 
 .map-area {
-  grid-row: 1;
+  grid-row: 2;
   position: relative;
   overflow: hidden;
   background: var(--night);
@@ -56,26 +66,22 @@
 }
 
 .card {
-  grid-row: 2;
+  grid-row: 3;
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  /* The card starts at 181 px: 9 px over the map's lower edge. */
+  /* The card starts 9 px over the map's lower edge. */
   margin-top: calc(var(--card-top) - var(--topbar-h) - var(--map-h));
   background: var(--panel);
   border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
-/* The card scrolls under the pinned button strip; its last line can still
-   scroll clear of the strip (R1.2). */
+/* The card is in the page's normal flow: the page scrolls, the card does not (story-layer Req 12.1). */
 .card-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: var(--pad) var(--pad) calc(var(--strip-h) + var(--pad));
+  flex: none;
+  overflow-x: clip;
+  padding: var(--pad) var(--pad) 0;
 }
 
 .pair-row {
@@ -86,50 +92,70 @@
   min-width: 0;
 }
 
+/* Phone pair row: two lines, the start, then "→ destination" (Req 12.2). The desktop
+   stylesheet puts the names back on one line. */
+.pair-row .pair-break {
+  display: block;
+  height: 0;
+}
+
 .loading-line {
   margin-top: 12px;
   color: var(--muted);
 }
 
-/* The two buttons stay pinned on a solid --panel strip over the bottom of the
-   card, so the card's text passes under them cleanly. */
+/* Sources and Share this race flow after the content (Req 12.2). */
 .card-buttons {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
   display: flex;
   gap: 12px;
-  height: var(--strip-h);
-  padding: 8px var(--pad) var(--buttons-bottom);
-  background: var(--panel);
+  padding: 16px var(--pad) 0;
 }
 
 .card-buttons:empty {
   display: none;
 }
 
-/* The footer line is part of the desktop race column only. */
+/* "About and credits" closes the page (Req 12.2). */
 .card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px var(--pad) 24px;
+}
+
+.card-footer .link {
+  min-height: var(--tap);
+}
+
+.card-footer:empty {
   display: none;
 }
 
-/* Sheets slide up from the bottom over a scrim. */
+/* Sheets slide up from the bottom over a scrim. With no sheet open the scrim is not displayed,
+   so nothing fixed shows (story-layer Req 12.1). It fades in from opacity 0 where the browser
+   supports @starting-style, and simply appears where it does not. */
 .scrim {
   position: fixed;
   inset: 0;
   z-index: 10;
+  display: none;
   background: rgb(0 0 0 / 55%);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--sheet-out) var(--ease-in);
 }
 
 .scrim.is-open {
+  display: block;
   opacity: 1;
   pointer-events: auto;
   transition: opacity var(--sheet-in) var(--ease-out);
+}
+
+@starting-style {
+  .scrim.is-open {
+    opacity: 0;
+  }
 }
 
 .sheet {
@@ -154,14 +180,45 @@
   transition: transform var(--sheet-in) var(--ease-out);
 }
 
-/* The banner is a light pill over the top bar. */
+/* The banner is an overlay: a compact strip, one or two lines tall, anchored at the top of the
+   viewport, over the top bar, clear of the result box and the next-step actions further down the
+   card. Its close control clears it at once (story-layer Req 12.11, decision 20). */
 .banner-root {
   position: fixed;
   top: 4px;
-  left: var(--pad);
-  right: var(--pad);
+  left: 0;
+  right: 0;
   z-index: 20;
   display: flex;
   justify-content: center;
+  padding: 0 var(--pad);
   pointer-events: none;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  pointer-events: auto;
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner-close {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  margin: -6px -10px -6px 0;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--night);
+}
+
+/* The cross is drawn here, so the banner's text is the copy string alone; the button is named "Close". */
+.banner-close::before {
+  content: '×';
 }

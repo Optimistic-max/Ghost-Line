@@ -23,6 +23,8 @@ export function pairRow(originName: string, destName: string, inferred: Inferred
         { class: 'pair-row', id: 'pair-names', 'data-chip': inferred !== null },
         h('span', { class: 'corner', id: 'origin-name' }, originName),
         chip('origin'),
+        // Phone only (layout-phone.css): the line break between the two names.
+        h('span', { class: 'pair-break', 'aria-hidden': 'true' }),
         h('span', { class: 'arrow' }, ` ${GLYPH.arrow} `),
         h('span', { class: 'corner', id: 'dest-name' }, destName),
         chip('dest'),

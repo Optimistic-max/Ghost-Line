@@ -266,6 +266,20 @@ describe('links (14.2, race-brief 5.9)', () => {
     expect(banner()).toBeNull();
   });
 
+  it('clears the banner at once with its close control, named "Close" (story-layer Req 12.11)', async () => {
+    const { app, time } = await opened(`?from=nowhere&to=${lead.dest}`);
+    const close = banner()!.querySelector<HTMLButtonElement>('button.banner-close')!;
+    expect(close.getAttribute('aria-label')).toBe(C.CLOSE);
+    close.click();
+    expect(app.store.get().banner).toBeNull();
+    expect(banner()!.classList.contains('is-open')).toBe(false);
+    time.advance(TIMINGS.bannerSlideMs);
+    expect(banner()).toBeNull();
+    // The hold timer it replaced does not bring it back.
+    time.advance(TIMINGS.bannerHoldMs * 2);
+    expect(banner()).toBeNull();
+  });
+
   it('opens the lead pair at 5.9 case 5 with the shared banner, and with no banner and no query (case 8)', async () => {
     const { app } = await opened(encode(lead));
     expect(app.store.get().pair).toEqual(lead);

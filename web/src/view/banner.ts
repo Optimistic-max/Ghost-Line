@@ -3,6 +3,7 @@
 // slide is the stylesheet's transition; with reduced motion it is removed and
 // the banner simply appears and goes. It names the pair only, never a time.
 import { TIMINGS } from '../config';
+import { CLOSE } from '../copy/copy';
 import { h } from './dom';
 
 export type Banner = {
@@ -24,7 +25,14 @@ export function createBanner(
   return {
     show(text, onDone) {
       stop();
-      const banner = h('div', { class: 'banner', role: 'status' }, text);
+      // The close control clears the banner at once, whatever the hold timer is doing (Req 12.11).
+      // The cross is drawn by the stylesheet, so the banner's text stays the copy string alone.
+      const close = h('button', { type: 'button', class: 'banner-close', 'aria-label': CLOSE });
+      close.addEventListener('click', () => {
+        stop();
+        onDone();
+      });
+      const banner = h('div', { class: 'banner', role: 'status' }, h('span', { class: 'banner-text' }, text), close);
       root.replaceChildren(banner);
       el = banner;
       // Read the layout once so the slide starts from above the screen.

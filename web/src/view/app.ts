@@ -142,6 +142,8 @@ export function createApp(options: AppOptions): App {
   byId(doc, 'app').append(info);
   const headline = doc.getElementById('headline');
   const headlineLine = headline?.querySelector<HTMLElement>('.headline-line') ?? null;
+  const intro = doc.getElementById('intro-line');
+  const introParent = intro?.parentElement ?? null;
   const mapArea = byId(doc, 'map-area');
   const fixtureTag = h('p', { class: 'fixture-tag', hidden: true }, FIXTURE_TAG);
   mapArea.append(fixtureTag);
@@ -223,6 +225,12 @@ export function createApp(options: AppOptions): App {
     label.textContent = n && year ? lineLabel(n, year) : '';
     label.hidden = !(n && year);
     info.hidden = data.status !== 'ready';
+    // The phone intro line names the year 1938, so it leaves the page with the data error, like the
+    // headline's second line (P7).
+    if (intro && introParent) {
+      if (data.status === 'error') intro.remove();
+      else if (!intro.isConnected) introParent.prepend(intro);
+    }
     // The headline's second line names the year 1938; during the data error it leaves the page, so
     // the DOM holds no number at all, and "Same ride, longer wait." stays (P7; Emmanuel, Nov 19).
     if (headlineLine && headline) {

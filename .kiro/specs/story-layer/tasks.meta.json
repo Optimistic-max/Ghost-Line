@@ -487,6 +487,25 @@
         "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795269129082
+      },
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795269505722
+      }
+    ],
+    "13. Scheduled departures section (Req 11)": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795269506943
+      }
+    ],
+    "14.1 `web/index.html` adds the phone-only intro line (text equal to the `copy.ts` constant); `styles/layout-phone.css`: `.app` loses `height: 100dvh; overflow: hidden`, `.card-scroll` loses its inside scrolling and bottom padding, `.card-buttons` loses the pinned strip and flows after the content; the phone pair row is two lines (origin, then \"→ destination\") with the swap button; the DOM order is as Req 12.2 for phone and the same from the pair names down on desktop. Sheets, scrim and banners stay overlays; the scrim is `display: none` with no sheet; on a phone the banner is a compact strip at the top of the viewport that never covers the result box or the Next_Step_Actions, and its close control always clears it. No text size is reduced.": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795269510094
       }
     ]
   }

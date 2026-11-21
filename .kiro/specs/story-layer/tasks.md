@@ -135,15 +135,15 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 10.1 to 10.8, 16.6, 16.10**
     - Depends on: task 12.1
 
-- [ ] 13. Scheduled departures section (Req 11)
+- [x] 13. Scheduled departures section (Req 11)
   - [x] 13.1 New `web/src/view/departures.ts` wrapping the existing `boardView` in a section with a `<button aria-expanded aria-controls>` "Scheduled departures" and a region hidden unless `departuresOpen`; `boardShown` true on both layouts and stages; `racer.finish()` keeps the board; `view/board.ts` uses `BOARD_TODAY` for the bus row. Board content rules (R8.2, R8.3, R8.5) unchanged. Number buttons inside a closed section still register their Sources rows.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
-  - [-] 13.2 DOM tests: closed by default, `aria-expanded` toggles, labels, every time and gap is a Number_Button when open, the P3 crawl finds a registry row for each whether open or closed, board contents equal the file's lists.
+  - [x] 13.2 DOM tests: closed by default, `aria-expanded` toggles, labels, every time and gap is a Number_Button when open, the P3 crawl finds a registry row for each whether open or closed, board contents equal the file's lists.
     - **Validates: Requirements 11.1 to 11.5**
     - Depends on: task 13.1
 
 - [ ] 14. Phone reading order and page flow (Req 12.1, 12.2, 12.4 to 12.7, 12.11)
-  - [ ] 14.1 `web/index.html` adds the phone-only intro line (text equal to the `copy.ts` constant); `styles/layout-phone.css`: `.app` loses `height: 100dvh; overflow: hidden`, `.card-scroll` loses its inside scrolling and bottom padding, `.card-buttons` loses the pinned strip and flows after the content; the phone pair row is two lines (origin, then "→ destination") with the swap button; the DOM order is as Req 12.2 for phone and the same from the pair names down on desktop. Sheets, scrim and banners stay overlays; the scrim is `display: none` with no sheet; on a phone the banner is a compact strip at the top of the viewport that never covers the result box or the Next_Step_Actions, and its close control always clears it. No text size is reduced.
+  - [-] 14.1 `web/index.html` adds the phone-only intro line (text equal to the `copy.ts` constant); `styles/layout-phone.css`: `.app` loses `height: 100dvh; overflow: hidden`, `.card-scroll` loses its inside scrolling and bottom padding, `.card-buttons` loses the pinned strip and flows after the content; the phone pair row is two lines (origin, then "→ destination") with the swap button; the DOM order is as Req 12.2 for phone and the same from the pair names down on desktop. Sheets, scrim and banners stay overlays; the scrim is `display: none` with no sheet; on a phone the banner is a compact strip at the top of the viewport that never covers the result box or the Next_Step_Actions, and its close control always clears it. No text size is reduced.
     - _Requirements: 12.1, 12.2, 12.4, 12.5, 12.11_
   - [ ] 14.2 Tests. DOM: the order of Req 12.2 on both layouts including the notices directly under the schedule line; the intro line equals the constant. jsdom/CSS scan: no `position: fixed` or `sticky` rule displays on a phone with no sheet and no banner. (The geometry checks run in task 20.)
     - **Validates: Requirements 12.1, 12.2, 12.4, 16.12**

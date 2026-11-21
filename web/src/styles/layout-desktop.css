@@ -10,6 +10,12 @@
   .app {
     display: block;
     height: 100vh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .intro-line {
+    display: none;
   }
 
   .topbar {
@@ -87,6 +93,11 @@
     overflow-x: clip;
   }
 
+  /* The phone's line break between the two names (layout-phone.css) is not drawn here. */
+  .pair-row .pair-break {
+    display: none;
+  }
+
   /* The fixture tag sits over the map, at its foot. */
   .map-area .fixture-tag {
     top: auto;
@@ -105,10 +116,12 @@
 
   .card-footer {
     display: flex;
+    flex-direction: row;
+    align-items: stretch;
     justify-content: space-between;
     gap: 12px;
     margin: 20px var(--column-pad) 24px;
-    padding-top: 16px;
+    padding: 16px 0 0;
     border-top: 1px solid var(--line);
   }
 
