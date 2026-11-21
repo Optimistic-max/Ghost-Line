@@ -106,9 +106,9 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - Depends on: task 8.2
 
 - [ ] 9. Where the time goes (Req 8)
-  - [-] 9.1 `web/src/state/derive.ts`: add `takeaway` to `RaceView` from the lane legends' shown parts and `sumShown` of the two shown walks, with `waitMost` read from `row.wait_most` (no comparison anywhere in the site). `web/src/state/specs.ts`: `takeawayNumbers` (`take-wait-1938`, `take-ride-1938`, `take-wait-today`, `take-ride-today`, `take-walk-today` with `walk: true` and the sum method line). New `web/src/view/takeaway.ts`; `resultElements` appends it after the honest line, so it shows with the result box and at once under reduced motion; trolley rows only when there is no one-seat ride; the "most of the difference" sentence only when `waitMost`.
+  - [x] 9.1 `web/src/state/derive.ts`: add `takeaway` to `RaceView` from the lane legends' shown parts and `sumShown` of the two shown walks, with `waitMost` read from `row.wait_most` (no comparison anywhere in the site). `web/src/state/specs.ts`: `takeawayNumbers` (`take-wait-1938`, `take-ride-1938`, `take-wait-today`, `take-ride-today`, `take-walk-today` with `walk: true` and the sum method line). New `web/src/view/takeaway.ts`; `resultElements` appends it after the honest line, so it shows with the result box and at once under reduced motion; trolley rows only when there is no one-seat ride; the "most of the difference" sentence only when `waitMost`.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_
-  - [ ] 9.2 Tests. **Property 8: The takeaway repeats the lane values and follows the stored flag** (including a copy of the row with the flag flipped). DOM tests with real data and the fixture row where `wait_most` is false; the no-ride fixture shows trolley rows only; every takeaway number is a Number_Button with a Sources row.
+  - [x] 9.2 Tests. **Property 8: The takeaway repeats the lane values and follows the stored flag** (including a copy of the row with the flag flipped). DOM tests with real data and the fixture row where `wait_most` is false; the no-ride fixture shows trolley rows only; every takeaway number is a Number_Button with a Sources row.
     - **Validates: Requirements 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 16.8**
     - Depends on: task 9.1
 

@@ -370,6 +370,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795240611490
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240854924
+      }
+    ],
+    "9.2 Tests. **Property 8: The takeaway repeats the lane values and follows the stored flag** (including a copy of the row with the flag flipped). DOM tests with real data and the fixture row where `wait_most` is false; the no-ride fixture shows trolley rows only; every takeaway number is a Number_Button with a Sources row.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240856513
       }
     ]
   }
