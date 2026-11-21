@@ -22,7 +22,7 @@ import {
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
 import { cornerName, sliderRange } from '../data/lookup';
-import type { Index, Pair, RaceFile, Summary } from '../data/types';
+import type { Index, Pair, RaceFile, Summary, TodayWin } from '../data/types';
 import { routeNumberOf, yearOf } from '../format/line';
 import { decode, encode, namesAPair } from '../format/share';
 import { defaultStart, minutesOf } from '../format/time';
@@ -106,6 +106,7 @@ type Drawn = {
   stage: Stage;
   resultShown: boolean;
   guided: boolean;
+  todayWinNotice: TodayWin | null;
 };
 
 const LEVELS: MotionLevel[] = ['full', 'lite', 'reduced'];
@@ -420,7 +421,7 @@ export function createApp(options: AppOptions): App {
     }
     mapView.painted();
     const { index, summary, race, minute, layout, stage, resultShown, guided } = input;
-    drawn = { index, summary, race, minute, layout, stage, resultShown, guided };
+    drawn = { index, summary, race, minute, layout, stage, resultShown, guided, todayWinNotice: input.todayWinNotice ?? null };
     racer = null;
     timeline = null;
     if (stage !== 'racing') return;
@@ -493,6 +494,7 @@ export function createApp(options: AppOptions): App {
       canSkip: state.motion !== 'reduced',
       guided: state.guided,
       orientation: state.guided && !state.oriented,
+      todayWinNotice: state.todayWinNotice,
     };
     // While the slider moves, only the time label and the departures board follow it (R3.5).
     if (held && drawn) {
@@ -517,7 +519,8 @@ export function createApp(options: AppOptions): App {
       drawn.minute === input.minute &&
       drawn.layout === input.layout &&
       drawn.stage === input.stage &&
-      drawn.guided === input.guided;
+      drawn.guided === input.guided &&
+      drawn.todayWinNotice === input.todayWinNotice;
     if (same && drawn?.resultShown === input.resultShown) {
       announceIfDue(derived.view);
       return;

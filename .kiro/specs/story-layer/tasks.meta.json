@@ -414,6 +414,13 @@
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795266215101
       }
+    ],
+    "11.1 `web/src/view/card.ts`: always render the schedule line (\"... Scheduled, not live.\"), removing the race-screen condition that hid it while a notice showed (race-screen R6.7, superseded); render the before-the-table notice, the inferred-corner notice and the today-win notice in one `.notices` block directly after it. The today-win notice shows the pair names from index.json and the entry's `t` in 12-hour form as plain text (no Number_Button, no Sources row). Run `grep` for `.schedule` in `web/tests/`; change only the assertions that expect the line hidden while a notice shows, and name each in the commit message.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795266797281
+      }
     ]
   }
 }

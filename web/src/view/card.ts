@@ -13,11 +13,12 @@ import {
   beforeTable,
   captionText,
   ready,
+  todayWinNotice,
 } from '../copy/copy';
-import type { Index, RaceFile, Summary } from '../data/types';
-import { sliderRange } from '../data/lookup';
+import type { Index, RaceFile, Summary, TodayWin } from '../data/types';
+import { cornerName, sliderRange } from '../data/lookup';
 import { routeNumberOf } from '../format/line';
-import { serviceDateLabel } from '../format/time';
+import { label12, serviceDateLabel } from '../format/time';
 import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
 import { honestNumbers, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
@@ -54,6 +55,8 @@ export type CardInput = {
   guided?: boolean;
   /** The orientation line shows in the caption area: a guided visit before its first race has started (Req 4.1). */
   orientation?: boolean;
+  /** The summary.today_wins entry the shortcut selected, while its notice shows (Req 10.5). */
+  todayWinNotice?: TodayWin | null;
   /** The trolley's one fade-in, on the first paint of the page (R2.5). */
   firstPaint?: boolean;
 };
@@ -119,8 +122,9 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   // Under the slider: the schedule line always shows (story-layer decision 16, Req 7.13), then the
   // notices block directly after it (Req 12.2).
   const schedule = h('p', { class: 'schedule' }, ready(serviceDateLabel(index.service_date)), input.minuteFromClock ? ` ${START_IS_NOW}` : '');
+  const win = input.todayWinNotice ?? null;
   const notices =
-    view.notices.length > 0
+    view.notices.length > 0 || win
       ? h(
           'div',
           { class: 'notices' },
@@ -130,6 +134,14 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
                 h('p', { class: 'notice', 'data-notice': notice }, sentence(registry, beforeTable, nums.lane1938.next))
               : h('p', { class: 'notice', 'data-notice': notice }, INFERRED_CAUTION),
           ),
+          // The today-win notice: plain text, no number button, after the other notices (Req 10.5).
+          win
+            ? h(
+                'p',
+                { class: 'notice', 'data-notice': 'today-win' },
+                todayWinNotice(cornerName(index, win.origin) ?? win.origin, cornerName(index, win.dest) ?? win.dest, label12(win.t)),
+              )
+            : null,
         )
       : null;
   const inferredSlug = index.corners.find((c) => c.inferred)?.slug;
