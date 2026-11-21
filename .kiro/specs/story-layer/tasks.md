@@ -206,9 +206,9 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
 
 ## Final validation
 
-- [ ] 23. Final checkpoint
+- [x] 23. Final checkpoint
   - [x] 23.1 Run, each as its own command: `python -m pipeline check`, `python -m pipeline verify`, `python -m pipeline check_sources`, then in web/ `npm test`, `npm run build`, `npm run test:e2e`, `npm run check:size`. All must pass, including every race-screen and race-engine test (Req 16.17), with every golden value and facts file unchanged since task 1.
-  - [-] 23.2 Write the report for Emmanuel: any layout finding from the report file with its pixel amount (104, 150, 28 and 100 px kept); whether task 17 was built or cut; every superseded race-screen test that changed; the perf numbers. Do not change a size, a text size, a golden value or a test to clear a finding.
+  - [x] 23.2 Write the report for Emmanuel: any layout finding from the report file with its pixel amount (104, 150, 28 and 100 px kept); whether task 17 was built or cut; every superseded race-screen test that changed; the perf numbers. Do not change a size, a text size, a golden value or a test to clear a finding.
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
