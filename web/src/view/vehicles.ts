@@ -246,6 +246,23 @@ export function markerSvg(options: { width: number }): string {
   return `<span class="marker" data-vehicle="marker">${svg('marker-art', viewBox, options.width, parts)}</span>`;
 }
 
+/**
+ * Today's bar marker: a small flat bus in the same 58 x 26 box as the trolley
+ * marker, so both bar markers are the same size. Drawn with the bus's own
+ * classes, so it takes --today and --panel from vehicles.css. No pole, wire or glow.
+ */
+export function busMarkerSvg(options: { width: number }): string {
+  const parts = [
+    '<rect class="b-body" data-part="body" x="2" y="5" width="54" height="16" rx="3"/>',
+    ...[7, 19, 31].map((x) => `<rect class="b-window" data-part="window" x="${x}" y="8" width="9" height="6" rx="1"/>`),
+    '<rect class="b-window" data-part="windscreen" x="44" y="8" width="9" height="6" rx="1"/>',
+    '<circle class="b-wheel" data-part="wheel" cx="14" cy="22" r="3.4"/>',
+    '<circle class="b-wheel" data-part="wheel" cx="45" cy="22" r="3.4"/>',
+  ];
+  const viewBox = `0 0 ${MARKER_VIEWBOX.width} ${MARKER_VIEWBOX.height}`;
+  return `<span class="marker bus-marker" data-vehicle="bus-marker">${svg('marker-art', viewBox, options.width, parts)}</span>`;
+}
+
 // ---- Today's bus ---------------------------------------------------------------
 
 /** Today's bus: a plain flat shape with dark windows and two wheels. */

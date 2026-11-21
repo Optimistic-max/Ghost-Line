@@ -308,6 +308,25 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795238640379
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795239946024
+      }
+    ],
+    "7. Captions (Req 7)": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795239947209
+      }
+    ],
+    "8.1 `web/src/view/vehicles.ts`: add `busMarkerSvg` (small flat bus, `--today`, no glow). `web/src/view/layout.ts`: add `markerCentre(layout, frame, barPx, segGapPx)` (ride start before the ride, filled end during it, ride end after it; park position for reduced motion).": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795239954180
       }
     ]
   }

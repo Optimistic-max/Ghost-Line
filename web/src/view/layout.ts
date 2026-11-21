@@ -2,6 +2,7 @@
 // trip is visibly longer, and positions in the map area (design 12.1, 12.2).
 // Allowed arithmetic: fractions of the longer stored total, and geometry of the
 // route's own coordinates. Nothing here reads a time or decides a result.
+import type { LaneFrame } from '../play/timeline';
 import type { Lane, RaceView } from '../state/model';
 import { MARKER_VIEWBOX } from './vehicles';
 
@@ -27,6 +28,18 @@ function laneLayout(lane: Lane, longest: number): LaneLayout {
   const park = rideFrom + (widths[rideIndex] ?? 0);
   const end = widths.reduce((a, b) => a + b, 0);
   return { widths, end, rideFrom, park, gapsBefore: rideIndex };
+}
+
+/**
+ * Where a lane's bar marker centre stands, in pixels from the bar's left edge
+ * (the marker track adds half a marker on each side). Before the ride it is the
+ * ride's start, during it the filled end, after it the ride's end: all of that
+ * is `frame.vehicle`. The gaps drawn before the ride shift it by `segGapPx`
+ * each. A null frame is the reduced-motion case: parked at the ride's end.
+ */
+export function markerCentre(layout: LaneLayout, frame: Pick<LaneFrame, 'vehicle'> | null, barPx: number, segGapPx: number): number {
+  const share = frame ? frame.vehicle : layout.park;
+  return share * barPx + layout.gapsBefore * segGapPx;
 }
 
 /**
