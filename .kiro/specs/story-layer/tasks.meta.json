@@ -736,6 +736,25 @@
         "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795296934789
+      },
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795297511482
+      }
+    ],
+    "22.1 Run `npm run check:size` (first-screen under 100,000 bytes compressed, map chunk excluded, no new runtime dependency in `web/package.json`) and the `web/tests/build/budget.test.ts` checks (no static import of the map chunk; the dynamic import in `app.ts` remains the only reference). Confirm `npm run perf` still reads the `race-start` mark and the median stays under 5,000 ms; on a slow or noisy machine report the five runs to Emmanuel and leave the quiet-machine run to him (race-screen 23.4). If the size is over budget, STOP and report which file grew.": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795297511738
+      }
+    ],
+    "21. Layout report and pictures (Req 5.7, 6.10, 12.3, 12.7, 16.15)": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795297512407
       }
     ]
   }

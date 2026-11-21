@@ -192,15 +192,15 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - _Requirements: 4.7, 14.3, 15.1, 15.2, 15.4, 16.14_
   - Depends on: tasks 19.1 to 19.4
 
-- [ ] 21. Layout report and pictures (Req 5.7, 6.10, 12.3, 12.7, 16.15)
+- [x] 21. Layout report and pictures (Req 5.7, 6.10, 12.3, 12.7, 16.15)
   - [x] 21.1 `web/tests/e2e/screens.spec.ts` (extend) with the layout report of design section 9, on the phone (375 x 667) and laptop (1280 x 800) projects, using `getBoundingClientRect`: illustration against its title and total (overlap, clip, row growth); markers (clipped at either track end, overlapping another lane's content, wider than their ride segment); the 100 px strip (credit line, toggle and route drawing overlap); the banner against the result box and Next_Step_Action boxes at 375 x 667 and 320 wide; and the phone fit at the lead example's result moment (bottom of the caption area and of the result line against 667, with the pixels cut off). Each finding is written as a line to `web/test-results/story-layout-report.md` (git-ignored) and attached as a test annotation. The step never fails the run and never changes a size. A separate failing assertion covers only no sideways scroll at 320, 375 and 899 px.
     - _Requirements: 5.7, 6.10, 12.3, 12.6, 12.7, 12.11, 16.19_
-  - [-] 21.2 `npm run screens` adds pictures of the first visit, racing with a caption, finished with the takeaway, the today-win notice, the chart, and the phone page at the lead example's result moment. Run it (no network needed beyond the dev server) and copy the report's lines into the task summary for Emmanuel.
+  - [x] 21.2 `npm run screens` adds pictures of the first visit, racing with a caption, finished with the takeaway, the today-win notice, the chart, and the phone page at the lead example's result moment. Run it (no network needed beyond the dev server) and copy the report's lines into the task summary for Emmanuel.
     - _Requirements: 16.15_
     - Depends on: task 21.1
 
 - [ ] 22. Budgets and timing (Req 16.13, 16.14)
-  - [ ] 22.1 Run `npm run check:size` (first-screen under 100,000 bytes compressed, map chunk excluded, no new runtime dependency in `web/package.json`) and the `web/tests/build/budget.test.ts` checks (no static import of the map chunk; the dynamic import in `app.ts` remains the only reference). Confirm `npm run perf` still reads the `race-start` mark and the median stays under 5,000 ms; on a slow or noisy machine report the five runs to Emmanuel and leave the quiet-machine run to him (race-screen 23.4). If the size is over budget, STOP and report which file grew.
+  - [-] 22.1 Run `npm run check:size` (first-screen under 100,000 bytes compressed, map chunk excluded, no new runtime dependency in `web/package.json`) and the `web/tests/build/budget.test.ts` checks (no static import of the map chunk; the dynamic import in `app.ts` remains the only reference). Confirm `npm run perf` still reads the `race-start` mark and the median stays under 5,000 ms; on a slow or noisy machine report the five runs to Emmanuel and leave the quiet-machine run to him (race-screen 23.4). If the size is over budget, STOP and report which file grew.
     - _Requirements: 4.7, 16.13, 16.14_
   - Depends on: task 20
 
