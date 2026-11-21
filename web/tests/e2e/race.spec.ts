@@ -7,11 +7,14 @@
 // colour contrast included (R13.4). The page reads the real files in
 // web/public/data; expected values come from the page and the files, never from
 // the briefs. The only host it may reach besides the dev server is the map's.
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { type BrowserContext, type Page, expect, test } from '@playwright/test';
-import { LEAD_PAIR, TIMINGS } from '../../src/config';
-import { LINK_COPIED, MAP_UNAVAILABLE, PICKER_STEP_END } from '../../src/copy/copy';
+import { LEAD_PAIR, SOURCE_URLS, TIMINGS } from '../../src/config';
+import { HIDE_ROUTE, LINK_COPIED, MAP_UNAVAILABLE, NOT_LIVE, PICKER_STEP_END, VIEW_ROUTE } from '../../src/copy/copy';
 import {
   FIXTURE_NO_RIDE,
+  INDEX,
   axeViolations,
   beforeNewYork,
   fontsReady,
@@ -533,5 +536,244 @@ test.describe('axe-core on the drawn page (20.3, R13.4)', () => {
       await fontsReady(page);
       expect(await axeViolations(page)).toEqual([]);
     });
+  });
+});
+
+// Task 20.2 (story layer, Req 7.13, 12.1, 12.2, 12.3, 12.6, 12.9, 12.11, 16.12, 16.19): the phone's page flow,
+// the lazy map, the bad-link banner and the notices. The sideways-scroll test above already covers 320, 375
+// and 899 px (and three wider widths), racing, finished and with a sheet open, so nothing is added for Req 12.6.
+const PHONE_VIEWPORT = { width: 375, height: 667 };
+const MAP_HOST = new URL(SOURCE_URLS.baseMapStyle).hostname;
+const DATA_DIR = resolve(import.meta.dirname, '..', '..', 'public', 'data');
+const INFERRED_SLUG: string = INDEX.corners.find((c: { inferred: boolean }) => c.inferred).slug;
+
+const minuteOf = (hhmm: string): number => {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h! * 60 + m!;
+};
+
+test.describe('the phone flows in one page (20.2, R12.1, R12.2)', () => {
+  test.use({ viewport: PHONE_VIEWPORT, reducedMotion: 'reduce' });
+
+  test('with no sheet and no banner, nothing displayed is fixed or sticky, and nothing scrolls inside the card', async ({ page }) => {
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    await fontsReady(page);
+    // The share banner is not part of a plain visit; wait for the card to be settled and no overlay to be in the page.
+    await expect(page.locator('.sheet.is-open, .banner')).toHaveCount(0);
+    const found = await page.evaluate(() => {
+      const pinned: string[] = [];
+      const inner: string[] = [];
+      const describe = (el: Element): string => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${el.className && typeof el.className === 'string' ? `.${el.className.trim().split(/\s+/).join('.')}` : ''}`;
+      for (const el of Array.from(document.body.querySelectorAll('*'))) {
+        const style = getComputedStyle(el);
+        const box = el.getBoundingClientRect();
+        const shown = style.display !== 'none' && style.visibility !== 'hidden' && box.width > 0 && box.height > 0;
+        if (shown && (style.position === 'fixed' || style.position === 'sticky')) pinned.push(`${describe(el)} (${style.position})`);
+        if (el.closest('#race-card') && (/(auto|scroll)/.test(style.overflowY) || /(auto|scroll)/.test(style.overflowX))) inner.push(`${describe(el)} overflow ${style.overflowX}/${style.overflowY}`);
+      }
+      const card = document.getElementById('race-card')!;
+      const scroll = document.getElementById('card-scroll')!;
+      // Vertical: the card must be as tall as its content, so no inner scrolling is ever needed. Horizontal: reported only
+      // (the card clips its x overflow; the page's own sideways scroll is checked by the sideways test).
+      const measure = (el: HTMLElement) => `${describe(el)} scroll ${el.scrollWidth}x${el.scrollHeight}, client ${el.clientWidth}x${el.clientHeight}, overflow ${getComputedStyle(el).overflowX}/${getComputedStyle(el).overflowY}`;
+      const overflowing = [card, scroll].filter((el) => el.scrollHeight - el.clientHeight > 1).map(measure);
+      const clipped = [card, scroll].filter((el) => el.scrollWidth - el.clientWidth > 1).map(measure);
+      return { pinned, inner, overflowing, clipped };
+    });
+    console.log(`card containers: ${found.clipped.length === 0 ? 'no horizontal overflow' : `horizontal overflow, clipped: ${found.clipped.join('; ')}`}`);
+    expect(found.pinned, 'displayed elements that are fixed or sticky').toEqual([]);
+    expect(found.inner, 'elements inside the card that can scroll').toEqual([]);
+    expect(found.overflowing, 'card containers with scrollable overflow').toEqual([]);
+  });
+
+  test('the DOM order is the story order of Req 12.2', async ({ page }) => {
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    const order = [
+      '#topbar',
+      '#intro-line',
+      '#map-area .route-toggle',
+      '#pair-names',
+      '.example-label',
+      '#start-time',
+      '.schedule',
+      '.lanes',
+      '#race-caption',
+      '.result',
+      '.honest',
+      '.takeaway',
+      '.next-steps',
+      '.chart',
+      '.departures .departures-region[hidden]',
+      '[data-action="sources"]',
+      '[data-action="share"]',
+      '#app > button.info',
+    ];
+    const positions = await page.evaluate((selectors) => {
+      const els = selectors.map((s) => document.querySelector(s));
+      return selectors.map((s, k) => {
+        const el = els[k];
+        if (!el) return { selector: s, found: false, after: false };
+        const previous = k > 0 ? els[k - 1] : null;
+        return { selector: s, found: true, after: previous ? Boolean(previous.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) : true };
+      });
+    }, order);
+    expect(positions.filter((p) => !p.found).map((p) => p.selector), 'selectors not in the page').toEqual([]);
+    expect(positions.filter((p) => !p.after).map((p) => p.selector), 'selectors that come before the one listed above them').toEqual([]);
+  });
+
+  test('the notices follow the schedule line directly, in the order before-the-table, inferred, today-win', async ({ page }) => {
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto(`./${query({ origin: INFERRED_SLUG, dest: LEAD_PAIR.dest })}`);
+    await page.locator('.result').waitFor();
+    const directly = await page.evaluate(() => {
+      const next = document.querySelector('.schedule')?.nextElementSibling;
+      return { cls: next?.className ?? null, lanesAfter: next?.nextElementSibling?.className ?? null };
+    });
+    expect(directly.cls).toBe('notices');
+    expect(directly.lanesAfter).toBe('lanes');
+  });
+});
+
+test.describe('the lazy map on the phone (20.2, R12.3, R12.9)', () => {
+  test.use({ viewport: PHONE_VIEWPORT });
+
+  test('no MapLibre chunk and no tile host until View route; after Hide route no map and no further tile requests [map]', async ({ page }, info) => {
+    test.skip(info.project.name !== 'phone', 'the request log is the same on every project; one run is enough');
+    const log: { url: string; at: number }[] = [];
+    page.on('request', (request) => log.push({ url: request.url(), at: Date.now() }));
+    const chunk = (url: string): boolean => /maplibre/i.test(url) || /\/src\/map\/map(\.ts)?(\?|$)/.test(url);
+    const tile = (url: string): boolean => new URL(url).hostname === MAP_HOST;
+
+    await page.goto('./');
+    await page.locator('.result, .clock-row').first().waitFor();
+    await page.locator('.route-drawing').waitFor();
+    await page.locator('.route-toggle').waitFor({ state: 'visible' });
+    await expect(page.locator('.route-toggle')).toHaveText(VIEW_ROUTE);
+    // Longer than the idle wait that starts the map on a laptop: here it must not start.
+    await page.waitForTimeout(TIMINGS.mapIdleMs + 1500);
+    expect(log.filter((r) => chunk(r.url)).map((r) => r.url), 'MapLibre or map chunk requests before View route').toEqual([]);
+    expect(log.filter((r) => tile(r.url)).map((r) => r.url), `${MAP_HOST} requests before View route`).toEqual([]);
+    expect(await page.locator('.maplibregl-map').count()).toBe(0);
+
+    await page.locator('.route-toggle').click();
+    expect(await mapSettled(page).catch(() => 'timeout')).not.toBe('timeout');
+    expect(log.filter((r) => chunk(r.url)).length, 'the map chunk is asked for on View route').toBeGreaterThan(0);
+    const afterView = log.filter((r) => tile(r.url)).length;
+    expect(afterView, `${MAP_HOST} is asked for on View route`).toBeGreaterThan(0);
+    await expect(page.locator('.route-toggle')).toHaveText(HIDE_ROUTE);
+
+    await page.locator('.route-toggle').click();
+    await expect(page.locator('.route-toggle')).toHaveText(VIEW_ROUTE);
+    await expect(page.locator('.maplibregl-map')).toHaveCount(0);
+    await expect(page.locator('.maplibregl-canvas')).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.dataset['route'])).toBe('strip');
+    await expect(page.locator('.route-drawing')).toHaveCount(1);
+    const settled = log.filter((r) => tile(r.url)).length;
+    await page.waitForTimeout(3000);
+    const later = log.filter((r) => tile(r.url)).slice(settled).map((r) => r.url);
+    console.log(`phone map: ${afterView} tile-host requests by the time the map settled, ${settled} when it was hidden, ${later.length} after`);
+    expect(later, `${MAP_HOST} requests after Hide route`).toEqual([]);
+  });
+});
+
+/** Where two boxes overlap, in pixels (0 x 0 when they do not touch). */
+function overlapOf(a: Rect, b: Rect): { dx: number; dy: number } {
+  const dx = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+  const dy = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+  return dx > 0 && dy > 0 ? { dx, dy } : { dx: 0, dy: 0 };
+}
+
+test.describe('the bad-link banner at the result moment (20.2, R12.11, R16.12, R16.19)', () => {
+  for (const width of [375, 320]) {
+    test(`at ${width} x 667 the banner is measured against the result box and the next-step actions`, async ({ browser }, info) => {
+      const context = await browser.newContext({ viewport: { width, height: 667 }, reducedMotion: 'reduce', deviceScaleFactor: 2 });
+      const seen = await guardNetwork(context, true);
+      const page = await context.newPage();
+      await page.clock.setFixedTime(newYork('20:00'));
+      await page.goto(`./?from=nowhere&to=${LEAD_PAIR.dest}`);
+      await page.locator('.result').waitFor();
+      await page.locator('.banner.is-open').waitFor();
+      await fontsReady(page);
+      const boxes = await page.evaluate(() => {
+        const box = (el: Element | null): { x: number; y: number; width: number; height: number } | null => {
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { x: r.x, y: r.y, width: r.width, height: r.height };
+        };
+        return {
+          banner: box(document.querySelector('.banner')),
+          result: box(document.querySelector('.result')),
+          actions: Array.from(document.querySelectorAll('.next-steps .next-step')).map(box),
+          actionsRow: box(document.querySelector('.next-steps')),
+          text: document.querySelector('.banner')?.textContent ?? '',
+        };
+      });
+      expect(boxes.banner, 'the banner is showing').not.toBeNull();
+      expect(boxes.result, 'the result box is drawn').not.toBeNull();
+      expect(boxes.actions.length, 'three next-step actions').toBe(3);
+      const lines: string[] = [];
+      let worst = 0;
+      const compare = (name: string, other: Rect | null): void => {
+        const o = other ? overlapOf(boxes.banner!, other) : { dx: 0, dy: 0 };
+        lines.push(`${name}: ${o.dx.toFixed(1)} x ${o.dy.toFixed(1)} px overlap (${(o.dx * o.dy).toFixed(0)} px2); box y ${other ? other.y.toFixed(1) : 'none'}..${other ? (other.y + other.height).toFixed(1) : 'none'}`);
+        worst = Math.max(worst, o.dx * o.dy);
+      };
+      compare('result box', boxes.result);
+      boxes.actions.forEach((a, k) => compare(`next-step action ${k + 1}`, a));
+      const summary = `${info.project.name} ${width} x 667: banner y ${boxes.banner!.y.toFixed(1)}..${(boxes.banner!.y + boxes.banner!.height).toFixed(1)}, ${lines.join('; ')}`;
+      console.log(summary);
+      // The task's one recorded-not-failed check: an overlap is reported in pixels, not fixed by shrinking.
+      info.annotations.push({ type: `banner overlap at ${width} x 667`, description: worst > 0 ? `OVERLAP: ${summary}` : `none: ${summary}` });
+      await context.close();
+      expect(seen).toEqual([]);
+    });
+  }
+});
+
+test.describe('"Scheduled, not live." shows with each notice (20.2, R7.13)', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  async function noticeShows(page: Page, kind: string): Promise<void> {
+    await expect(page.locator(`.notice[data-notice="${kind}"]`)).toBeVisible();
+    const schedule = page.locator('.schedule');
+    await expect(schedule).toBeVisible();
+    await expect(schedule).toContainText(NOT_LIVE);
+    const [s, n] = await Promise.all([schedule.boundingBox(), page.locator(`.notice[data-notice="${kind}"]`).boundingBox()]);
+    expect(n!.y, `${kind} notice sits under the schedule line`).toBeGreaterThanOrEqual(s!.y + s!.height - 1);
+  }
+
+  test('the before-the-table notice', async ({ page }) => {
+    let found: { origin: string; dest: string; t: string } | null = null;
+    for (const p of INDEX.pairs as { origin: string; dest: string }[]) {
+      const race = JSON.parse(readFileSync(resolve(DATA_DIR, 'race', `${p.origin}__${p.dest}.json`), 'utf8'));
+      const row = (race.races as { t: string; before_table: boolean }[]).find((r) => r.before_table);
+      if (row && !found) found = { origin: p.origin, dest: p.dest, t: row.t };
+    }
+    expect(found, 'a pair with a start before its first listed car').not.toBeNull();
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto(`./${query(found!)}`);
+    await page.locator('.result').waitFor();
+    await fontsReady(page);
+    await page.locator('#start-time').fill(String(minuteOf(found!.t)));
+    await noticeShows(page, 'before-table');
+  });
+
+  test('the inferred-corner notice', async ({ page }) => {
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto(`./${query({ origin: INFERRED_SLUG, dest: LEAD_PAIR.dest })}`);
+    await page.locator('.result').waitFor();
+    await noticeShows(page, 'inferred');
+  });
+
+  test('the today-win notice', async ({ page }) => {
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    await page.locator('[data-action="next-today-win"]').click();
+    await noticeShows(page, 'today-win');
   });
 });

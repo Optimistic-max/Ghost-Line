@@ -681,6 +681,18 @@
         "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795294926363
+      },
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795295047839
+      }
+    ],
+    "20.2 `race.spec.ts` (extend): no sideways scroll at 320, 375 and 899 px; with no sheet and no banner no displayed element is fixed or sticky and nothing scrolls inside the card, and the DOM order matches Req 12.2; request log with no MapLibre chunk and no tile host until \"View route\", and after \"Hide route\" no map instance and no further tile requests; a bad-link Guided_Visit at 375 x 667 and 320 wide, at the result moment, the banner's box does not intersect the result box or any Next_Step_Action box (overlaps are reported by pixels, not fixed by shrinking); \"Scheduled, not live.\" visible while each notice shows.": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795295049107
       }
     ]
   }
