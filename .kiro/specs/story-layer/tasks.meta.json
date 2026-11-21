@@ -506,6 +506,18 @@
         "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795269510094
+      },
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795270230814
+      }
+    ],
+    "14.2 Tests. DOM: the order of Req 12.2 on both layouts including the notices directly under the schedule line; the intro line equals the constant. jsdom/CSS scan: no `position: fixed` or `sticky` rule displays on a phone with no sheet and no banner. (The geometry checks run in task 20.)": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795270235284
       }
     ]
   }
