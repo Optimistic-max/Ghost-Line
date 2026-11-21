@@ -167,13 +167,13 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - [x] 17.1 Only if time allows, and only after task 18 is otherwise green: `web/src/map/map.ts` and `map/style.ts` add a source for the selected pair's stretch (the polyline `layout.ts` `markerTrack` builds), drawn bright over the route, with the route lines at lower `line-opacity`; symbol layers keep opacity at 0.8 or more; updated on pair change through `map.corners(plan)`; phone and fallback drawing unchanged. Extend the `style.ts` unit test (no label below 80% opacity). If skipped, record it as cut in the final report; nothing else depends on it.
     - _Requirements: 14.1, 14.2, 14.3_
 
-- [-] 18. Checkpoint: site features
+- [x] 18. Checkpoint: site features
   - Ensure all tests pass, ask the user if questions arise. Run `npm test`, `npm run build` and `npm run check:size` in web/. Report to Emmanuel whether task 17 is built or cut.
 
 ## Cross-cutting tests, pictures and budgets
 
 - [ ] 19. Rule tests across the whole screen (Req 13, Req 15, Req 16)
-  - [ ] 19.1 Extend `web/tests/dom/wording.test.ts` and the P3 crawl: every new part and state (first visit, racing with a caption, finished with takeaway, today-win notice, open departures, expanded route preview, no-ride fixture) has no banned word except "Scheduled, not live." and "Start time is the time now."; no "citywide"; every time carries "scheduled"; walks say "estimate"; every new number is a Number_Button with a Sources row; singular for 1 in every new minute string. Extend the count test: a made-up summary changes every count on screen.
+  - [-] 19.1 Extend `web/tests/dom/wording.test.ts` and the P3 crawl: every new part and state (first visit, racing with a caption, finished with takeaway, today-win notice, open departures, expanded route preview, no-ride fixture) has no banned word except "Scheduled, not live." and "Start time is the time now."; no "citywide"; every time carries "scheduled"; walks say "estimate"; every new number is a Number_Button with a Sources row; singular for 1 in every new minute string. Extend the count test: a made-up summary changes every count on screen.
     - _Requirements: 13.4, 13.5, 13.6, 13.7, 16.6, 16.11_
   - [ ] 19.2 Digit scan and principle test: no digit string from the real `summary.json` appears under `web/src/` (extending race-screen 19.3), and `web/tests/unit/principle.test.ts` passes with its allowlist unchanged (all new arithmetic is in `format/rounding.ts`, `format/gaps.ts`, `format/time.ts`, `play/timeline.ts`, `play/clock.ts`, `view/layout.ts` or `data/lookup.ts`).
     - _Requirements: 8.7, 16.7_

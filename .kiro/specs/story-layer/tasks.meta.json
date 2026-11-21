@@ -614,6 +614,18 @@
         "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795284499442
+      },
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795286413222
+      }
+    ],
+    "19.1 Extend `web/tests/dom/wording.test.ts` and the P3 crawl: every new part and state (first visit, racing with a caption, finished with takeaway, today-win notice, open departures, expanded route preview, no-ride fixture) has no banned word except \"Scheduled, not live.\" and \"Start time is the time now.\"; no \"citywide\"; every time carries \"scheduled\"; walks say \"estimate\"; every new number is a Number_Button with a Sources row; singular for 1 in every new minute string. Extend the count test: a made-up summary changes every count on screen.": [
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795286414786
       }
     ]
   }

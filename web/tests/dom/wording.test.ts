@@ -171,6 +171,109 @@ describe('the wording rules on every state (19.1, 19.2, 19.4)', () => {
   });
 });
 
+// ---- Story layer 19.1: the new parts and states -------------------------------------
+
+const noMap = { loadMap: () => Promise.resolve({ startMap: () => ({ corners: () => undefined, marker: () => undefined, remove: () => undefined }) }), whenIdle: (run: () => void) => run() };
+
+/** Each new part or state the story layer adds that STATES does not already reach. */
+const STORY_STATES: [string, 'phone' | 'desktop', () => Promise<void>][] = [];
+for (const layout of ['phone', 'desktop'] as const) {
+  STORY_STATES.push(
+    ['the today-win notice after "Show a race today wins"', layout, async () => {
+      await bootPage({ motion: 'reduced', layout });
+      await settle();
+      click('#race-card [data-action="next-today-win"]');
+      await settle();
+      if (!document.querySelector('.notices')) throw new Error('no notice block');
+    }],
+    ['the open departures section', layout, async () => {
+      await bootPage({ motion: 'reduced', layout });
+      click('[data-action="departures"]');
+    }],
+    ['the open departures section, today wins', layout, async () => {
+      await bootPage({ motion: 'reduced', layout, query: `?from=${westToPreston.origin}&to=${westToPreston.dest}`, now: new Date(`${realData().index.service_date}T11:23:00-05:00`) });
+      click('[data-action="departures"]');
+    }],
+  );
+}
+STORY_STATES.push(['the expanded route preview', 'phone', async () => {
+  await bootPage({ motion: 'reduced', layout: 'phone', ...noMap });
+  await settle();
+  click('.route-toggle');
+  await settle();
+  if (document.querySelector('.route-toggle')?.getAttribute('aria-expanded') !== 'true') throw new Error('route not open');
+}]);
+
+describe('the story layer parts obey the wording rules (19.1)', () => {
+  for (const [name, layout, reach] of STORY_STATES) {
+    it(`${name} (${layout})`, async () => {
+      await reach();
+      expect(breaks()).toEqual([]);
+    });
+  }
+
+  it('keeps "Scheduled, not live." and the example label wording clean on a first visit and with a caption showing', async () => {
+    const time = fakeTime();
+    await bootPage({ time });
+    expect(document.body.textContent).toContain('Scheduled, not live.');
+    expect(breaks()).toEqual([]);
+    for (const ms of [0, TIMINGS.orientationMs + 500, 2500, 3000, 3500]) {
+      time.advance(ms);
+      expect(breaks(), `after +${ms} ms`).toEqual([]);
+    }
+  });
+
+  it('makes every number a Number_Button with a Sources row, in each new state', async () => {
+    for (const [name, layout, reach] of STORY_STATES) {
+      document.body.innerHTML = '';
+      await reach();
+      // Open the Sources sheet through the first number button, then check every number on the card.
+      const buttons = [...document.querySelectorAll<HTMLElement>('#card-scroll button.num, #race-card button.num')];
+      expect(buttons.length, `${name} ${layout}`).toBeGreaterThan(5);
+      buttons[0]!.click();
+      for (const id of new Set(buttons.map((b) => b.dataset['source']!))) {
+        expect(document.querySelector(`.sheet .source-row[data-source="${id}"]`), `${name} ${layout}: ${id}`).not.toBeNull();
+      }
+    }
+  });
+
+  it('leaves no loose time or minute count outside a Number_Button in the takeaway, the chart readout and the open board', async () => {
+    await bootPage({ motion: 'reduced', layout: 'desktop' });
+    click('[data-action="departures"]');
+    const parts = document.querySelectorAll('.takeaway, .chart-readout, .departures');
+    expect(parts.length).toBeGreaterThan(0);
+    for (const part of parts) {
+      const walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const el = n.parentElement!;
+        if (el.closest('button.num')) continue;
+        const loose = (n.textContent ?? '').replace(/\b1938\b/g, '').replace(/\b(No\. ?)?21\b/g, '').replace(/\b\d{1,2}:\d{2} [AP]M\b/g, '').replace(/(Scheduled departures after) \d{1,2}:\d{2}/, '$1');
+        // The readout's "At 10:00 AM" names the slider's start time, which is on the slider itself, not a result.
+        expect(loose, `${text(el)}`).not.toMatch(/\d/);
+      }
+    }
+  });
+
+  it('reads "1 minute" in every new minute string that holds a shown 1', async () => {
+    const data = realData();
+    let seen = 0;
+    for (const pair of data.index.pairs) {
+      const race = data.races.get(pairKey(pair))!;
+      for (const row of race.races) {
+        const view = buildView(data.index, data.summary, race, row.t);
+        const lane = [view.lane1938, ...(view.laneToday ? [view.laneToday] : [])];
+        if (!lane.some((l) => l.phases.some((p) => p.shown === 1))) continue;
+        const card = renderAt(data, pair, row.t, 'phone').root;
+        const found = [...card.querySelectorAll('.takeaway, .chart-readout')].flatMap((e) => minuteWordProblems(e.textContent ?? ''));
+        expect(found, `${pairKey(pair)} ${row.t}`).toEqual([]);
+        seen += 1;
+        if (seen >= 12) return;
+      }
+    }
+    expect(seen).toBeGreaterThan(0);
+  });
+});
+
 describe('the minute-word check itself', () => {
   it('takes "minute" exactly for one, a decimal one included, and never "1 minutes"', () => {
     for (const ok of ['1 minute', '2 minutes', '0 minutes', 'under 1.0 minute', '1.5 minutes', 'Trolley 1 min', 'every 7 or 8 min']) {

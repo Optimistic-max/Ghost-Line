@@ -7,6 +7,7 @@ import { formatCount } from '../../src/format/count';
 import { shortClock } from '../../src/format/time';
 import { FIXTURE_DIR, fixtureData } from '../support/fixture';
 import { bootPage } from '../support/page';
+import { realData } from '../support/realdata';
 import { text } from '../support/render';
 
 const { index, summary } = fixtureData();
@@ -19,6 +20,34 @@ afterEach(() => {
 
 const sheet = (): HTMLElement => document.querySelector<HTMLElement>('.sheet:not([aria-hidden])')!;
 const click = (selector: string): void => document.querySelector<HTMLElement>(selector)!.click();
+
+describe('every count on the card and in the sheet is the made-up summary\'s (Req 13.4, 16.6)', () => {
+  const expected: Record<string, number> = {
+    'count-races': summary.races,
+    'count-wins-1938': summary.wins_1938,
+    'count-wins-today': summary.wins_today,
+    'count-ride-same': summary.ride_same,
+    'count-pairs': summary.pairs.length,
+    'count-ride-faster': summary.ride_faster_today,
+    'count-ride-slower': summary.ride_slower_today,
+  };
+
+  it('shows only fixture values on every count button, in each result, with the heading open', async () => {
+    await bootPage({ motion: 'reduced', folder: FIXTURE_DIR, leadPair: pair, query: `?from=${pair.origin}&to=${pair.dest}` });
+    click('#card-scroll [data-action="whentoday"]');
+    const buttons = [...document.querySelectorAll<HTMLElement>('button.num[data-source^="count-"]')];
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const b of buttons) {
+      const id = b.dataset['source']!;
+      expect(expected, id).toHaveProperty(id);
+      expect(text(b), id).toBe(formatCount(expected[id]!));
+    }
+    // The fixture's counts differ from the real file's, so none of these is a leftover real value.
+    const real = realData().summary;
+    expect(summary.races).not.toBe(real.races);
+    expect(summary.wins_today).not.toBe(real.wins_today);
+  });
+});
 
 describe('the made-up summary drives the counts, the heading and the method lines', () => {
   it('shows the fixture\'s values in the heading, the shortcut list and every Sources row', async () => {
