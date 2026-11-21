@@ -724,6 +724,18 @@
         "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795296652368
+      },
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795296933921
+      }
+    ],
+    "21.2 `npm run screens` adds pictures of the first visit, racing with a caption, finished with the takeaway, the today-win notice, the chart, and the phone page at the lead example's result moment. Run it (no network needed beyond the dev server) and copy the report's lines into the task summary for Emmanuel.": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795296934789
       }
     ]
   }

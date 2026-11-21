@@ -659,7 +659,11 @@ test.describe.serial('layout report', () => {
             area: rect(area),
             credit: rect(document.querySelector('#map-area .map-credit')),
             toggle: rect(document.querySelector('#map-area .route-toggle')),
-            drawing: rect(document.querySelector('#map-area .route-drawing:not(.is-faded)')),
+            // The drawing's content, not its SVG box (which spans the whole strip): the legs, corner dots and
+            // corner names, each on its own.
+            drawing: [...document.querySelectorAll('#map-area .route-drawing:not(.is-faded) :is(.route-legs, .corner-dot, .corner-name)')]
+              .map((el) => ({ what: el.classList.contains('corner-name') ? `name "${el.textContent ?? ''}"` : el.classList.contains('corner-dot') ? 'corner dot' : 'route legs', box: rect(el) }))
+              .filter((p): p is { what: string; box: Box } => p.box !== null),
           };
         });
         if (size === DESKTOP) {
@@ -668,19 +672,20 @@ test.describe.serial('layout report', () => {
         }
         if (!strip.area) throw new Error('no map area');
         let any = false;
-        const parts = [['credit line', strip.credit], ['toggle', strip.toggle], ['route drawing', strip.drawing]] as const;
+        const parts: (readonly [string, Box | null])[] = [['credit line', strip.credit], ['toggle', strip.toggle], ...strip.drawing.map((p) => [`route drawing ${p.what}`, p.box] as const)];
         for (let i = 0; i < parts.length; i += 1) {
           for (let j = i + 1; j < parts.length; j += 1) {
             const a = parts[i]!;
             const b = parts[j]!;
-            const hit = a[1] && b[1] && intersect(a[1], b[1]);
+            // The drawing's own parts meet each other by design (dots sit on the legs); only the other parts are compared.
+            const hit = a[1] && b[1] && !(a[0].startsWith('route drawing') && b[0].startsWith('route drawing')) && intersect(a[1], b[1]);
             if (hit) {
               any = true;
               note('finding', `strip (${dims(strip.area)}): ${a[0]} overlaps ${b[0]} by ${px(hit.w)} across and ${px(hit.h)} down`);
             }
           }
         }
-        if (!any) note('ok', `strip (${dims(strip.area)}): credit line ${strip.credit ? 'shown' : 'not shown'}, toggle ${strip.toggle ? 'shown' : 'not shown'}, drawing ${strip.drawing ? 'shown' : 'not shown'}; no overlap`);
+        if (!any) note('ok', `strip (${dims(strip.area)}): credit line ${strip.credit ? 'shown' : 'not shown'}, toggle ${strip.toggle ? 'shown' : 'not shown'}, drawing content (legs, dots, names: ${strip.drawing.length} boxes) ${strip.drawing.length ? 'shown' : 'not shown'}; no overlap`);
       });
       await context.close();
     });
@@ -781,6 +786,54 @@ test.describe.serial('layout report', () => {
       }
     });
   });
+});
+
+// Story-layer pictures (task 21.2, Req 16.15): test-results/screens/story-<name>-<phone|desktop>.png, git-ignored.
+// The lead pair at the labelled example start, 10:00. Finished states are full-page, because the page scrolls.
+type StoryShot = { name: string; racing?: number; click?: string; wait?: string; fullPage?: boolean };
+const STORY: StoryShot[] = [
+  { name: 'story-1-first-visit', racing: 0 },
+  { name: 'story-2-racing-caption', racing: TEN_OH_EIGHT },
+  { name: 'story-3-finished-takeaway', fullPage: true },
+  { name: 'story-4-today-win-notice', click: '[data-action="next-today-win"]', wait: '.notice[data-notice="today-win"]', fullPage: true },
+  { name: 'story-5-chart', wait: '.chart-plot', fullPage: true },
+];
+for (const [label, size] of [['phone', PHONE], ['desktop', DESKTOP]] as const) {
+  for (const shot of STORY) {
+    test(`story picture: ${shot.name} (${label})`, async ({ browser }) => {
+      const racing = shot.racing !== undefined;
+      const context = await browser.newContext({
+        viewport: { width: size.width, height: size.height },
+        deviceScaleFactor: size.deviceScaleFactor,
+        reducedMotion: racing ? 'no-preference' : 'reduce',
+      });
+      await guardNetwork(context, true);
+      const page = await context.newPage();
+      if (racing) {
+        await page.clock.install({ time: beforeNewYork('20:00') });
+        await page.clock.pauseAt(newYork('20:00'));
+      } else {
+        await page.clock.setFixedTime(newYork('20:00'));
+      }
+      await page.goto('./');
+      await page.locator(racing ? '.clock-row' : '.result').waitFor();
+      await fontsReady(page);
+      if (racing && shot.racing) await page.clock.runFor(shot.racing + 20);
+      if (shot.click) await page.locator(shot.click).click();
+      if (shot.wait) await page.locator(shot.wait).first().waitFor();
+      if (shot.name === 'story-4-today-win-notice') await page.locator('.notice[data-notice="today-win"]').scrollIntoViewIfNeeded();
+      if (shot.name === 'story-5-chart') await page.locator('.chart').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: resolve(OUT, `${shot.name}-${label}.png`), fullPage: shot.fullPage ?? false, animations: 'disabled' });
+      await context.close();
+    });
+  }
+}
+
+// The phone page at the lead example's result moment (Req 12.7), a viewport picture of what a 375 x 667 phone shows.
+test('story picture: story-6-result-moment (phone)', async ({ browser }) => {
+  const { context, page } = await resultMoment(browser, PHONE);
+  await page.screenshot({ path: resolve(OUT, 'story-6-result-moment-phone.png'), animations: 'disabled' });
+  await context.close();
 });
 
 // Req 12.6: nothing scrolls sideways at 320, 375 and 899 px. This one is a real assertion.
