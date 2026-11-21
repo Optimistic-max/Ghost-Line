@@ -137,7 +137,7 @@ export const WHEN_TODAY_WINS = 'When today wins';
 
 /** Counts from summary.json: wins_1938 and races, already formatted. */
 export function trolleyFirst(wins1938: string, races: string): string {
-  return `Trolley first in ${wins1938} of ${races} races.`;
+  return `Trolley first in ${wins1938} of ${races} covered starts.`;
 }
 
 /** The honest line for a 1938 win, a photo finish and no one-seat ride. */
@@ -208,7 +208,7 @@ export function frequency(
   date: string,
   spacing1938: string,
 ): string {
-  return `Scheduled one-seat buses on this stretch leave ${gapPart} between ${windowFrom} and ${windowTo} (${routeNames}, weekday schedule as of ${date}). In 1938 a trolley was scheduled ${spacing1938}.`;
+  return `For these corners and this direction, scheduled one-seat buses leave ${gapPart} between ${windowFrom} and ${windowTo} (${routeNames}, weekday schedule as of ${date}). In the covered 1938 midday timetable, a trolley was scheduled at this corner ${spacing1938}.`;
 }
 
 // ---- Share, banners, errors, map --------------------------------------------------
@@ -305,7 +305,7 @@ export function clockReadout(hm: string): string {
 // ---- Lanes and the departures board ------------------------------------------
 
 export const LANE_TITLE_1938 = '1938 trackless trolley';
-/** Today's lane title, and the bus row label of the departures board. */
+/** Today's lane title (the board's bus row label is BOARD_TODAY, story-layer copy table). */
 export const LANE_TITLE_TODAY = "Today's bus";
 
 /** A shown duration: a lane total, or a value in the Sources sheet. */
@@ -314,10 +314,11 @@ export function minShort(n: number): string {
 }
 
 export function boardHeader(hm: string): string {
-  return `Scheduled departures from this corner after ${hm}`;
+  return `Scheduled departures after ${hm}`;
 }
 
-export const BOARD_1938 = '1938 trolley';
+export const BOARD_1938 = '1938 trolley, at this corner';
+export const BOARD_TODAY = "Today's bus, from the boarding stop";
 
 export function boardEveryOr(a: number, b: number): string {
   return `every ${a} or ${b} min`;
@@ -359,13 +360,16 @@ export const WHAT = {
   totalToday: "today's scheduled total, walking included (estimated)",
   busDeparture: 'scheduled bus departure',
   margin: 'difference of the two scheduled totals',
-  wins1938: 'races where the 1938 trolley arrives first',
-  races: 'races on this line',
+  wins1938: 'covered starts where the 1938 trolley arrives first',
+  races: 'covered starts on this line',
   rideSame: 'corner pairs with about the same scheduled ride',
   pairs: 'corner pairs on this line',
   rideFasterToday: "corner pairs where today's scheduled ride is faster",
   rideSlowerToday: "corner pairs where today's scheduled ride is slower",
   spacing1938: 'scheduled spacing of 1938 cars at this corner',
+  // Story-layer rows, after the race-screen phrases.
+  walkSum: 'walks to and from the stop, together (estimate)',
+  winsToday: "covered starts where today's bus arrives first",
 } as const;
 
 /** What the board's bus gaps are; the window is the race file's, in 12-hour form. */
@@ -417,7 +421,12 @@ export function methodTotalToday(hm: string): string {
 }
 
 export const METHOD_MARGIN = 'The difference of the two totals as shown.';
-export const METHOD_RACE_COUNTS = 'Counted over every race on this line, one per corner pair and slider minute.';
+export const METHOD_RACE_COUNTS =
+  'Counted over every corner pair and every start minute that the 1938 midday timetable covers at the start corner. Earlier minutes, which race from the first listed car, are not counted.';
+/**
+ * The race-screen ride-same line. Superseded by methodRideVerdicts; kept only because
+ * state/specs.ts still imports it until task 16.1, which removes it.
+ */
 export const METHOD_RIDE_VERDICTS =
   "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.";
 
@@ -458,3 +467,174 @@ export function todayWinEntry(origin: string, dest: string, hm: string): string 
 
 /** After the inferred corner's name on the map (R11.2). */
 export const MAP_INFERRED = '(inferred)';
+
+// =================================================================================
+// Story-layer rows (Story copy table, .kiro/specs/story-layer/requirements.md).
+// Where a row replaces a race-screen row, the constant above changed in place and
+// the story row wins (Requirement 13.8).
+// =================================================================================
+
+// ---- Guided visit (Req 3, 4, 12) ---------------------------------------------
+
+/** `time` is the start in 12-hour form, plain text. */
+export function exampleLabel(time: string): string {
+  return `Example start: ${time} scheduled.`;
+}
+
+export const PHONE_INTRO = "Race Baltimore's 1938 trolley against today's scheduled bus.";
+export const ORIENTATION_LINE = 'Same two corners. Walking included for today; walks are estimates.';
+
+// ---- Captions (Req 7). No template takes a number. -----------------------------
+
+export type Caption1938Phase = 'waiting' | 'riding' | 'arrived';
+export type CaptionTodayPhase = 'walking-to-stop' | 'waiting' | 'riding' | 'walking-to-destination' | 'arrived';
+/** The shape state/captions.ts produces (design 3.1). */
+export type CaptionKey =
+  | { kind: 'orientation' }
+  | { kind: 'both-arrived' }
+  | {
+      kind: 'clauses';
+      p1938: { phase: Caption1938Phase; still: boolean };
+      today: { phase: CaptionTodayPhase; still: boolean } | null;
+    };
+
+/** The {still } rule: "still " only while the other side has arrived. */
+export const STILL = 'still ';
+
+function stillWord(still: boolean): string {
+  return still ? STILL : '';
+}
+
+export function caption1938Waiting(still: boolean): string {
+  return `The trolley passenger is ${stillWord(still)}waiting for the car.`;
+}
+
+export function caption1938Riding(still: boolean): string {
+  return `The trolley passenger is ${stillWord(still)}riding.`;
+}
+
+export const CAPTION_1938_ARRIVED = 'The trolley passenger has arrived.';
+
+export function captionTodayWalkingToStop(still: boolean): string {
+  return `Today's passenger is ${stillWord(still)}walking to the stop (estimate).`;
+}
+
+export function captionTodayWaiting(still: boolean): string {
+  return `Today's passenger is ${stillWord(still)}waiting to board.`;
+}
+
+export function captionTodayRiding(still: boolean): string {
+  return `Today's passenger is ${stillWord(still)}riding.`;
+}
+
+export function captionTodayWalkingToDestination(still: boolean): string {
+  return `Today's passenger is ${stillWord(still)}walking to the destination (estimate).`;
+}
+
+export const CAPTION_TODAY_ARRIVED = "Today's passenger has arrived.";
+export const CAPTION_BOTH_ARRIVED = 'Both passengers have arrived.';
+
+function clause1938(phase: Caption1938Phase, still: boolean): string {
+  if (phase === 'waiting') return caption1938Waiting(still);
+  if (phase === 'riding') return caption1938Riding(still);
+  return CAPTION_1938_ARRIVED;
+}
+
+function clauseToday(phase: CaptionTodayPhase, still: boolean): string {
+  if (phase === 'walking-to-stop') return captionTodayWalkingToStop(still);
+  if (phase === 'waiting') return captionTodayWaiting(still);
+  if (phase === 'riding') return captionTodayRiding(still);
+  if (phase === 'walking-to-destination') return captionTodayWalkingToDestination(still);
+  return CAPTION_TODAY_ARRIVED;
+}
+
+/** The caption for a key: the clauses joined with a space. */
+export function captionText(key: CaptionKey): string {
+  if (key.kind === 'orientation') return ORIENTATION_LINE;
+  if (key.kind === 'both-arrived') return CAPTION_BOTH_ARRIVED;
+  const first = clause1938(key.p1938.phase, key.p1938.still);
+  return key.today ? `${first} ${clauseToday(key.today.phase, key.today.still)}` : first;
+}
+
+// ---- Takeaway (Req 8) -----------------------------------------------------------
+
+export const TAKEAWAY_HEADING = 'Where the time goes';
+
+export function takeawayWaiting(a: number, b: number): string {
+  return `Waiting: trolley ${a} min, today's bus ${b} min.`;
+}
+
+/** {w} is the sum of the shown walk parts. */
+export function takeawayWalking(w: number): string {
+  return `Walking (estimate): today's bus ${w} min.`;
+}
+
+export function takeawayRiding(c: number, d: number): string {
+  return `Riding: trolley ${c} min, today's bus ${d} min.`;
+}
+
+/** With no one-seat ride. */
+export function takeawayWaitingTrolley(a: number): string {
+  return `Waiting: trolley ${a} min.`;
+}
+
+/** With no one-seat ride. */
+export function takeawayRidingTrolley(c: number): string {
+  return `Riding: trolley ${c} min.`;
+}
+
+export const TAKEAWAY_MOST = 'Waiting accounts for most of the difference in this race.';
+export const METHOD_WALK_SUM = 'Sum of the two walks as shown, to and from the stop.';
+
+// ---- Next steps and the today-win notice (Req 10) ----------------------------------
+
+export const NEXT_TRY_TIME = 'Try another time';
+export const NEXT_TRY_CORNERS = 'Try other corners';
+export const NEXT_SHOW_TODAY_WIN = 'Show a race today wins';
+
+/** `time` is the entry's start in 12-hour form, plain text. */
+export function todayWinNotice(origin: string, dest: string, time: string): string {
+  return `Showing a race today wins: ${origin} → ${dest}, starting ${time} (scheduled).`;
+}
+
+// ---- Slider and chart (Req 9) ------------------------------------------------------
+// The slider's two ends are "{h:mm AM/PM}" from the race file: clock12, through label12.
+
+export const SLIDER_LABEL = 'Choose a scheduled start time';
+export const CHART_HEADING = 'How much does the start time matter?';
+export const CHART_PROMPT_HEADING = 'How much does your start time matter?';
+export const CHART_SUBHEADING = 'Scheduled journey minutes for each start time, for these corners and this direction.';
+export const CHART_LEGEND_1938 = '1938 trolley';
+export const CHART_LEGEND_TODAY = "Today's bus, walking included (estimated)";
+
+/** `time` is "{h:mm AM/PM}". */
+export function chartReadout(time: string, n: number, m: number): string {
+  return `At ${time}: trolley ${n} min, today's bus ${m} min.`;
+}
+
+/** With no one-seat ride. */
+export function chartReadoutTrolley(time: string, n: number): string {
+  return `At ${time}: trolley ${n} min.`;
+}
+
+export const CHART_HATCH_LABEL = 'Before the 1938 midday timetable reaches this corner';
+export const CHART_ACCESSIBLE_NAME =
+  "Chart of scheduled journey minutes for each start time, 1938 trolley and today's bus. Move the start time slider to read a minute.";
+
+// ---- Route preview and departures (Req 11, 12) ---------------------------------
+
+export const VIEW_ROUTE = 'View route';
+export const HIDE_ROUTE = 'Hide route';
+export const DEPARTURES_BUTTON = 'Scheduled departures';
+
+// ---- Counts and Sources (Req 2, 13) ----------------------------------------------
+
+/** The "When today wins" sheet heading; `winsToday` is summary.wins_today, already formatted. */
+export function whenTodayWinsHeading(winsToday: string): string {
+  return `The ${winsToday} races today wins`;
+}
+
+/** `minutes` and `fractionPct` are summary.ride_same_rule, as plain text. */
+export function methodRideVerdicts(minutes: string, fractionPct: string): string {
+  return `Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides. About as long means within ${minutes} ${minuteWord(Number(minutes))} or ${fractionPct}% of the 1938 ride, whichever is larger.`;
+}

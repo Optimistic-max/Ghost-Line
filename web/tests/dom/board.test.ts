@@ -69,7 +69,7 @@ describe('the board for the lead pair at 10:00 (desktop, finished)', () => {
       }
     }
     expect(text(root.querySelector('.board-row-1938 .board-label'))).toBe(C.BOARD_1938);
-    expect(text(root.querySelector('.board-row-today .board-label'))).toBe(C.LANE_TITLE_TODAY);
+    expect(text(root.querySelector('.board-row-today .board-label'))).toBe(C.BOARD_TODAY);
   });
 
   it('gives the bus gaps and the 1938 spacing from the file, rounded to whole minutes', () => {

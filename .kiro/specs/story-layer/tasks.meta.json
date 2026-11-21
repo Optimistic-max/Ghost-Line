@@ -160,6 +160,18 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795233767350
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795234018411
+      }
+    ],
+    "3.2 `web/src/copy/copy.ts` and `copy/announce.ts` untouched where unchanged; add one constant or template per story copy table row: example label, intro line, orientation line, the caption clauses with the `still` rule and `captionText(key)`, takeaway heading and rows, the \"most of the difference\" sentence, next-step labels, today-win notice, slider label and 12-hour ends, chart heading, prompt heading, subheading, legend, readout, hatch label, accessible name, \"View route\" and \"Hide route\", the departures button, `boardHeader` (\"Scheduled departures after {h:mm}\"), `BOARD_1938` (\"1938 trolley, at this corner\"), new `BOARD_TODAY` (\"Today's bus, from the boarding stop\"; `LANE_TITLE_TODAY` stays \"Today's bus\"), the honest lines with \"covered starts\", the \"The {wins_today} races today wins\" heading, the new \"what a number is\" lines, the walk-sum method line, the frequency sentence, `METHOD_RACE_COUNTS` with the covered-starts text (used by `races`, `wins_1938` and `wins_today`, decision 22) and `methodRideVerdicts(minutes, fractionPct)`. No caption template takes a number parameter.": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795234022832
       }
     ]
   }

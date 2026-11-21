@@ -7,7 +7,7 @@ import * as A from '../../src/copy/announce';
 import * as C from '../../src/copy/copy';
 import { cornerName } from '../../src/data/lookup';
 import { ALLOWED_PHRASE, bannedTerms } from '../support/banned';
-import { copyTable, stringLiterals } from '../support/copytable';
+import { copyTable, effectiveCopyTable, storyCopyTable, stringLiterals } from '../support/copytable';
 import { listRepoFiles, readRepoText } from '../support/files';
 import { realData } from '../support/realdata';
 import { minuteWordProblems } from '../support/words';
@@ -62,7 +62,7 @@ const RENDERED: Record<string, string> = {
     '{window_to}',
     '{route_names}',
     '{service_date}',
-    C.everyMinutesOr(n('{y1938.gap_min}'), n('{y1938.gap_max}')),
+    C.everyMinutesOr(n('{a}'), n('{b}')),
   ),
   gapUpTo: C.gapUpTo(n('{max}')),
   gapRange: C.gapRange(n('{min}'), n('{max}')),
@@ -108,6 +108,7 @@ const RENDERED: Record<string, string> = {
   minShort: C.minShort(N),
   boardHeader: C.boardHeader('{h:mm}'),
   BOARD_1938: C.BOARD_1938,
+  BOARD_TODAY: C.BOARD_TODAY,
   boardEveryOr: C.boardEveryOr(n('{a}'), n('{b}')),
   boardEvery: C.boardEvery(N),
   boardGapUpTo: C.boardGapUpTo(n('{max}')),
@@ -148,6 +149,80 @@ const RENDERED: Record<string, string> = {
   HEADLINE_LINE: C.HEADLINE_LINE,
   todayWinEntry: C.todayWinEntry('{origin}', '{dest}', '{h:mm}'),
   MAP_INFERRED: C.MAP_INFERRED,
+  // Story-layer rows.
+  exampleLabel: C.exampleLabel('{h:mm AM/PM}'),
+  PHONE_INTRO: C.PHONE_INTRO,
+  STILL: C.STILL,
+  ORIENTATION_LINE: C.ORIENTATION_LINE,
+  caption1938Waiting: C.caption1938Waiting(false),
+  'caption1938Waiting.still': C.caption1938Waiting(true),
+  caption1938Riding: C.caption1938Riding(false),
+  'caption1938Riding.still': C.caption1938Riding(true),
+  CAPTION_1938_ARRIVED: C.CAPTION_1938_ARRIVED,
+  captionTodayWalkingToStop: C.captionTodayWalkingToStop(false),
+  'captionTodayWalkingToStop.still': C.captionTodayWalkingToStop(true),
+  captionTodayWaiting: C.captionTodayWaiting(false),
+  'captionTodayWaiting.still': C.captionTodayWaiting(true),
+  captionTodayRiding: C.captionTodayRiding(false),
+  'captionTodayRiding.still': C.captionTodayRiding(true),
+  captionTodayWalkingToDestination: C.captionTodayWalkingToDestination(false),
+  'captionTodayWalkingToDestination.still': C.captionTodayWalkingToDestination(true),
+  CAPTION_TODAY_ARRIVED: C.CAPTION_TODAY_ARRIVED,
+  CAPTION_BOTH_ARRIVED: C.CAPTION_BOTH_ARRIVED,
+  TAKEAWAY_HEADING: C.TAKEAWAY_HEADING,
+  takeawayWaiting: C.takeawayWaiting(n('{a}'), n('{b}')),
+  takeawayWalking: C.takeawayWalking(n('{w}')),
+  takeawayRiding: C.takeawayRiding(n('{c}'), n('{d}')),
+  takeawayWaitingTrolley: C.takeawayWaitingTrolley(n('{a}')),
+  takeawayRidingTrolley: C.takeawayRidingTrolley(n('{c}')),
+  TAKEAWAY_MOST: C.TAKEAWAY_MOST,
+  METHOD_WALK_SUM: C.METHOD_WALK_SUM,
+  NEXT_TRY_TIME: C.NEXT_TRY_TIME,
+  NEXT_TRY_CORNERS: C.NEXT_TRY_CORNERS,
+  NEXT_SHOW_TODAY_WIN: C.NEXT_SHOW_TODAY_WIN,
+  todayWinNotice: C.todayWinNotice('{origin}', '{dest}', '{h:mm AM/PM}'),
+  SLIDER_LABEL: C.SLIDER_LABEL,
+  CHART_HEADING: C.CHART_HEADING,
+  CHART_PROMPT_HEADING: C.CHART_PROMPT_HEADING,
+  CHART_SUBHEADING: C.CHART_SUBHEADING,
+  CHART_LEGEND_1938: C.CHART_LEGEND_1938,
+  CHART_LEGEND_TODAY: C.CHART_LEGEND_TODAY,
+  chartReadout: C.chartReadout('{h:mm AM/PM}', N, n('{m}')),
+  chartReadoutTrolley: C.chartReadoutTrolley('{h:mm AM/PM}', N),
+  CHART_HATCH_LABEL: C.CHART_HATCH_LABEL,
+  CHART_ACCESSIBLE_NAME: C.CHART_ACCESSIBLE_NAME,
+  VIEW_ROUTE: C.VIEW_ROUTE,
+  HIDE_ROUTE: C.HIDE_ROUTE,
+  DEPARTURES_BUTTON: C.DEPARTURES_BUTTON,
+  whenTodayWinsHeading: C.whenTodayWinsHeading('{wins_today}'),
+  methodRideVerdicts: C.methodRideVerdicts('{ride_same_rule.minutes}', '{ride_same_rule.fraction_pct}'),
+};
+
+/**
+ * Race-screen strings that story-layer rows replace (story-layer Requirement 13.8,
+ * decisions 22 and 23). They leave the effective table, so a template still printing
+ * one fails the tests below. Each is replaced in copy.ts, in place.
+ */
+const REPLACED = [
+  'Scheduled departures from this corner after {h:mm}',
+  'Same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins',
+  'Today wins this race. Across this line: same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins',
+  'Scheduled one-seat buses on this stretch leave {gap part} between {window_from} and {window_to} ({route_names}, weekday schedule as of {service_date}). In 1938 a trolley was scheduled every {y1938.gap_min} or {y1938.gap_max} minutes.',
+  'races where the 1938 trolley arrives first',
+  'races on this line',
+  'Counted over every race on this line, one per corner pair and slider minute.',
+];
+
+/**
+ * Replaced race-screen wording that copy.ts still holds, because a view still imports it.
+ * Each stays in the effective table with its old text; its task removes both.
+ */
+const KEPT_UNTIL_VIEW_CHANGES: Record<string, { text: string; task: string }> = {
+  START_TIME: { text: 'Start time', task: 'task 10.2 (slider input name)' },
+  METHOD_RIDE_VERDICTS: {
+    text: "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
+    task: 'task 16.1 (specs.ts ride-same rows)',
+  },
 };
 
 /** The phrases of WHAT ("What a number is"), each a table string. */
@@ -161,6 +236,7 @@ const HELPERS = [
   'WHAT',
   'everyMinutesOr',
   'trolleyFirst',
+  'captionText',
   'whenTodayWinsSentence',
   'SAME_RIDE',
   'TODAY_WINS_THIS_RACE',
@@ -169,21 +245,38 @@ const HELPERS = [
   'NOT_LIVE',
 ];
 
-const table = copyTable();
+// Both copy tables, the story-layer row winning where it replaces a race-screen row.
+const table = effectiveCopyTable(REPLACED);
+
+/** A caption row's "{still }" stands for "still " or nothing: both forms are table strings. */
+const quotedForms = table.quoted.flatMap((q) =>
+  q.includes('{still }') ? [q.replace('{still }', 'still '), q.replace('{still }', '')] : [q],
+);
+
+/** Slider ends: "{hh:mm AM/PM}" (race-screen) and "{h:mm AM/PM}" (story-layer), both built by clock12. */
+/**
+ * The identifiers of design 3.1's CaptionKey ("kind" and phase names). They select a
+ * caption and are never shown. The three phase names that are also table words
+ * (waiting, riding, arrived) need no entry. Exact matches only: nothing else is exempt.
+ */
+const CAPTION_KEY_IDS = ['orientation', 'both-arrived', 'clauses', 'walking-to-stop', 'walking-to-destination'];
+
+const CLOCK_FORMS = ['{hh:mm AM/PM}', '{h:mm AM/PM}'];
 
 describe('copy.ts and announce.ts hold the copy table', () => {
-  it('reads the copy table', () => {
-    expect(table.quoted.length).toBeGreaterThan(50);
+  it('reads both copy tables', () => {
+    expect(table.quoted.length).toBeGreaterThan(100);
+    expect(table.quoted).toContain('Where the time goes');
   });
 
   it('has a template for every quoted string of the table', () => {
     const rendered = new Set(Object.values(RENDERED));
-    const missing = table.quoted.filter((q) => q !== '{hh:mm AM/PM}' && !rendered.has(q));
+    const missing = quotedForms.filter((q) => !CLOCK_FORMS.includes(q) && !rendered.has(q));
     expect(missing).toEqual([]);
   });
 
   it('renders nothing that is not a quoted string of the table', () => {
-    const quoted = new Set(table.quoted);
+    const quoted = new Set(quotedForms);
     const extra = Object.entries(RENDERED).filter(([, text]) => !quoted.has(text));
     expect(extra).toEqual([]);
   });
@@ -196,7 +289,9 @@ describe('copy.ts and announce.ts hold the copy table', () => {
 
   it('holds no literal wording that is not in the table', () => {
     for (const file of ['web/src/copy/copy.ts', 'web/src/copy/announce.ts']) {
-      const strange = stringLiterals(readRepoText(file)).filter((s) => /[A-Za-z]/.test(s) && !table.raw.includes(s));
+      const strange = stringLiterals(readRepoText(file)).filter(
+        (s) => /[A-Za-z]/.test(s) && !table.raw.includes(s) && !CAPTION_KEY_IDS.includes(s),
+      );
       expect(strange, file).toEqual([]);
     }
   });
@@ -222,6 +317,7 @@ describe('the literal scan', () => {
 describe('helpers', () => {
   it('clock12 gives the slider label form "{hh:mm AM/PM}"', () => {
     expect(table.quoted).toContain('{hh:mm AM/PM}');
+    expect(table.quoted).toContain('{h:mm AM/PM}');
     expect(C.clock12('10:00', false)).toBe('10:00 AM');
     expect(C.clock12('2:00', true)).toBe('2:00 PM');
   });
@@ -231,9 +327,65 @@ describe('helpers', () => {
     expect(C.TRY_AGAIN).toBe('Try again');
   });
 
-  it('WHAT holds every phrase of the "What a number is" row, in order', () => {
-    const row = table.raw.split('\n').find((l) => l.startsWith('| What a number is'))!;
-    expect(Object.values(C.WHAT)).toEqual([...row.matchAll(/"([^"]*)"/g)].map((m) => m[1]));
+  it('WHAT holds every phrase of the "What a number is" rows: the race-screen phrases in order with the story-layer replacements in place, then the story-layer additions', () => {
+    const lines = copyTable().raw.split('\n');
+    const phrasesOf = (line: string): string[] => [...line.matchAll(/"([^"]*)"/g)].map((m) => m[1]!);
+    const raceRow = phrasesOf(lines.find((l) => l.startsWith('| What a number is |'))!);
+    const replacements: Record<string, string> = {
+      'races where the 1938 trolley arrives first': 'covered starts where the 1938 trolley arrives first',
+      'races on this line': 'covered starts on this line',
+    };
+    const additions = ["walks to and from the stop, together (estimate)", "covered starts where today's bus arrives first"];
+    // Every replacement and addition is a quoted string of the story-layer row.
+    const storyRow = storyCopyTable().raw.split('\n').find((l) => l.startsWith('| What a number is (Req 8, Req 13)'))!;
+    for (const phrase of [...Object.keys(replacements), ...Object.values(replacements), ...additions]) {
+      expect(phrasesOf(storyRow), phrase).toContain(phrase);
+    }
+    expect(Object.values(C.WHAT)).toEqual([...raceRow.map((p) => replacements[p] ?? p), ...additions]);
+  });
+
+  it('the replaced race-screen strings are gone from the effective table and from copy.ts', () => {
+    const source = readRepoText('web/src/copy/copy.ts');
+    for (const old of REPLACED) {
+      expect(table.quoted, old).not.toContain(old);
+      expect(Object.values(RENDERED), old).not.toContain(old);
+    }
+    for (const old of ['Scheduled departures from this corner after', 'In 1938 a trolley was scheduled', ' races.`', 'races on this line']) {
+      expect(source, old).not.toContain(old);
+    }
+  });
+
+  it('keeps two replaced constants, with their old text, only until the view that imports them changes', () => {
+    for (const [name, { text, task }] of Object.entries(KEPT_UNTIL_VIEW_CHANGES)) {
+      expect((C as Record<string, unknown>)[name], `${name} stays until ${task}`).toBe(text);
+    }
+  });
+
+  it('board row labels and header follow the story-layer departures row', () => {
+    expect(C.BOARD_1938).toBe('1938 trolley, at this corner');
+    expect(C.BOARD_TODAY).toBe("Today's bus, from the boarding stop");
+    expect(C.LANE_TITLE_TODAY).toBe("Today's bus");
+    expect(C.boardHeader('{h:mm}')).toBe('Scheduled departures after {h:mm}');
+  });
+
+  it('captionText joins the clauses with a space and uses the {still } rule', () => {
+    const both = C.captionText({
+      kind: 'clauses',
+      p1938: { phase: 'arrived', still: false },
+      today: { phase: 'riding', still: true },
+    });
+    expect(both).toBe(`${C.CAPTION_1938_ARRIVED} ${C.captionTodayRiding(true)}`);
+    expect(both).toBe("The trolley passenger has arrived. Today's passenger is still riding.");
+    expect(C.captionText({ kind: 'clauses', p1938: { phase: 'waiting', still: false }, today: null })).toBe(
+      C.caption1938Waiting(false),
+    );
+    expect(C.captionText({ kind: 'both-arrived' })).toBe(C.CAPTION_BOTH_ARRIVED);
+    expect(C.captionText({ kind: 'orientation' })).toBe(C.ORIENTATION_LINE);
+  });
+
+  it('methodRideVerdicts reads a one-minute tolerance in the singular', () => {
+    expect(C.methodRideVerdicts('1', '15')).toContain('within 1 minute or 15% of');
+    expect(C.methodRideVerdicts('1.5', '15')).toContain('within 1.5 minutes or 15% of');
   });
 
   it('reads the photo-finish meaning with the real band as approved', () => {
@@ -267,7 +419,7 @@ describe('helpers', () => {
   });
 
   it('everyMinutesOr is the 1938 spacing inside the frequency sentence', () => {
-    expect(RENDERED.frequency).toContain(C.everyMinutesOr(n('{y1938.gap_min}'), n('{y1938.gap_max}')));
+    expect(RENDERED.frequency).toContain(C.everyMinutesOr(n('{a}'), n('{b}')));
   });
 
   it('whenTodayWinsSentence adds the slower clause only when it is above zero, then the full stop', () => {

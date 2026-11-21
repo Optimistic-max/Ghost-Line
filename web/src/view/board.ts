@@ -4,7 +4,7 @@
 // number button, and so are the 1938 spacing and the bus gaps, whose Sources
 // rows carry the frequency sentence (Emmanuel, Nov 19). The header's time is the
 // start time, shown like the slider's.
-import { BOARD_1938, LANE_TITLE_TODAY, boardHeader } from '../copy/copy';
+import { BOARD_1938, BOARD_TODAY, boardHeader } from '../copy/copy';
 import { shortClock } from '../format/time';
 import type { RaceView, Side } from '../state/model';
 import type { Num } from '../state/specs';
@@ -37,6 +37,6 @@ export function boardView(registry: SourceRegistry, view: RaceView, nums: BoardN
     { class: 'board' },
     h('p', { class: 'board-head' }, boardHeader(shortClock(view.board.after))),
     boardRow(registry, '1938', BOARD_1938, nums.cars, nums.spacing),
-    nums.buses.length > 0 && nums.gaps ? boardRow(registry, 'today', LANE_TITLE_TODAY, nums.buses, nums.gaps) : null,
+    nums.buses.length > 0 && nums.gaps ? boardRow(registry, 'today', BOARD_TODAY, nums.buses, nums.gaps) : null,
   );
 }

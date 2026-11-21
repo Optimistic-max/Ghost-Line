@@ -8,19 +8,49 @@ export type CopyTable = {
   quoted: string[];
 };
 
-export function copyTable(): CopyTable {
-  const text = readRepoText('.kiro/specs/race-screen/requirements.md').replace(/\r\n/g, '\n');
-  const start = text.indexOf('## Copy strings');
-  if (start === -1) throw new Error('requirements.md has no "## Copy strings" section');
+function sectionOf(file: string, heading: string): string {
+  const text = readRepoText(file).replace(/\r\n/g, '\n');
+  const start = text.indexOf(heading);
+  if (start === -1) throw new Error(`${file} has no "${heading}" section`);
   const end = text.indexOf('\n## ', start + 1);
-  const raw = text.slice(start, end === -1 ? undefined : end);
+  return text.slice(start, end === -1 ? undefined : end);
+}
+
+function quotedOf(raw: string): string[] {
   const quoted: string[] = [];
   for (const line of raw.split('\n')) {
     if (!line.startsWith('|') || /^\|\s*-/.test(line) || line.startsWith('| Where |')) continue;
     const cell = line.split('|')[2] ?? '';
     for (const m of cell.matchAll(/"([^"]*)"/g)) quoted.push(m[1]!);
   }
-  return { raw, quoted };
+  return quoted;
+}
+
+/** The race-screen copy table alone. */
+export function copyTable(): CopyTable {
+  const raw = sectionOf('.kiro/specs/race-screen/requirements.md', '## Copy strings');
+  return { raw, quoted: quotedOf(raw) };
+}
+
+/** The story-layer copy table alone. */
+export function storyCopyTable(): CopyTable {
+  const raw = sectionOf('.kiro/specs/story-layer/requirements.md', '## Story copy table');
+  return { raw, quoted: quotedOf(raw) };
+}
+
+/**
+ * Both copy tables, with the story-layer row winning (story-layer Requirement 13.8).
+ * `replaced` lists the race-screen strings that story rows replace (and the story
+ * table's own mentions of them); each is removed from both tables, so a template
+ * still carrying one of them fails the copy-table test. The story table's rows are
+ * added to the race-screen table's.
+ */
+export function effectiveCopyTable(replaced: readonly string[]): CopyTable {
+  const drop = (raw: string): string => replaced.reduce((acc, s) => acc.split(`"${s}"`).join(''), raw);
+  const race = drop(copyTable().raw);
+  const story = drop(storyCopyTable().raw);
+  const raw = `${race}\n${story}`;
+  return { raw, quoted: [...quotedOf(race), ...quotedOf(story)] };
 }
 
 /**
