@@ -537,6 +537,18 @@
         "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795270641041
+      },
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795272578102
+      }
+    ],
+    "15.2 DOM tests for the toggle states, `aria-expanded`, the strip versus the map drawing, desktop having no toggle, and the failure paths (import, WebGL, tile) leaving the race unaffected. The request-log checks run in task 20.": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795272580801
       }
     ]
   }

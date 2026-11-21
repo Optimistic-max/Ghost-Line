@@ -150,9 +150,9 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - Depends on: task 14.1
 
 - [ ] 15. Route preview on phones (Req 12.3, 12.8 to 12.10)
-  - [-] 15.1 `web/src/view/mapview.ts` and `map/routedrawing.ts`: on a phone the map area is the 100 px strip of the bundled route drawing with the two chosen corners and a "View route" button, with no MapLibre code and no tile request until it is pressed; pressing it dispatches `route/toggle`, expands to the 150 px map, lazy-imports `map/map` and reads "Hide route"; "Hide route" calls `stopMap()` (no map instance, no further tiles), redraws the strip and does not stay open. Desktop keeps the idle load and shows no preview or toggle. `route.geojson` still loads after the card is on screen on both layouts; a failure shows "Map unavailable." and the toggle still tries the map. The race never waits for either.
+  - [x] 15.1 `web/src/view/mapview.ts` and `map/routedrawing.ts`: on a phone the map area is the 100 px strip of the bundled route drawing with the two chosen corners and a "View route" button, with no MapLibre code and no tile request until it is pressed; pressing it dispatches `route/toggle`, expands to the 150 px map, lazy-imports `map/map` and reads "Hide route"; "Hide route" calls `stopMap()` (no map instance, no further tiles), redraws the strip and does not stay open. Desktop keeps the idle load and shows no preview or toggle. `route.geojson` still loads after the card is on screen on both layouts; a failure shows "Map unavailable." and the toggle still tries the map. The race never waits for either.
     - _Requirements: 12.3, 12.8, 12.9, 12.10, 14.3_
-  - [ ] 15.2 DOM tests for the toggle states, `aria-expanded`, the strip versus the map drawing, desktop having no toggle, and the failure paths (import, WebGL, tile) leaving the race unaffected. The request-log checks run in task 20.
+  - [x] 15.2 DOM tests for the toggle states, `aria-expanded`, the strip versus the map drawing, desktop having no toggle, and the failure paths (import, WebGL, tile) leaving the race unaffected. The request-log checks run in task 20.
     - **Validates: Requirements 12.3, 12.8, 12.9, 12.10**
     - Depends on: task 15.1
 
