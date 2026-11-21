@@ -118,6 +118,18 @@ function object<S extends Shape>(shape: S): Check<Out<S>> {
   };
 }
 
+/** Like object(), and any key outside the shape is a failure. */
+function strictObject<S extends Shape>(shape: S): Check<Out<S>> {
+  const inner = object(shape);
+  return (v, at, ctx) => {
+    inner(v, at, ctx);
+    for (const key of Object.keys(v as Record<string, unknown>)) {
+      if (!(key in shape)) fail(ctx, join(at, key), 'not expected');
+    }
+    return v as Out<S>;
+  };
+}
+
 /** A block-to-source-IDs map: the required keys are present and every ID is in the catalog. */
 function sourceMap(required: readonly string[]): Check<SourceMap> {
   return (v, at, ctx) => {
@@ -225,6 +237,7 @@ const pairVerdictShape = {
   delta: nullable(finite),
   ride_verdict: nullable(oneOf(['same', 'faster today', 'slower today'] as const)),
 };
+const rideSameRuleShape = { minutes: finite, fraction_pct: finite };
 const summaryShape = {
   schema: exactly('ghostline.summary.v1'),
   definition: str,
@@ -235,6 +248,7 @@ const summaryShape = {
   ride_same: count,
   ride_faster_today: count,
   ride_slower_today: count,
+  ride_same_rule: strictObject(rideSameRuleShape),
   pairs_without_one_seat_ride: count,
   today_wins: arrayOf(object(todayWinShape)),
   pairs: arrayOf(object(pairVerdictShape)),
@@ -292,6 +306,7 @@ const raceRowShape = {
   today: nullable(object(raceTodaySideShape)),
   result: oneOf(RESULTS),
   margin: optional(nonNegative),
+  wait_most: bool,
 };
 const raceShape = {
   schema: exactly('ghostline.race.v1'),
@@ -405,6 +420,7 @@ export const CHECKED_FIELDS = {
   summarySources: SUMMARY_SOURCE_KEYS,
   todayWin: keys(todayWinShape),
   pairVerdict: keys(pairVerdictShape),
+  rideSameRule: keys(rideSameRuleShape),
   race: keys(raceShape),
   raceSources: RACE_SOURCE_KEYS,
   clock1938: keys(clock1938Shape),

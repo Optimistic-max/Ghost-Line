@@ -316,9 +316,13 @@
     },
     "RaceRow": {
       "type": "object",
-      "required": ["t", "start", "y1938", "result"],
+      "required": ["t", "start", "y1938", "result", "wait_most"],
       "additionalProperties": false,
       "properties": {
+        "wait_most": {
+          "type": "boolean",
+          "description": "True only when result is '1938' or 'today' and the loser's shown wait minus the winner's shown wait is more than half the shown margin, all as whole-minute shown values; false otherwise."
+        },
         "t": {
           "type": "string",
           "description": "Slider time (HH:MM).",

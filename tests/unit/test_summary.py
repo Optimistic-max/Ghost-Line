@@ -161,3 +161,35 @@ def test_compute_summary_faster_and_slower_verdicts():
     s = compute_summary(races, eligible, facts)
     assert [p.ride_verdict for p in s.pairs] == ["faster today", "slower today"]
     assert (s.ride_faster_today, s.ride_slower_today, s.ride_same) == (1, 1, 0)
+
+
+# ---- ride_same_rule in summary.json (story-layer task 1.6, Req 2.1, 2.2, 2.4) ----
+
+
+def _emitted_summary_doc():
+    from pipeline.emit import _summary_doc
+
+    facts = _facts(0, 10, 5)
+    races = {("a", "b"): [_row("09:01", "1938", ride=9.0, margin=3.0)]}
+    eligible = {("a", "b"): [SimpleNamespace(dep=540.0), SimpleNamespace(dep=574.0)]}
+    return _summary_doc(compute_summary(races, eligible, facts))
+
+
+def test_ride_same_rule_equals_the_summary_constants():
+    from pipeline.summary import SAME_FLOOR_MIN, SAME_FRACTION
+
+    rule = _emitted_summary_doc()["ride_same_rule"]
+    assert set(rule) == {"minutes", "fraction_pct"}
+    assert rule["minutes"] == SAME_FLOOR_MIN
+    assert rule["fraction_pct"] == pytest.approx(SAME_FRACTION * 100, abs=1e-9)
+
+
+def test_ride_same_rule_fraction_pct_is_the_integer_15():
+    rule = _emitted_summary_doc()["ride_same_rule"]
+    assert rule["fraction_pct"] == 15
+    assert isinstance(rule["fraction_pct"], int) and not isinstance(rule["fraction_pct"], bool)
+    assert repr(rule["fraction_pct"]) == "15"
+
+
+def test_ride_same_rule_source_is_method_only():
+    assert _emitted_summary_doc()["sources"]["ride_same_rule"] == ["method"]

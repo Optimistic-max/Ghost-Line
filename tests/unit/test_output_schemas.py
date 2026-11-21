@@ -62,7 +62,7 @@ def race_row(i, covered="09:21"):
         "t": t, "start": covered if before else t, "before_table": before,
         "y1938": {"dep": "09:21", "wait": 0.0, "total": 9.0},
         "today": {"trip": 0, "wait": 5.5, "total": 20.25},
-        "result": "1938", "margin": 11.25,
+        "result": "1938", "margin": 11.25, "wait_most": False,
     }
 
 
@@ -95,11 +95,12 @@ def race_doc(rows=293):
 def summary_doc():
     ids = ["guide1938_diagram", "guide1938_timetable", "mta_gtfs", "method"]
     keys = ["races", "wins_1938", "wins_today", "photo_finishes", "ride_same",
-            "ride_faster_today", "ride_slower_today", "pairs_without_one_seat_ride", "today_wins", "pairs"]
+            "ride_faster_today", "ride_slower_today", "ride_same_rule", "pairs_without_one_seat_ride", "today_wins", "pairs"]
     return {
         "schema": "ghostline.summary.v1", "definition": "d", "races": 1, "wins_1938": 1,
         "wins_today": 0, "photo_finishes": 0, "ride_same": 17, "ride_faster_today": 3,
         "ride_slower_today": 0, "pairs_without_one_seat_ride": 0,
+        "ride_same_rule": {"minutes": 1.5, "fraction_pct": 15},
         "today_wins": [{"origin": "a", "dest": "b", "t": "10:00", "margin": 1.5}],
         "pairs": [{"origin": "a", "dest": "b", "races": 1, "wins_1938": 1, "wins_today": 0,
                    "photo_finishes": 0, "ride_1938": 8, "ride_today_median": 6.0, "delta": -2.0,
@@ -290,4 +291,60 @@ def test_race_nested_y1938_source_urls_preserved():
 def test_schemas_do_not_mutate_between_calls():
     doc = copy.deepcopy(race_doc())
     assert errors("race", doc) == []
+    assert errors("race", doc) == []
+
+
+# ---------- story layer: wait_most and ride_same_rule (task 1.6, Req 1.5, 2.3) ----------
+
+def test_summary_schema_accepts_ride_same_rule_with_whole_and_decimal_numbers():
+    doc = summary_doc()
+    assert errors("summary", doc) == []
+    doc["ride_same_rule"] = {"minutes": 2, "fraction_pct": 12.5}
+    assert errors("summary", doc) == []
+
+
+def test_summary_schema_rejects_missing_ride_same_rule():
+    doc = summary_doc()
+    del doc["ride_same_rule"]
+    assert errors("summary", doc)
+
+
+@pytest.mark.parametrize("key", ["minutes", "fraction_pct"])
+def test_summary_schema_rejects_ride_same_rule_missing_key(key):
+    doc = summary_doc()
+    del doc["ride_same_rule"][key]
+    assert errors("summary", doc)
+
+
+def test_summary_schema_rejects_extra_key_in_ride_same_rule():
+    doc = summary_doc()
+    doc["ride_same_rule"]["extra"] = 1
+    assert errors("summary", doc)
+
+
+@pytest.mark.parametrize("key", ["minutes", "fraction_pct"])
+@pytest.mark.parametrize("bad", ["1.5", None, [1.5], {"v": 1}])
+def test_summary_schema_rejects_non_number_ride_same_rule_values(key, bad):
+    doc = summary_doc()
+    doc["ride_same_rule"][key] = bad
+    assert errors("summary", doc)
+
+
+def test_race_schema_rejects_row_without_wait_most():
+    doc = race_doc()
+    del doc["races"][5]["wait_most"]
+    assert errors("race", doc)
+
+
+@pytest.mark.parametrize("bad", ["true", 1, 0, None])
+def test_race_schema_rejects_non_boolean_wait_most(bad):
+    doc = race_doc()
+    doc["races"][5]["wait_most"] = bad
+    assert errors("race", doc)
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_race_schema_accepts_boolean_wait_most(value):
+    doc = race_doc()
+    doc["races"][5]["wait_most"] = value
     assert errors("race", doc) == []

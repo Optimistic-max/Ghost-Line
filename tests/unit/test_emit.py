@@ -118,7 +118,7 @@ def test_key_order_is_fixed(tmp_path):
         "schema", "line", "origin", "dest", "direction", "inferred", "service_date", "feed_version",
         "feed_sha256", "radius_m", "y1938", "today", "races", "sources",
     ]
-    assert list(race["races"][0]) == ["t", "start", "before_table", "y1938", "today", "result", "margin"]
+    assert list(race["races"][0]) == ["t", "start", "before_table", "y1938", "today", "result", "margin", "wait_most"]
     assert list(load(tmp_path / "index.json"))[:3] == ["schema", "line", "mode"]
 
 

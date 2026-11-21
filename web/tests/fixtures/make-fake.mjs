@@ -91,6 +91,32 @@ const PAIRS = [
   },
 ];
 
+// Test-only copy of the display rounding and the wait-most rule (story-layer Req 1.2),
+// written here so web/src never holds the predicate. Largest remainder, ties to the earlier part.
+const round6 = (x) => Math.floor(x * 1e6 + 0.5) / 1e6;
+function shownParts(parts, total) {
+  const exact = parts.map(round6);
+  const shownTotal = Math.floor(round6(total) + 0.5);
+  const shown = exact.map(Math.floor);
+  const missing = shownTotal - shown.reduce((s, x) => s + x, 0);
+  const order = exact
+    .map((x, i) => ({ i, f: round6(x - Math.floor(x)) }))
+    .filter((x) => x.f > 0)
+    .sort((a, b) => b.f - a.f || a.i - b.i);
+  if (missing < 0 || missing > order.length) throw new Error(`fixture parts ${parts} cannot add up to ${shownTotal}`);
+  for (const { i } of order.slice(0, missing)) shown[i] += 1;
+  return { shownTotal, shown };
+}
+/** True only for a win where the loser's shown wait exceeds the winner's by more than half the shown margin. */
+function waitMost(result, parts1938, total1938, partsToday, totalToday) {
+  if (result !== '1938' && result !== 'today') return false;
+  const a = shownParts(parts1938, total1938);
+  const b = shownParts(partsToday, totalToday);
+  const margin = Math.abs(a.shownTotal - b.shownTotal);
+  const d = result === '1938' ? b.shown[1] - a.shown[0] : a.shown[0] - b.shown[1];
+  return 2 * d > margin;
+}
+
 const stop = (id, name, walkMin) => ({ stop_id: id, name, walk_m: R3((walkMin * 60 * 1.2) / 1.3), walk_min: walkMin });
 
 function buildRace(p) {
@@ -130,6 +156,9 @@ function buildRace(p) {
       row.result = Math.abs(diff) < BAND ? 'photo_finish' : diff > 0 ? '1938' : 'today';
       row.margin = Math.abs(diff);
     }
+    row.wait_most = today
+      ? waitMost(row.result, [y1938.wait, p.ride1938], y1938.total, [trip._t.walkTo, today.wait, trip._t.ride, trip._t.walkFrom], today.total)
+      : false;
     races.push(row);
   }
   const trips = allTrips.slice(0, lastUsed === -1 ? 0 : lastUsed + 4).map(({ _dep, _t, ...trip }) => trip);
@@ -215,7 +244,7 @@ const pairs = races.map((race) => {
 
 const sum = (key) => pairs.reduce((s, p) => s + p[key], 0);
 const countVerdict = (v) => pairs.filter((p) => p.ride_verdict === v).length;
-const summaryKeys = ['races', 'wins_1938', 'wins_today', 'photo_finishes', 'ride_same', 'ride_faster_today', 'ride_slower_today', 'pairs_without_one_seat_ride', 'today_wins', 'pairs'];
+const summaryKeys = ['races', 'wins_1938', 'wins_today', 'photo_finishes', 'ride_same', 'ride_faster_today', 'ride_slower_today', 'ride_same_rule', 'pairs_without_one_seat_ride', 'today_wins', 'pairs'];
 const summary = {
   schema: 'ghostline.summary.v1',
   definition: 'Made-up fixture: race at each whole minute 09:00-13:52',
@@ -226,12 +255,14 @@ const summary = {
   ride_same: countVerdict('same'),
   ride_faster_today: countVerdict('faster today'),
   ride_slower_today: countVerdict('slower today'),
+  // Made up, and unlike the real rule, so a test catches any typed value.
+  ride_same_rule: { minutes: 2.5, fraction_pct: 20 },
   pairs_without_one_seat_ride: pairs.filter((p) => p.ride_verdict === null).length,
   today_wins: races.flatMap((race) =>
     race.races.filter((r) => !r.before_table && r.result === 'today').map((r) => ({ origin: race.origin, dest: race.dest, t: r.t, margin: r.margin })),
   ),
   pairs,
-  sources: Object.fromEntries(summaryKeys.map((k) => [k, SOURCES_RACES])),
+  sources: Object.fromEntries(summaryKeys.map((k) => [k, k === 'ride_same_rule' ? ['method'] : SOURCES_RACES])),
 };
 
 const leg = (a, b, direction, street, method, note) => ({

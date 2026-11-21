@@ -39,6 +39,7 @@ const MAPPING: Record<string, Record<string, readonly string[]>> = {
     'properties.sources': F.summarySources,
     '$defs.TodayWin': F.todayWin,
     '$defs.PairVerdict': F.pairVerdict,
+    'properties.ride_same_rule': F.rideSameRule,
   },
   race: {
     '': F.race,

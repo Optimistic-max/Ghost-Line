@@ -1,0 +1,120 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 In `pipeline/emit.py` add `display_round_parts(parts, stored_total)` and `_wait_most(...)` as in design 1.1 and 1.2: the same rule as `web/src/format/rounding.ts` `roundParts` (inputs rounded at six decimals with `floor(x * 1e6 + 0.5) / 1e6`, totals with `floor(x + 0.5)`, remainder ties to the earlier phase, `ValidationError` naming pair and `t` when the parts cannot add up). Inputs are the emitted three-decimal values: 1938 `[wait, ride_min]`, today `[board walk, wait, ride_min, alight walk]`. `_race_doc` sets `wait_most` as the last key of every row, after `margin` when present. False for photo finish and no one-seat ride without rounding. Use `2 * d > margin` on integers.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795215893512
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795216204795
+      }
+    ],
+    "1.2 In `pipeline/emit.py` `_summary_doc` add `\"ride_same_rule\": {\"minutes\": _r(SAME_FLOOR_MIN), \"fraction_pct\": _r(SAME_FRACTION * 100)}` after `ride_slower_today`, importing the two constants from `pipeline/summary.py` (no number typed in emit; `fraction_pct` written as the integer 15 through `_r`). Add the one `summary.sources` entry `\"ride_same_rule\": [\"method\"]` so `check_source_coverage` passes (decision 17).": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795216210545
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795216275829
+      }
+    ],
+    "1.3 Schemas: `pipeline/schemas/race.schema.json` `$defs.RaceRow` gains `wait_most` (boolean) in `properties` and `required`; `pipeline/schemas/summary.schema.json` gains required `ride_same_rule` (object, required `minutes` and `fraction_pct` numbers, `additionalProperties: false`). Check both are still valid JSON Schema.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795216276650
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229782442
+      }
+    ],
+    "1.4 Approved edit (decision 18): in `tests/unit/test_emit.py::test_key_order_is_fixed` add `\"wait_most\"` at the end of the expected row key list. Change nothing else in that test or file. The commit message of task 1.11 names this test.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229783257
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229838971
+      }
+    ],
+    "1.5 Write `tests/property/test_wait_most_properties.py`. **Property 1: The wait-most flag is the shown-wait predicate** (an independent oracle in the test; false for every photo finish and no-ride row). **Property 2: Python display rounding keeps the R7 invariants** (parts sum to the shown total, each within one minute of its stored part, whole parts unchanged, deterministic, shown total `floor(round6(total) + 0.5)`).": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229843039
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229912470
+      }
+    ],
+    "1.6 Extend `tests/unit/test_summary.py` and `tests/unit/test_output_schemas.py` (new test functions only): `ride_same_rule` equals the two constants read through `pipeline/summary.py`, `fraction_pct` is the integer 15, `sources[\"ride_same_rule\"] == [\"method\"]`, the schemas accept the new fields and reject a missing or extra key, and a row without `wait_most` is rejected.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229913504
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229969219
+      }
+    ],
+    "1.7 Write `tests/golden/test_story_layer_golden.py` on the pinned feed (skips with a clear message when raw/ is missing): every row of every race file has a boolean `wait_most`; `wait_most` is false for every photo finish and no-ride row; the lead pair's `10:00` row is true (brief check 9). If it is not true, STOP and report to Emmanuel; do not change the test or the rule.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795229970289
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795230035030
+      }
+    ],
+    "1.8 Rebuild and compare, without committing yet: run `python -m pipeline build`. Then a one-off comparison script (not kept as a test, not committed): load each regenerated file and `git show HEAD:web/public/data/...`; drop `wait_most` from every row and `ride_same_rule` plus `sources.ride_same_rule` from the summary; require the two to be equal, including every other `sources` key. `index.json` and `route.geojson` must be byte-identical. Report the result. Any other difference: STOP and report.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795230037910
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795230282842
+      }
+    ],
+    "1.9 Site data layer, landing with the pipeline change (design Data Models): `web/src/data/types.ts` (`RaceRow.wait_most`, `RideSameRule`, `Summary.ride_same_rule`); `web/src/data/shape.ts` checks `wait_most` is a boolean on every row and `ride_same_rule` is an object with two finite numbers and nothing else; update `web/tests/fixtures/make-fake.mjs` to write `wait_most` on every made-up row (computed in test code from its own made-up totals, with one row where walking and riding make up most of the margin so it is false) and a made-up `ride_same_rule` that differs from the real file, then regenerate `web/tests/fixtures/fake/`. Extend the shape tests: all real files validate; mutated copies (missing, non-boolean `wait_most`; missing or extra `ride_same_rule` key) fail; the existing `shape-contract.test.ts` passes with the new schema fields.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795230284840
+      },
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795230796788
+      }
+    ],
+    "1.10 Write `web/tests/real/waitmost.test.ts`: **Property 13: Site rounding agrees with the stored flag on every real row.** For every row of all 20 committed race files, apply `roundParts` to the stored parts and the Req 1.2 predicate (kept in `web/tests/support/`, never in `src/`) to the shown values; the result equals the stored `wait_most`. Exhaustive, not sampled. A mismatch is a STOP and report.": [
+      {
+        "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
+        "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
+        "timestamp": 1795230798060
+      }
+    ]
+  }
+}

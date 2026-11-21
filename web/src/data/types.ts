@@ -79,6 +79,8 @@ export type RaceRow = {
   result: RaceResult;
   /** Present for every result except no_one_seat_ride. */
   margin?: number;
+  /** Stored by the pipeline: the wait is most of the difference. The site only reads it. */
+  wait_most: boolean;
 };
 
 export type RaceFile = {
@@ -129,6 +131,9 @@ export type PairVerdict = {
   ride_verdict: RideVerdict | null;
 };
 
+/** The rule that counts two ride times as the same, as the pipeline applied it. */
+export type RideSameRule = { minutes: number; fraction_pct: number };
+
 export type Summary = {
   schema: string;
   definition: string;
@@ -139,6 +144,7 @@ export type Summary = {
   ride_same: number;
   ride_faster_today: number;
   ride_slower_today: number;
+  ride_same_rule: RideSameRule;
   pairs_without_one_seat_ride: number;
   today_wins: TodayWin[];
   pairs: PairVerdict[];

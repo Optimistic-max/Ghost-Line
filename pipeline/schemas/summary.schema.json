@@ -14,6 +14,7 @@
     "ride_same",
     "ride_faster_today",
     "ride_slower_today",
+    "ride_same_rule",
     "pairs_without_one_seat_ride",
     "today_wins",
     "pairs",
@@ -92,6 +93,16 @@
       "type": "integer",
       "minimum": 0,
       "description": "Number of pairs where today's ride is slower."
+    },
+    "ride_same_rule": {
+      "type": "object",
+      "description": "The tolerance behind the 'same' ride verdict: within minutes or fraction_pct percent of the 1938 ride.",
+      "required": ["minutes", "fraction_pct"],
+      "additionalProperties": false,
+      "properties": {
+        "minutes": { "type": "number", "description": "Floor tolerance in minutes (SAME_FLOOR_MIN)." },
+        "fraction_pct": { "type": "number", "description": "Fractional tolerance in percent (SAME_FRACTION x 100)." }
+      }
     },
     "pairs_without_one_seat_ride": {
       "type": "integer",

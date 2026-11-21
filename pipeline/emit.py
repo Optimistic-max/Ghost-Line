@@ -14,6 +14,7 @@ from __future__ import annotations
 import functools
 import gzip
 import json
+import math
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -26,7 +27,15 @@ from pipeline.facts import FactsFile
 from pipeline.race import PHOTO_FINISH_MIN, SLIDER_FIRST_MIN, SLIDER_LAST_MIN, RaceRow
 from pipeline.route import RouteLeg
 from pipeline.stops import DEFAULT_STOP_RADIUS_M, Stop
-from pipeline.summary import GAP_WINDOW_END, GAP_WINDOW_START, Summary, find_gaps, gaps_in_window
+from pipeline.summary import (
+    GAP_WINDOW_END,
+    GAP_WINDOW_START,
+    SAME_FLOOR_MIN,
+    SAME_FRACTION,
+    Summary,
+    find_gaps,
+    gaps_in_window,
+)
 
 if TYPE_CHECKING:  # annotation only; keeps pandas out of validate
     from pipeline.eligible import EligibleTrip
@@ -93,6 +102,65 @@ def _r(value: float) -> int | float:
     """Round to three decimals. A whole number is stored as an integer to save bytes."""
     rounded = round(float(value), DECIMALS)
     return int(rounded) if rounded == int(rounded) else rounded
+
+
+def _round6(x: float) -> float:
+    """Same as the site's round6 for x >= 0: Math.round(x * 1e6) / 1e6."""
+    return math.floor(x * 1e6 + 0.5) / 1e6
+
+
+def display_round_parts(parts: list[float], stored_total: float) -> tuple[int, list[int]]:
+    """Race-screen R7 display rounding, the same rule as web/src/format/rounding.ts roundParts.
+
+    Used only by _wait_most. Never used for a stored value.
+    shown_total = floor(round6(stored_total) + 0.5); each part floors; the missing
+    minutes go one each to the largest fractional remainders, ties to the earlier
+    phase. Raises ValidationError when the parts cannot add up to the shown total
+    with each part within one minute (the site's RoundingError case).
+    """
+    if not math.isfinite(stored_total) or stored_total < 0:
+        raise ValidationError(f"bad total {stored_total}")
+    exact = []
+    for p in parts:
+        if not math.isfinite(p) or p < 0:
+            raise ValidationError(f"bad part {p}")
+        exact.append(_round6(p))
+    shown_total = math.floor(_round6(stored_total) + 0.5)
+    shown = [math.floor(p) for p in exact]
+    missing = shown_total - sum(shown)
+    by_fraction = sorted(
+        ((i, _round6(p - math.floor(p))) for i, p in enumerate(exact) if _round6(p - math.floor(p)) > 0),
+        key=lambda x: (-x[1], x[0]),
+    )
+    if missing < 0 or missing > len(by_fraction):
+        raise ValidationError(f"parts {list(parts)} cannot add up to a shown total of {shown_total}")
+    for i, _ in by_fraction[:missing]:
+        shown[i] += 1
+    return shown_total, shown
+
+
+def _wait_most(
+    result: str,
+    parts_1938: list[float] | None,
+    total_1938: float | None,
+    parts_today: list[float] | None,
+    total_today: float | None,
+    where: str = "",
+) -> bool:
+    """True only for a win where the loser's shown wait minus the winner's shown
+    wait is more than half the shown margin, all as display-rounded values.
+    `where` names the pair and t for error messages."""
+    if result not in ("1938", "today"):
+        return False
+    try:
+        t38, s38 = display_round_parts(parts_1938, total_1938)
+        tt, st = display_round_parts(parts_today, total_today)
+    except ValidationError as exc:
+        raise ValidationError(f"{where}: {exc}" if where else str(exc)) from exc
+    wait38, wait_today = s38[0], st[1]
+    margin = abs(t38 - tt)
+    d = (wait_today - wait38) if result == "1938" else (wait38 - wait_today)
+    return 2 * d > margin
 
 
 def _hhmm(minutes: float) -> str:
@@ -248,6 +316,7 @@ def _summary_doc(summary: Summary) -> dict:
         "ride_same": summary.ride_same,
         "ride_faster_today": summary.ride_faster_today,
         "ride_slower_today": summary.ride_slower_today,
+        "ride_same_rule": {"minutes": _r(SAME_FLOOR_MIN), "fraction_pct": _r(SAME_FRACTION * 100)},
         "pairs_without_one_seat_ride": summary.pairs_without_one_seat_ride,
         "today_wins": [
             {"origin": w.origin, "dest": w.dest, "t": w.t, "margin": _r(w.margin)} for w in summary.today_wins
@@ -267,7 +336,10 @@ def _summary_doc(summary: Summary) -> dict:
             }
             for p in summary.pairs
         ],
-        "sources": {k: list(RACE_DERIVED_IDS) for k in SUMMARY_COUNT_KEYS},
+        "sources": {
+            **{k: list(RACE_DERIVED_IDS) for k in SUMMARY_COUNT_KEYS},
+            "ride_same_rule": ["method"],
+        },
     }
     return doc
 
@@ -397,6 +469,43 @@ def _race_doc(
         except ValueError as exc:
             raise ValidationError(f"Race file {origin} -> {dest} needs gap_min and gap_max: {exc}") from exc
 
+    trip_docs = [
+        {
+            "i": i,
+            "trip_id": t.trip_id,
+            "route": t.route,
+            "route_display": display,
+            "headsign": t.headsign,
+            "headsign_display": headsign,
+            "board": _stop_ref(t.board_stop),
+            "alight": _stop_ref(t.alight_stop),
+            "dep": _hhmmss(t.dep_str),
+            "arr": _hhmmss(t.arr_str),
+            "ride_min": _r(t.ride_min),
+        }
+        for i, (t, display, headsign) in enumerate(zip(ordered, route_displays, headsign_displays))
+    ]
+    ride_1938 = _r(ride_minutes(origin, dest, facts))
+    race_docs = []
+    for r in rows:
+        doc_row = _race_row(r, trip_index)
+        today = doc_row["today"]
+        if today is None:
+            parts_today = total_today = None
+        else:
+            trip = trip_docs[today["trip"]]
+            parts_today = [trip["board"]["walk_min"], today["wait"], trip["ride_min"], trip["alight"]["walk_min"]]
+            total_today = today["total"]
+        doc_row["wait_most"] = _wait_most(
+            doc_row["result"],
+            [doc_row["y1938"]["wait"], ride_1938],
+            doc_row["y1938"]["total"],
+            parts_today,
+            total_today,
+            where=f"{origin} -> {dest} at t={doc_row['t']}",
+        )
+        race_docs.append(doc_row)
+
     return {
         "schema": "ghostline.race.v1",
         "line": facts.line,
@@ -409,7 +518,7 @@ def _race_doc(
         "feed_sha256": feed_sha256,
         "radius_m": _r(radius_m),
         "y1938": {
-            "ride_min": _r(ride_minutes(origin, dest, facts)),
+            "ride_min": ride_1938,
             "covered_from": _hhmm(clock.covered_from),
             "passes": [_hhmm(p) for p in clock.passes],
             "gap_min": _r(pass_gap_min),
@@ -422,24 +531,9 @@ def _race_doc(
             "window_from": _hhmm(GAP_WINDOW_START),
             "window_to": _hhmm(GAP_WINDOW_END),
             "route_names": route_names,
-            "trips": [
-                {
-                    "i": i,
-                    "trip_id": t.trip_id,
-                    "route": t.route,
-                    "route_display": display,
-                    "headsign": t.headsign,
-                    "headsign_display": headsign,
-                    "board": _stop_ref(t.board_stop),
-                    "alight": _stop_ref(t.alight_stop),
-                    "dep": _hhmmss(t.dep_str),
-                    "arr": _hhmmss(t.arr_str),
-                    "ride_min": _r(t.ride_min),
-                }
-                for i, (t, display, headsign) in enumerate(zip(ordered, route_displays, headsign_displays))
-            ],
+            "trips": trip_docs,
         },
-        "races": [_race_row(r, trip_index) for r in rows],
+        "races": race_docs,
         "sources": {
             "y1938": ["guide1938_diagram", "guide1938_timetable"],
             "today": ["mta_gtfs", "method"],

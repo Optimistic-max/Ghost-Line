@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { FIXTURE_TAG } from '../../src/copy/copy';
 import { INDEX_FILE } from '../../src/data/files';
 import { buildView } from '../../src/state/derive';
-import { listRepoFiles, readRepoText } from '../support/files';
+import { listRepoFiles, readRepoJson, readRepoText } from '../support/files';
 import { FIXTURE_DIR, fixtureData, fixtureFileNames, readFixture } from '../support/fixture';
 
 const data = fixtureData();
@@ -50,6 +50,17 @@ describe('the fake fixture line', () => {
     expect(races.some((r) => r.today.gap_min !== null && r.today.gap_min < 0.5)).toBe(true);
     expect(data.summary.ride_slower_today).toBeGreaterThan(0);
     expect(data.index.street_order_checked).toBe(true);
+  });
+
+  it('holds wait_most true and false on wins, false elsewhere, and a made-up ride_same_rule', () => {
+    const wins = rows.filter(({ row }) => row.result === '1938' || row.result === 'today');
+    expect(wins.some(({ row }) => row.wait_most)).toBe(true);
+    expect(wins.some(({ row }) => !row.wait_most)).toBe(true);
+    for (const { row } of rows) {
+      if (row.result === 'photo_finish' || row.result === 'no_one_seat_ride') expect(row.wait_most).toBe(false);
+    }
+    const real = readRepoJson<{ ride_same_rule: unknown }>('web/public/data/summary.json').ride_same_rule;
+    expect(data.summary.ride_same_rule).not.toEqual(real);
   });
 
   it('gives a view for every row, with no bus lane, margin or board buses for no one-seat ride', () => {
