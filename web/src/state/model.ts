@@ -1,5 +1,5 @@
 // State and view types (design 4 and 5).
-import type { Index, Pair, RaceFile, RaceResult, RaceRow, Summary, Trip } from '../data/types';
+import type { Index, Pair, RaceFile, RaceResult, RaceRow, Summary, TodayWin, Trip } from '../data/types';
 import type { PhotoTotals } from '../format/rounding';
 
 export type MotionLevel = 'full' | 'lite' | 'reduced';
@@ -31,6 +31,18 @@ export type AppState = {
   picker: Picker | null;
   banner: Banner | null;
   mapStatus: MapStatus;
+  /** True from data ready on a visit without a valid share link, until the first Visitor_Input (Req 3). */
+  guided: boolean;
+  /** The orientation pause has run or been skipped in this visit (Req 4). */
+  oriented: boolean;
+  /** Index of the next summary.today_wins entry the shortcut selects (Req 10.4). */
+  todayWinNext: number;
+  /** The entry the shortcut selected, while its notice shows (Req 10.5). */
+  todayWinNotice: TodayWin | null;
+  /** The departures section is open (Req 11.2). */
+  departuresOpen: boolean;
+  /** The phone route preview is expanded (Req 12.8). */
+  routeOpen: boolean;
 };
 
 // ---- The derived view -----------------------------------------------------------

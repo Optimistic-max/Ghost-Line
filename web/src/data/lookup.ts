@@ -52,3 +52,11 @@ export function cornerName(index: Index, slug: string): string | undefined {
 export function sourcesOf(index: Index, map: SourceMap, block: string): { id: SourceId; entry: SourceEntry }[] {
   return (map[block] ?? []).map((id) => ({ id, entry: index.sources[id] }));
 }
+
+/** The entry at position k mod n, and the next position. Lookup by position only. */
+export function cycleAt<T>(list: readonly T[], k: number): { entry: T; next: number } {
+  const n = list.length;
+  if (n === 0) throw new Error('cycleAt: empty list');
+  const at = ((k % n) + n) % n;
+  return { entry: list[at] as T, next: (at + 1) % n };
+}

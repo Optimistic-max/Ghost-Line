@@ -29,6 +29,7 @@ function ready(motion: MotionLevel = 'full', race: RaceFile = raceA): AppState {
     summary: data.summary,
     race,
     start,
+    guided: false,
   });
 }
 
@@ -45,7 +46,7 @@ describe('data actions', () => {
     expect(s.minute).toBe(lo);
     expect(s.minuteFromClock).toBe(true);
     const moved = run(s, { type: 'minute/set', minute: lo + 5 });
-    const again = run(moved, { type: 'data/ready', index: data.index, summary: data.summary, race: raceA, start });
+    const again = run(moved, { type: 'data/ready', index: data.index, summary: data.summary, race: raceA, start, guided: false });
     expect(again.minute).toBe(lo + 5);
     expect(again.minuteFromClock).toBe(false);
   });

@@ -587,7 +587,7 @@ export function createApp(options: AppOptions): App {
     const { index, summary, race } = result.data;
     if (!samePair(store.get().pair, pair)) store.dispatch({ type: 'pair/set', pair });
     const { first, last } = sliderRange(race);
-    store.dispatch({ type: 'data/ready', index, summary, race, start: defaultStart(options.now(), first, last) });
+    store.dispatch({ type: 'data/ready', index, summary, race, start: defaultStart(options.now(), first, last), guided: false });
     // With index.json read, the link is judged against the real corners (R4.5, R4.6, race-brief 5.9).
     if (namesAPair(options.query)) {
       const checked = decode(options.query, new Set(index.corners.map((c) => c.slug)));

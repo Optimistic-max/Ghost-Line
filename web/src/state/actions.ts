@@ -1,7 +1,7 @@
 // Pure reducers for the race screen (design 4). Each returns the same state
 // object when nothing changes, so subscribers are not called.
 import { pairKey } from '../data/files';
-import { hasPair, sliderRange } from '../data/lookup';
+import { cycleAt, hasPair, sliderRange } from '../data/lookup';
 import type { Index, Pair, RaceFile, Summary } from '../data/types';
 import { type DefaultStart, minutesOf, stepMinute } from '../format/time';
 import type { AppState, Banner, MapStatus, MotionLevel, SheetName } from './model';
@@ -9,7 +9,7 @@ import type { AppState, Banner, MapStatus, MotionLevel, SheetName } from './mode
 export type Action =
   | { type: 'data/loading' }
   /** Boot succeeded. `start` is the default start (R3.4), used only if no minute is set yet. */
-  | { type: 'data/ready'; index: Index; summary: Summary; race: RaceFile; start: DefaultStart }
+  | { type: 'data/ready'; index: Index; summary: Summary; race: RaceFile; start: DefaultStart; guided: boolean }
   /** An on-demand race file arrived. */
   | { type: 'data/race'; race: RaceFile }
   | { type: 'data/error' }
@@ -17,6 +17,12 @@ export type Action =
   | { type: 'pair/swap' }
   | { type: 'minute/set'; minute: number }
   | { type: 'minute/step'; step: -1 | 1 }
+  /** The first Visitor_Input ends the guided visit (idempotent). */
+  | { type: 'guided/end' }
+  | { type: 'race/oriented' }
+  | { type: 'todaywin/select' }
+  | { type: 'departures/toggle' }
+  | { type: 'route/toggle' }
   | { type: 'race/start' }
   | { type: 'race/result' }
   | { type: 'race/finish' }
@@ -50,6 +56,12 @@ export function initialState(pair: Pair, motion: MotionLevel): AppState {
     picker: null,
     banner: null,
     mapStatus: 'pending',
+    guided: false,
+    oriented: false,
+    todayWinNext: 0,
+    todayWinNotice: null,
+    departuresOpen: false,
+    routeOpen: false,
   };
 }
 
@@ -67,7 +79,7 @@ function setPair(state: AppState, pair: Pair): AppState {
   if (pair.origin === state.pair.origin && pair.dest === state.pair.dest) return state;
   if (state.data.status === 'ready' && !hasPair(state.data.index, pair)) return state;
   const sheet = state.sheet === 'corners' ? null : state.sheet;
-  return { ...state, pair, race: reset(state), picker: null, sheet };
+  return { ...state, pair, race: reset(state), picker: null, sheet, todayWinNotice: null };
 }
 
 function setMinute(state: AppState, minute: number): AppState {
@@ -77,7 +89,7 @@ function setMinute(state: AppState, minute: number): AppState {
     const { first, last } = sliderRange(race);
     if (minute < minutesOf(first) || minute > minutesOf(last)) return state;
   }
-  return { ...state, minute, minuteFromClock: false, race: reset(state) };
+  return { ...state, minute, minuteFromClock: false, race: reset(state), todayWinNotice: null };
 }
 
 export function reduce(state: AppState, action: Action): AppState {
@@ -94,6 +106,7 @@ export function reduce(state: AppState, action: Action): AppState {
         data: { status: 'ready', index: action.index, summary: action.summary, races },
         minute: fresh ? action.start.minute : state.minute,
         minuteFromClock: fresh ? action.start.fromClock : state.minuteFromClock,
+        guided: fresh ? action.guided : state.guided,
         race: reset(state),
       };
     }
@@ -123,6 +136,25 @@ export function reduce(state: AppState, action: Action): AppState {
       const { first, last } = sliderRange(race);
       return setMinute(state, stepMinute(state.minute, action.step, first, last));
     }
+
+    case 'guided/end':
+      return state.guided ? { ...state, guided: false } : state;
+
+    case 'race/oriented':
+      return state.oriented ? state : { ...state, oriented: true };
+
+    case 'todaywin/select': {
+      if (state.data.status !== 'ready' || state.data.summary.today_wins.length === 0) return state;
+      const { entry, next } = cycleAt(state.data.summary.today_wins, state.todayWinNext);
+      const moved = setMinute(setPair(state, { origin: entry.origin, dest: entry.dest }), minutesOf(entry.t));
+      return { ...moved, todayWinNotice: entry, todayWinNext: next };
+    }
+
+    case 'departures/toggle':
+      return { ...state, departuresOpen: !state.departuresOpen };
+
+    case 'route/toggle':
+      return { ...state, routeOpen: !state.routeOpen };
 
     case 'race/start':
       if (state.race.phase !== 'idle') return state;

@@ -172,6 +172,32 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795234022832
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235046087
+      }
+    ],
+    "3.3 Update the tests the copy change makes stale, and no others: `web/tests/dom/board.test.ts` (the bus row label now asserts `C.BOARD_TODAY`, the 1938 row `C.BOARD_1938`, the header follows `C.boardHeader`) and `web/tests/unit/copy-table.test.ts` (reads both copy tables, applies the story-layer-row-wins rule for rows the story table marks as replacing, adds `BOARD_TODAY` and the new `BOARD_1938` text). Grep `web/tests/` for any other assertion on a replaced string (honest lines, `METHOD_RACE_COUNTS`, \"Start time\" input name, 24-hour end labels, `trolleyFirst`) and change only those, each named in the commit message. The fixed-phrase and banned-word tests still pass.": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235047770
+      }
+    ],
+    "3. Constants and copy (Req 3, Req 11.3, Req 13)": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235048215
+      }
+    ],
+    "4.1 `web/src/state/model.ts` and `actions.ts`: add `guided`, `oriented`, `todayWinNext`, `todayWinNotice`, `departuresOpen`, `routeOpen` and the actions of design 2.2 (`data/ready` takes `guided` and keeps the first value across a retry; `guided/end` idempotent; `race/oriented`; `todaywin/select`; `departures/toggle`; `route/toggle`; `pair/set`, `pair/swap`, `minute/set` and `minute/step` clear `todayWinNotice` when they change the pair or minute). `web/src/data/lookup.ts` gains `cycleAt(list, k)` returning the entry at `k mod n` and the next position.": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235051229
       }
     ]
   }
