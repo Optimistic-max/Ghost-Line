@@ -120,7 +120,7 @@ describe('every control by keyboard alone (18.3, R13.1)', () => {
 
   it('moves the start time with the arrow keys, Home and End; the race stops at once and starts 300 ms after the last key, focus kept', async () => {
     const page = await open();
-    page.time.advance(TIMINGS.racePauseMs + 500);
+    page.time.advance(TIMINGS.orientationMs + 500);
     expect(page.app.store.get().race.phase).toBe('running');
     tabTo('#start-time');
     const start = page.app.store.get().minute!;

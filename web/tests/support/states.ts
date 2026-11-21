@@ -48,7 +48,7 @@ async function boot(layout: Layout, options: PageOptions = {}): Promise<FakeTime
   return time;
 }
 
-/** The lead pair's race, this many real milliseconds after the page booted (the 300 ms pause included). */
+/** The lead pair's race, this many real milliseconds after the page booted (the 2,000 ms orientation pause of a guided first visit included). */
 function racingAt(ms: number): Reach {
   return async (layout) => {
     const time = await boot(layout);
@@ -89,12 +89,12 @@ export const STATES: [string, Reach][] = [
     },
   ],
   ['ready, before the first race starts', racingAt(0)],
-  ['racing: the trolley riding, the bus waiting', racingAt(TIMINGS.racePauseMs + 2000)],
-  ['racing: the trolley in, the result shown, the bus waiting', racingAt(TIMINGS.racePauseMs + 4500)],
-  ['racing: the bus riding', racingAt(TIMINGS.racePauseMs + 9000)],
-  ['racing: the bus walking from the stop', racingAt(TIMINGS.racePauseMs + 10800)],
+  ['racing: the trolley riding, the bus waiting', racingAt(TIMINGS.orientationMs + 2000)],
+  ['racing: the trolley in, the result shown, the bus waiting', racingAt(TIMINGS.orientationMs + 4500)],
+  ['racing: the bus riding', racingAt(TIMINGS.orientationMs + 9000)],
+  ['racing: the bus walking from the stop', racingAt(TIMINGS.orientationMs + 10800)],
   ['racing, with the Sources sheet open', async (layout) => {
-    const time = await racingAt(TIMINGS.racePauseMs + 2000)(layout);
+    const time = await racingAt(TIMINGS.orientationMs + 2000)(layout);
     // A time on the departures board, which shows while the race runs.
     click('#card-scroll .board button.num');
     return time;

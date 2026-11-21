@@ -89,9 +89,9 @@ function play(page: Page, ms: number): Snap[] {
 const firstAt = (snaps: Snap[], test: (s: Snap) => boolean): number | null => snaps.find(test)?.ms ?? null;
 
 /** The real time, in page milliseconds, at which the clock reaches `minutes` scheduled minutes. */
-function realMs(view: RaceView, minutes: number): number {
+function realMs(view: RaceView, minutes: number, pause: number = TIMINGS.racePauseMs): number {
   const t = buildTimeline(view);
-  return TIMINGS.racePauseMs + (minutes / t.speed) * 1000;
+  return pause + (minutes / t.speed) * 1000;
 }
 
 function expectNear(actual: number | null, expected: number): void {
@@ -124,8 +124,9 @@ describe('the first race starts by itself (R2.1, R2.5)', () => {
       expect(lane(side)!.querySelector<HTMLElement>('.legend')!.hidden).toBe(true);
     }
     expect(lane('1938')!.querySelector('.vehicle.first-paint')).not.toBeNull();
-    expect(page.time.marks).toEqual([]);
-    page.time.advance(TIMINGS.racePauseMs - 1);
+    // The mark is set when the card is first drawn with its data, before either pause (story-layer Req 4.7).
+    expect(page.time.marks).toEqual(['race-start']);
+    page.time.advance(TIMINGS.orientationMs - 1);
     expect(page.app.store.get().race.phase).toBe('idle');
     page.time.advance(1);
     expect(page.app.store.get().race.phase).toBe('running');
@@ -156,11 +157,11 @@ describe('the order of events', () => {
     const view = viewOn(page.app);
     expect(view.result).toBe('1938');
     const t = buildTimeline(view);
-    const snaps = play(page, 13000);
+    const snaps = play(page, TIMINGS.orientationMs + 13000);
     const result = firstAt(snaps, (s) => s.result);
-    expectNear(result, realMs(view, t.end1938));
+    expectNear(result, realMs(view, t.end1938, TIMINGS.orientationMs));
     expect(firstAt(snaps, (s) => s.arrived['1938'])).toBe(result);
-    expectNear(firstAt(snaps, (s) => s.arrived.today), realMs(view, t.endToday!));
+    expectNear(firstAt(snaps, (s) => s.arrived.today), realMs(view, t.endToday!, TIMINGS.orientationMs));
     expect(firstAt(snaps, (s) => s.phase === 'finished')).toBe(firstAt(snaps, (s) => s.arrived.today));
     // The emphasis is the first arrival's only.
     expect(firstAt(snaps, (s) => s.arriving['1938'])).toBe(result);
@@ -223,7 +224,7 @@ describe('the result and the announcement', () => {
   it('happen once, at the result moment, from the shown numbers; the box is not rebuilt at the finish', async () => {
     const page = await open();
     const view = viewOn(page.app);
-    const snaps = play(page, 5000);
+    const snaps = play(page, TIMINGS.orientationMs + 5000);
     const result = firstAt(snaps, (s) => s.result)!;
     const box = document.querySelector('.result')!;
     expect(box.classList.contains('entering')).toBe(true);
@@ -256,13 +257,13 @@ describe('the result and the announcement', () => {
     const page = await open();
     const view = viewOn(page.app);
     const t = buildTimeline(view);
-    page.time.advance(realMs(view, t.end1938) + 100);
+    page.time.advance(realMs(view, t.end1938, TIMINGS.orientationMs) + 100);
     expect(page.app.store.get().race).toEqual({ phase: 'running', resultShown: true });
     const status = text(lane('today')!.querySelector('.status'));
     const p = (): number => Number(lane('today')!.querySelector<HTMLElement>('.runner')!.style.getPropertyValue('--x'));
     const before = p();
     // A minute before the bus side's own finish: its ride is done and it walks on.
-    page.time.advance(realMs(view, t.endToday! - 1) - page.time.current());
+    page.time.advance(realMs(view, t.endToday! - 1, TIMINGS.orientationMs) - page.time.current());
     expect(text(lane('today')!.querySelector('.status'))).not.toBe(status);
     expect(p()).toBeGreaterThan(before);
     expect(document.querySelector('button.skip')).not.toBeNull();
@@ -291,7 +292,7 @@ describe('a change of layout during the race', () => {
     const page = await open({ layout: () => layout });
     const view = viewOn(page.app);
     const t = buildTimeline(view);
-    const before = play(page, realMs(view, t.end1938) + 200);
+    const before = play(page, realMs(view, t.end1938, TIMINGS.orientationMs) + 200);
     expect(page.app.store.get().race).toEqual({ phase: 'running', resultShown: true });
     layout = 'desktop';
     page.app.render();
@@ -311,7 +312,7 @@ describe('the clock readout and status lines', () => {
     const page = await open();
     const view = viewOn(page.app);
     // 2 s into the race is 8 scheduled minutes: "10:08 scheduled".
-    page.time.advance(TIMINGS.racePauseMs + 2000 + STEP);
+    page.time.advance(TIMINGS.orientationMs + 2000 + STEP);
     expect(text(document.querySelector('.clock-readout'))).toBe(C.clockReadout(shortClock(clockOf(600 + 8))));
     const [wait, ride] = view.lane1938.phases;
     expect(wait!.stored).toBeLessThan(8);
@@ -378,7 +379,7 @@ describe('stop and restart (R3.5)', () => {
 
   it('stops at a minus or plus press and starts 300 ms after the last one; each race announces once', async () => {
     const page = await open();
-    play(page, 13000);
+    play(page, TIMINGS.orientationMs + 13000);
     expect(page.app.store.get().race.phase).toBe('finished');
     click('[data-action="minus"]');
     expect(page.app.store.get().race.phase).toBe('idle');
@@ -446,7 +447,7 @@ describe('reduced motion (R5.11)', () => {
 
   it('finishes a running race at once when the device asks for reduced motion', async () => {
     const page = await open();
-    page.time.advance(TIMINGS.racePauseMs + 1000);
+    page.time.advance(TIMINGS.orientationMs + 1000);
     page.app.setMotion('reduced');
     expect(page.app.store.get().race.phase).toBe('finished');
     expect(document.querySelector('.clock-row')).toBeNull();
@@ -462,7 +463,7 @@ describe('the lite fallback (R5.10)', () => {
   it('drops the extra motion after a slow first second and keeps the race moving to its finish', async () => {
     const page = await open({ time: fakeTime({ frameMs: 50 }) });
     expect(document.documentElement.classList.contains('motion-full')).toBe(true);
-    page.time.advance(TIMINGS.racePauseMs + 1100);
+    page.time.advance(TIMINGS.orientationMs + 1100);
     expect(page.app.store.get().motion).toBe('lite');
     expect(document.documentElement.classList.contains('motion-lite')).toBe(true);
     expect(document.documentElement.classList.contains('motion-full')).toBe(false);
@@ -477,7 +478,7 @@ describe('the lite fallback (R5.10)', () => {
     const page = await open();
     const sparking = (): boolean => lane('1938')!.classList.contains('is-sparking');
     // The first spark comes one random gap after the race starts, and lasts 120 ms.
-    const at = TIMINGS.racePauseMs + sparkGapMs(0.5);
+    const at = TIMINGS.orientationMs + sparkGapMs(0.5);
     page.time.advance(at - 1);
     expect(sparking()).toBe(false);
     page.time.advance(1);

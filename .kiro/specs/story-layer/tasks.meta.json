@@ -229,6 +229,18 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795235778271
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795236153974
+      }
+    ],
+    "5.2 Orientation pause (design 2.5): `scheduleRace()` waits `TIMINGS.orientationMs` when `guided && !oriented && motion !== 'reduced'`, else the 300 ms pause; `startRace()` dispatches `race/oriented`; the card shows the orientation line in the caption area, the clock row and \"Skip to result\" during the pause; `skip` during a pending start cancels it, starts the race and skips to finished; a Visitor_Input during the pause runs `holdRace()` and the next start uses 300 ms; reduced motion runs no pause and draws the finished card with the orientation line while `guided && !oriented`. Move `performance.mark('race-start')` out of `startRace()` into `draw()` the first time a card with data is drawn; `tests/e2e/perf.spec.ts` keeps reading the same mark name. Name any race-screen test this changes in the commit message.": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795236157486
       }
     ]
   }

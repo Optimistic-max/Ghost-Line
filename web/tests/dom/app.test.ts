@@ -2,7 +2,7 @@
 // shows its finished state, every number a button. Since task 11 the first race
 // plays by itself first, so these tests run it to the finish on a fake clock.
 import { afterEach, describe, expect, it } from 'vitest';
-import { FALLBACK_START, LEAD_PAIR } from '../../src/config';
+import { FALLBACK_START, LEAD_PAIR, TIMINGS } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { cornerName } from '../../src/data/lookup';
 import { routeNumberOf, yearOf } from '../../src/format/line';
@@ -19,7 +19,8 @@ const { index } = realData();
 async function bootFinished(options: PageOptions = {}) {
   const time = fakeTime();
   const app = await bootPage({ ...options, time });
-  time.advance((MAX_SECONDS + 1) * 1000);
+  // A guided first visit waits for the orientation line first (story-layer Req 4.1); a linked visit waits 300 ms.
+  time.advance(TIMINGS.orientationMs + (MAX_SECONDS + 1) * 1000);
   expect(app.store.get().race.phase).toBe('finished');
   return app;
 }

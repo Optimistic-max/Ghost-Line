@@ -11,6 +11,7 @@ import {
   DATA_INCOMPLETE,
   FIXTURE_TAG,
   LINK_COPIED,
+  ORIENTATION_LINE,
   SHARE_THIS_RACE,
   TRY_AGAIN,
   badLink,
@@ -408,6 +409,12 @@ export function createApp(options: AppOptions): App {
     });
     fitPairRow();
     painted = true;
+    // The first card with data on screen (the orientation line already in it on a guided visit): the
+    // 2,000 ms and 300 ms start pauses do not count against the 5,000 ms limit (story-layer Req 4.7).
+    if (!marked) {
+      marked = true;
+      timers.mark('race-start');
+    }
     mapView.painted();
     const { index, summary, race, minute, layout, stage, resultShown, guided } = input;
     drawn = { index, summary, race, minute, layout, stage, resultShown, guided };
@@ -435,7 +442,7 @@ export function createApp(options: AppOptions): App {
 
   /** The result box and honest line arrive at the result moment, under the clock row (R5.7, R1.2). */
   function showResult(input: CardInput, motion: MotionLevel): void {
-    const above = scroll.querySelector('.clock-row') ?? scroll.querySelector('.lanes');
+    const above = scroll.querySelector('.clock-row') ?? scroll.querySelector('.caption') ?? scroll.querySelector('.lanes');
     above?.after(...resultElements(registry, input, motion !== 'reduced'));
     if (drawn) drawn.resultShown = true;
   }
@@ -483,6 +490,7 @@ export function createApp(options: AppOptions): App {
       resultShown: state.race.resultShown,
       canSkip: state.motion !== 'reduced',
       guided: state.guided,
+      orientation: state.guided && !state.oriented,
     };
     // While the slider moves, only the time label and the departures board follow it (R3.5).
     if (held && drawn) {
@@ -538,10 +546,18 @@ export function createApp(options: AppOptions): App {
     announcer.cancel();
   }
 
-  /** The next race starts after the fixed pause (R2.5, R3.5). */
+  /** The next race starts after the fixed pause (R2.5, R3.5); the guided first race waits for the orientation line (Req 4.1). */
   function scheduleRace(): void {
     cancelStart();
-    pending = timers.later(startRace, TIMINGS.racePauseMs);
+    const state = store.get();
+    const orienting = state.guided && !state.oriented && state.motion !== 'reduced';
+    pending = timers.later(startRace, orienting ? TIMINGS.orientationMs : TIMINGS.racePauseMs);
+  }
+
+  /** The orientation line leaves the caption area, in place (the card is not redrawn). */
+  function clearOrientation(): void {
+    const caption = scroll.querySelector('#race-caption');
+    if (caption?.textContent === ORIENTATION_LINE) caption.textContent = '';
   }
 
   function startRace(): void {
@@ -551,15 +567,16 @@ export function createApp(options: AppOptions): App {
     const before = store.get();
     if (before.data.status !== 'ready' || !before.data.races.has(pairKey(before.pair))) return;
     run = {};
+    // Under reduced motion no pause ran, so the orientation line stays while the visit is guided (Req 4.6).
+    if (before.motion !== 'reduced') {
+      store.dispatch({ type: 'race/oriented' });
+      clearOrientation();
+    }
     // Reduced motion: the reducer gives the finished state at once and no clock runs (R5.11).
     store.dispatch({ type: 'race/start' });
     render();
     const state = store.get();
     if (state.race.phase !== 'running' || !timeline) return;
-    if (!marked) {
-      marked = true;
-      timers.mark('race-start');
-    }
     clock.start(timeline);
     if (state.motion === 'full') scheduleSpark();
   }
@@ -573,6 +590,7 @@ export function createApp(options: AppOptions): App {
     if (!store.get().guided) return;
     // The parts leave in place, so the card on screen (a race running, or held) is not redrawn for it.
     scroll.querySelectorAll('.example-label, .chart-prompt').forEach((el) => el.remove());
+    clearOrientation();
     if (drawn) drawn.guided = false;
     store.dispatch({ type: 'guided/end' });
   }
@@ -710,6 +728,11 @@ export function createApp(options: AppOptions): App {
         break;
       case 'skip': {
         const fromSkip = doc.activeElement === target;
+        // During the orientation pause the start is still pending: start the race, then skip it (Req 4.4).
+        if (pending !== null) {
+          cancelStart();
+          startRace();
+        }
         clock.skip();
         // The button leaves with the clock row; focus goes to the result it asked for.
         if (fromSkip && !target.isConnected) scroll.querySelector<HTMLElement>('.result button.num')?.focus();

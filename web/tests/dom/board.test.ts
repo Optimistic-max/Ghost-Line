@@ -3,7 +3,7 @@
 // race files here, with the rounding written out (halves up), so the test does
 // not lean on the site's own helpers for its expectations.
 import { afterEach, describe, expect, it } from 'vitest';
-import { BOARD, LEAD_PAIR } from '../../src/config';
+import { BOARD, LEAD_PAIR, TIMINGS } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { rowAt } from '../../src/data/lookup';
 import type { Pair, RaceFile } from '../../src/data/types';
@@ -193,7 +193,7 @@ describe('where the board shows (R8.4, R5.11)', () => {
     const time = fakeTime();
     const app = await bootPage({ time });
     expect(document.querySelector('.board')).not.toBeNull();
-    time.advance(1500);
+    time.advance(TIMINGS.orientationMs + 1500);
     expect(app.store.get().race.phase).toBe('running');
     expect(document.querySelector('.board')).not.toBeNull();
     time.advance((MAX_SECONDS + 1) * 1000);
@@ -206,7 +206,7 @@ describe('where the board shows (R8.4, R5.11)', () => {
     const time = fakeTime();
     const app = await bootPage({ time, layout: 'desktop' });
     expect(document.querySelector('.board')).not.toBeNull();
-    time.advance((MAX_SECONDS + 1) * 1000);
+    time.advance(TIMINGS.orientationMs + (MAX_SECONDS + 1) * 1000);
     expect(app.store.get().race.phase).toBe('finished');
     expect(document.querySelector('.board')).not.toBeNull();
   });

@@ -5,7 +5,7 @@
 // screen), the credits with the flag true and false, and the today_wins list.
 // Expected values are read from the files.
 import { afterEach, describe, expect, it } from 'vitest';
-import { LEAD_PAIR, LICENCE_PATH, SOURCE_URLS } from '../../src/config';
+import { LEAD_PAIR, LICENCE_PATH, SOURCE_URLS, TIMINGS } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { cornerName, rowAt, tripAt } from '../../src/data/lookup';
 import type { Index, Pair, SourceId, Summary } from '../../src/data/types';
@@ -129,7 +129,7 @@ describe('every number has its row (P3, 13.5)', () => {
   it('during the race, with the status lines and the board', async () => {
     const time = fakeTime();
     const app = await bootPage({ time });
-    time.advance(1500);
+    time.advance(TIMINGS.orientationMs + 1500);
     expect(app.store.get().race.phase).toBe('running');
     const ids = cardIds();
     expect(ids).toContain('next-1938');

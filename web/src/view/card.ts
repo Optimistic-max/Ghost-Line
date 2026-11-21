@@ -8,6 +8,7 @@ import {
   INFERRED_CAUTION,
   LANE_TITLE_TODAY,
   NO_SINGLE_BUS,
+  ORIENTATION_LINE,
   SKIP_TO_RESULT,
   START_IS_NOW,
   beforeTable,
@@ -48,6 +49,8 @@ export type CardInput = {
   canSkip: boolean;
   /** A guided visit: the example label and the chart prompt heading show (story-layer Req 3.4). */
   guided?: boolean;
+  /** The orientation line shows in the caption area: a guided visit before its first race has started (Req 4.1). */
+  orientation?: boolean;
   /** The trolley's one fade-in, on the first paint of the page (R2.5). */
   firstPaint?: boolean;
 };
@@ -154,6 +157,8 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
       : []),
     under,
     h('div', { class: 'lanes' }, lane1938, today),
+    // Plain text, outside the announcer's region; task 7.2 owns the later captions.
+    h('p', { class: 'caption', id: 'race-caption' }, input.orientation ? ORIENTATION_LINE : ''),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
     ...(boardShown(input) ? [cardBoard(registry, input)] : []),
