@@ -198,6 +198,18 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795235051229
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235413838
+      }
+    ],
+    "4.2 Reducer property tests (fast-check). **Property 4: Guided parts end at the first Visitor_Input and stay gone** (over random action sequences; skip, sheets, departures and route toggles never change `guided`). **Property 10: The today-win shortcut walks the list in file order** (k presses select entry (k-1) mod n, with pair, minute, notice and `encode(pair)` agreeing; an empty list does nothing). **Property 11: The today-win notice leaves with the next pair or time change.**": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235417837
       }
     ]
   }
