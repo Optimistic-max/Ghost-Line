@@ -45,6 +45,14 @@ async function runUntil(page: Page, done: () => Promise<boolean>, limitMs = 20_0
   throw new Error(`not done after ${limitMs} ms of the page's clock`);
 }
 
+/** On a phone the map loads only after View route (story-layer Req 12.3); on a laptop there is no such button. */
+async function viewRouteOnPhone(page: Page): Promise<void> {
+  const toggle = page.locator('.route-toggle');
+  if (await toggle.isVisible()) await toggle.click();
+}
+
+const isPhone = (page: Page): boolean => (page.viewportSize()?.width ?? 0) < 900;
+
 let strange: string[] = [];
 
 test.beforeEach(async ({ context }, info) => {
@@ -108,9 +116,12 @@ test.describe('the race (20.2)', () => {
     await pausedAt(page, '20:00');
     await page.goto('./');
     await page.locator('.clock-row').waitFor();
-    // The map is asked for once the route drawing is in and the page is idle (at the latest after mapIdleMs).
+    // The map is asked for once the route drawing is in and the page is idle (at the latest after mapIdleMs) on a
+    // laptop; on a phone only after View route (story-layer Req 12.3).
     await page.locator('.route-drawing').waitFor();
     await page.clock.runFor(TIMINGS.orientationMs + TIMINGS.mapIdleMs);
+    await viewRouteOnPhone(page);
+    await runUntil(page, async () => (await page.locator('#map-area').getAttribute('data-map-failed')) !== null);
     await expect(page.locator('#map-area')).toHaveAttribute('data-map-failed', 'no WebGL');
     await expect(page.locator('.map-notice')).toBeVisible();
     await expect(page.locator('.map-notice')).toHaveText(MAP_UNAVAILABLE);
@@ -296,8 +307,8 @@ test.describe('story-layer geometry (20.1)', () => {
 
 test.describe('the keyboard alone (20.2, R13.1)', () => {
   /** Tab (or Shift+Tab) until `selector` has focus, then check its focus ring shows. */
-  async function tabTo(page: Page, selector: string, shift = false): Promise<void> {
-    for (let k = 0; k < 120; k += 1) {
+  async function tabTo(page: Page, selector: string, shift = false, limit = 120): Promise<void> {
+    for (let k = 0; k < limit; k += 1) {
       await page.keyboard.press(shift ? 'Shift+Tab' : 'Tab');
       if (await page.evaluate((s) => document.activeElement?.matches(s) ?? false, selector)) {
         const ring = await page.evaluate(() => {
@@ -310,6 +321,15 @@ test.describe('the keyboard alone (20.2, R13.1)', () => {
       }
     }
     throw new Error(`Tab never reached ${selector}`);
+  }
+
+  /** Forward first, then backward: the new controls sit on both sides of wherever focus came back to. */
+  async function reach(page: Page, selector: string): Promise<void> {
+    try {
+      await tabTo(page, selector, false, 60);
+    } catch {
+      await tabTo(page, selector, true, 120);
+    }
   }
 
   const focusMatches = (page: Page, selector: string): Promise<boolean> =>
@@ -427,6 +447,65 @@ test.describe('the keyboard alone (20.2, R13.1)', () => {
     await page.clock.runFor(TIMINGS.racePauseMs);
     await expect(page.locator('.lanes')).toHaveCount(1);
   });
+
+  test('reaches the new controls: next steps, chart readouts, departures and (phone) the route toggle, each with a focus ring (20.3, R15.1, R15.2)', async ({ page, context }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await withoutWebGL(context);
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    await fontsReady(page);
+
+    // The phone's route toggle: Enter opens the route (the map is unavailable here, no WebGL), Enter again closes it.
+    if (isPhone(page)) {
+      await reach(page, '.route-toggle');
+      await page.keyboard.press('Enter');
+      await expect(page.locator('.route-toggle')).toHaveText(HIDE_ROUTE);
+      await expect(page.locator('.route-toggle')).toHaveAttribute('aria-expanded', 'true');
+      if (!(await focusMatches(page, '.route-toggle'))) await reach(page, '.route-toggle');
+      await page.keyboard.press('Enter');
+      await expect(page.locator('.route-toggle')).toHaveText(VIEW_ROUTE);
+      await expect(page.locator('.route-toggle')).toHaveAttribute('aria-expanded', 'false');
+    }
+
+    // Try another time: focus goes to the slider.
+    await reach(page, '[data-action="next-time"]');
+    await page.keyboard.press('Enter');
+    expect(await focusMatches(page, '#start-time')).toBe(true);
+
+    // Try other corners: the picker opens; Escape closes it.
+    await reach(page, '[data-action="next-corners"]');
+    await page.keyboard.press('Enter');
+    await page.locator('.sheet.is-open[data-sheet="corners"]').waitFor();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.sheet.is-open')).toHaveCount(0);
+
+    // The chart's readout numbers: each opens its Sources row, and Escape brings focus back.
+    const ids = await page.locator('.chart-readout button.num').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset['source'] ?? ''));
+    expect(ids.length, 'readout number buttons').toBeGreaterThanOrEqual(1);
+    for (const id of ids) {
+      await reach(page, `.chart-readout button.num[data-source="${id}"]`);
+      await page.keyboard.press('Enter');
+      await expect(page.locator(`.sheet.is-open .source-row.is-target[data-source="${id}"]`)).toHaveCount(1);
+      await page.keyboard.press('Escape');
+      await expect(page.locator('.sheet.is-open')).toHaveCount(0);
+      expect(await focusMatches(page, `.chart-readout button.num[data-source="${id}"]`)).toBe(true);
+    }
+
+    // Scheduled departures: Enter opens the section, Space closes it.
+    await reach(page, '[data-action="departures"]');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('[data-action="departures"]')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('.departures-region')).toBeVisible();
+    await page.keyboard.press(' ');
+    await expect(page.locator('[data-action="departures"]')).toHaveAttribute('aria-expanded', 'false');
+
+    // Show a race today wins: the notice shows and the race is one today wins.
+    await reach(page, '[data-action="next-today-win"]');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.notice[data-notice="today-win"]')).toBeVisible();
+    await expect(page.locator('.result')).toHaveAttribute('data-result', 'today');
+  });
 });
 
 test.describe('nothing scrolls sideways (20.2, R1.4)', () => {
@@ -508,6 +587,8 @@ test.describe('axe-core on the drawn page (20.3, R13.4)', () => {
       await page.goto('./');
       await page.locator('.result').waitFor();
       await fontsReady(page);
+      // On a phone the map loads only after View route (story-layer Req 12.3).
+      await viewRouteOnPhone(page);
       // The map draws in software here; if it gives up in time, the drawing and notice are checked instead.
       await mapSettled(page);
       expect(await axeViolations(page)).toEqual([]);
@@ -517,6 +598,8 @@ test.describe('axe-core on the drawn page (20.3, R13.4)', () => {
       await withoutWebGL(context);
       await page.goto('./');
       await page.locator('.result').waitFor();
+      // On a phone the map is asked for only after View route (story-layer Req 12.3).
+      await viewRouteOnPhone(page);
       await expect(page.locator('.map-notice')).toBeVisible();
       await fontsReady(page);
       expect(await axeViolations(page)).toEqual([]);
@@ -775,5 +858,177 @@ test.describe('"Scheduled, not live." shows with each notice (20.2, R7.13)', () 
     await page.locator('.result').waitFor();
     await page.locator('[data-action="next-today-win"]').click();
     await noticeShows(page, 'today-win');
+  });
+});
+
+// Task 20.3 (story layer, Req 4.7, 14.3, 15.1, 15.2, 15.4, 16.14).
+test.describe('the story with no map (20.3, R14.3)', () => {
+  test('the whole story with the tile host blocked and WebGL absent: captions, result, takeaway, chart, departures, the today-win shortcut', async ({ page, context }) => {
+    await withoutWebGL(context);
+    await pausedAt(page, '20:00');
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    await expect(page.locator('.example-label')).toBeVisible();
+    const caption = page.locator('#race-caption');
+    expect(((await caption.textContent()) ?? '').trim(), 'the orientation line').not.toBe('');
+    // The map is asked for (a phone: on View route) and gives up; the race does not wait for it.
+    await viewRouteOnPhone(page);
+    await runUntil(page, async () => (await page.locator('#map-area').getAttribute('data-map-failed')) !== null);
+    await expect(page.locator('.map-notice')).toHaveText(MAP_UNAVAILABLE);
+    // The race runs to its finish; the caption changes along the way.
+    const seen = new Set<string>();
+    await runUntil(page, async () => {
+      seen.add(((await caption.textContent()) ?? '').trim());
+      return (await phase(page)) === 'finished';
+    });
+    expect(seen.size, `caption texts seen: ${[...seen].join(' | ')}`).toBeGreaterThan(1);
+    await expect(page.locator('.result')).toHaveCount(1);
+    await expect(page.locator('.takeaway')).toBeVisible();
+    await expect(page.locator('.chart')).toHaveCount(1);
+    await expect(page.locator('.schedule')).toContainText(NOT_LIVE);
+    await page.locator('[data-action="departures"]').click();
+    await expect(page.locator('.departures-region')).toBeVisible();
+    // The shortcut races a pair today wins, still with no map.
+    await page.locator('[data-action="next-today-win"]').click();
+    await expect(page.locator('.notice[data-notice="today-win"]')).toBeVisible();
+    await runUntil(page, async () => (await page.locator('.result[data-result="today"]').count()) > 0);
+    await runUntil(page, async () => (await page.locator('.clock-row').count()) === 0);
+    expect(await phase(page)).toBe('finished');
+    await expect(page.locator('.data-error')).toHaveCount(0);
+    await expect(page.locator('.map-notice')).toBeVisible();
+  });
+});
+
+test.describe('the first race and the pause (20.3, R4.7)', () => {
+  test('"race-start" is marked while the orientation pause is still running, before the clock starts', async ({ page }) => {
+    // Real time: the page's fake clock does not carry performance marks. The pause is 2,000 ms, so the reads below
+    // happen well inside it.
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    const before = await page.evaluate(() => ({
+      starts: performance.getEntriesByName('race-start', 'mark').map((e) => e.startTime),
+      phase: document.documentElement.dataset['race'],
+      now: performance.now(),
+    }));
+    expect(before.starts.length, 'the mark is present before the pause ends').toBe(1);
+    expect(before.phase, 'the race has not started').not.toBe('running');
+    await expect.poll(() => phase(page), { timeout: 10_000 }).toBe('running');
+    const runningAt = await page.evaluate(() => performance.now());
+    // The mark came first, and the clock started only after the pause.
+    expect(before.starts[0]!).toBeLessThanOrEqual(before.now);
+    expect(runningAt - before.starts[0]!, 'the clock starts after the orientation pause').toBeGreaterThanOrEqual(TIMINGS.orientationMs - 150);
+  });
+});
+
+test.describe('reduced motion, the story layer (20.3, R4.7, R15.4)', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('the race is finished at once, the takeaway shows with the result, and no caption sequence plays', async ({ page }) => {
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    // At once: the takeaway is in the page with the result box, and nothing is racing.
+    await expect(page.locator('.takeaway')).toBeVisible();
+    expect(await phase(page)).toBe('finished');
+    await expect(page.locator('.clock-row, .skip')).toHaveCount(0);
+    expect(await page.evaluate(() => performance.getEntriesByName('race-start', 'mark').length)).toBe(1);
+    const texts = new Set<string>();
+    for (let k = 0; k < 12; k += 1) {
+      texts.add(((await page.locator('#race-caption').textContent()) ?? '').trim());
+      await page.waitForTimeout(100);
+    }
+    expect(texts.size, `caption texts seen: ${[...texts].join(' | ')}`).toBe(1);
+    expect([...texts][0]).not.toBe('');
+  });
+});
+
+// axe with every rule on, colour contrast included, on the story layer's new states. Each project (phone and
+// laptop) runs them on its own layout; the phone-only states skip on the laptop.
+test.describe('axe-core on the story layer states (20.3, R13.4, R16.14)', () => {
+  test('racing with a caption showing', async ({ page }) => {
+    await pausedAt(page, '20:00');
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    await page.clock.runFor(TIMINGS.orientationMs + 1500);
+    expect(await phase(page)).toBe('running');
+    expect(((await page.locator('#race-caption').textContent()) ?? '').trim()).not.toBe('');
+    await page.clock.resume();
+    expect(await axeViolations(page)).toEqual([]);
+  });
+
+  test.describe('finished (reduced motion)', () => {
+    test.use({ reducedMotion: 'reduce' });
+
+    async function finished(page: Page, search = ''): Promise<void> {
+      await page.clock.setFixedTime(newYork('20:00'));
+      await page.goto(`./${search}`);
+      await page.locator('.result').waitFor();
+      await fontsReady(page);
+    }
+
+    test('first visit, finished, with the takeaway', async ({ page }) => {
+      await finished(page);
+      await expect(page.locator('.takeaway')).toBeVisible();
+      await expect(page.locator('.example-label')).toBeVisible();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('the today-win notice', async ({ page }) => {
+      await finished(page);
+      await page.locator('[data-action="next-today-win"]').click();
+      await expect(page.locator('.notice[data-notice="today-win"]')).toBeVisible();
+      await page.locator('.result[data-result="today"]').waitFor();
+      await page.waitForTimeout(400);
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('the departures section open', async ({ page }) => {
+      await finished(page);
+      await page.locator('[data-action="departures"]').click();
+      await expect(page.locator('.departures-region')).toBeVisible();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('the chart, after the slider has moved (the plain heading and a readout)', async ({ page }) => {
+      await finished(page);
+      const slider = page.locator('#start-time');
+      await slider.fill(String(Math.round((Number(await slider.getAttribute('min')) + Number(await slider.getAttribute('max'))) / 2)));
+      await page.waitForTimeout(400);
+      await page.locator('.chart').scrollIntoViewIfNeeded();
+      await expect(page.locator('.chart-readout button.num').first()).toBeVisible();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('the shared-link banner', async ({ page }) => {
+      await finished(page, query(LEAD_PAIR));
+      await page.locator('.banner.is-open').waitFor();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('a bad-link banner with the takeaway under it', async ({ page }) => {
+      await finished(page, `?from=nowhere&to=${LEAD_PAIR.dest}`);
+      await page.locator('.banner.is-open').waitFor();
+      await expect(page.locator('.takeaway')).toBeVisible();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('the phone route strip, closed', async ({ page }) => {
+      test.skip(!isPhone(page), 'the strip and its toggle are the phone layout');
+      await finished(page);
+      await expect(page.locator('.route-toggle')).toHaveText(VIEW_ROUTE);
+      expect(await page.evaluate(() => document.documentElement.dataset['route'])).toBe('strip');
+      expect(await axeViolations(page)).toEqual([]);
+    });
+
+    test('the phone route preview, expanded (no WebGL: the drawing and the notice)', async ({ page, context }) => {
+      test.skip(!isPhone(page), 'the preview toggle is the phone layout');
+      await withoutWebGL(context);
+      await finished(page);
+      await page.locator('.route-toggle').click();
+      await expect(page.locator('.route-toggle')).toHaveText(HIDE_ROUTE);
+      await expect(page.locator('.map-notice')).toBeVisible();
+      expect(await axeViolations(page)).toEqual([]);
+    });
   });
 });

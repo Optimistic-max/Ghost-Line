@@ -693,6 +693,18 @@
         "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795295049107
+      },
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795295619192
+      }
+    ],
+    "20.3 `race.spec.ts` (extend): the whole story with the tile host blocked and WebGL absent; reduced motion (finished at once, takeaway shown at once, no caption sequence); the first race reaches `race-start` before the pause (the mark is present and earlier than the clock start); the keyboard-only run now includes the new controls; axe in the browser with every rule on for the new states on both layouts.": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795295619833
       }
     ]
   }
