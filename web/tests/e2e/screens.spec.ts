@@ -227,7 +227,12 @@ async function shoot(browser: Browser, state: State): Promise<void> {
   // for the map to draw or give up.
   if (state.data !== 'fail-summary' && !fixture) {
     await page.locator('.route-drawing').waitFor();
-    if (!racing) {
+    // On a phone the map loads only after "View route" (story-layer Req 12.3): the strip with the route
+    // drawing is the state, so there is no map to wait for. Nothing may have asked for the tile host.
+    if (state.size === PHONE) {
+      await expect(page.locator('.route-toggle')).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.locator('.route-drawing.is-faded')).toHaveCount(0);
+    } else if (!racing) {
       let map = await mapSettled(page);
       let cause = await page.locator('#map-area').getAttribute('data-map-failed');
       // Headless Chromium draws the map in software; on a busy machine the first frame can miss the map's
@@ -271,10 +276,10 @@ for (const state of STATES) {
   test(`${state.file} (${state.size.width} x ${state.size.height})`, async ({ browser }) => shoot(browser, state));
 }
 
-// R1.2 (Emmanuel, Nov 19): on a 375 x 667 phone, during the race, both lanes,
-// their status lines and the clock row are fully visible above the pinned
-// button strip, which is solid --panel with the card scrolling under it.
-test('phone race layout: lanes, status lines and clock row clear of the button strip (375 x 667)', async ({ browser }) => {
+// R1.2 (Emmanuel, Nov 19), as superseded by story-layer Req 12.1: on a 375 x 667 phone, during the race, both
+// lanes, their status lines and the clock row are visible in the page flow and nothing covers them. The button
+// strip is no longer pinned: it is position static, below those boxes, and the card does not scroll inside.
+test('phone race layout: lanes, status lines and clock row in flow, the button strip not pinned or over them (375 x 667)', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: PHONE.width, height: PHONE.height } });
   const page = await context.newPage();
   await page.clock.install({ time: beforeNewYork('20:00') });
@@ -282,7 +287,6 @@ test('phone race layout: lanes, status lines and clock row clear of the button s
   await page.goto('./');
   await page.locator('.clock-row').waitFor();
   await fontsReady(page);
-  const panel = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--panel').trim());
   // The start, 10:08 scheduled, just after the trolley arrives and the result shows, and just before the finish.
   const moments = [0, TEN_OH_EIGHT, TIMINGS.orientationMs + 4200, TIMINGS.orientationMs + 11000];
   let at = 0;
@@ -301,7 +305,6 @@ test('phone race layout: lanes, status lines and clock row clear of the button s
         stripTop: strip.getBoundingClientRect().top,
         cardTop: card.getBoundingClientRect().top,
         cardScroll: card.scrollTop,
-        stripBackground: style.backgroundColor,
         stripPosition: style.position,
         result: document.querySelector('.result') !== null,
         boxes,
@@ -310,23 +313,23 @@ test('phone race layout: lanes, status lines and clock row clear of the button s
     expect(layout.cardScroll).toBe(0);
     expect(layout.boxes.length).toBeGreaterThanOrEqual(5);
     for (const box of layout.boxes) {
+      // Visible in the flow: a real height, below the card's top, and the button strip never overlaps it.
+      expect(box.bottom - box.top, `${box.name} at ${moment} ms: has a box`).toBeGreaterThan(0);
       expect(box.top, `${box.name} at ${moment} ms`).toBeGreaterThanOrEqual(layout.cardTop);
-      expect(box.bottom, `${box.name} at ${moment} ms`).toBeLessThanOrEqual(layout.stripTop);
+      expect(box.bottom, `${box.name} at ${moment} ms`).toBeLessThanOrEqual(layout.stripTop + 0.5);
     }
-    expect(layout.stripPosition).toBe('absolute');
-    expect(layout.stripBackground).toBe(hexToRgb(panel));
+    expect(layout.stripPosition).toBe('static');
     if (moment === TIMINGS.orientationMs + 4200) expect(layout.result).toBe(true);
   }
   await context.close();
 });
 
-// Design 9.3 (Emmanuel, Nov 19): a vehicle's front edge is the filled end of its
-// ride portion, never nearer the lane start than its own width, so it never
-// reaches past the lane start and moves during its ride only. The finish
-// marker sits at the end of each bar the whole time. The lead pair at 10:00,
+// Design 9.3 (Emmanuel, Nov 19), as superseded by story-layer Req 5 and 6: the illustrations no longer
+// travel, a small bar marker does (measured in race.spec.ts, task 20.1), so here the illustration stays put.
+// The finish marker sits at the end of each bar the whole time. The lead pair at 10:00,
 // measured at moments across the race and after the finish.
 for (const size of [PHONE, DESKTOP]) {
-  test(`vehicle front edges on the filled end of the ride (${size.width} x ${size.height})`, async ({ browser }) => {
+  test(`illustrations stay put, finish mark and glow on each bar (${size.width} x ${size.height})`, async ({ browser }) => {
     const context = await browser.newContext({ viewport: { width: size.width, height: size.height } });
     const page = await context.newPage();
     await page.clock.install({ time: beforeNewYork('20:00') });
@@ -363,9 +366,7 @@ for (const size of [PHONE, DESKTOP]) {
       );
       for (const l of lanes) {
         const label = `${l.side} at ${moment} ms`;
-        const front = Math.max(l.laneStart + l.vehicle.width, l.rideFilled);
-        expect(Math.abs(l.vehicle.right - front), label).toBeLessThanOrEqual(1.5);
-        expect(l.vehicle.left, label).toBeGreaterThanOrEqual(l.laneStart - 0.5);
+        // The small bar marker on the filled end of the ride is measured in race.spec.ts (task 20.1).
         expect(Math.abs(l.markCentre - l.barEnd), label).toBeLessThanOrEqual(1.5);
         expect(l.markOpacity, label).toBe(1);
         // Only the trolley glows (ui.md): the bus lane's marker is a solid tick; the arrival flash glows on neither side.
@@ -375,11 +376,8 @@ for (const size of [PHONE, DESKTOP]) {
         lefts[l.side]!.push(l.vehicle.left);
       }
     }
-    // The bus stays put through its first walk and its wait, and again through its last walk.
-    expect(lefts.today![0]).toBeCloseTo(lefts.today![4]!, 1);
-    expect(lefts.today![7]).toBeCloseTo(lefts.today![8]!, 1);
-    // It moves during its ride.
-    expect(lefts.today![6]!).toBeGreaterThan(lefts.today![5]!);
+    // Neither illustration moves at any moment, ride included.
+    for (const side of ['1938', 'today']) for (const left of lefts[side]!) expect(left, side).toBeCloseTo(lefts[side]![0]!, 1);
     await context.close();
   });
 }
@@ -391,6 +389,8 @@ test('desktop pair names on one line, for every pair (1280 x 800)', async ({ bro
   const page = await context.newPage();
   const names = new Map<string, string>(INDEX.corners.map((c: { slug: string; name: string }) => [c.slug, c.name]));
   const pairs: { origin: string; dest: string }[] = INDEX.pairs;
+  // One page load per pair: the budget grows with the number of pairs (5 s each, 30 s base) instead of a fixed 30 s.
+  test.setTimeout(30_000 + 5_000 * pairs.length);
   const length = (p: { origin: string; dest: string }): number => `${names.get(p.origin)} → ${names.get(p.dest)}`.length;
   const longest = [...pairs].sort((a, b) => length(b) - length(a))[0]!;
   let longestSize = 0;

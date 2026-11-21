@@ -199,15 +199,15 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - _Requirements: 16.15_
     - Depends on: task 21.1
 
-- [ ] 22. Budgets and timing (Req 16.13, 16.14)
-  - [-] 22.1 Run `npm run check:size` (first-screen under 100,000 bytes compressed, map chunk excluded, no new runtime dependency in `web/package.json`) and the `web/tests/build/budget.test.ts` checks (no static import of the map chunk; the dynamic import in `app.ts` remains the only reference). Confirm `npm run perf` still reads the `race-start` mark and the median stays under 5,000 ms; on a slow or noisy machine report the five runs to Emmanuel and leave the quiet-machine run to him (race-screen 23.4). If the size is over budget, STOP and report which file grew.
+- [x] 22. Budgets and timing (Req 16.13, 16.14)
+  - [x] 22.1 Run `npm run check:size` (first-screen under 100,000 bytes compressed, map chunk excluded, no new runtime dependency in `web/package.json`) and the `web/tests/build/budget.test.ts` checks (no static import of the map chunk; the dynamic import in `app.ts` remains the only reference). Confirm `npm run perf` still reads the `race-start` mark and the median stays under 5,000 ms; on a slow or noisy machine report the five runs to Emmanuel and leave the quiet-machine run to him (race-screen 23.4). If the size is over budget, STOP and report which file grew.
     - _Requirements: 4.7, 16.13, 16.14_
   - Depends on: task 20
 
 ## Final validation
 
 - [ ] 23. Final checkpoint
-  - [ ] 23.1 Run, each as its own command: `python -m pipeline check`, `python -m pipeline verify`, `python -m pipeline check_sources`, then in web/ `npm test`, `npm run build`, `npm run test:e2e`, `npm run check:size`. All must pass, including every race-screen and race-engine test (Req 16.17), with every golden value and facts file unchanged since task 1.
+  - [-] 23.1 Run, each as its own command: `python -m pipeline check`, `python -m pipeline verify`, `python -m pipeline check_sources`, then in web/ `npm test`, `npm run build`, `npm run test:e2e`, `npm run check:size`. All must pass, including every race-screen and race-engine test (Req 16.17), with every golden value and facts file unchanged since task 1.
   - [ ] 23.2 Write the report for Emmanuel: any layout finding from the report file with its pixel amount (104, 150, 28 and 100 px kept); whether task 17 was built or cut; every superseded race-screen test that changed; the perf numbers. Do not change a size, a text size, a golden value or a test to clear a finding.
   - Ensure all tests pass, ask the user if questions arise.
 
