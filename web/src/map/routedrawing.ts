@@ -49,6 +49,11 @@ export type DrawingInput = {
   size?: Size;
   /** The race file's direction, once it is in: it gives the trolley marker's track. */
   direction?: RaceFile['direction'] | null;
+  /**
+   * The phone's collapsed route preview (story-layer Req 12.3): the 100 px strip, the chosen two corners named,
+   * no street names. Only meaningful on the phone layout.
+   */
+  preview?: boolean;
 };
 
 export type Role = 'origin' | 'dest' | 'other';
@@ -139,9 +144,11 @@ function legPerStreet(features: readonly RouteLeg[]): { leg: RouteLeg; at: numbe
 export function planDrawing(input: DrawingInput): DrawingPlan {
   const { index, route, pair, layout } = input;
   const look = MAP_LAYOUT[layout];
-  const size = input.size ?? look.size;
+  const preview = input.preview === true && layout === 'phone';
+  const frame = preview ? MAP_LAYOUT.phonePreview : look;
+  const size = input.size ?? frame.size;
   const view: Box = { x: 0, y: 0, width: size.width, height: size.height };
-  const { project, unproject, pxPerMetre } = fitProjection(drawingPoints(index, route), size, look.padding);
+  const { project, unproject, pxPerMetre } = fitProjection(drawingPoints(index, route), size, frame.padding);
 
   const legs = route.features.map((f) => fromWest(f.geometry.coordinates.map(project)));
   const dots = index.corners.map((corner): PlannedDot => {
@@ -174,7 +181,7 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
       .map((f) => f.properties.street),
   );
   const named = legPerStreet(route.features).filter(
-    ({ leg }) => leg.properties.method !== 'inferred' && !(crowded && meetsInferred.has(leg.properties.street)),
+    ({ leg }) => !preview && leg.properties.method !== 'inferred' && !(crowded && meetsInferred.has(leg.properties.street)),
   );
 
   // The trolley marker stands at the origin before the ride and short of the destination after it (R5.9), on the

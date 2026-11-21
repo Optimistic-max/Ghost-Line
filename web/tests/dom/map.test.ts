@@ -165,7 +165,8 @@ describe('the map area on the page (16.1, 16.2)', () => {
   });
 
   it('shows the credit line with the route, and the notice not at all while nothing has failed', async () => {
-    const app = await bootPage();
+    // On desktop: the phone strip has no map, so no credit (Req 12.3).
+    const app = await bootPage({ layout: 'desktop' });
     await settle();
     expect(credit().hidden).toBe(false);
     expect(credit().textContent).toBe(MAP_CREDIT);
@@ -202,6 +203,11 @@ describe('the map area on the page (16.1, 16.2)', () => {
     for (const layout of ['phone', 'desktop'] as const) {
       const app = await bootPage({ layout });
       await settle();
+      // The phone's strip names no streets; its View route shows the 150 px drawing (Req 12.3, 12.8).
+      if (layout === 'phone') {
+        expect(streetLabels(area().querySelector('.route-drawing')!)).toEqual([]);
+        document.querySelector<HTMLElement>('.route-toggle')!.click();
+      }
       const svg = area().querySelector('.route-drawing')!;
       const labels = streetLabels(svg);
       expect(labels, layout).toContain('Caroline Street');
@@ -283,6 +289,7 @@ describe('the map chunk (17.1, 17.3)', () => {
     const idle: (() => void)[] = [];
     const waits: number[] = [];
     const app = mountPage({
+      layout: 'desktop',
       loadMap: chunk.load,
       whenIdle: (run, ms) => {
         idle.push(run);
@@ -299,7 +306,7 @@ describe('the map chunk (17.1, 17.3)', () => {
     await settle();
     expect(chunk.started).toHaveLength(1);
     const { start } = chunk.started[0]!;
-    expect(start.layout).toBe('phone');
+    expect(start.layout).toBe('desktop');
     expect(start.plan.dots.map((d) => d.corner.slug)).toEqual(realData().index.corners.map((c) => c.slug));
     // The map sits under the drawing until its first frame.
     expect(area().firstElementChild?.classList.contains('map-canvas')).toBe(true);
@@ -309,7 +316,7 @@ describe('the map chunk (17.1, 17.3)', () => {
 
   it('fades the drawing out only when the first map frame is drawn, and moves the marker onto the map', async () => {
     const chunk = fakeChunk();
-    const app = await bootPage({ loadMap: chunk.load, whenIdle: now, motion: 'reduced' });
+    const app = await bootPage({ layout: 'desktop', loadMap: chunk.load, whenIdle: now, motion: 'reduced' });
     await settle();
     expect(drawingEl().classList.contains('is-faded')).toBe(false);
     expect(area().querySelector<HTMLElement>('.drawing-marker')!.hidden).toBe(false);
@@ -324,7 +331,7 @@ describe('the map chunk (17.1, 17.3)', () => {
 
   it('on a failure, removes the map, keeps the drawing, shows the notice and leaves the data and the race alone', async () => {
     const chunk = fakeChunk();
-    const app = await bootPage({ loadMap: chunk.load, whenIdle: now });
+    const app = await bootPage({ layout: 'desktop', loadMap: chunk.load, whenIdle: now });
     await settle();
     const data = app.store.get().data;
     const run = chunk.started[0]!;
@@ -339,7 +346,7 @@ describe('the map chunk (17.1, 17.3)', () => {
   });
 
   it('shows the notice when the chunk cannot be imported, and the race plays on', async () => {
-    const app = await bootPage({ loadMap: () => Promise.reject(new Error('blocked')), whenIdle: now });
+    const app = await bootPage({ layout: 'desktop', loadMap: () => Promise.reject(new Error('blocked')), whenIdle: now });
     await settle();
     expect(app.store.get().mapStatus).toBe('unavailable');
     expect(app.store.get().data.status).toBe('ready');
@@ -362,6 +369,11 @@ describe('the map chunk (17.1, 17.3)', () => {
     let layout: Layout = 'phone';
     const app = await bootPage({ loadMap: chunk.load, whenIdle: now, layout: () => layout });
     await settle();
+    // The phone's map starts on View route only (Req 12.3).
+    expect(chunk.started).toHaveLength(0);
+    document.querySelector<HTMLElement>('.route-toggle')!.click();
+    await settle();
+    expect(chunk.started[0]!.start.layout).toBe('phone');
     document.querySelector<HTMLElement>('[data-action="swap"]')!.click();
     expect(chunk.started[0]!.corners.at(-1)?.dots.find((d) => d.role === 'origin')?.corner.slug).toBe(LEAD_PAIR.dest);
     layout = 'desktop';

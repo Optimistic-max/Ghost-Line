@@ -1,11 +1,25 @@
 // The map area (design 12): the route drawing once route.geojson arrives, then
-// the map chunk when the page is idle; the line of text (the credit, or the
-// notice when the map is unavailable); the desktop hint strip while a pair is
-// picked on the map; and the trolley marker, moved along the route during the
-// 1938 ride (R5.9). Positions come from layout.ts; nothing here does arithmetic.
-// The race never waits for any of it, and no map failure touches the data state.
+// the map chunk; the line of text (the credit, or the notice when the map is
+// unavailable); the desktop hint strip while a pair is picked on the map; and
+// the trolley marker, moved along the route during the 1938 ride (R5.9).
+// Positions come from layout.ts; nothing here does arithmetic.
+//
+// Desktop loads the map chunk when the page is idle. On a phone the area is
+// first the 100 px strip of the route drawing with a View route button: no map
+// code is imported and no tile is asked for until the button is pressed
+// (story-layer Req 12.3, 12.8 to 12.10). Hide route removes the map and draws
+// the strip again. The race never waits for any of it, and no map failure
+// touches the data state.
 import { FIXTURE_LINE, TIMINGS } from '../config';
-import { MAP_CREDIT, MAP_UNAVAILABLE, MAP_UNAVAILABLE_NO_DRAWING, PICKER_STEP_END, PICKER_STEP_START } from '../copy/copy';
+import {
+  HIDE_ROUTE,
+  MAP_CREDIT,
+  MAP_UNAVAILABLE,
+  MAP_UNAVAILABLE_NO_DRAWING,
+  PICKER_STEP_END,
+  PICKER_STEP_START,
+  VIEW_ROUTE,
+} from '../copy/copy';
 import { pairKey } from '../data/files';
 import type { Loader } from '../data/load';
 import type { Index, Pair, RaceFile, Route } from '../data/types';
@@ -61,15 +75,36 @@ export function createMapView(deps: MapViewDeps): MapView {
   const credit = h('p', { class: 'map-credit', hidden: true }, MAP_CREDIT);
   const hint = h('p', { class: 'map-hint', hidden: true });
   const trolley = h('div', { class: 'drawing-marker', 'aria-hidden': 'true', hidden: true });
-  area.append(h('div', { class: 'map-lines' }, notice, credit), hint, trolley);
+  // The phone's View route / Hide route button (Req 12.8); never shown on desktop.
+  const toggle = h(
+    'button',
+    { type: 'button', class: 'route-toggle', 'aria-expanded': 'false', 'aria-controls': area.id || null, hidden: true },
+    VIEW_ROUTE,
+  );
+  area.append(h('div', { class: 'map-lines' }, notice, credit), hint, trolley, toggle);
+  toggle.addEventListener('click', () => deps.dispatch({ type: 'route/toggle' }));
 
   let route: Route | null = null;
+  let routeLoading = false;
+  /** painted() asks once; only View route asks again after a failure. */
   let routeAsked = false;
-  let drawing: { svg: SVGSVGElement; plan: DrawingPlan; pair: Pair; layout: Layout; direction: Direction | null } | null = null;
+  let drawing: {
+    svg: SVGSVGElement;
+    plan: DrawingPlan;
+    pair: Pair;
+    layout: Layout;
+    direction: Direction | null;
+    preview: boolean;
+  } | null = null;
   let progress = 0;
   let map: MapHandle | null = null;
   let mapLayout: Layout | null = null;
   let mapCanvas: HTMLElement | null = null;
+  /** Counts map starts and stops, so a chunk that arrives after Hide route does nothing. */
+  let attempt: object = {};
+  /** The idle callback has run: a desktop map may start whenever the route is in. */
+  let idleDone = false;
+  let lastRouteOpen = false;
   let markerLayout: Layout | null = null;
   let hovering = false;
 
@@ -81,16 +116,26 @@ export function createMapView(deps: MapViewDeps): MapView {
   /**
    * The drawing for the pair and layout on screen. It is drawn again once the pair's race file is in: its
    * direction gives the trolley marker's track, which the street names keep clear of where the marker stands.
+   * On a phone with the route closed it is the 100 px strip (Req 12.3).
    */
   function drawFor(state: AppState & { data: { status: 'ready'; index: Index } }, layout: Layout): void {
     if (!route) return;
+    const preview = layout === 'phone' && !state.routeOpen;
     const direction = state.data.races.get(pairKey(state.pair))?.direction ?? null;
-    if (drawing && samePair(drawing.pair, state.pair) && drawing.layout === layout && drawing.direction === direction) return;
-    const made = routeDrawing(doc, { index: state.data.index, route, pair: state.pair, layout, size: areaSize(), direction });
+    if (
+      drawing &&
+      samePair(drawing.pair, state.pair) &&
+      drawing.layout === layout &&
+      drawing.direction === direction &&
+      drawing.preview === preview
+    ) {
+      return;
+    }
+    const made = routeDrawing(doc, { index: state.data.index, route, pair: state.pair, layout, size: areaSize(), direction, preview });
     if (drawing) drawing.svg.replaceWith(made.svg);
     else if (mapCanvas) mapCanvas.after(made.svg);
     else area.prepend(made.svg);
-    drawing = { svg: made.svg, plan: made.plan, pair: state.pair, layout, direction };
+    drawing = { svg: made.svg, plan: made.plan, pair: state.pair, layout, direction, preview };
     map?.corners(made.plan);
   }
 
@@ -119,7 +164,9 @@ export function createMapView(deps: MapViewDeps): MapView {
     if (hint.textContent !== text) hint.textContent = text;
   }
 
+  /** No map instance and no further tiles: the map, its canvas and any chunk still arriving are dropped. */
   function stopMap(): void {
+    attempt = {};
     map?.remove();
     map = null;
     mapLayout = null;
@@ -132,12 +179,21 @@ export function createMapView(deps: MapViewDeps): MapView {
     const state = deps.state();
     if (!loadMap || !route || !drawing || !hasMap(state) || !deps.onPage() || state.mapStatus === 'unavailable') return;
     const layout = deps.layout();
+    // On a phone nothing of the map starts until View route is pressed (Req 12.3).
+    if (layout === 'phone' && !state.routeOpen) return;
+    if (map || mapLayout !== null) return;
+    const mine = {};
+    attempt = mine;
     const { index } = state.data;
     const plan = drawing.plan;
     mapLayout = layout;
     loadMap().then(
       (chunk) => {
-        if (!deps.onPage() || mapLayout !== layout || !route) return;
+        if (attempt !== mine) return;
+        if (!deps.onPage() || mapLayout !== layout || !route) {
+          mapLayout = null;
+          return;
+        }
         const canvas = h('div', { class: 'map-canvas' });
         mapCanvas = canvas;
         area.prepend(canvas);
@@ -160,34 +216,88 @@ export function createMapView(deps: MapViewDeps): MapView {
         if (drawing) map.corners(drawing.plan);
       },
       () => {
+        if (attempt !== mine) return;
+        mapLayout = null;
         area.dataset['mapFailed'] = 'import';
         deps.dispatch({ type: 'map/status', status: 'unavailable' });
       },
     );
   }
 
-  function sync(state: AppState): void {
+  /** View route or Hide route was pressed on a phone (Req 12.8, 12.9). */
+  function routeToggled(open: boolean): void {
+    delete area.dataset['mapFailed'];
+    if (open) {
+      // A failed map or route is tried again.
+      if (deps.state().mapStatus === 'unavailable') deps.dispatch({ type: 'map/status', status: 'pending' });
+      if (!route) askRoute();
+      return;
+    }
+    stopMap();
+    if (deps.state().mapStatus !== 'pending') deps.dispatch({ type: 'map/status', status: 'pending' });
+  }
+
+  function sync(first: AppState): void {
     const layout = deps.layout();
+    if (first.routeOpen !== lastRouteOpen) {
+      lastRouteOpen = first.routeOpen;
+      if (layout === 'phone') routeToggled(first.routeOpen);
+    }
+    const state = deps.state();
     if (hasMap(state)) drawFor(state, layout);
-    // A change of layout draws the map again for the new one.
+    // A change of layout draws the map again for the new one, or drops it on a phone with the route closed.
     if (map && mapLayout !== null && mapLayout !== layout && state.mapStatus !== 'unavailable') {
       stopMap();
       queueMicrotask(() => {
         deps.dispatch({ type: 'map/status', status: 'pending' });
         startMap();
       });
+    } else if (route && !map && mapLayout === null && hasMap(state) && state.mapStatus !== 'unavailable') {
+      // The map starts here when the visitor asked for it (phone) or the idle load has already run (desktop).
+      if (layout === 'phone' ? state.routeOpen : idleDone) startMap();
     }
+    // The phone's map area is the 100 px strip unless the route is open (or the made-up line has no map to preview).
+    const expanded = layout !== 'phone' || state.routeOpen || (state.data.status === 'ready' && !hasMap(state));
+    doc.documentElement.dataset['route'] = expanded ? 'open' : 'strip';
     const unavailable = state.mapStatus === 'unavailable';
+    const preview = drawing?.preview === true;
     // "Showing the route diagram" only while the drawing is on screen; without route.geojson there is none.
     const noticeText = drawing?.svg.isConnected ? MAP_UNAVAILABLE : MAP_UNAVAILABLE_NO_DRAWING;
     if (notice.textContent !== noticeText) notice.textContent = noticeText;
     notice.hidden = !unavailable;
-    credit.hidden = unavailable || drawing === null;
+    // The strip has no map, so it has no map credit.
+    credit.hidden = unavailable || drawing === null || preview;
     drawing?.svg.classList.toggle('is-faded', state.mapStatus === 'ready');
+    toggle.hidden = layout !== 'phone' || !hasMap(state);
+    const label = state.routeOpen ? HIDE_ROUTE : VIEW_ROUTE;
+    if (toggle.textContent !== label) toggle.textContent = label;
+    toggle.setAttribute('aria-expanded', String(state.routeOpen));
     // At rest the trolley waits at the origin; after the finish it stands short of the destination.
     if (state.race.phase !== 'running') progress = state.race.phase === 'finished' ? 1 : 0;
     placeMarker(state, layout);
     syncHint(state, layout);
+  }
+
+  /** Fetch route.geojson once the card is on screen; the map follows when the page is idle (desktop) or on View route (phone). */
+  function askRoute(): void {
+    if (routeLoading || route) return;
+    routeLoading = true;
+    void loader.route().then((loaded) => {
+      routeLoading = false;
+      if (!deps.onPage()) return;
+      if (!loaded) {
+        deps.dispatch({ type: 'map/status', status: 'unavailable' });
+        return;
+      }
+      route = loaded;
+      sync(deps.state());
+      if (deps.loadMap) {
+        deps.whenIdle(() => {
+          idleDone = true;
+          startMap();
+        }, TIMINGS.mapIdleMs);
+      }
+    });
   }
 
   const hover = (over: boolean): void => {
@@ -201,19 +311,9 @@ export function createMapView(deps: MapViewDeps): MapView {
   return {
     sync,
     painted() {
-      const state = deps.state();
-      if (routeAsked || !hasMap(state)) return;
+      if (routeAsked || !hasMap(deps.state())) return;
       routeAsked = true;
-      void loader.route().then((loaded) => {
-        if (!deps.onPage()) return;
-        if (!loaded) {
-          deps.dispatch({ type: 'map/status', status: 'unavailable' });
-          return;
-        }
-        route = loaded;
-        sync(deps.state());
-        if (deps.loadMap) deps.whenIdle(startMap, TIMINGS.mapIdleMs);
-      });
+      askRoute();
     },
     ride(next) {
       progress = next;

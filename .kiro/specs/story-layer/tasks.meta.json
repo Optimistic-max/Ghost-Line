@@ -518,6 +518,25 @@
         "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795270235284
+      },
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795270638718
+      }
+    ],
+    "14. Phone reading order and page flow (Req 12.1, 12.2, 12.4 to 12.7, 12.11)": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795270639860
+      }
+    ],
+    "15.1 `web/src/view/mapview.ts` and `map/routedrawing.ts`: on a phone the map area is the 100 px strip of the bundled route drawing with the two chosen corners and a \"View route\" button, with no MapLibre code and no tile request until it is pressed; pressing it dispatches `route/toggle`, expands to the 150 px map, lazy-imports `map/map` and reads \"Hide route\"; \"Hide route\" calls `stopMap()` (no map instance, no further tiles), redraws the strip and does not stay open. Desktop keeps the idle load and shows no preview or toggle. `route.geojson` still loads after the card is on screen on both layouts; a failure shows \"Map unavailable.\" and the toggle still tries the map. The race never waits for either.": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795270641041
       }
     ]
   }

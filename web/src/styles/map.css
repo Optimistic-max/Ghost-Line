@@ -264,3 +264,23 @@
     pointer-events: none;
   }
 }
+
+/* View route / Hide route: phone only, top right of the map area, a 44 px target (story-layer Req 12.8). */
+.route-toggle {
+  position: absolute;
+  z-index: 3;
+  top: 4px;
+  right: 8px;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.route-toggle[hidden] {
+  display: none;
+}
+

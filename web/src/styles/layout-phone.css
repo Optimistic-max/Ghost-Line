@@ -222,3 +222,11 @@
 .banner-close::before {
   content: '×';
 }
+
+/* The collapsed route preview: the map area is the 100 px strip, and the card keeps its 9 px overlap on it. View route
+   sets data-route="open" for the 150 px map (story-layer Req 12.3, 12.8). */
+:root[data-route='strip'] {
+  --map-h: var(--map-strip-h);
+  --card-top: calc(var(--topbar-h) + var(--map-strip-h) - 9px);
+}
+

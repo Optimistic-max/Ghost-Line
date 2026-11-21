@@ -142,15 +142,15 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 11.1 to 11.5**
     - Depends on: task 13.1
 
-- [ ] 14. Phone reading order and page flow (Req 12.1, 12.2, 12.4 to 12.7, 12.11)
+- [x] 14. Phone reading order and page flow (Req 12.1, 12.2, 12.4 to 12.7, 12.11)
   - [x] 14.1 `web/index.html` adds the phone-only intro line (text equal to the `copy.ts` constant); `styles/layout-phone.css`: `.app` loses `height: 100dvh; overflow: hidden`, `.card-scroll` loses its inside scrolling and bottom padding, `.card-buttons` loses the pinned strip and flows after the content; the phone pair row is two lines (origin, then "→ destination") with the swap button; the DOM order is as Req 12.2 for phone and the same from the pair names down on desktop. Sheets, scrim and banners stay overlays; the scrim is `display: none` with no sheet; on a phone the banner is a compact strip at the top of the viewport that never covers the result box or the Next_Step_Actions, and its close control always clears it. No text size is reduced.
     - _Requirements: 12.1, 12.2, 12.4, 12.5, 12.11_
-  - [-] 14.2 Tests. DOM: the order of Req 12.2 on both layouts including the notices directly under the schedule line; the intro line equals the constant. jsdom/CSS scan: no `position: fixed` or `sticky` rule displays on a phone with no sheet and no banner. (The geometry checks run in task 20.)
+  - [x] 14.2 Tests. DOM: the order of Req 12.2 on both layouts including the notices directly under the schedule line; the intro line equals the constant. jsdom/CSS scan: no `position: fixed` or `sticky` rule displays on a phone with no sheet and no banner. (The geometry checks run in task 20.)
     - **Validates: Requirements 12.1, 12.2, 12.4, 16.12**
     - Depends on: task 14.1
 
 - [ ] 15. Route preview on phones (Req 12.3, 12.8 to 12.10)
-  - [ ] 15.1 `web/src/view/mapview.ts` and `map/routedrawing.ts`: on a phone the map area is the 100 px strip of the bundled route drawing with the two chosen corners and a "View route" button, with no MapLibre code and no tile request until it is pressed; pressing it dispatches `route/toggle`, expands to the 150 px map, lazy-imports `map/map` and reads "Hide route"; "Hide route" calls `stopMap()` (no map instance, no further tiles), redraws the strip and does not stay open. Desktop keeps the idle load and shows no preview or toggle. `route.geojson` still loads after the card is on screen on both layouts; a failure shows "Map unavailable." and the toggle still tries the map. The race never waits for either.
+  - [-] 15.1 `web/src/view/mapview.ts` and `map/routedrawing.ts`: on a phone the map area is the 100 px strip of the bundled route drawing with the two chosen corners and a "View route" button, with no MapLibre code and no tile request until it is pressed; pressing it dispatches `route/toggle`, expands to the 150 px map, lazy-imports `map/map` and reads "Hide route"; "Hide route" calls `stopMap()` (no map instance, no further tiles), redraws the strip and does not stay open. Desktop keeps the idle load and shows no preview or toggle. `route.geojson` still loads after the card is on screen on both layouts; a failure shows "Map unavailable." and the toggle still tries the map. The race never waits for either.
     - _Requirements: 12.3, 12.8, 12.9, 12.10, 14.3_
   - [ ] 15.2 DOM tests for the toggle states, `aria-expanded`, the strip versus the map drawing, desktop having no toggle, and the failure paths (import, WebGL, tile) leaving the race unaffected. The request-log checks run in task 20.
     - **Validates: Requirements 12.3, 12.8, 12.9, 12.10**
