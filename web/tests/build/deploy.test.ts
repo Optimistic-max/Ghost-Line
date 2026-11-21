@@ -10,6 +10,9 @@ import { PERF, median, pagesUrl } from '../e2e/perf-config';
 import { listRepoFiles, readRepoJson, readRepoText } from '../support/files';
 
 const workflow = readRepoText('.github/workflows/pages.yml');
+
+/** Tool caches and installs, never part of the site: the repository listing does not walk into them. */
+const TOOL_FOLDERS = ['.git', '.hypothesis', '.pytest_cache', '__pycache__', 'node_modules'];
 /** The workflow without its comment lines, so a comment cannot satisfy or break a check. */
 const code = workflow
   .split(/\r?\n/)
@@ -76,7 +79,7 @@ describe('the Pages workflow (22.1)', () => {
     const tracked = listRepoFiles('web/public/data');
     expect(tracked.length).toBe(23);
     expect(readRepoText('.gitignore')).toMatch(/^raw\/$/m);
-    expect(listRepoFiles('.').filter((f) => f.startsWith('raw/'))).toEqual([]);
+    expect(listRepoFiles('.', { skipFolders: TOOL_FOLDERS }).filter((f) => f.startsWith('raw/'))).toEqual([]);
   });
 });
 

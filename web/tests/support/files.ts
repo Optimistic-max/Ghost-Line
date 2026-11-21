@@ -24,11 +24,13 @@ export function repoFileExists(relative: string): boolean {
 }
 
 /** Files under a repository-relative folder, recursively, as repository-relative paths with forward slashes. */
-export function listRepoFiles(relative: string): string[] {
+export function listRepoFiles(relative: string, options: { skipFolders?: readonly string[] } = {}): string[] {
   const out: string[] = [];
+  const skip = new Set(options.skipFolders ?? []);
   const walk = (rel: string): void => {
     for (const name of readdirSync(repoPath(rel))) {
       const child = `${rel}/${name}`;
+      if (skip.has(name)) continue;
       if (statSync(repoPath(child)).isDirectory()) walk(child);
       else out.push(child);
     }
