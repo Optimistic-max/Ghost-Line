@@ -401,6 +401,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795241811671
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795266213794
+      }
+    ],
+    "10.3 Tests. **Property 9: The chart is the race file's stored totals** (random race files from the fixture generator and the 20 real files; readout equals `roundTotal` of the stored totals). DOM tests: columns, hatch, cursor, readout, prompt heading versus normal heading, no listeners; with the made-up race file the chart follows it; after every pair change, swap and shortcut the series equal the new file and the loader's fetch log has no extra race file.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795266215101
       }
     ]
   }
