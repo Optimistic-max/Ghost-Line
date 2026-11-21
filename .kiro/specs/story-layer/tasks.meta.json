@@ -296,6 +296,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795238293516
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795238638705
+      }
+    ],
+    "7.3 Tests. **Property 6: Captions name the phases the lanes show** (rows sampled from all 20 files and the fixtures, random elapsed times; `still` only while the other side has arrived). **Property 7: Caption text carries no number, no present-tense marker and no place** (no digit, no whole word \"now\" or \"currently\", no \"at the stop\", no street or corner name read from index.json, for every key including the orientation line). DOM tests `web/tests/dom/captions.test.ts` with fake timers: the caption sequence equals the sequence worked out in the test from stored boundaries for the lead race at 10:00, the first `summary.today_wins` entry (read from the file), the lead pair at 10:30, the lead pair at 9:00, one Brevard pair and the no-one-seat-ride fixture; the caption area is not in a live region; \"Scheduled, not live.\" is visible at each of those moments.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795238640379
       }
     ]
   }

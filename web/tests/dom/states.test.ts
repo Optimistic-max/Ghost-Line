@@ -68,7 +68,7 @@ describe('before the midday table (15.2): the lead pair at the first slider minu
     await bootPage({ query: query(lead), now: newYork(first.t) });
     const notice = document.querySelector('.notice[data-notice="before-table"]')!;
     expect(text(notice)).toBe(C.beforeTable(shortClock(first.start)));
-    expect(document.querySelector('.schedule')).toBeNull();
+    expect(document.querySelector('.schedule')).not.toBeNull();
     expect(document.querySelector<HTMLInputElement>('#start-time')!.value).toBe(String(minutesOf(first.t)));
     // Both lanes and the board start from row.start; the start time in the notice is a number with its source.
     expect(text(document.querySelector('.clock-readout'))).toBe(C.clockReadout(shortClock(first.start)));
@@ -92,7 +92,7 @@ describe('the inferred corner (15.2)', () => {
     expect(text(chip)).toBe(C.INFERRED_CHIP);
     expect(chip.previousElementSibling?.id).toBe('origin-name');
     expect(text(document.querySelector('.notice[data-notice="inferred"]'))).toBe(C.INFERRED_CAUTION);
-    expect(document.querySelector('.schedule')).toBeNull();
+    expect(document.querySelector('.schedule')).not.toBeNull();
     await bootPage({ motion: 'reduced' });
     expect(document.querySelector('.pair-chip, .notice')).toBeNull();
   });

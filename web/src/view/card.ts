@@ -111,8 +111,10 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   const { first, last } = sliderRange(race);
   const trolleyWidth = stage === 'finished' ? widths.trolleyFinished : widths.trolleyRacing;
 
-  // Under the slider: the notices when there are any (they hide the schedule line), else the schedule line (R6.6, R6.7).
-  const under =
+  // Under the slider: the schedule line always shows (story-layer decision 16, Req 7.13), then the
+  // notices block directly after it (Req 12.2).
+  const schedule = h('p', { class: 'schedule' }, ready(serviceDateLabel(index.service_date)), input.minuteFromClock ? ` ${START_IS_NOW}` : '');
+  const notices =
     view.notices.length > 0
       ? h(
           'div',
@@ -124,7 +126,7 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
               : h('p', { class: 'notice', 'data-notice': notice }, INFERRED_CAUTION),
           ),
         )
-      : h('p', { class: 'schedule' }, ready(serviceDateLabel(index.service_date)), input.minuteFromClock ? ` ${START_IS_NOW}` : '');
+      : null;
   const inferredSlug = index.corners.find((c) => c.inferred)?.slug;
   const inferredEnd = !view.inferred ? null : view.pair.origin === inferredSlug ? 'origin' : view.pair.dest === inferredSlug ? 'dest' : null;
 
@@ -167,7 +169,8 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
           h('h3', { class: 'chart-prompt' }, CHART_PROMPT_HEADING),
         ]
       : []),
-    under,
+    schedule,
+    notices,
     h('div', { class: 'lanes' }, lane1938, today),
     // Plain text, outside the announcer's region. Racing, racer.ts writes it; a finished card (the finish,
     // skip, reduced motion) is drawn with the finished caption, or the orientation line on a guided visit.
