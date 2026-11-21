@@ -238,7 +238,11 @@ describe('the map area on the page (16.1, 16.2)', () => {
     let layout: Layout = 'phone';
     const app = await bootPage({ layout: () => layout });
     await settle();
-    expect(names(area().querySelector('.route-drawing')!)).toHaveLength(2);
+    // On the phone strip only the chosen two are named, and a name that cannot sit next to its own dot is
+    // hidden (checkpoint 18, round 2), so one or two of them show.
+    const strip = names(area().querySelector('.route-drawing')!);
+    expect(strip.length).toBeGreaterThanOrEqual(1);
+    expect(strip.length).toBeLessThanOrEqual(2);
     layout = 'desktop';
     app.render();
     expect(names(area().querySelector('.route-drawing')!)).toHaveLength(realData().index.corners.length);
