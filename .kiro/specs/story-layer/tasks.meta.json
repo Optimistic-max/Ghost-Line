@@ -556,6 +556,18 @@
         "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795273199448
+      },
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795273602274
+      }
+    ],
+    "16.2 Tests. **Property 12: The tolerance line shows the file's numbers** (any finite non-negative minutes and percentage; plain text, no Number_Button). Made-up summary: every count, the heading, the shortcut order and the Sources method lines show the fixture's values; the three counts show the covered-starts line; `today_wins` list length equals the file's.": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795273605929
       }
     ]
   }

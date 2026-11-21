@@ -157,9 +157,9 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - Depends on: task 15.1
 
 - [ ] 16. Sources specs and counts (Req 2, Req 13)
-  - [-] 16.1 `web/src/state/specs.ts` and `view/sheets/sources.ts`: the `races`, `wins_1938` and `wins_today` rows use the covered-starts method line; the ride-same row fills `methodRideVerdicts` with `String(summary.ride_same_rule.minutes)` and `String(summary.ride_same_rule.fraction_pct)` as plain text (no Number_Button); the "When today wins" sheet heading "The {wins_today} races today wins" with `wins_today` as Number_Button `count-wins-today` ("covered starts where today's bus arrives first"); the replaced "what a number is" lines; the frequency sentence; the honest lines with counts read from `summary.json`.
+  - [x] 16.1 `web/src/state/specs.ts` and `view/sheets/sources.ts`: the `races`, `wins_1938` and `wins_today` rows use the covered-starts method line; the ride-same row fills `methodRideVerdicts` with `String(summary.ride_same_rule.minutes)` and `String(summary.ride_same_rule.fraction_pct)` as plain text (no Number_Button); the "When today wins" sheet heading "The {wins_today} races today wins" with `wins_today` as Number_Button `count-wins-today` ("covered starts where today's bus arrives first"); the replaced "what a number is" lines; the frequency sentence; the honest lines with counts read from `summary.json`.
     - _Requirements: 2.1, 13.1, 13.2, 13.3, 13.4, 13.6_
-  - [ ] 16.2 Tests. **Property 12: The tolerance line shows the file's numbers** (any finite non-negative minutes and percentage; plain text, no Number_Button). Made-up summary: every count, the heading, the shortcut order and the Sources method lines show the fixture's values; the three counts show the covered-starts line; `today_wins` list length equals the file's.
+  - [x] 16.2 Tests. **Property 12: The tolerance line shows the file's numbers** (any finite non-negative minutes and percentage; plain text, no Number_Button). Made-up summary: every count, the heading, the shortcut order and the Sources method lines show the fixture's values; the three counts show the covered-starts line; `today_wins` list length equals the file's.
     - **Validates: Requirements 2.1, 13.2, 13.3, 13.4, 13.6, 16.6**
     - Depends on: task 16.1
 
