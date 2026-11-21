@@ -17,6 +17,7 @@ import { ANNOUNCE_DELAY_MS } from '../../src/view/a11y';
 import { FIXTURE_DIR } from '../support/fixture';
 import { controlName, press, tabOrder, tabTo } from '../support/keyboard';
 import { type PageOptions, bootPage } from '../support/page';
+import { stylesheets } from '../support/css';
 import { raceOf, realData } from '../support/realdata';
 import { text, value } from '../support/render';
 import { STATES, click, lead, newYork, noRide, query, settle, westToPreston } from '../support/states';
@@ -434,4 +435,212 @@ describe('the race announcement (18.4, R13.2)', () => {
       expect(said()).toBe(expectedWords(page.app));
     });
   }
+});
+
+// ---- Story layer 19.4: the new parts, axe and the keyboard ------------------------------
+
+const noMap = { loadMap: () => Promise.resolve({ startMap: () => ({ corners: () => undefined, marker: () => undefined, remove: () => undefined }) }), whenIdle: (run: () => void) => run() };
+
+const storyStates: [string, 'phone' | 'desktop', () => Promise<void>][] = [];
+for (const layout of ['phone', 'desktop'] as const) {
+  storyStates.push(
+    [
+      'the first visit',
+      layout,
+      async () => {
+        await bootPage({ layout });
+      },
+    ],
+    [
+      'racing, with a caption',
+      layout,
+      async () => {
+        const time = fakeTime();
+        await bootPage({ layout, time });
+        time.advance(TIMINGS.orientationMs + 2000);
+        if (text(document.getElementById('race-caption')) === '') throw new Error('no caption');
+      },
+    ],
+    [
+      'finished, with the takeaway and the chart',
+      layout,
+      async () => {
+        await bootPage({ layout, motion: 'reduced' });
+        await settle();
+        if (!document.querySelector('.takeaway') || !document.querySelector('.chart')) throw new Error('not finished');
+      },
+    ],
+    [
+      'the today-win notice',
+      layout,
+      async () => {
+        await bootPage({ layout, motion: 'reduced' });
+        await settle();
+        click('#race-card [data-action="next-today-win"]');
+        await settle();
+        if (!document.querySelector('.notices')) throw new Error('no notice block');
+      },
+    ],
+    [
+      'the open departures section',
+      layout,
+      async () => {
+        await bootPage({ layout, motion: 'reduced' });
+        click('[data-action="departures"]');
+      },
+    ],
+  );
+}
+storyStates.push([
+  'the expanded route preview',
+  'phone',
+  async () => {
+    await bootPage({ motion: 'reduced', layout: 'phone', ...noMap });
+    await settle();
+    click('.route-toggle');
+    await settle();
+    if (document.querySelector('.route-toggle')?.getAttribute('aria-expanded') !== 'true') throw new Error('route not open');
+  },
+]);
+
+describe('axe-core finds nothing on the story-layer states (19.4, R15.1)', () => {
+  for (const [name, layout, reach] of storyStates) {
+    it(`${name} (${layout})`, async () => {
+      await reach();
+      expect(await violations()).toEqual([]);
+    });
+  }
+});
+
+describe('the story-layer controls by keyboard alone (19.4, R15.2, R15.3)', () => {
+  const NEXT = ['next-time', 'next-corners', 'next-today-win'];
+
+  for (const layout of ['phone', 'desktop'] as const) {
+    it(`Tab reaches the three next-step actions, the chart readout buttons and the departures toggle (${layout})`, async () => {
+      await open({ layout, motion: 'reduced' });
+      await settle();
+      const order = tabOrder().map(controlName);
+      for (const name of NEXT) expect(order, name).toContain(name);
+      expect(order).toContain('departures');
+      const readout = [...document.querySelectorAll<HTMLElement>('.chart-readout button.num')];
+      expect(readout.length).toBeGreaterThan(0);
+      for (const b of readout) expect(tabOrder(), controlName(b)).toContain(b);
+      // Reading order: the actions, then the chart, then the departures toggle.
+      expect(order.indexOf('next-today-win')).toBeLessThan(order.indexOf(controlName(readout[0]!)));
+      expect(order.indexOf(controlName(readout.at(-1)!))).toBeLessThan(order.indexOf('departures'));
+      for (const name of [...NEXT, 'departures']) {
+        tabTo(name);
+        expectFocusOn(name);
+      }
+      for (const b of readout) {
+        tabTo(controlName(b));
+        expectFocusOn(controlName(b));
+      }
+    });
+
+    it(`Enter on each next-step action does its work (${layout})`, async () => {
+      const page = await open({ layout, motion: 'reduced' });
+      await settle();
+      tabTo('next-corners');
+      press('Enter');
+      expect(sheetOpen('corners')).toBe(true);
+      press('Escape');
+      expect(sheetOpen('corners')).toBe(false);
+      tabTo('next-today-win');
+      press('Enter');
+      await settle();
+      page.time.advance(TIMINGS.racePauseMs);
+      expect(document.querySelector('.notices')).not.toBeNull();
+      expect(document.activeElement!.isConnected).toBe(true);
+    });
+  }
+
+  it('Tab reaches the route toggle on the phone and Enter opens and closes it', async () => {
+    await open({ layout: 'phone', motion: 'reduced', ...noMap });
+    await settle();
+    expect(tabOrder().map(controlName)).toContain('button:View route');
+    const toggle = tabTo('button:View route');
+    expect(toggle.classList.contains('route-toggle')).toBe(true);
+    press('Enter');
+    await settle();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(document.activeElement).toBe(toggle);
+    press('Enter');
+    await settle();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('puts no control of the story layer out of the Tab order with a positive or negative tabindex', async () => {
+    for (const layout of ['phone', 'desktop'] as const) {
+      document.body.innerHTML = '';
+      await open({ layout, motion: 'reduced', ...(layout === 'phone' ? noMap : {}) });
+      await settle();
+      const selector = '[data-action^="next-"], [data-action="departures"], .chart-readout button.num, .route-toggle';
+      const controls = [...document.querySelectorAll<HTMLElement>(selector)].filter((el) => !el.hidden);
+      expect(controls.length).toBeGreaterThanOrEqual(layout === 'phone' ? 6 : 5);
+      for (const el of controls) {
+        const tabindex = el.getAttribute('tabindex');
+        expect(tabindex === null || Number(tabindex) >= 0, controlName(el)).toBe(true);
+        expect(el.matches(':disabled'), controlName(el)).toBe(false);
+      }
+    }
+  });
+
+  it('draws a focus ring on every control: one :focus-visible rule, and no stylesheet turns an outline off a control', () => {
+    const sheets = stylesheets();
+    const base = sheets.get([...sheets.keys()].find((k) => k.endsWith('base.css'))!)!;
+    expect(base).toMatch(/(^|\})\s*:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--ink\)/);
+    // jsdom has no layout; the rule is the universal one, so it covers a button and the range input alike.
+    for (const [file, css] of sheets) {
+      for (const m of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+        const [, selector, body] = m;
+        if (!/outline\s*:\s*(none|0)\b/.test(body!)) continue;
+        // The sheet title takes focus by script, not as a control (it is not in the Tab order).
+        expect(selector!.trim(), file).toBe('.sheet-title:focus');
+      }
+    }
+  });
+});
+
+describe('the announcement and the caption area (19.4, R15.4)', () => {
+  const LIVE = '[aria-live], [role="status"], [role="alert"], [role="log"]';
+
+  it('keeps the caption area, its status lines and the chart readout out of every live region', async () => {
+    const time = fakeTime();
+    await open({ time });
+    const check = (): void => {
+      for (const el of document.querySelectorAll('#race-caption, .caption, .status, .chart-readout, .clock-readout, .takeaway')) {
+        expect(el.closest(LIVE), `${el.className} is inside a live region`).toBeNull();
+        expect(el.querySelector(LIVE), `${el.className} holds a live region`).toBeNull();
+        expect(el.getAttribute('aria-live')).toBeNull();
+        expect(el.getAttribute('role') ?? '').not.toMatch(/status|alert|log/);
+      }
+    };
+    check();
+    const captions = new Set<string>();
+    for (let t = 0; t < 14000; t += STEP) {
+      time.advance(STEP);
+      captions.add(text(document.getElementById('race-caption')));
+      if (t % 800 === 0) check();
+    }
+    check();
+    // The caption changed through the race, and nothing of it reached the announcer.
+    expect([...captions].filter(Boolean).length).toBeGreaterThan(1);
+    expect(said()).not.toContain(text(document.getElementById('race-caption')));
+  });
+
+  it('writes the result once per race while the caption changes; the live regions are the two status lines only', async () => {
+    const page = await open();
+    const regions = [...document.querySelectorAll(LIVE)].filter((el) => el.closest('.sheet') === null);
+    expect(regions.map((el) => el.id || el.className).sort()).toEqual(['result-status', 'share-status']);
+    const heard = listen(page, 14000);
+    expect(writes(heard)).toHaveLength(1);
+    expect(page.app.store.get().race.phase).toBe('finished');
+    const finalSaid = said();
+    // Using the finished card (the next-step actions, the departures section) does not speak the result again.
+    click('[data-action="departures"]');
+    click('[data-action="next-today-win"]');
+    await settle();
+    expect(said()).toBe(finalSaid);
+  });
 });

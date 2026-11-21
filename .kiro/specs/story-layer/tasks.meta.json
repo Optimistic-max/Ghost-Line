@@ -638,6 +638,18 @@
         "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795287384777
+      },
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795288528349
+      }
+    ],
+    "19.4 axe-core in jsdom and keyboard tests: the first visit, racing, finished, the today-win notice, the open departures section and the expanded route preview, on both layouts; keyboard alone reaches the three Next_Step_Actions, the chart readout buttons, the departures toggle and the route toggle, each with a visible focus ring; the result is announced once per race and the caption area is never in a live region.": [
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795288530756
       }
     ]
   }
