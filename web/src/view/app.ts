@@ -46,6 +46,7 @@ import {
   renderCard,
   resultElements,
 } from './card';
+import { syncDepartures } from './departures';
 import { h, setVar } from './dom';
 import { GLYPH } from './glyphs';
 import { vehicleMarkup } from './lanes';
@@ -524,7 +525,10 @@ export function createApp(options: AppOptions): App {
       guided: state.guided,
       orientation: state.guided && !state.oriented,
       todayWinNotice: state.todayWinNotice,
+      departuresOpen: state.departuresOpen,
     };
+    // The section opens and closes in place; a redraw reads the same flag (Req 11.2).
+    syncDepartures(scroll, state.departuresOpen);
     // While the slider moves, only the time label and the departures board follow it (R3.5).
     if (held && drawn) {
       updateSlider(scroll, input.minute);
@@ -758,6 +762,10 @@ export function createApp(options: AppOptions): App {
       case 'next-corners':
         visitorInput();
         store.dispatch({ type: 'picker/open' });
+        break;
+      case 'departures':
+        // Not a Visitor_Input (Req 11.2): the guided visit and a running race go on.
+        store.dispatch({ type: 'departures/toggle' });
         break;
       case 'next-today-win':
         showTodayWin();

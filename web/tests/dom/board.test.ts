@@ -189,7 +189,7 @@ describe('the made-up fixture line', () => {
 });
 
 describe('where the board shows (R8.4, R5.11)', () => {
-  it('on a phone: before and during the race, not after it', async () => {
+  it('on a phone: before, during and after the finish', async () => {
     const time = fakeTime();
     const app = await bootPage({ time });
     expect(document.querySelector('.board')).not.toBeNull();
@@ -198,8 +198,8 @@ describe('where the board shows (R8.4, R5.11)', () => {
     expect(document.querySelector('.board')).not.toBeNull();
     time.advance((MAX_SECONDS + 1) * 1000);
     expect(app.store.get().race.phase).toBe('finished');
-    expect(document.querySelector('.board')).toBeNull();
-    expect(app.registry.list().some((s) => s.id.startsWith('board-'))).toBe(false);
+    expect(document.querySelector('.board')).not.toBeNull();
+    expect(app.registry.list().some((s) => s.id.startsWith('board-'))).toBe(true);
   });
 
   it('on desktop: before, during and after the race', async () => {
@@ -211,9 +211,9 @@ describe('where the board shows (R8.4, R5.11)', () => {
     expect(document.querySelector('.board')).not.toBeNull();
   });
 
-  it('with reduced motion: never on a phone, always on desktop', async () => {
+  it('with reduced motion: on a phone and on desktop', async () => {
     await bootPage({ motion: 'reduced' });
-    expect(document.querySelector('.board')).toBeNull();
+    expect(document.querySelector('.board')).not.toBeNull();
     await bootPage({ motion: 'reduced', layout: 'desktop' });
     expect(document.querySelector('.board')).not.toBeNull();
   });

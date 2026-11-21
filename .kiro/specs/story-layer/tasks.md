@@ -128,15 +128,15 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 3.8, 7.13, 10.5, 16.19**
     - Depends on: task 11.1
 
-- [ ] 12. Next-step actions and the today-win shortcut (Req 10)
+- [x] 12. Next-step actions and the today-win shortcut (Req 10)
   - [x] 12.1 New `web/src/view/nextsteps.ts` with the three buttons in order, each at least 44 x 44 px; `view/buttons.ts` `cardButtons()` becomes Sources and Share this race as outline secondary buttons after them. "Try another time": `visitorInput()`, focus `#start-time`, scroll it into view (a plain jump under reduced motion). "Try other corners": `visitorInput()`, `picker/open`. "Show a race today wins": `visitorInput()`, stop any race, close any sheet, `todaywin/select`, update the address bar through the existing `pair/set` subscription, and play that race when its file has arrived. Empty `today_wins` does nothing.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.7, 10.8_
-  - [-] 12.2 Tests. DOM: order, keyboard reach, 44 px targets, focus moves to the slider, picker opens, each action ends the Guided_Parts. Real data `web/tests/real/todaywins.test.ts`: presses equal to `summary.today_wins.length` (read from the file) then one more to show the wrap, each with the address equal to `encode(pair)`, the notice shown and a race whose result is "today". Made-up summary: the order and notice follow the fixture (Req 16.6).
+  - [x] 12.2 Tests. DOM: order, keyboard reach, 44 px targets, focus moves to the slider, picker opens, each action ends the Guided_Parts. Real data `web/tests/real/todaywins.test.ts`: presses equal to `summary.today_wins.length` (read from the file) then one more to show the wrap, each with the address equal to `encode(pair)`, the notice shown and a race whose result is "today". Made-up summary: the order and notice follow the fixture (Req 16.6).
     - **Validates: Requirements 10.1 to 10.8, 16.6, 16.10**
     - Depends on: task 12.1
 
 - [ ] 13. Scheduled departures section (Req 11)
-  - [ ] 13.1 New `web/src/view/departures.ts` wrapping the existing `boardView` in a section with a `<button aria-expanded aria-controls>` "Scheduled departures" and a region hidden unless `departuresOpen`; `boardShown` true on both layouts and stages; `racer.finish()` keeps the board; `view/board.ts` uses `BOARD_TODAY` for the bus row. Board content rules (R8.2, R8.3, R8.5) unchanged. Number buttons inside a closed section still register their Sources rows.
+  - [-] 13.1 New `web/src/view/departures.ts` wrapping the existing `boardView` in a section with a `<button aria-expanded aria-controls>` "Scheduled departures" and a region hidden unless `departuresOpen`; `boardShown` true on both layouts and stages; `racer.finish()` keeps the board; `view/board.ts` uses `BOARD_TODAY` for the bus row. Board content rules (R8.2, R8.3, R8.5) unchanged. Number buttons inside a closed section still register their Sources rows.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
   - [ ] 13.2 DOM tests: closed by default, `aria-expanded` toggles, labels, every time and gap is a Number_Button when open, the P3 crawl finds a registry row for each whether open or closed, board contents equal the file's lists.
     - **Validates: Requirements 11.1 to 11.5**

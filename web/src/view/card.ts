@@ -23,6 +23,7 @@ import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
 import { honestNumbers, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
 import { boardView } from './board';
+import { departuresView } from './departures';
 import { h } from './dom';
 import { honestLine } from './honest';
 import { type Stage, laneView } from './lanes';
@@ -58,6 +59,8 @@ export type CardInput = {
   orientation?: boolean;
   /** The summary.today_wins entry the shortcut selected, while its notice shows (Req 10.5). */
   todayWinNotice?: TodayWin | null;
+  /** The departures section is open (Req 11.2). */
+  departuresOpen?: boolean;
   /** The trolley's one fade-in, on the first paint of the page (R2.5). */
   firstPaint?: boolean;
 };
@@ -198,13 +201,13 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
     nextSteps(),
-    ...(boardShown(input) ? [cardBoard(registry, input)] : []),
+    ...(boardShown(input) ? [departuresView(cardBoard(registry, input), input.departuresOpen ?? false)] : []),
   ];
 }
 
-/** The departures board shows before and during the race, and on desktop after it too (R8.4, R5.11). */
-export function boardShown(input: Pick<CardInput, 'layout' | 'stage'>): boolean {
-  return input.layout === 'desktop' || input.stage === 'racing';
+/** The departures section is on the card on both layouts and in every stage (story-layer Req 11.1). */
+export function boardShown(_input: Pick<CardInput, 'layout' | 'stage'>): boolean {
+  return true;
 }
 
 /** The board for the card's race; also drawn again while the slider moves (R3.5). */

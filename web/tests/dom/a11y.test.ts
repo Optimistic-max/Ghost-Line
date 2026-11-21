@@ -111,9 +111,23 @@ describe('every control by keyboard alone (18.3, R13.1)', () => {
     expect(at('skip')).toBeLessThan(at('sources'));
     expect(at('sources')).toBeLessThan(at('share'));
     // Every number on the card is a stop of its own (the legends wait, hidden, for each lane's arrival).
+    // The departures toggle is in the Tab order; it opens and closes the region it controls (Req 11.2).
+    expect(at('departures')).toBeGreaterThanOrEqual(0);
+    const toggle = (): HTMLElement => document.querySelector<HTMLElement>('[data-action="departures"]')!;
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    const region = document.getElementById(toggle().getAttribute('aria-controls')!)!;
+    expect(region).not.toBeNull();
+    expect(region.hidden).toBe(true);
+    toggle().click();
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(region.hidden).toBe(false);
     const numbers = [...document.querySelectorAll<HTMLElement>('#card-scroll button.num')].filter((b) => !b.closest('[hidden]'));
     expect(numbers.length).toBeGreaterThan(5);
-    for (const b of numbers) expect(order, controlName(b)).toContain(controlName(b));
+    const openOrder = tabOrder().map(controlName);
+    for (const b of numbers) expect(openOrder, controlName(b)).toContain(controlName(b));
+    toggle().click();
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    expect(region.hidden).toBe(true);
     // The map's corner dots are for the pointer; the picker does the same from the keyboard (R4.2).
     expect(order.some((n) => n.startsWith('map-corner'))).toBe(false);
   });

@@ -451,6 +451,30 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795267796503
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795268090520
+      }
+    ],
+    "12. Next-step actions and the today-win shortcut (Req 10)": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795268090911
+      }
+    ],
+    "13.1 New `web/src/view/departures.ts` wrapping the existing `boardView` in a section with a `<button aria-expanded aria-controls>` \"Scheduled departures\" and a region hidden unless `departuresOpen`; `boardShown` true on both layouts and stages; `racer.finish()` keeps the board; `view/board.ts` uses `BOARD_TODAY` for the bus row. Board content rules (R8.2, R8.3, R8.5) unchanged. Number buttons inside a closed section still register their Sources rows.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795268091959
+      },
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795268781815
       }
     ]
   }
