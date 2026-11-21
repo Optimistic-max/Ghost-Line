@@ -114,6 +114,28 @@
         "executionId": "837851a3-d5ec-4fa2-9bbe-6af96782f994",
         "chatSessionId": "sess_04f31598-49db-4de5-88bd-f246d62623b2",
         "timestamp": 1795230798060
+      },
+      {
+        "executionId": "99f841a8-4526-4ca0-9307-37bcac2e8302",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795231525636
+      },
+      {
+        "executionId": "57465531-004f-444d-ad59-dfac7a62b9ef",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795231537635
+      },
+      {
+        "executionId": "57465531-004f-444d-ad59-dfac7a62b9ef",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795231589891
+      }
+    ],
+    "1.11 Full pipeline checks and commit: `python -m pipeline validate`, `python -m pipeline check`, `python -m pipeline verify`, `python -m pipeline check_sources`, then `npm test` in web/. Commit the 20 race files, `summary.json`, both schemas, the pipeline code and tests, the site data layer and `.kiro/` together. The commit message names `tests/unit/test_emit.py::test_key_order_is_fixed` as the one approved test edit.": [
+      {
+        "executionId": "57465531-004f-444d-ad59-dfac7a62b9ef",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795231593414
       }
     ]
   }
