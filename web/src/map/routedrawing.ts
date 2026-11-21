@@ -112,6 +112,7 @@ const STRIP_RULE: StripRule = {
   offsetStep: MAP_LAYOUT.labelOffsetStep,
   slideStep: MAP_LAYOUT.labelOffsetAlongStep,
   markerRoom: MAP_LAYOUT.markerRoom,
+  reach: MAP_LAYOUT.phonePreview.nameReach,
   glyphBox: MAP_LAYOUT.glyphBox,
 };
 
@@ -184,18 +185,20 @@ export function planDrawing(input: DrawingInput): DrawingPlan {
   // Corner names: the chosen two first, so they get the best places; on a phone only they are named.
   const toName = [...dots.filter((d) => d.role !== 'other'), ...(layout === 'desktop' ? dots.filter((d) => d.role === 'other') : [])];
   const nameBoxes: Box[] = [];
-  const names = toName.map((dot): PlannedName => {
+  const names = toName.flatMap((dot): PlannedName[] => {
     const text = mapName(dot.corner);
     const font = dot.role === 'other' ? look.otherNameFont : look.nameFont;
     const width = textWidth(text, font, MAP_LAYOUT.glyphEm);
     const others = dots.filter((o) => o !== dot).map((o) => o.box);
     // On the strip a corner name also keeps off the boxes the standing trolley marker covers, as the street names
     // do on the map. (The map's own corner names keep their places: Caroline Street's place depends on them.)
+    // A strip name that cannot sit next to its own dot is hidden (the pair row names both corners).
     const place = preview
-      ? stripPlace(dot, width, font, { lines: legs, boxes: [...nameBoxes, ...others], view }, markerBoxes, STRIP_RULE)
+      ? stripPlace(dot, dots.filter((o) => o !== dot).map((o) => o.at), width, font, { lines: legs, boxes: [...nameBoxes, ...others], view }, markerBoxes, STRIP_RULE)
       : bestPlace(namePlaces(dot.at, dot.radius, width, font, MAP_LAYOUT.gap), { lines: legs, boxes: [...nameBoxes, ...others], view }, 2);
+    if (!place) return [];
     nameBoxes.push(place.box);
-    return { dot, text, font, place };
+    return [{ dot, text, font, place }];
   });
 
   // Street names: one per street, on its longest leg; the dashed stretch carries none (mockups 07, 26). With the

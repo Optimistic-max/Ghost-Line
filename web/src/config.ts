@@ -138,6 +138,13 @@ export const MAP_LAYOUT = {
     button: { width: 80, height: 44, right: 8, top: 4, gap: 4 },
     /** The race card's rounded top covers the strip's lowest 9 px (layout-phone.css `--card-top`); names stay above it. */
     cardOverlap: 9,
+    /**
+     * "Next to its own dot" on the strip (Emmanuel, checkpoint 18 round 2): a corner name is shown only where the
+     * distance from its own dot's centre to the nearest point of its box is at most `nameReach`, and that distance
+     * is smaller than the same distance to any other corner's dot. Otherwise the name is hidden on the strip (the
+     * pair row names both corners). A dot's radius is at most 7 and the usual gap 5, so 26 allows 14 px further out.
+     */
+    nameReach: 26,
   },
   desktop: {
     size: { width: 840, height: 800 },

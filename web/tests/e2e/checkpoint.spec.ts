@@ -3,7 +3,7 @@
 // Run from web/:  npx playwright test tests/e2e/checkpoint.spec.ts --project=checkpoint
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { TIMINGS } from '../../src/config';
+import { MAP_LAYOUT, TIMINGS } from '../../src/config';
 import { DESKTOP, PHONE, beforeNewYork, fontsReady, guardNetwork, newYork } from './support';
 
 const OUT = resolve(import.meta.dirname, '..', '..', 'test-results', 'screens');
@@ -115,7 +115,7 @@ for (const moment of ['before the race', 'finished'] as const) {
       await page.clock.setFixedTime(newYork('20:00'));
     }
     await page.goto('./');
-    await page.locator('.route-drawing .corner-name').first().waitFor();
+    await page.locator('.route-drawing .corner-dot').first().waitFor();
     await page.locator('.drawing-marker:not([hidden])').waitFor();
     await fontsReady(page);
     if (!before) await page.locator('.result').waitFor();
@@ -130,7 +130,8 @@ for (const moment of ['before the race', 'finished'] as const) {
         button: r(document.querySelector('.route-toggle')),
         legs: r(document.querySelector('.route-drawing .route-legs')),
         dots: [...document.querySelectorAll('.route-drawing .corner-dot')].map(r),
-        names: [...document.querySelectorAll('.route-drawing .corner-name')].map((el) => ({ text: el.textContent, box: r(el) })),
+        names: [...document.querySelectorAll('.route-drawing .corner-name')].map((el) => ({ text: el.textContent, slug: el.getAttribute('data-slug'), box: r(el) })),
+        dotsBySlug: [...document.querySelectorAll('.route-drawing .corner')].map((g) => ({ slug: g.getAttribute('data-slug'), box: r(g.querySelector('.corner-dot')) })),
         marker: r(document.querySelector('.drawing-marker svg') ?? document.querySelector('.drawing-marker')),
       };
     });
@@ -144,6 +145,18 @@ for (const moment of ['before the race', 'finished'] as const) {
     for (const n of m.names) {
       expect(meets(m.button!, n.box!), `button against ${n.text}`).toBe(false);
       expect(meets(m.marker!, n.box!), `marker against ${n.text}`).toBe(false);
+      // A shown name is nearer to its own dot than to any other corner's dot, and within the fixed reach
+      // (MAP_LAYOUT.phonePreview.nameReach, in the strip's own 375-wide pixels; the strip is drawn 1:1).
+      const centre = (b: Box): { x: number; y: number } => ({ x: b.x + b.width / 2, y: b.y + b.height / 2 });
+      const away = (from: { x: number; y: number }, b: Box): number =>
+        Math.hypot(Math.max(b.x - from.x, 0, from.x - (b.x + b.width)), Math.max(b.y - from.y, 0, from.y - (b.y + b.height)));
+      const own = m.dotsBySlug.find((d) => d.slug === n.slug)!;
+      const mine = away(centre(own.box!), n.box!);
+      expect(mine, `${n.text} reach`).toBeLessThanOrEqual(MAP_LAYOUT.phonePreview.nameReach + 1);
+      for (const d of m.dotsBySlug) if (d.slug !== n.slug) expect(mine, `${n.text} against another dot`).toBeLessThan(away(centre(d.box!), n.box!));
     }
+    // Hidden names are allowed; the dots are not hidden.
+    expect(m.names.length).toBeLessThanOrEqual(2);
+    expect(m.dotsBySlug.length).toBeGreaterThanOrEqual(2);
   });
 }

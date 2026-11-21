@@ -618,6 +618,8 @@ export type StripRule = {
   slideStep: number;
   /** Room kept between a name and the standing marker. */
   markerRoom: number;
+  /** The farthest a name's box may be from its own dot's centre (config.ts phonePreview.nameReach). */
+  reach: number;
   /** How far the browser's glyph boxes reach above and below the baseline, in ems (config.ts glyphBox). */
   glyphBox: { above: number; below: number };
 };
@@ -634,28 +636,47 @@ function glyphBoxOf(p: NamePlace, font: number, glyph: { above: number; below: n
  * the strip's edge or the button's column is in the way of all of them, the same places a pixel further out
  * each time, up to `rule.maxOffset`, a place over or under the dot also sliding sideways while it still spans
  * the dot. A place clear of the route's lines, the other dots and the names already set as well wins where one
- * exists. Only if nothing within the limit clears the marker does the name take the usual best place.
+ * exists. Every place must also be next to its own dot (`besideOwnDot`). Where no place within the limit is clear
+ * of the marker, the lines, the other dots and names, and the strip's edges, the name is hidden: null.
  */
 export function stripPlace(
   dot: { at: Pt; radius: number },
+  otherDots: readonly Pt[],
   width: number,
   font: number,
   obstacles: Obstacles,
   markers: readonly Box[],
   rule: StripRule,
-): NamePlace {
+): NamePlace | null {
   const { view } = obstacles;
   const inView = (b: Box): boolean => b.x >= view.x && b.y >= view.y && b.x + b.width <= view.x + view.width && b.y + b.height <= view.y + view.height;
-  const offMarker = (p: NamePlace): boolean => {
+  const free = (p: NamePlace): boolean => {
     const glyphs = glyphBoxOf(p, font, rule.glyphBox);
-    return inView(glyphs) && !markers.some((m) => boxesOverlap(glyphs, grow(m, rule.markerRoom)));
+    return (
+      inView(glyphs) &&
+      !markers.some((m) => boxesOverlap(glyphs, grow(m, rule.markerRoom))) &&
+      placeHits(p, obstacles, 2) === 0 &&
+      besideOwnDot(p.box, dot.at, otherDots, rule.reach)
+    );
   };
-  const free = (p: NamePlace): boolean => offMarker(p) && placeHits(p, obstacles, 2) === 0;
-  for (const clear of [free, offMarker]) {
-    const found = placesOut(dot, width, font, rule, clear);
-    if (found.length > 0) return bestPlace(found, obstacles, 2);
-  }
-  return bestPlace(namePlaces(dot.at, dot.radius, width, font, rule.gap), obstacles, 2);
+  const found = placesOut(dot, width, font, rule, free);
+  return found.length > 0 ? bestPlace(found, obstacles, 2) : null;
+}
+
+/** The distance from a point to the nearest point of a box (0 inside it). */
+export function distanceToBox(p: Pt, box: Box): number {
+  const dx = Math.max(box.x - p.x, 0, p.x - (box.x + box.width));
+  const dy = Math.max(box.y - p.y, 0, p.y - (box.y + box.height));
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * Whether a name's box is "next to its own dot" (checkpoint 18, round 2): within `reach` pixels of the dot's
+ * centre, and nearer to it than to any other corner's dot.
+ */
+export function besideOwnDot(box: Box, own: Pt, others: readonly Pt[], reach: number): boolean {
+  const mine = distanceToBox(own, box);
+  return mine <= reach && others.every((o) => mine < distanceToBox(o, box));
 }
 
 /** The places at the first step out (from the usual gap) at which some place passes `clear`. */
