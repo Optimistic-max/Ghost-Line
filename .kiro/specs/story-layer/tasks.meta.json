@@ -626,6 +626,18 @@
         "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795286414786
+      },
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795287383475
+      }
+    ],
+    "19.3 Extend the made-up race file test set: chart columns equal its stored totals, its before-table minutes are hatched, the readout, takeaway, \"most of the difference\" sentence (one row with `wait_most` false) and captions follow the fixture.": [
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795287384777
       }
     ]
   }
