@@ -37,8 +37,11 @@ import {
 const OUT = resolve(import.meta.dirname, '..', '..', 'test-results', 'screens');
 const westToPreston = `?from=${slug('Westwood & Carey')}&to=${slug('Preston & Caroline')}`;
 
-/** Real milliseconds of race before the picture: 2 s is 8 scheduled minutes ("10:08 scheduled"). */
-const TEN_OH_EIGHT = 2000;
+/**
+ * Real milliseconds after the page loads, for an unqueried (guided) visit: the orientation pause, then 2 s
+ * of race, which is 8 scheduled minutes ("10:08 scheduled").
+ */
+const TEN_OH_EIGHT = TIMINGS.orientationMs + 2000;
 
 type State = {
   file: string;
@@ -241,7 +244,8 @@ async function shoot(browser: Browser, state: State): Promise<void> {
     }
   }
   if (racing && state.racing) {
-    await page.clock.runFor(TIMINGS.racePauseMs);
+    // These racing states have no valid link, so the visit is guided: the orientation pause is included in state.racing.
+    expect(state.query, `${state.file}: a link would skip the orientation pause`).toBeUndefined();
     await page.clock.runFor(state.racing + 20);
     await expect(page.locator('.result')).toHaveCount(0);
   }
@@ -279,7 +283,7 @@ test('phone race layout: lanes, status lines and clock row clear of the button s
   await fontsReady(page);
   const panel = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--panel').trim());
   // The start, 10:08 scheduled, just after the trolley arrives and the result shows, and just before the finish.
-  const moments = [0, TIMINGS.racePauseMs + TEN_OH_EIGHT, TIMINGS.racePauseMs + 4200, TIMINGS.racePauseMs + 11000];
+  const moments = [0, TEN_OH_EIGHT, TIMINGS.orientationMs + 4200, TIMINGS.orientationMs + 11000];
   let at = 0;
   for (const moment of moments) {
     await page.clock.runFor(moment - at);
@@ -310,7 +314,7 @@ test('phone race layout: lanes, status lines and clock row clear of the button s
     }
     expect(layout.stripPosition).toBe('absolute');
     expect(layout.stripBackground).toBe(hexToRgb(panel));
-    if (moment === TIMINGS.racePauseMs + 4200) expect(layout.result).toBe(true);
+    if (moment === TIMINGS.orientationMs + 4200) expect(layout.result).toBe(true);
   }
   await context.close();
 });
@@ -330,7 +334,7 @@ for (const size of [PHONE, DESKTOP]) {
     await page.locator('.clock-row').waitFor();
     await fontsReady(page);
     // Real milliseconds after the pause: 1938 waiting, riding twice, arrived; bus waiting, riding twice, the last walk; finished.
-    const pause = TIMINGS.racePauseMs;
+    const pause = TIMINGS.orientationMs;
     const moments = [0, pause + 1000, pause + 2500, pause + 3600, pause + 5000, pause + 8600, pause + 9800, pause + 11000, pause + 12500];
     const lefts: Record<string, number[]> = { '1938': [], today: [] };
     let at = 0;

@@ -70,7 +70,7 @@ test.describe('the race (20.2)', () => {
     await pausedAt(page, '20:00');
     await page.goto('./');
     await page.locator('.clock-row').waitFor();
-    await page.clock.runFor(TIMINGS.racePauseMs);
+    await page.clock.runFor(TIMINGS.orientationMs);
     await runUntil(page, async () => (await page.locator('.result').count()) > 0);
     // At the result moment: one side in, the other still on its way, the clock still running and Skip offered.
     await expect(page.locator('.lane[data-arrived]')).toHaveCount(1);
@@ -91,7 +91,7 @@ test.describe('the race (20.2)', () => {
     await pausedAt(page, '20:00');
     await page.goto('./');
     await page.locator('.clock-row').waitFor();
-    await page.clock.runFor(TIMINGS.racePauseMs + 500);
+    await page.clock.runFor(TIMINGS.orientationMs + 500);
     expect(await phase(page)).toBe('running');
     await page.locator('.skip').click();
     expect(await phase(page)).toBe('finished');
@@ -107,7 +107,7 @@ test.describe('the race (20.2)', () => {
     await page.locator('.clock-row').waitFor();
     // The map is asked for once the route drawing is in and the page is idle (at the latest after mapIdleMs).
     await page.locator('.route-drawing').waitFor();
-    await page.clock.runFor(TIMINGS.racePauseMs + TIMINGS.mapIdleMs);
+    await page.clock.runFor(TIMINGS.orientationMs + TIMINGS.mapIdleMs);
     await expect(page.locator('#map-area')).toHaveAttribute('data-map-failed', 'no WebGL');
     await expect(page.locator('.map-notice')).toBeVisible();
     await expect(page.locator('.map-notice')).toHaveText(MAP_UNAVAILABLE);

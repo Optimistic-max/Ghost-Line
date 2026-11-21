@@ -73,22 +73,22 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 3.4, 3.5, 4.5, 10.4, 10.5, 10.6**
     - Depends on: task 4.1
 
-- [ ] 5. Guided visit, orientation pause and the race-start mark (Req 3, Req 4)
+- [x] 5. Guided visit, orientation pause and the race-start mark (Req 3, Req 4)
   - [x] 5.1 `web/src/view/app.ts` boot (design 2.4): load as today, judge the link before `data/ready` (`valid = namesAPair(query) && !checked.bad && samePair(...)`), start from `EXAMPLE_START` with `guided: true` when not valid, else `defaultStart(now, first, last)` with `guided: false`; show the bad-link or shared-link banner as today; a query with neither `from` nor `to` is no query. Add `visitorInput()` dispatching `guided/end`, called from the slider input, minus, plus, the picker completing a pair (card and map), swap and each Next_Step_Action handler (wired in task 12), and not from skip, sheets, departures or route. Show the example label (time as plain text) and the chart prompt heading only while `guided`; drop both at the first Visitor_Input; keep "Start time is the time now." only for an unguided clock-derived start.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
   - [x] 5.2 Orientation pause (design 2.5): `scheduleRace()` waits `TIMINGS.orientationMs` when `guided && !oriented && motion !== 'reduced'`, else the 300 ms pause; `startRace()` dispatches `race/oriented`; the card shows the orientation line in the caption area, the clock row and "Skip to result" during the pause; `skip` during a pending start cancels it, starts the race and skips to finished; a Visitor_Input during the pause runs `holdRace()` and the next start uses 300 ms; reduced motion runs no pause and draws the finished card with the orientation line while `guided && !oriented`. Move `performance.mark('race-start')` out of `startRace()` into `draw()` the first time a card with data is drawn; `tests/e2e/perf.spec.ts` keeps reading the same mark name. Name any race-screen test this changes in the commit message.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
-  - [-] 5.3 Tests. **Property 3: The start time follows the link's validity** (fast-check over query strings and instants). DOM tests `web/tests/dom/guided.test.ts` with fake timers: no query, bad link with banner, valid link with a fixed clock and no example label; the mark is set before the 2,000 ms pause; 2,000 ms then clock start; skip during the pause; input during the pause; reduced motion; after each kind of Visitor_Input the Guided_Parts are gone and stay gone and captions work on the next race.
+  - [x] 5.3 Tests. **Property 3: The start time follows the link's validity** (fast-check over query strings and instants). DOM tests `web/tests/dom/guided.test.ts` with fake timers: no query, bad link with banner, valid link with a fixed clock and no example label; the mark is set before the 2,000 ms pause; 2,000 ms then clock start; skip during the pause; input during the pause; reduced motion; after each kind of Visitor_Input the Guided_Parts are gone and stay gone and captions work on the next race.
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.7, 4.1, 4.4, 4.5, 4.6, 4.7, 16.2, 16.3**
     - Depends on: tasks 5.1, 5.2
 
-- [ ] 6. Checkpoint: site foundation
+- [x] 6. Checkpoint: site foundation
   - Ensure all tests pass, ask the user if questions arise. Run `npm test` and `npm run build` in web/ and `python -m pipeline check`.
 
 ## Story parts
 
 - [ ] 7. Captions (Req 7)
-  - [ ] 7.1 `web/src/state/captions.ts`: `captionFor` and `phaseOf` as in design 3.1, taking the phase from `play/timeline.ts` `laneFrame` so a caption never names a phase the lane is not in; both-arrived, 1938-only (no `still`) and orientation cases.
+  - [-] 7.1 `web/src/state/captions.ts`: `captionFor` and `phaseOf` as in design 3.1, taking the phase from `play/timeline.ts` `laneFrame` so a caption never names a phase the lane is not in; both-arrived, 1938-only (no `still`) and orientation cases.
     - _Requirements: 7.2, 7.3, 7.4, 7.5, 7.6, 7.9_
   - [ ] 7.2 Wiring: `view/card.ts` adds `<p class="caption" id="race-caption">` under the lanes, reserved at two lines in every state, plain text, outside `#result-status` and any live region; `view/racer.ts` rewrites it only when the key changes; the finished and skip states and reduced motion show the finished caption (or the orientation line on a guided visit); "Scheduled, not live." stays visible through the schedule line.
     - _Requirements: 7.1, 7.7, 7.9, 7.10, 7.13, 15.3, 15.4_

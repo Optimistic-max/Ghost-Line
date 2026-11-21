@@ -253,6 +253,37 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795236659292
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795237099906
+      }
+    ],
+    "5. Guided visit, orientation pause and the race-start mark (Req 3, Req 4)": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795237100296
+      }
+    ],
+    "6. Checkpoint: site foundation": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795237106790
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795237561718
+      }
+    ],
+    "7.1 `web/src/state/captions.ts`: `captionFor` and `phaseOf` as in design 3.1, taking the phase from `play/timeline.ts` `laneFrame` so a caption never names a phase the lane is not in; both-arrived, 1938-only (no `still`) and orientation cases.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795237847823
       }
     ]
   }

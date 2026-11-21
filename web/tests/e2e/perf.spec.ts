@@ -6,8 +6,8 @@
 //
 // Five cold loads of the page (a new browser context each: no cache), a phone-sized touch
 // viewport, slow-4G network and a 4x slower processor through the browser's debugging protocol.
-// Each load waits for the `race-start` performance mark the page makes when its first lane
-// begins to move, and reads its time after the page started loading. All five are printed; the
+// Each load waits for the `race-start` performance mark the page makes the first time a card
+// with data is drawn (story-layer Req 4.7), not when the first lane begins to move, and reads its time after the page started loading. All five are printed; the
 // median must be under 5,000 ms. The map's tile host is blocked, as the first race does not
 // wait for the map and the check must reach nothing outside the page. To measure another
 // address (the local preview, for instance) set PERF_URL first:
