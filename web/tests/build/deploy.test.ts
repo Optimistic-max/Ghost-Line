@@ -3,16 +3,20 @@
 // what it must never do (run the pipeline, install Python, read raw/). The measurement's
 // settings are the ones R16.2 gives: five runs, a median under 5,000 ms, slow 4G, a slowed
 // processor.
+import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import config from '../../vite.config';
 import { SOURCE_URLS } from '../../src/config';
 import { PERF, median, pagesUrl } from '../e2e/perf-config';
-import { listRepoFiles, readRepoJson, readRepoText } from '../support/files';
+import { listRepoFiles, readRepoJson, readRepoText, repoPath } from '../support/files';
 
 const workflow = readRepoText('.github/workflows/pages.yml');
 
-/** Tool caches and installs, never part of the site: the repository listing does not walk into them. */
-const TOOL_FOLDERS = ['.git', '.hypothesis', '.pytest_cache', '__pycache__', 'node_modules'];
+/** The paths of a list that are inside the repository's raw/ folder, each with a leading "./" and backslashes normalised. */
+function rawPaths(paths: readonly string[]): string[] {
+  return paths.map((p) => p.replace(/\\/g, '/').replace(/^(\.\/)+/, '')).filter((p) => p.startsWith('raw/'));
+}
+
 /** The workflow without its comment lines, so a comment cannot satisfy or break a check. */
 const code = workflow
   .split(/\r?\n/)
@@ -79,7 +83,15 @@ describe('the Pages workflow (22.1)', () => {
     const tracked = listRepoFiles('web/public/data');
     expect(tracked.length).toBe(23);
     expect(readRepoText('.gitignore')).toMatch(/^raw\/$/m);
-    expect(listRepoFiles('.', { skipFolders: TOOL_FOLDERS }).filter((f) => f.startsWith('raw/'))).toEqual([]);
+    // raw/ exists on a developer machine (git-ignored), so the check reads what git tracks, not the disk.
+    const committed = execFileSync('git', ['ls-files'], { cwd: repoPath('.'), encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
+    expect(rawPaths(committed)).toEqual([]);
+  });
+
+  it('finds a raw/ path however it is written, so the check above can fail', () => {
+    expect(rawPaths(['web/src/a.ts', 'raw/mta_local_bus.zip'])).toEqual(['raw/mta_local_bus.zip']);
+    expect(rawPaths(['./raw/cache/x.parquet', '.\\raw\\y.zip', 'pipeline/raw.py', 'web/raw/z'])).toEqual(['raw/cache/x.parquet', 'raw/y.zip']);
+    expect(rawPaths(['data/lines/no21-1938.yaml'])).toEqual([]);
   });
 });
 
