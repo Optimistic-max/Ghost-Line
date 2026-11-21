@@ -59,7 +59,7 @@ match them closely, except where section 3B changes the layout.
 - Every walk time carries the word "estimate" ("Walk 2 min · estimate"). The
   slider is labelled "Choose a scheduled start time" and shows its two ends in
   12-hour form ("9:00 AM", "1:52 PM") in small muted text, read from the race
-  file. A start-time chart sits directly above the slider and shares its range
+  file. A start-time chart sits after the next-step actions and shares the slider's range
   (story-layer spec).
 - Data error state: no number anywhere on screen, including the route number
   on the trolley and "No. 21, 1938" in the top bar.

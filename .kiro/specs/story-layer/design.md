@@ -355,7 +355,7 @@ The chart is drawn by `renderCard` from the race file on screen. A pair change, 
 
 `index.html` gains a phone-only intro line `<p class="intro-line">` between the top bar and the map area, with the Story_Copy_Table text (a test checks it equals the `copy.ts` constant, as for the headline). The map area becomes the Route_Preview on a phone. Inside the card the order is:
 
-pair row (phone: two lines, origin, then "→ destination", with the swap button; desktop keeps the one-line fitted row of R1.3), start row, chart, slider row, schedule line, notices (before the table, inferred corner, today-win; directly under the schedule line), lanes, caption, clock row (while racing), result box, honest line, takeaway, next-step actions, departures section, then `#card-buttons` (Sources, Share this race), then `#card-footer` (About and credits).
+pair row (phone: two lines, origin, then "→ destination", with the swap button; desktop keeps the one-line fitted row of R1.3), start row, slider row, schedule line, notices (before the table, inferred corner, today-win; directly under the schedule line), lanes, caption, clock row (while racing), result box, honest line, takeaway, next-step actions, chart (heading, key, plot, readout; after the next-step actions so the result is above the fold, decision 24), departures section, then `#card-buttons` (Sources, Share this race), then `#card-footer` (About and credits).
 
 #### 8.2 CSS
 

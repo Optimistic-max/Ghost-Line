@@ -1,5 +1,5 @@
 // The start-time chart (story-layer Req 9, design 6.2): an inline SVG of the race file's stored
-// totals, one column per slider minute, directly above the slider. Geometry comes from layout.ts;
+// totals, one column per slider minute, after the next-step actions, sharing the slider's range. Geometry comes from layout.ts;
 // the readout under it prints the slider minute's two stored totals through display rounding.
 // The drawing takes no pointer input and holds no listeners: the slider is the only time control.
 import {

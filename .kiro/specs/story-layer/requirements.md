@@ -41,12 +41,13 @@ Status: requirements approved by Emmanuel, with his answers to the open points f
 21. Hide route (Q6): "Hide route" removes the map instance and returns to the strip, so no further tiles are requested. The preview does not stay open (Requirement 12.9).
 22. Count method line (Q7): the Story_Copy_Table "covered starts" method line replaces the race-screen races-count method line (`METHOD_RACE_COUNTS`) for all three counts: `races`, `wins_1938` and `wins_today` (Requirement 13.2).
 23. Board row label: the departures board's bus row label reads "Today's bus, from the boarding stop" (Emmanuel's change of "at the boarding stop"). It is a Story_Copy_Table row that wins over the race-screen row under Requirement 13.8 (Requirement 11.3).
+24. Chart position (checkpoint 18, Emmanuel): the Start_Time_Chart with its heading, key and readout moves to directly after the Next_Step_Actions on both layouts, so the result box is above the fold at 1280 × 800 and 375 × 667. The slider stays where it is. The chart keeps its inset of half the thumb's width (plus the two buttons and gaps), so its columns and cursor still line up with the slider's thumb (Requirement 9.1).
 
 ## Glossary
 
 - **Site**: the static web app in web/ (Vite, TypeScript, MapLibre GL JS).
 - **Pipeline**: the Python build in pipeline/, run by `python -m pipeline build`, which writes web/public/data/.
-- **Race_Card**: the race content: pair row, start time, chart, slider, lanes, caption area, result box, honest line, takeaway, next-step actions, departures section and secondary buttons. On a phone it is in normal page flow; on desktop it is the 440 px race column.
+- **Race_Card**: the race content: pair row, start time, slider, lanes, caption area, result box, honest line, takeaway, next-step actions, chart, departures section and secondary buttons. On a phone it is in normal page flow; on desktop it is the 440 px race column.
 - **Race_File**: web/public/data/race/<origin>__<dest>.json. Its `races` array holds one Race_Row per slider minute.
 - **Race_Row**: one entry of a Race_File's `races` array, with the fields `t`, `start`, `before_table`, `y1938` {`dep`, `wait`, `total`}, `today` {`trip`, `wait`, `total`} or null, `result` (one of "1938", "today", "photo_finish", "no_one_seat_ride") and `margin`.
 - **Summary_File**: web/public/data/summary.json, with `races`, `wins_1938`, `wins_today`, `photo_finishes`, `ride_same`, `ride_faster_today`, `ride_slower_today`, `pairs_without_one_seat_ride`, `today_wins[]` (`origin`, `dest`, `t`, `margin`), `pairs[]` and `sources`.
@@ -67,7 +68,7 @@ Status: requirements approved by Emmanuel, with his answers to the open points f
 - **Takeaway**: the "Where the time goes" block under the honest line, built from Shown_Values.
 - **Wait_Most_Flag**: the new boolean field `wait_most` on every Race_Row, written by the Pipeline.
 - **Ride_Same_Rule**: the new object `ride_same_rule` in the Summary_File, with `minutes` and `fraction_pct`.
-- **Start_Time_Chart**: the inline SVG chart of the selected pair's stored totals for every slider minute, directly above the slider.
+- **Start_Time_Chart**: the inline SVG chart of the selected pair's stored totals for every slider minute, placed after the Next_Step_Actions and sharing the slider's range.
 - **Next_Step_Actions**: the three buttons "Try another time", "Try other corners" and "Show a race today wins".
 - **Today_Win_Shortcut**: the "Show a race today wins" action.
 - **Departures_Section**: the expandable "Scheduled departures" section that holds the race-screen R8 departures board.
@@ -227,7 +228,7 @@ Shown waits for the Wait_Most_Flag: the 1938 shown wait is the largest-remainder
 
 #### Acceptance Criteria
 
-1. THE Site SHALL draw the Start_Time_Chart as inline SVG with no chart library, directly above the native slider, sharing the slider's range so that each slider minute lines up with its column.
+1. THE Site SHALL draw the Start_Time_Chart as inline SVG with no chart library, after the Next_Step_Actions (not next to the slider, so that the result is above the fold, decision 24), sharing the slider's range and inset by half the slider thumb's width on both sides, so that each slider minute lines up with its column and the chart cursor lines up with the slider thumb.
 2. THE Site SHALL draw the Start_Time_Chart only from the selected pair's Race_File, fetching no other file for it.
 3. THE Site SHALL draw two step series, one value per Race_Row: `y1938.total` in --ghost and `today.total` in --today, each sample as stored, with no smoothing and no average.
 4. THE Site SHALL use one shared vertical scale starting at 0 for both series and SHALL draw no numeric axis labels.
@@ -274,7 +275,7 @@ Shown waits for the Wait_Most_Flag: the 1938 shown wait is the largest-remainder
 #### Acceptance Criteria
 
 1. WHILE the viewport is below 900 px wide, THE Site SHALL lay out the page in normal flow, with no fixed or sticky element and no element that scrolls inside the Race_Card. Overlays (sheets, their scrim and banners) are outside this rule; WHILE no sheet is open and no banner shows, THE Site SHALL display no fixed or sticky element.
-2. WHILE the viewport is below 900 px wide, THE Site SHALL order the content as: top bar; intro line; Route_Preview with "View route"; pair names on two lines (start, then "→ destination") with the swap button; example label and start time; Start_Time_Chart and slider; schedule line; Notices (before-the-table, inferred corner, today-win), directly under the schedule line; both Lanes; Caption_Area; result box; honest line; Takeaway; Next_Step_Actions; Departures_Section (closed); "Sources" and "Share this race"; "About and credits".
+2. WHILE the viewport is below 900 px wide, THE Site SHALL order the content as: top bar; intro line; Route_Preview with "View route"; pair names on two lines (start, then "→ destination") with the swap button; example label and start time; slider; schedule line; Notices (before-the-table, inferred corner, today-win), directly under the schedule line; both Lanes; Caption_Area; result box; honest line; Takeaway; Next_Step_Actions; Start_Time_Chart with its heading and readout; Departures_Section (closed); "Sources" and "Share this race"; "About and credits".
 3. WHILE the viewport is below 900 px wide and the Route_Preview is collapsed, THE Site SHALL show the Route_Preview as a strip 100 px tall (a starting value, reported to Emmanuel under the rule of Requirement 5.7 if it causes a layout problem) of the bundled route drawing with the two chosen corners, and SHALL load no MapLibre code and request no map tiles.
 4. WHILE the viewport is 900 px wide or more, THE Site SHALL order the race column content as in criterion 2 from the pair names down, without the intro line and the Route_Preview.
 5. THE Site SHALL keep every text size at or above the race-screen minimums.

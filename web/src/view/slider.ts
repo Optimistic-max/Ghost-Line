@@ -1,7 +1,7 @@
 // The time controls (R3, story-layer Req 9.12), in two rows: the start row (the visible label, the
 // example label while the visit is guided, and the large start time in 12-hour form) and the slider
 // row (minus, a native range input over the race file's minute rows, plus, and the range ends in
-// small muted text). The start-time chart sits between them.
+// small muted text). The start-time chart sits lower, after the next-step actions.
 import { ONE_MINUTE_EARLIER, ONE_MINUTE_LATER, SLIDER_LABEL, exampleLabel, sliderValueText } from '../copy/copy';
 import { clockOf, label12, minutesOf } from '../format/time';
 import { h } from './dom';

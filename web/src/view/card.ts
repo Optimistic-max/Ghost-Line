@@ -1,6 +1,6 @@
 // The race card's content, in the order of the mockups: pair row, start row,
-// start-time chart, slider row, schedule line, the two lanes, the race clock row while racing, the result box
-// and the honest line once the result is shown, and the departures board. Every
+// slider row, schedule line, the two lanes, the race clock row while racing, the result box,
+// honest line, takeaway and next-step actions, then the start-time chart and the departures board. Every
 // number in the race is a number button registered in the card's source
 // registry.
 import {
@@ -184,13 +184,6 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   return [
     pairRow(view.originName, view.destName, inferredEnd),
     startRow(input.minute, input.guided ?? false),
-    chartView(registry, {
-      race,
-      originName: view.originName,
-      destName: view.destName,
-      minute: input.minute,
-      guided: input.guided ?? false,
-    }),
     sliderRow({ first, last, minute: input.minute }),
     schedule,
     ...(notices ? [notices] : []),
@@ -201,6 +194,14 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
     nextSteps(),
+    // After the next-step actions, so the result is above the fold; it shares the slider's range (Req 9.1, 12.2).
+    chartView(registry, {
+      race,
+      originName: view.originName,
+      destName: view.destName,
+      minute: input.minute,
+      guided: input.guided ?? false,
+    }),
     ...(boardShown(input) ? [departuresView(cardBoard(registry, input), input.departuresOpen ?? false)] : []),
   ];
 }
