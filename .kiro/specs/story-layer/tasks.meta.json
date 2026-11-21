@@ -705,6 +705,25 @@
         "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795295619833
+      },
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795296650610
+      }
+    ],
+    "20. Playwright end to end (Req 5, 6, 9, 12, 14, 16)": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795296651231
+      }
+    ],
+    "21.1 `web/tests/e2e/screens.spec.ts` (extend) with the layout report of design section 9, on the phone (375 x 667) and laptop (1280 x 800) projects, using `getBoundingClientRect`: illustration against its title and total (overlap, clip, row growth); markers (clipped at either track end, overlapping another lane's content, wider than their ride segment); the 100 px strip (credit line, toggle and route drawing overlap); the banner against the result box and Next_Step_Action boxes at 375 x 667 and 320 wide; and the phone fit at the lead example's result moment (bottom of the caption area and of the result line against 667, with the pixels cut off). Each finding is written as a line to `web/test-results/story-layout-report.md` (git-ignored) and attached as a test annotation. The step never fails the run and never changes a size. A separate failing assertion covers only no sideways scroll at 320, 375 and 899 px.": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795296652368
       }
     ]
   }

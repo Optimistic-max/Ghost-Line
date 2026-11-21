@@ -14,7 +14,8 @@
 // of the mockup; finished states use the device's reduced-motion setting, which
 // draws the finished state at once. Phone pictures are taken at 2x, like the
 // phone mockups (750 x 1334).
-import { resolve } from 'node:path';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { type Browser, type Page, expect, test } from '@playwright/test';
 import { FONT_SIZES, ROUTE_NUMBER_MIN_WIDTH, TIMINGS } from '../../src/config';
 import { FIXTURE_TAG } from '../../src/copy/copy';
@@ -446,3 +447,348 @@ test('vehicle sheet (dev only), beside mockup 18', async ({ browser }) => {
   expect(numbers).toEqual(Array(numbered).fill(expected));
   await context.close();
 });
+
+// ---------------------------------------------------------------------------------------------------------------
+// Layout report (story-layer design 9, task 21.1; Req 5.7, 6.10, 12.3, 12.6, 12.7, 12.11, 16.19).
+// The starting sizes are not tuned by the build. These steps measure with getBoundingClientRect and WRITE DOWN what
+// they find, one line each, to test-results/story-layout-report.md (git-ignored) and as test annotations. They never
+// fail the run and never change a size. The one failing assertion is "no sideways scroll" (Req 12.6), further down.
+// ---------------------------------------------------------------------------------------------------------------
+const REPORT = resolve(import.meta.dirname, '..', '..', 'test-results', 'story-layout-report.md');
+
+type Box = { left: number; top: number; right: number; bottom: number };
+const px = (n: number): string => `${(Math.round(n * 10) / 10).toString()} px`;
+const dims = (b: Box): string => `${px(b.right - b.left)} wide x ${px(b.bottom - b.top)} tall`;
+/** How far two boxes intersect, in pixels each way, or null when they do not. */
+const intersect = (a: Box, b: Box): { w: number; h: number } | null => {
+  const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+  const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+  return w > 0.5 && h > 0.5 ? { w, h } : null;
+};
+
+type Note = (kind: 'finding' | 'ok', text: string) => void;
+
+function recorder(label: string, info: { annotations: { type: string; description?: string }[] }): Note {
+  return (kind, text) => {
+    const line = `- [${label}] ${kind}: ${text}`;
+    info.annotations.push({ type: 'layout-' + kind, description: line });
+    appendFileSync(REPORT, line + '\n');
+  };
+}
+
+/** A step that reports and never throws: a measurement that cannot be taken is itself a line. */
+async function step(note: Note, name: string, body: () => Promise<void>): Promise<void> {
+  try {
+    await body();
+  } catch (error) {
+    note('finding', `${name}: could not be measured (${String((error as Error).message).split('\n')[0]})`);
+  }
+}
+
+type LaneBoxes = {
+  side: string;
+  head: Box;
+  art: Box | null;
+  vehicle: Box | null;
+  title: Box | null;
+  total: Box | null;
+  track: Box | null;
+  clip: Box | null;
+  marker: Box | null;
+  ride: Box | null;
+  content: { what: string; box: Box }[];
+};
+
+async function laneBoxes(page: Page): Promise<LaneBoxes[]> {
+  return page.evaluate(() => {
+    const rect = (el: Element | null): Box | null => {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return r.width === 0 && r.height === 0 ? null : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+    };
+    const clipOf = (el: Element | null): Box | null => {
+      for (let p = el?.parentElement ?? null; p && p !== document.documentElement; p = p.parentElement) {
+        const s = getComputedStyle(p);
+        if (s.overflowX !== 'visible' || s.overflowY !== 'visible') return rect(p);
+      }
+      return null;
+    };
+    return [...document.querySelectorAll('.lane')].map((lane) => {
+      const marker = lane.querySelector('.bar-marker svg') ?? lane.querySelector('.bar-marker');
+      const rides = [...lane.querySelectorAll('.seg-ride:not([data-empty="true"])')];
+      const widest = rides.map((r) => rect(r)).filter((r): r is Box => r !== null);
+      const narrowest = widest.sort((a, b) => a.right - a.left - (b.right - b.left))[0] ?? null;
+      const content = ['.lane-head', '.lane-title', '.lane-total', '.bar', '.status', '.legend'].flatMap((selector) => {
+        const box = rect(lane.querySelector(selector));
+        return box ? [{ what: selector, box }] : [];
+      });
+      return {
+        side: lane.getAttribute('data-side') ?? '',
+        head: rect(lane.querySelector('.lane-head'))!,
+        art: rect(lane.querySelector('.lane-art')),
+        vehicle: rect(lane.querySelector('.vehicle')),
+        title: rect(lane.querySelector('.lane-title')),
+        total: rect(lane.querySelector('.lane-total')),
+        track: rect(lane.querySelector('.marker-track')),
+        clip: clipOf(marker),
+        marker: rect(marker),
+        ride: narrowest,
+        content,
+      };
+    });
+  });
+}
+
+/** A finished lead-pair page at the given size, on a reduced-motion device, with the tile host blocked (the route drawing shows). */
+async function finishedPage(browser: Browser, size: { width: number; height: number }) {
+  const context = await browser.newContext({ viewport: { width: size.width, height: size.height }, reducedMotion: 'reduce' });
+  await guardNetwork(context, true);
+  const page = await context.newPage();
+  await page.clock.setFixedTime(newYork('20:00'));
+  await page.goto('./');
+  await page.locator('.result').waitFor();
+  await fontsReady(page);
+  await page.locator('.route-drawing').waitFor();
+  return { context, page };
+}
+
+/** A guided visit on a paused clock, run forward until the result box first appears. Returns the page at that moment. */
+async function resultMoment(browser: Browser, size: { width: number; height: number }, search = '', onTick?: (page: Page, ran: number) => Promise<void>) {
+  const context = await browser.newContext({ viewport: { width: size.width, height: size.height }, reducedMotion: 'no-preference' });
+  await guardNetwork(context, true);
+  const page = await context.newPage();
+  await page.clock.install({ time: beforeNewYork('20:00') });
+  await page.clock.pauseAt(newYork('20:00'));
+  await page.goto(`./${search}`);
+  await page.locator('.clock-row').waitFor();
+  await fontsReady(page);
+  let ran = 0;
+  while ((await page.locator('.result').count()) === 0 && ran < 20_000) {
+    await page.clock.runFor(100);
+    ran += 100;
+    await onTick?.(page, ran);
+  }
+  return { context, page, ran };
+}
+
+test.describe.serial('layout report', () => {
+  test.beforeAll(() => {
+    mkdirSync(dirname(REPORT), { recursive: true });
+    writeFileSync(REPORT, '# Story layer layout report\n\nMeasured with getBoundingClientRect. Findings only; no size was changed.\n\n');
+  });
+
+  for (const size of [PHONE, DESKTOP]) {
+    const label = `${size.width} x ${size.height}`;
+
+    test(`layout report: lanes, markers and route strip (${label})`, async ({ browser }, info) => {
+      const note = recorder(label, info);
+      const { context, page } = await finishedPage(browser, size);
+      await step(note, 'illustration', async () => {
+        for (const lane of await laneBoxes(page)) {
+          const art = lane.vehicle ?? lane.art;
+          if (!art) throw new Error(`no illustration in the ${lane.side} lane`);
+          const where = `${lane.side} lane illustration (${dims(art)})`;
+          let any = false;
+          for (const [what, other] of [['title', lane.title], ['total', lane.total]] as const) {
+            const hit = other && intersect(art, other);
+            if (hit) {
+              any = true;
+              note('finding', `${where} overlaps the ${what} by ${px(hit.w)} across and ${px(hit.h)} down`);
+            }
+          }
+          const clipped: string[] = [];
+          if (art.left < lane.head.left - 0.5) clipped.push(`${px(lane.head.left - art.left)} at the left`);
+          if (art.right > lane.head.right + 0.5) clipped.push(`${px(art.right - lane.head.right)} at the right`);
+          if (art.top < lane.head.top - 0.5) clipped.push(`${px(lane.head.top - art.top)} at the top`);
+          if (art.bottom > lane.head.bottom + 0.5) clipped.push(`${px(art.bottom - lane.head.bottom)} at the bottom`);
+          if (clipped.length) {
+            any = true;
+            note('finding', `${where} reaches outside its title row (${dims(lane.head)}): ${clipped.join(', ')}`);
+          }
+          const growth = lane.head.bottom - lane.head.top - (art.bottom - art.top);
+          if (growth > 0.5) {
+            any = true;
+            note('finding', `${lane.side} title row is ${px(growth)} taller than its illustration (row ${px(lane.head.bottom - lane.head.top)}, illustration ${px(art.bottom - art.top)})`);
+          }
+          if (!any) note('ok', `${where} clear of title and total, inside its row, row not taller than it`);
+        }
+      });
+      await step(note, 'markers', async () => {
+        const lanes = await laneBoxes(page);
+        for (const lane of lanes) {
+          const m = lane.marker;
+          if (!m) throw new Error(`no bar marker in the ${lane.side} lane`);
+          const where = `${lane.side} marker (${dims(m)})`;
+          let any = false;
+          for (const [what, box] of [['track', lane.track], ['clipping ancestor', lane.clip]] as const) {
+            if (!box) continue;
+            if (m.left < box.left - 0.5) {
+              any = true;
+              note('finding', `${where} is clipped ${px(box.left - m.left)} at the left end of the ${what}`);
+            }
+            if (m.right > box.right + 0.5) {
+              any = true;
+              note('finding', `${where} is clipped ${px(m.right - box.right)} at the right end of the ${what}`);
+            }
+          }
+          for (const other of lanes.filter((l) => l !== lane)) {
+            for (const c of other.content) {
+              const hit = intersect(m, c.box);
+              if (hit) {
+                any = true;
+                note('finding', `${where} overlaps the ${other.side} lane's ${c.what} by ${px(hit.w)} across and ${px(hit.h)} down`);
+              }
+            }
+          }
+          if (lane.ride && m.right - m.left > lane.ride.right - lane.ride.left + 0.5) {
+            any = true;
+            note('finding', `${where} is ${px(m.right - m.left - (lane.ride.right - lane.ride.left))} wider than its ride segment (${px(lane.ride.right - lane.ride.left)})`);
+          }
+          if (!any) note('ok', `${where} not clipped, clear of the other lane, no wider than its ride segment`);
+        }
+      });
+      await step(note, 'route strip', async () => {
+        const strip = await page.evaluate(() => {
+          const rect = (el: Element | null): Box | null => {
+            if (!el || (el as HTMLElement).hidden) return null;
+            const r = el.getBoundingClientRect();
+            return r.width === 0 && r.height === 0 ? null : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+          };
+          const area = document.getElementById('map-area');
+          return {
+            area: rect(area),
+            credit: rect(document.querySelector('#map-area .map-credit')),
+            toggle: rect(document.querySelector('#map-area .route-toggle')),
+            drawing: rect(document.querySelector('#map-area .route-drawing:not(.is-faded)')),
+          };
+        });
+        if (size === DESKTOP) {
+          note('ok', `route strip: not a strip on the laptop (map area ${strip.area ? dims(strip.area) : 'absent'}); toggle ${strip.toggle ? 'shown' : 'not shown'}`);
+          return;
+        }
+        if (!strip.area) throw new Error('no map area');
+        let any = false;
+        const parts = [['credit line', strip.credit], ['toggle', strip.toggle], ['route drawing', strip.drawing]] as const;
+        for (let i = 0; i < parts.length; i += 1) {
+          for (let j = i + 1; j < parts.length; j += 1) {
+            const a = parts[i]!;
+            const b = parts[j]!;
+            const hit = a[1] && b[1] && intersect(a[1], b[1]);
+            if (hit) {
+              any = true;
+              note('finding', `strip (${dims(strip.area)}): ${a[0]} overlaps ${b[0]} by ${px(hit.w)} across and ${px(hit.h)} down`);
+            }
+          }
+        }
+        if (!any) note('ok', `strip (${dims(strip.area)}): credit line ${strip.credit ? 'shown' : 'not shown'}, toggle ${strip.toggle ? 'shown' : 'not shown'}, drawing ${strip.drawing ? 'shown' : 'not shown'}; no overlap`);
+      });
+      await context.close();
+    });
+  }
+
+  // The banner on a bad-link guided visit, at the result moment (Req 12.11, 16.19).
+  for (const size of [{ width: 375, height: 667 }, { width: 320, height: 667 }]) {
+    const label = `${size.width} x ${size.height}`;
+    test(`layout report: banner against the result and next steps (${label})`, async ({ browser }, info) => {
+      const note = recorder(`${label} banner`, info);
+      await step(note, 'banner', async () => {
+        let lastOpen: { at: number; box: Box } | null = null;
+        const { context, page, ran } = await resultMoment(browser, size, '?from=nowhere&to=aliceanna-bond', async (p, at) => {
+          const box = await p.evaluate(() => {
+            const b = document.querySelector('#banner-root .banner.is-open');
+            if (!b) return null;
+            const r = b.getBoundingClientRect();
+            return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+          });
+          if (box) lastOpen = { at, box };
+        });
+        try {
+          const boxes = await page.evaluate(() => {
+            const rect = (el: Element): Box => {
+              const r = el.getBoundingClientRect();
+              return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+            };
+            const banner = document.querySelector('#banner-root .banner');
+            return {
+              banner: banner ? rect(banner) : null,
+              open: banner?.classList.contains('is-open') ?? false,
+              result: [...document.querySelectorAll('.result')].map(rect),
+              steps: [...document.querySelectorAll('.next-step')].map((el) => ({ what: el.getAttribute('data-action') ?? '', box: rect(el) })),
+            };
+          });
+          if (!boxes.banner || !boxes.open) {
+            const seen = lastOpen as { at: number; box: Box } | null;
+            note('finding', `banner was not open at the result moment (${ran} ms into the race); last seen open at ${seen ? `${seen.at} ms, ${dims(seen.box)}, bottom at ${px(seen.box.bottom)}` : 'never'}`);
+            if (seen) {
+              for (const r of boxes.result) {
+                const hit = intersect(seen.box, r);
+                note(hit ? 'finding' : 'ok', `banner's last open box ${hit ? `intersects the result box by ${px(hit.w)} across and ${px(hit.h)} down` : `is clear of the result box (result top at ${px(r.top)})`}`);
+              }
+              for (const s of boxes.steps) {
+                const hit = intersect(seen.box, s.box);
+                note(hit ? 'finding' : 'ok', `banner's last open box ${hit ? `intersects the ${s.what} next step by ${px(hit.w)} across and ${px(hit.h)} down` : `is clear of the ${s.what} next step (top at ${px(s.box.top)})`}`);
+              }
+            }
+            return;
+          }
+          let any = false;
+          for (const r of boxes.result) {
+            const hit = intersect(boxes.banner, r);
+            if (hit) {
+              any = true;
+              note('finding', `banner (${dims(boxes.banner)}) intersects the result box by ${px(hit.w)} across and ${px(hit.h)} down`);
+            }
+          }
+          for (const s of boxes.steps) {
+            const hit = intersect(boxes.banner, s.box);
+            if (hit) {
+              any = true;
+              note('finding', `banner intersects the ${s.what} next step by ${px(hit.w)} across and ${px(hit.h)} down`);
+            }
+          }
+          if (!any) {
+            const nearest = [...boxes.result, ...boxes.steps.map((s) => s.box)].map((b) => b.top - boxes.banner!.bottom);
+            note('ok', `banner (${dims(boxes.banner)}, bottom at ${px(boxes.banner.bottom)}) clear of the result box and ${boxes.steps.length} next step boxes; the nearest top is ${px(Math.min(...nearest))} below it`);
+          }
+        } finally {
+          await context.close();
+        }
+      });
+    });
+  }
+
+  // The phone fit at the lead example's result moment (Req 12.7).
+  test('layout report: phone fit at the result moment (375 x 667)', async ({ browser }, info) => {
+    const note = recorder('375 x 667 fit', info);
+    await step(note, 'phone fit', async () => {
+      const { context, page, ran } = await resultMoment(browser, PHONE);
+      try {
+        const fit = await page.evaluate(() => {
+          const bottom = (selector: string): number | null => {
+            const el = document.querySelector(selector);
+            return el ? el.getBoundingClientRect().bottom : null;
+          };
+          return { height: window.innerHeight, caption: bottom('#race-caption'), result: bottom('.result-line'), box: bottom('.result') };
+        });
+        for (const [what, bottom] of [['caption area', fit.caption], ['result line', fit.result]] as const) {
+          if (bottom === null) throw new Error(`no ${what}`);
+          const cut = bottom - fit.height;
+          if (cut > 0.5) note('finding', `${what} bottom is at ${px(bottom)} against ${fit.height} px: ${px(cut)} cut off (result moment ${ran} ms into the race)`);
+          else note('ok', `${what} bottom is at ${px(bottom)} against ${fit.height} px: fits with ${px(-cut)} to spare (result moment ${ran} ms into the race)`);
+        }
+      } finally {
+        await context.close();
+      }
+    });
+  });
+});
+
+// Req 12.6: nothing scrolls sideways at 320, 375 and 899 px. This one is a real assertion.
+for (const width of [320, 375, 899]) {
+  test(`no sideways scroll at ${width} px`, async ({ browser }) => {
+    const { context, page } = await finishedPage(browser, { width, height: 667 });
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    await context.close();
+    expect(over, `${width} px: the page is this much wider than the window`).toBeLessThanOrEqual(0);
+  });
+}
