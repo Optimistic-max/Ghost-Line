@@ -31,6 +31,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Two workers: the machine has 8 GB RAM, and more workers made normal runs time out under load.
+    maxWorkers: 2,
     projects: [
       {
         extends: true,

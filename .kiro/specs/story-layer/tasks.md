@@ -175,11 +175,11 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
 - [ ] 19. Rule tests across the whole screen (Req 13, Req 15, Req 16)
   - [x] 19.1 Extend `web/tests/dom/wording.test.ts` and the P3 crawl: every new part and state (first visit, racing with a caption, finished with takeaway, today-win notice, open departures, expanded route preview, no-ride fixture) has no banned word except "Scheduled, not live." and "Start time is the time now."; no "citywide"; every time carries "scheduled"; walks say "estimate"; every new number is a Number_Button with a Sources row; singular for 1 in every new minute string. Extend the count test: a made-up summary changes every count on screen.
     - _Requirements: 13.4, 13.5, 13.6, 13.7, 16.6, 16.11_
-  - [ ] 19.2 Digit scan and principle test: no digit string from the real `summary.json` appears under `web/src/` (extending race-screen 19.3), and `web/tests/unit/principle.test.ts` passes with its allowlist unchanged (all new arithmetic is in `format/rounding.ts`, `format/gaps.ts`, `format/time.ts`, `play/timeline.ts`, `play/clock.ts`, `view/layout.ts` or `data/lookup.ts`).
+  - [-] 19.2 Digit scan and principle test: no digit string from the real `summary.json` appears under `web/src/` (extending race-screen 19.3), and `web/tests/unit/principle.test.ts` passes with its allowlist unchanged (all new arithmetic is in `format/rounding.ts`, `format/gaps.ts`, `format/time.ts`, `play/timeline.ts`, `play/clock.ts`, `view/layout.ts` or `data/lookup.ts`).
     - _Requirements: 8.7, 16.7_
   - [x] 19.3 Extend the made-up race file test set: chart columns equal its stored totals, its before-table minutes are hatched, the readout, takeaway, "most of the difference" sentence (one row with `wait_most` false) and captions follow the fixture.
     - _Requirements: 16.8_
-  - [-] 19.4 axe-core in jsdom and keyboard tests: the first visit, racing, finished, the today-win notice, the open departures section and the expanded route preview, on both layouts; keyboard alone reaches the three Next_Step_Actions, the chart readout buttons, the departures toggle and the route toggle, each with a visible focus ring; the result is announced once per race and the caption area is never in a live region.
+  - [x] 19.4 axe-core in jsdom and keyboard tests: the first visit, racing, finished, the today-win notice, the open departures section and the expanded route preview, on both layouts; keyboard alone reaches the three Next_Step_Actions, the chart readout buttons, the departures toggle and the route toggle, each with a visible focus ring; the result is announced once per race and the caption area is never in a live region.
     - _Requirements: 15.1, 15.2, 15.3, 15.4_
   - Depends on: tasks 7 to 16
 

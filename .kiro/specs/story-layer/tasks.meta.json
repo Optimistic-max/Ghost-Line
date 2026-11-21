@@ -650,6 +650,18 @@
         "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795288530756
+      },
+      {
+        "executionId": "39aa0bdf-c9fa-4ed7-824c-5abfb7e9c5bb",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795288975030
+      }
+    ],
+    "19.2 Digit scan and principle test: no digit string from the real `summary.json` appears under `web/src/` (extending race-screen 19.3), and `web/tests/unit/principle.test.ts` passes with its allowlist unchanged (all new arithmetic is in `format/rounding.ts`, `format/gaps.ts`, `format/time.ts`, `play/timeline.ts`, `play/clock.ts`, `view/layout.ts` or `data/lookup.ts`).": [
+      {
+        "executionId": "f78e8763-3f69-4eba-8649-7157ed233e94",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795289292182
       }
     ]
   }
