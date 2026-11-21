@@ -383,6 +383,13 @@
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795240856513
       }
+    ],
+    "10.1 `web/src/view/layout.ts`: `chartPlan(race)` and `chartPath(series, max, height)` as in design 6.1 (one column per row, step paths, shared scale from 0, hatch range from `before_table`, today series null when every row has no one-seat ride).": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795241126747
+      }
     ]
   }
 }

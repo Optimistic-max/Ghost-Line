@@ -2,6 +2,7 @@
 // trip is visibly longer, and positions in the map area (design 12.1, 12.2).
 // Allowed arithmetic: fractions of the longer stored total, and geometry of the
 // route's own coordinates. Nothing here reads a time or decides a result.
+import type { RaceFile } from '../data/types';
 import type { LaneFrame } from '../play/timeline';
 import type { Lane, RaceView } from '../state/model';
 import { MARKER_VIEWBOX } from './vehicles';
@@ -40,6 +41,58 @@ function laneLayout(lane: Lane, longest: number): LaneLayout {
 export function markerCentre(layout: LaneLayout, frame: Pick<LaneFrame, 'vehicle'> | null, barPx: number, segGapPx: number): number {
   const share = frame ? frame.vehicle : layout.park;
   return share * barPx + layout.gapsBefore * segGapPx;
+}
+
+// ---- The start-time chart (story-layer design 6.1) ------------------------------------
+// Geometry only: stored totals are copied and scaled, never combined or compared.
+
+export type ChartPlan = {
+  /** One column per race row. */
+  columns: number;
+  /** The largest stored total of both series: the scale runs 0 to max. */
+  max: number;
+  series1938: number[];
+  /** Null when every row has no one-seat ride. */
+  seriesToday: number[] | null;
+  /** The column range (inclusive) where before_table is true, or null. */
+  hatch: { from: number; to: number } | null;
+};
+
+export function chartPlan(race: Pick<RaceFile, 'races'>): ChartPlan {
+  const rows = race.races;
+  const series1938 = rows.map((r) => r.y1938.total);
+  const anyToday = rows.some((r) => r.today !== null);
+  const seriesToday = anyToday
+    ? rows.map((r) => {
+        if (r.today === null) throw new Error(`Race row ${r.t} has no one-seat ride while other rows do.`);
+        return r.today.total;
+      })
+    : null;
+  const first = rows.findIndex((r) => r.before_table);
+  const last = rows.findLastIndex((r) => r.before_table);
+  return {
+    columns: rows.length,
+    max: Math.max(0, ...series1938, ...(seriesToday ?? [])),
+    series1938,
+    seriesToday,
+    hatch: first === -1 ? null : { from: first, to: last },
+  };
+}
+
+const unit = (n: number): string => String(Number(n.toFixed(3)));
+
+/**
+ * A step path in viewBox units: column k spans x from k - 0.5 to k + 0.5 at
+ * y = height x (1 - value / max). No smoothing, no averaging.
+ */
+export function chartPath(series: readonly number[], max: number, height: number): string {
+  const y = (v: number): string => unit(max > 0 ? height * (1 - v / max) : height);
+  let d = '';
+  series.forEach((v, k) => {
+    d += k === 0 ? `M${unit(-0.5)} ${y(v)}` : ` V${y(v)}`;
+    d += ` H${unit(k + 0.5)}`;
+  });
+  return d;
 }
 
 /**
