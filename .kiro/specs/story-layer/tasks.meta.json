@@ -339,6 +339,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795240194518
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240434634
+      }
+    ],
+    "8.3 Tests. **Property 5: Markers sit on the ride's filled end and move only during the ride** (random phase minutes with zeros, random elapsed times; non-decreasing, constant while walking or waiting, at the ride end at the finish). DOM tests: the box size of each illustration is the same before, during and after a race; the trolley route number appears only at 150 px; the bus has no pole, wire or glow.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240435251
       }
     ]
   }
