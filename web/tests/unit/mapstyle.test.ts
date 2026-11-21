@@ -188,7 +188,12 @@ describe('the map style in palette B', () => {
     const ids = (style.layers as AnyLayer[]).map((l) => l.id);
     expect(ids.indexOf('ghost-stretch')).toBeGreaterThan(ids.indexOf('ghost-route-inferred'));
     const stretch = (style.sources[STRETCH_SOURCE] as { data: ReturnType<typeof stretchData> }).data;
-    expect(stretch.features[0]!.geometry.coordinates.length).toBeGreaterThanOrEqual(2);
+    const line = stretch.features[0]!.geometry.coordinates;
+    expect(line.length).toBeGreaterThanOrEqual(2);
+    // From the origin corner's point to the destination corner's point (checkpoint 18), not where the marker stops.
+    const cornerAt = (slug: string) => index.corners.find((c) => c.slug === slug)!.lonlat;
+    expect(line[0]).toEqual([...cornerAt(lead.origin)]);
+    expect(line.at(-1)).toEqual([...cornerAt(lead.dest)]);
     expect(byId.get('ghost-stretch')?.paint?.['line-opacity']).toBe(1);
     for (const id of ['ghost-route', 'ghost-route-inferred', 'ghost-route-glow']) {
       expect(byId.get(id)?.paint?.['line-opacity'] as number, id).toBeLessThan(1);

@@ -12,7 +12,7 @@
 import type { TransformStyleFunction } from 'maplibre-gl';
 import { MAP_LAYOUT } from '../config';
 import type { Route } from '../data/types';
-import { type Track, trackPoint } from '../view/layout';
+import { type Track, stretchLine } from '../view/layout';
 import type { Layout } from '../view/vehicles';
 import type { DrawingPlan } from './routedrawing';
 
@@ -45,11 +45,13 @@ export const STRETCH_SOURCE = 'ghost-stretch';
 export const DIMMED_ROUTE_OPACITY = 0.45;
 export const DIMMED_GLOW_OPACITY = 0.25;
 
-/** The stretch as a line: the marker track's own polyline, from where it starts to where it stops, or nothing before the race file is in. */
+/**
+ * The stretch as a line: the marker track's own polyline, from the origin corner's point to the destination
+ * corner's point (layout.ts stretchLine), or nothing before the race file is in.
+ */
 export function stretchData(track: Track | null | undefined): StretchData {
   if (!track || track.points.length < 2) return { type: 'FeatureCollection', features: [] };
-  const inside = track.points.filter((_, i) => (track.at[i] ?? 0) > track.from && (track.at[i] ?? 0) < track.to);
-  const coordinates = [trackPoint(track, 0), ...inside.map((p): [number, number] => [p[0] ?? 0, p[1] ?? 0]), trackPoint(track, 1)];
+  const coordinates = stretchLine(track);
   return { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates }, properties: {} }] };
 }
 

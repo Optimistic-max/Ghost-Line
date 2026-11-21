@@ -273,7 +273,21 @@ export type Track = {
   /** Where the marker starts and stops, in metres along the line. */
   from: number;
   to: number;
+  /** The destination corner's place on the line, in metres (the marker stops short of it). */
+  end: number;
+  /** The two corners' own [lon, lat]. */
+  origin: [number, number];
+  dest: [number, number];
 };
+
+/**
+ * The pair's stretch of the line for the desktop map's bright line (checkpoint 18): from the origin corner's
+ * point, along the line, to the destination corner's point, not where the marker stops short of it.
+ */
+export function stretchLine(track: Track): [number, number][] {
+  const inside = track.points.filter((_, i) => (track.at[i] ?? 0) > track.from && (track.at[i] ?? 0) < track.end);
+  return [track.origin, ...inside.map((p): [number, number] => [p[0] ?? 0, p[1] ?? 0]), track.dest];
+}
 
 function metresBetween(a: readonly number[], b: readonly number[]): number {
   const [lonA = 0, latA = 0] = a;
@@ -318,7 +332,8 @@ export function markerTrack(legs: readonly (readonly number[][])[], origin: read
   const from = locate(points, at, origin);
   const end = locate(points, at, dest);
   const stop = pxPerMetre > 0 ? stopPx / pxPerMetre : 0;
-  return { points, at, from, to: Math.max(from, end - stop) };
+  const corner = (p: readonly number[]): [number, number] => [p[0] ?? 0, p[1] ?? 0];
+  return { points, at, from, to: Math.max(from, end - stop), end: Math.max(from, end), origin: corner(origin), dest: corner(dest) };
 }
 
 /** The marker's point at ride progress p, clamped to 0 to 1. */
