@@ -60,7 +60,7 @@ for (const [label, size] of [['phone', PHONE], ['desktop', DESKTOP]] as const) {
     await page.locator('.result').waitFor();
     await fontsReady(page);
     const rect = (await page.locator('.result').boundingBox())!;
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    // Superseded by task 24.1: the result scrolls itself into view, so scrollY is no longer 0 on a phone.
     console.log(`${label} finished: result box ${JSON.stringify(rect)} in ${size.width}x${size.height}`);
     expect(inside(rect, size), JSON.stringify(rect)).toBe(true);
     await context.close();
@@ -88,7 +88,7 @@ for (const [label, size] of [['phone', PHONE], ['desktop', DESKTOP]] as const) {
     const note = `${label} live: result box at first arrival ${JSON.stringify(atFirstArrival)} (${overflow > 0 ? `${overflow}px below the viewport` : 'inside'}); at the end of the race ${JSON.stringify(atEnd)}`;
     test.info().annotations.push({ type: 'result-box-position', description: note });
     console.log(note);
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    // (scrollY is not asserted: task 24.1 scrolls the result into view.)
     // Hard check: at the end of the live race. The first-arrival position is reported above, not asserted
     // (story-layer Req 12.7: report the pixels, keep text sizes).
     expect(inside(atEnd, size), JSON.stringify(atEnd)).toBe(true);

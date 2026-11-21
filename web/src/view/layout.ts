@@ -352,6 +352,18 @@ export function trackPoint(track: Track, p: number): [number, number] {
 }
 
 
+/**
+ * How far to scroll (positive: down) so a block from `top` to `bottom` stands whole in `port`, with `room` pixels
+ * kept clear; 0 when it already does or the port is empty. A block taller than the port keeps its top in view.
+ */
+export function revealDelta(top: number, bottom: number, port: { top: number; bottom: number }, room: number): number {
+  if (port.bottom <= port.top) return 0;
+  if (top >= port.top && bottom <= port.bottom) return 0;
+  const delta = bottom + room - port.bottom;
+  const capped = top - delta < port.top + room ? top - port.top - room : delta;
+  return Math.abs(capped) < 1 ? 0 : capped;
+}
+
 /** The width of a line of display type before it is drawn, from the face's average glyph advance. */
 export function textWidth(text: string, fontPx: number, glyphEm: number): number {
   return text.length * fontPx * glyphEm;

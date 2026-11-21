@@ -211,6 +211,12 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - [x] 23.2 Write the report for Emmanuel: any layout finding from the report file with its pixel amount (104, 150, 28 and 100 px kept); whether task 17 was built or cut; every superseded race-screen test that changed; the perf numbers. Do not change a size, a text size, a golden value or a test to clear a finding.
   - Ensure all tests pass, ask the user if questions arise.
 
+- [ ] 24. Result visibility and desktop About button
+  - [x] 24.1 When the result box appears, if the result box and the three next-step actions are not fully visible, scroll them into view: smooth, or instant under reduced motion; the page on a phone, the race column on desktop. Skip it if the visitor scrolled during the race. Test at 375x667 and 1280x800 that the result headline and all three next steps are fully visible after the scroll.
+  - [ ] 24.2 Desktop: move the "i" About button into the left top bar, next to "Ghost Line No. 21, 1938", so nothing scrolls under it. The phone stays as is. Test that it overlaps no text at any column scroll position.
+  - [ ] 24.3 Fix the `#card-scroll` overflow from the two bar-marker boxes so it is no wider than the card.
+  - Same rules as before: no weakened test, no changed golden value or facts file, no new wording outside the copy table, no network.
+
 ## Notes
 
 - The data change lands first and alone with its schema, shape validators and fixtures, so the site never reads a file the validators reject.
@@ -259,7 +265,10 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     { "id": 34, "tasks": ["20.3"] },
     { "id": 35, "tasks": ["22.1"] },
     { "id": 36, "tasks": ["23.1"] },
-    { "id": 37, "tasks": ["23.2"] }
+    { "id": 37, "tasks": ["23.2"] },
+    { "id": 38, "tasks": ["24.1"] },
+    { "id": 39, "tasks": ["24.2"] },
+    { "id": 40, "tasks": ["24.3"] }
   ]
 }
 ```

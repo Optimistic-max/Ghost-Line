@@ -50,7 +50,7 @@ import { syncDepartures } from './departures';
 import { h, setVar } from './dom';
 import { GLYPH } from './glyphs';
 import { vehicleMarkup } from './lanes';
-import { fitOneLine } from './layout';
+import { fitOneLine, revealDelta } from './layout';
 import { type MapModule, createMapView } from './mapview';
 import { SourceRegistry } from './numbers';
 import { type Racer, createRacer } from './racer';
@@ -189,6 +189,9 @@ export function createApp(options: AppOptions): App {
   let run: object | null = null;
   let announced: object | null = null;
   let spark: number | null = null;
+  /** The visitor scrolled the page or the race column since this race started: the result does not scroll it for them. */
+  let visitorScrolled = false;
+  const SCROLL_ROOM = 8;
 
   const clock = createClock(timers, {
     frame(elapsed) {
@@ -486,6 +489,27 @@ export function createApp(options: AppOptions): App {
     const above = scroll.querySelector('.clock-row') ?? scroll.querySelector('.caption') ?? scroll.querySelector('.lanes');
     above?.after(...resultElements(registry, input, motion !== 'reduced'));
     if (drawn) drawn.resultShown = true;
+    revealResult();
+  }
+
+  /**
+   * Bring the result box and the three next-step actions into view when the result appears, if they are not
+   * already whole on screen: the page on a phone, the race column on desktop. Smooth, instant under reduced
+   * motion. Skipped when the visitor scrolled since the race started.
+   */
+  function revealResult(): void {
+    if (visitorScrolled) return;
+    const result = scroll.querySelector<HTMLElement>('.result');
+    const steps = scroll.querySelector<HTMLElement>('.next-steps');
+    if (!result || !steps) return;
+    const desktop = options.layout() === 'desktop';
+    const win = doc.defaultView;
+    const port = desktop ? card.getBoundingClientRect() : { top: 0, bottom: win?.innerHeight ?? 0 };
+    const delta = revealDelta(result.getBoundingClientRect().top, steps.getBoundingClientRect().bottom, port, SCROLL_ROOM);
+    if (delta === 0) return;
+    const behavior: ScrollBehavior = store.get().motion === 'reduced' ? 'instant' : 'smooth';
+    if (desktop) card.scrollBy?.({ top: delta, behavior });
+    else win?.scrollBy?.({ top: delta, behavior });
   }
 
   /** The board, if it is on screen, for the minute the slider now shows. */
@@ -567,7 +591,11 @@ export function createApp(options: AppOptions): App {
       return;
     }
     if (same && input.resultShown) showResult(input, state.motion);
-    else draw(input);
+    else {
+      draw(input);
+      // A card drawn finished (the finish, skip, reduced motion) has its result at once.
+      if (input.stage === 'finished' && input.resultShown) revealResult();
+    }
     announceIfDue(derived.view);
   }
 
@@ -625,6 +653,7 @@ export function createApp(options: AppOptions): App {
     const before = store.get();
     if (before.data.status !== 'ready' || !before.data.races.has(pairKey(before.pair))) return;
     run = {};
+    visitorScrolled = false;
     // Under reduced motion no pause ran, so the orientation line stays while the visit is guided (Req 4.6).
     if (before.motion !== 'reduced') {
       store.dispatch({ type: 'race/oriented' });
@@ -842,6 +871,19 @@ export function createApp(options: AppOptions): App {
     dragging = false;
     if (held) scheduleRace();
   };
+  // The visitor's own scrolling: wheel, touch, scroll keys, or a press on a scrollbar (the root or the race column itself).
+  const SCROLL_KEYS = new Set(['PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown', ' ']);
+  const scrolled = (): void => {
+    if (onPage()) visitorScrolled = true;
+  };
+  doc.addEventListener('wheel', scrolled, { passive: true });
+  doc.addEventListener('touchmove', scrolled, { passive: true });
+  doc.addEventListener('keydown', (event) => {
+    if (SCROLL_KEYS.has(event.key) && !(event.target as Element | null)?.matches?.('input, textarea')) scrolled();
+  });
+  doc.addEventListener('pointerdown', (event) => {
+    if (event.target === doc.documentElement || event.target === card) scrolled();
+  });
   doc.addEventListener('pointerup', release);
   doc.addEventListener('pointercancel', release);
   // Escape shuts an open sheet even when focus has left it, and lets go of a pair half picked on the map.

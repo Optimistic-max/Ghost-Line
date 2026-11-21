@@ -1032,3 +1032,74 @@ test.describe('axe-core on the story layer states (20.3, R13.4, R16.14)', () => 
     });
   });
 });
+
+test.describe('the result scrolls into view (24.1)', () => {
+  type Edge = { top: number; bottom: number };
+  /** Whether the result headline, the result box and the three next steps are whole inside the scrolling area. */
+  const wholeInView = (page: Page): Promise<{ ok: boolean; detail: string }> =>
+    page.evaluate(() => {
+      const desktop = window.innerWidth >= 900;
+      const area = desktop ? document.getElementById('race-card')!.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+      const parts = ['.result', '.result-line', '.next-step[data-action="next-time"]', '.next-step[data-action="next-corners"]', '.next-step[data-action="next-today-win"]'];
+      const edges = parts.map((s) => {
+        const r = document.querySelector(s)!.getBoundingClientRect();
+        return { s, top: r.top, bottom: r.bottom };
+      });
+      const ok = edges.every((e: Edge) => e.top >= area.top - 0.5 && e.bottom <= area.bottom + 0.5);
+      return { ok, detail: JSON.stringify({ area, edges }) };
+    });
+
+  for (const [label, width, height] of [['phone', 375, 667], ['desktop', 1280, 800]] as const) {
+    test(`${label}: after a live race the result headline and all three next steps are whole`, async ({ browser }) => {
+      const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+      const seen = await guardNetwork(context, true);
+      const page = await context.newPage();
+      await pausedAt(page, '20:00');
+      await page.goto('./');
+      await page.locator('.clock-row').waitFor();
+      await fontsReady(page);
+      await runUntil(page, async () => (await page.locator('.result').count()) > 0 && (await page.locator('.clock-row').count()) === 0, 30_000, 100);
+      await page.clock.runFor(1500);
+      // The browser's own smooth scroll runs on real time.
+      await expect.poll(async () => (await wholeInView(page)).detail && (await wholeInView(page)).ok, { timeout: 5000 }).toBe(true);
+      await context.close();
+      expect(seen).toEqual([]);
+    });
+
+    test(`${label}: under reduced motion the jump is instant`, async ({ browser }) => {
+      const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce' });
+      const seen = await guardNetwork(context, true);
+      const page = await context.newPage();
+      await page.clock.setFixedTime(newYork('20:00'));
+      await page.goto('./');
+      await page.locator('.result').waitFor();
+      await fontsReady(page);
+      const view = await wholeInView(page);
+      expect(view.ok, view.detail).toBe(true);
+      await context.close();
+      expect(seen).toEqual([]);
+    });
+
+    test(`${label}: a visitor who scrolled during the race is not scrolled`, async ({ browser }) => {
+      const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+      const seen = await guardNetwork(context, true);
+      const page = await context.newPage();
+      await pausedAt(page, '20:00');
+      await page.goto('./');
+      await page.locator('.clock-row').waitFor();
+      await fontsReady(page);
+      // The race starts after the orientation pause; the visitor scrolls once it is running.
+      await runUntil(page, async () => (await phase(page)) === 'running', 10_000, 100);
+      await page.mouse.move(width / 2, height / 2);
+      await page.mouse.wheel(0, 1);
+      await runUntil(page, async () => (await page.locator('.result').count()) > 0 && (await page.locator('.clock-row').count()) === 0, 30_000, 100);
+      await page.clock.runFor(1500);
+      await page.waitForTimeout(800);
+      const moved = await page.evaluate(() => window.scrollY + (document.getElementById('race-card')?.scrollTop ?? 0));
+      // The wheel itself moves at most a pixel; the reveal would move far more.
+      expect(moved).toBeLessThanOrEqual(1);
+      await context.close();
+      expect(seen).toEqual([]);
+    });
+  }
+});
