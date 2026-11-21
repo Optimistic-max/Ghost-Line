@@ -414,3 +414,35 @@ describe('the chart follows the race file on the page', () => {
     expect(page.log.filter((n) => n === INDEX_FILE)).toHaveLength(1);
   }, 120_000);
 });
+
+describe('the bus line breaks where a row has no one-seat ride (made-up data, never written to web/)', () => {
+  const base = fake.races.get(pairKey(fake.index.pairs[0]!))!;
+  const GAP = 30;
+  const race: RaceFile = {
+    ...base,
+    races: base.races.map((r, k) => (k === GAP || k === GAP + 1 ? { ...r, today: null, result: 'no_one_seat_ride' as const } : r)),
+  };
+
+  it('draws a gap for the rows without a ride and resumes after them, with the stored totals', () => {
+    expect(base.races.every((r) => r.today !== null)).toBe(true);
+    const root = document.createElement('div');
+    root.append(chartView(new SourceRegistry(), { race, originName: 'A', destName: 'B', minute: 9 * 60, guided: false }));
+    const d = root.querySelector('.chart-line-today')!.getAttribute('d')!;
+    const runs = d.split('M').filter((s) => s !== '');
+    expect(runs).toHaveLength(2);
+    const max = Math.max(...race.races.map((r) => r.y1938.total), ...race.races.map((r) => r.today?.total ?? 0));
+    const run = (s: string) => readPath(`M${s.trim()}`, max);
+    const first = run(runs[0]!);
+    const second = run(runs[1]!);
+    // The first run ends at the column before the gap; the second starts at the column after it.
+    expect(first.ends.at(-1)).toBe(GAP - 0.5);
+    expect(first.values).toHaveLength(GAP);
+    expect(runs[1]!.startsWith(`${GAP + 1.5} `)).toBe(true);
+    expect(second.ends[0]).toBe(GAP + 2.5);
+    expect(second.ends.at(-1)).toBe(race.races.length - 0.5);
+    expect(second.values).toHaveLength(race.races.length - GAP - 2);
+    second.values.forEach((v, k) => expect(v).toBeCloseTo(race.races[GAP + 2 + k]!.today!.total, 1));
+    // The trolley line is unbroken.
+    expect(root.querySelector('.chart-line-1938')!.getAttribute('d')!.includes('M', 1)).toBe(false);
+  });
+});

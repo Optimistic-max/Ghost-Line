@@ -31,6 +31,10 @@ describe('chartPlan', () => {
     expect(chartPlan({ races: [row('09:00', 5, 6)] }).hatch).toBeNull();
   });
 
+  it('keeps a null for a row with no one-seat ride among rows that have one', () => {
+    expect(chartPlan({ races: [row('09:00', 10, 30), row('09:01', 12, null), row('09:02', 8, 40)] }).seriesToday).toEqual([30, null, 40]);
+  });
+
   it('has no today series when no row has a one-seat ride', () => {
     const plan = chartPlan({ races: [row('09:00', 7, null), row('09:01', 9, null)] });
     expect(plan.seriesToday).toBeNull();
@@ -41,6 +45,11 @@ describe('chartPlan', () => {
 describe('chartPath', () => {
   it('draws one flat step per column, with no smoothing', () => {
     expect(chartPath([10, 5, 0], 10, 100)).toBe('M-0.5 0 H0.5 V50 H1.5 V100 H2.5');
+  });
+
+  it('breaks at a null value and restarts the line after it', () => {
+    expect(chartPath([10, null, 5], 10, 100)).toBe('M-0.5 0 H0.5 M1.5 50 H2.5');
+    expect(chartPath([null, 10], 10, 100)).toBe('M0.5 0 H1.5');
   });
 
   it('is empty for an empty series', () => {

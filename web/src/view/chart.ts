@@ -31,23 +31,12 @@ export type ChartInput = {
   guided: boolean;
 };
 
-const reported = new WeakSet<RaceFile>();
-
 /**
- * The plan of a race file. A file where only some rows have a one-seat ride has no one-seat series to
- * draw (chartPlan throws): the chart then shows the trolley series alone, and the case is reported once
- * on the console. The committed data has no such file.
+ * The plan of a race file. A row with no one-seat ride inside a file that has some is a gap in the
+ * bus line (the path breaks there); no value is substituted.
  */
 export function safePlan(race: RaceFile): ChartPlan {
-  try {
-    return chartPlan(race);
-  } catch (error) {
-    if (!reported.has(race)) {
-      reported.add(race);
-      console.warn(`Start-time chart drawn without today's series: ${error instanceof Error ? error.message : String(error)}`);
-    }
-    return chartPlan({ races: race.races.map((row) => ({ ...row, today: null })) });
-  }
+  return chartPlan(race);
 }
 
 const escapeAttr = (s: string): string => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

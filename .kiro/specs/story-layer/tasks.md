@@ -136,9 +136,9 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - Depends on: task 12.1
 
 - [ ] 13. Scheduled departures section (Req 11)
-  - [-] 13.1 New `web/src/view/departures.ts` wrapping the existing `boardView` in a section with a `<button aria-expanded aria-controls>` "Scheduled departures" and a region hidden unless `departuresOpen`; `boardShown` true on both layouts and stages; `racer.finish()` keeps the board; `view/board.ts` uses `BOARD_TODAY` for the bus row. Board content rules (R8.2, R8.3, R8.5) unchanged. Number buttons inside a closed section still register their Sources rows.
+  - [x] 13.1 New `web/src/view/departures.ts` wrapping the existing `boardView` in a section with a `<button aria-expanded aria-controls>` "Scheduled departures" and a region hidden unless `departuresOpen`; `boardShown` true on both layouts and stages; `racer.finish()` keeps the board; `view/board.ts` uses `BOARD_TODAY` for the bus row. Board content rules (R8.2, R8.3, R8.5) unchanged. Number buttons inside a closed section still register their Sources rows.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
-  - [ ] 13.2 DOM tests: closed by default, `aria-expanded` toggles, labels, every time and gap is a Number_Button when open, the P3 crawl finds a registry row for each whether open or closed, board contents equal the file's lists.
+  - [-] 13.2 DOM tests: closed by default, `aria-expanded` toggles, labels, every time and gap is a Number_Button when open, the P3 crawl finds a registry row for each whether open or closed, board contents equal the file's lists.
     - **Validates: Requirements 11.1 to 11.5**
     - Depends on: task 13.1
 

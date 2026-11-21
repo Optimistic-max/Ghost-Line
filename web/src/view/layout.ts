@@ -52,8 +52,8 @@ export type ChartPlan = {
   /** The largest stored total of both series: the scale runs 0 to max. */
   max: number;
   series1938: number[];
-  /** Null when every row has no one-seat ride. */
-  seriesToday: number[] | null;
+  /** Null when every row has no one-seat ride. A row with no one-seat ride inside it is null: a gap. */
+  seriesToday: (number | null)[] | null;
   /** The column range (inclusive) where before_table is true, or null. */
   hatch: { from: number; to: number } | null;
 };
@@ -63,10 +63,7 @@ export function chartPlan(race: Pick<RaceFile, 'races'>): ChartPlan {
   const series1938 = rows.map((r) => r.y1938.total);
   const anyToday = rows.some((r) => r.today !== null);
   const seriesToday = anyToday
-    ? rows.map((r) => {
-        if (r.today === null) throw new Error(`Race row ${r.t} has no one-seat ride while other rows do.`);
-        return r.today.total;
-      })
+    ? rows.map((r) => (r.today === null ? null : r.today.total))
     : null;
   const first = rows.findIndex((r) => r.before_table);
   const last = rows.findLastIndex((r) => r.before_table);
@@ -108,14 +105,22 @@ const unit = (n: number): string => String(Number(n.toFixed(3)));
 
 /**
  * A step path in viewBox units: column k spans x from k - 0.5 to k + 0.5 at
- * y = height x (1 - value / max). No smoothing, no averaging.
+ * y = height x (1 - value / max). No smoothing, no averaging. A null value (no one-seat
+ * ride) breaks the path: nothing is drawn for that column and the line restarts with a
+ * new move at the next stored value.
  */
-export function chartPath(series: readonly number[], max: number, height: number): string {
+export function chartPath(series: readonly (number | null)[], max: number, height: number): string {
   const y = (v: number): string => unit(max > 0 ? height * (1 - v / max) : height);
   let d = '';
+  let open = false;
   series.forEach((v, k) => {
-    d += k === 0 ? `M${unit(-0.5)} ${y(v)}` : ` V${y(v)}`;
+    if (v === null) {
+      open = false;
+      return;
+    }
+    d += open ? ` V${y(v)}` : `${d === '' ? '' : ' '}M${unit(k - 0.5)} ${y(v)}`;
     d += ` H${unit(k + 0.5)}`;
+    open = true;
   });
   return d;
 }
