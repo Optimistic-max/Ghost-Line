@@ -439,6 +439,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795267580716
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795267795857
+      }
+    ],
+    "12.2 Tests. DOM: order, keyboard reach, 44 px targets, focus moves to the slider, picker opens, each action ends the Guided_Parts. Real data `web/tests/real/todaywins.test.ts`: presses equal to `summary.today_wins.length` (read from the file) then one more to show the wrap, each with the address equal to `encode(pair)`, the notice shown and a race whose result is \"today\". Made-up summary: the order and notice follow the fixture (Req 16.6).": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795267796503
       }
     ]
   }
