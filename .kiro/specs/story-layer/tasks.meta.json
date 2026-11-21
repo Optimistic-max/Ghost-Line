@@ -241,6 +241,18 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795236157486
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795236656459
+      }
+    ],
+    "5.3 Tests. **Property 3: The start time follows the link's validity** (fast-check over query strings and instants). DOM tests `web/tests/dom/guided.test.ts` with fake timers: no query, bad link with banner, valid link with a fixed clock and no example label; the mark is set before the 2,000 ms pause; 2,000 ms then clock start; skip during the pause; input during the pause; reduced motion; after each kind of Visitor_Input the Guided_Parts are gone and stay gone and captions work on the next race.": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795236659292
       }
     ]
   }
