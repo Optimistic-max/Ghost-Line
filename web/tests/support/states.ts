@@ -68,9 +68,10 @@ function finished(options: PageOptions, ...clicks: string[]): Reach {
   };
 }
 
-const beforeTable = { now: newYork(raceOf(lead).races[0]!.t) };
+// A clock-derived start needs a valid share link (story-layer Req 3.3); with no query the visit is guided at 10:00.
+const beforeTable = { query: query(lead), now: newYork(raceOf(lead).races[0]!.t) };
 const todayWins = { query: query(westToPreston), now: newYork('11:23') };
-const photoFinish = { now: newYork('10:30') };
+const photoFinish = { query: query(lead), now: newYork('10:30') };
 const fixtureLine = { folder: FIXTURE_DIR, query: query(noRide), leadPair: noRide };
 const sources = '#card-scroll button.num[data-source="total-today"], #card-scroll button.num[data-source="total-1938"]';
 

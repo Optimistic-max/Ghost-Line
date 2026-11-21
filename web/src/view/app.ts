@@ -4,7 +4,7 @@
 // 9): the card is drawn once per race; the clock then moves it through racer.ts,
 // the result is inserted at the result moment, and the finish is applied in
 // place, so nothing is rebuilt while it moves.
-import { BREAKPOINTS, FIXTURE_LINE, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
+import { BREAKPOINTS, EXAMPLE_START, FIXTURE_LINE, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
 import {
   ABOUT_AND_CREDITS,
   DATA_ERROR,
@@ -101,6 +101,7 @@ type Drawn = {
   layout: Layout;
   stage: Stage;
   resultShown: boolean;
+  guided: boolean;
 };
 
 const LEVELS: MotionLevel[] = ['full', 'lite', 'reduced'];
@@ -353,6 +354,13 @@ export function createApp(options: AppOptions): App {
     fixtureTag.hidden = !(state.data.status === 'ready' && state.data.index.line === FIXTURE_LINE);
   }
 
+  /** A corner chosen in the picker: the one that completes a pair (second step, not the start) is a Visitor_Input. */
+  function chooseCorner(slug: string): void {
+    const picker = store.get().picker;
+    if (picker?.step === 'end' && picker.start !== slug) visitorInput();
+    store.dispatch({ type: 'picker/choose', slug });
+  }
+
   /**
    * A corner tapped or clicked on the map (or on the drawing's dot) feeds the picker (design 12.4).
    * Phone: it is the start, and the Corners sheet opens at its second step. Desktop: the first click
@@ -368,7 +376,7 @@ export function createApp(options: AppOptions): App {
     const picking = state.picker?.step === 'end' && state.sheet === null ? state.picker : null;
     if (!picking) store.dispatch({ type: 'picker/start', slug, sheet: false });
     else if (picking.start === slug) store.dispatch({ type: 'picker/cancel' });
-    else store.dispatch({ type: 'picker/choose', slug });
+    else chooseCorner(slug);
   }
 
   function drawError(): void {
@@ -401,8 +409,8 @@ export function createApp(options: AppOptions): App {
     fitPairRow();
     painted = true;
     mapView.painted();
-    const { index, summary, race, minute, layout, stage, resultShown } = input;
-    drawn = { index, summary, race, minute, layout, stage, resultShown };
+    const { index, summary, race, minute, layout, stage, resultShown, guided } = input;
+    drawn = { index, summary, race, minute, layout, stage, resultShown, guided };
     racer = null;
     timeline = null;
     if (stage !== 'racing') return;
@@ -474,6 +482,7 @@ export function createApp(options: AppOptions): App {
       stage: state.race.phase === 'finished' ? 'finished' : 'racing',
       resultShown: state.race.resultShown,
       canSkip: state.motion !== 'reduced',
+      guided: state.guided,
     };
     // While the slider moves, only the time label and the departures board follow it (R3.5).
     if (held && drawn) {
@@ -488,7 +497,8 @@ export function createApp(options: AppOptions): App {
       drawn.race === race &&
       drawn.minute === input.minute &&
       drawn.layout === input.layout &&
-      drawn.stage === input.stage;
+      drawn.stage === input.stage &&
+      drawn.guided === input.guided;
     if (same && drawn?.resultShown === input.resultShown) {
       announceIfDue(derived.view);
       return;
@@ -554,6 +564,19 @@ export function createApp(options: AppOptions): App {
     if (state.motion === 'full') scheduleSpark();
   }
 
+  /**
+   * A Visitor_Input (design 2.3): ends the guided visit and takes the Guided_Parts off the card at once.
+   * Called by the slider, minus, plus, a completed pair, swap and the next-step actions; never by skip,
+   * the sheets, the departures toggle or the route toggle.
+   */
+  function visitorInput(): void {
+    if (!store.get().guided) return;
+    // The parts leave in place, so the card on screen (a race running, or held) is not redrawn for it.
+    scroll.querySelectorAll('.example-label, .chart-prompt').forEach((el) => el.remove());
+    if (drawn) drawn.guided = false;
+    store.dispatch({ type: 'guided/end' });
+  }
+
   /** Any slider movement or minus or plus stops the race at once (R3.5). */
   function holdRace(): void {
     stopRace();
@@ -587,13 +610,14 @@ export function createApp(options: AppOptions): App {
     const { index, summary, race } = result.data;
     if (!samePair(store.get().pair, pair)) store.dispatch({ type: 'pair/set', pair });
     const { first, last } = sliderRange(race);
-    store.dispatch({ type: 'data/ready', index, summary, race, start: defaultStart(options.now(), first, last), guided: false });
-    // With index.json read, the link is judged against the real corners (R4.5, R4.6, race-brief 5.9).
-    if (namesAPair(options.query)) {
-      const checked = decode(options.query, new Set(index.corners.map((c) => c.slug)));
-      const good = !checked.bad && samePair(checked.pair, pair);
-      store.dispatch({ type: 'banner/show', banner: good ? { kind: 'shared', pair } : { kind: 'bad' } });
-    }
+    // With index.json read, the link is judged against the real corners (R4.5, R4.6, race-brief 5.9),
+    // before data/ready: a valid link starts at the clock time, anything else is a guided visit at the example start.
+    const names = namesAPair(options.query);
+    const checked = decode(options.query, new Set(index.corners.map((c) => c.slug)));
+    const valid = names && !checked.bad && samePair(checked.pair, pair);
+    const start = valid ? defaultStart(options.now(), first, last) : { minute: minutesOf(EXAMPLE_START), fromClock: false };
+    store.dispatch({ type: 'data/ready', index, summary, race, start, guided: !valid });
+    if (names) store.dispatch({ type: 'banner/show', banner: valid ? { kind: 'shared', pair } : { kind: 'bad' } });
     scheduleRace();
   }
 
@@ -660,23 +684,26 @@ export function createApp(options: AppOptions): App {
         store.dispatch({ type: 'picker/open' });
         break;
       case 'pick':
-        store.dispatch({ type: 'picker/choose', slug: target.dataset['slug'] ?? '' });
+        chooseCorner(target.dataset['slug'] ?? '');
         break;
       case 'map-corner':
         pickOnMap(target.dataset['slug'] ?? '');
         break;
       case 'swap':
+        visitorInput();
         store.dispatch({ type: 'pair/swap' });
         break;
       case 'share':
         void shareRace(target);
         break;
       case 'minus':
+        visitorInput();
         holdRace();
         store.dispatch({ type: 'minute/step', step: -1 });
         scheduleRace();
         break;
       case 'plus':
+        visitorInput();
         holdRace();
         store.dispatch({ type: 'minute/step', step: 1 });
         scheduleRace();
@@ -698,6 +725,7 @@ export function createApp(options: AppOptions): App {
     if (!onPage() || !isSlider(event)) return;
     // Read the thumb first: stopping the race redraws the time label from the minute before.
     const minute = Number((event.target as HTMLInputElement).value);
+    visitorInput();
     holdRace();
     store.dispatch({ type: 'minute/set', minute });
     scheduleRace();

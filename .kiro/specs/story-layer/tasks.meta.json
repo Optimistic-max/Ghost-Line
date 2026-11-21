@@ -210,6 +210,25 @@
         "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795235417837
+      },
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235776737
+      }
+    ],
+    "4. State model, actions and lookups (Req 3.4, 3.5, 10.4 to 10.6, 11.2, 12.8)": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235777307
+      }
+    ],
+    "5.1 `web/src/view/app.ts` boot (design 2.4): load as today, judge the link before `data/ready` (`valid = namesAPair(query) && !checked.bad && samePair(...)`), start from `EXAMPLE_START` with `guided: true` when not valid, else `defaultStart(now, first, last)` with `guided: false`; show the bad-link or shared-link banner as today; a query with neither `from` nor `to` is no query. Add `visitorInput()` dispatching `guided/end`, called from the slider input, minus, plus, the picker completing a pair (card and map), swap and each Next_Step_Action handler (wired in task 12), and not from skip, sheets, departures or route. Show the example label (time as plain text) and the chart prompt heading only while `guided`; drop both at the first Visitor_Input; keep \"Start time is the time now.\" only for an unguided clock-derived start.": [
+      {
+        "executionId": "3152cca2-b877-47c3-a5a2-fbba92e0b483",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795235778271
       }
     ]
   }

@@ -331,7 +331,7 @@ type Case = { name: string; result: RaceResult; options: PageOptions };
 const CASES: Case[] = [
   { name: '1938 wins (the lead pair at 10:00)', result: '1938', options: {} },
   { name: 'today wins (Westwood & Carey to Preston & Caroline at 11:23)', result: 'today', options: { query: query(westToPreston), now: newYork('11:23') } },
-  { name: 'photo finish (the lead pair at 10:30)', result: 'photo_finish', options: { now: newYork('10:30') } },
+  { name: 'photo finish (the lead pair at 10:30)', result: 'photo_finish', options: { query: query(lead), now: newYork('10:30') } },
   {
     name: 'no one-seat ride (the made-up fixture line)',
     result: 'no_one_seat_ride',

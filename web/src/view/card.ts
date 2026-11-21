@@ -4,18 +4,20 @@
 // number in the race is a number button registered in the card's source
 // registry.
 import {
+  CHART_PROMPT_HEADING,
   INFERRED_CAUTION,
   LANE_TITLE_TODAY,
   NO_SINGLE_BUS,
   SKIP_TO_RESULT,
   START_IS_NOW,
   beforeTable,
+  exampleLabel,
   ready,
 } from '../copy/copy';
 import type { Index, RaceFile, Summary } from '../data/types';
 import { sliderRange } from '../data/lookup';
 import { routeNumberOf } from '../format/line';
-import { serviceDateLabel } from '../format/time';
+import { clockOf, label12, serviceDateLabel } from '../format/time';
 import type { RaceView } from '../state/model';
 import { honestNumbers, raceNumbers, type RaceNumbers } from '../state/specs';
 import { boardView } from './board';
@@ -44,6 +46,8 @@ export type CardInput = {
   resultShown: boolean;
   /** "Skip to result" is offered (not with reduced motion). */
   canSkip: boolean;
+  /** A guided visit: the example label and the chart prompt heading show (story-layer Req 3.4). */
+  guided?: boolean;
   /** The trolley's one fade-in, on the first paint of the page (R2.5). */
   firstPaint?: boolean;
 };
@@ -142,6 +146,12 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   return [
     pairRow(view.originName, view.destName, inferredEnd),
     slider({ first, last, minute: input.minute }),
+    ...(input.guided
+      ? [
+          h('p', { class: 'example-label' }, exampleLabel(label12(clockOf(input.minute)))),
+          h('h3', { class: 'chart-prompt' }, CHART_PROMPT_HEADING),
+        ]
+      : []),
     under,
     h('div', { class: 'lanes' }, lane1938, today),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),

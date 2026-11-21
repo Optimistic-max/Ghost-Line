@@ -182,7 +182,7 @@ describe('the order of events', () => {
   });
 
   it('a photo finish (the lead pair at 10:30): the result once both have arrived, both ends emphasised together', async () => {
-    const page = await open({ now: newYork('10:30') });
+    const page = await open({ query: query(lead), now: newYork('10:30') });
     const view = viewOn(page.app);
     expect(view.result).toBe('photo_finish');
     const t = buildTimeline(view);
@@ -271,7 +271,8 @@ describe('the result and the announcement', () => {
   });
 
   it('leaves the same finished card as the finished drawing: legends, totals, result, no clock row', async () => {
-    const page = await open();
+    // An unguided visit (a valid link, story-layer Req 3.3), so the card carries no Guided_Parts.
+    const page = await open({ query: query(lead) });
     play(page, 13000);
     const scroll = document.getElementById('card-scroll')!;
     const still = renderAt(data, lead, '10:00').root;

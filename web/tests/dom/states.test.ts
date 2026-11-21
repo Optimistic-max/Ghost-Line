@@ -53,7 +53,8 @@ describe('loading and ready (15.1)', () => {
     expect(text(document.querySelector('.schedule'))).toBe(C.ready(serviceDateLabel(index.service_date)));
     expect(text(document.querySelector('.schedule'))).not.toContain(C.START_IS_NOW);
     expect(app.store.get().race.phase).toBe('finished');
-    await bootPage({ motion: 'reduced', now: newYork('11:23') });
+    // A clock-derived start needs a valid share link (story-layer Req 3.3).
+    await bootPage({ motion: 'reduced', query: query(lead), now: newYork('11:23') });
     expect(text(document.querySelector('.schedule'))).toContain(C.START_IS_NOW);
   });
 });
@@ -64,7 +65,7 @@ describe('before the midday table (15.2): the lead pair at the first slider minu
 
   it('names row.start in a notice in place of the schedule line, races from it, and leaves the thumb where it was', async () => {
     expect(first.before_table).toBe(true);
-    await bootPage({ now: newYork(first.t) });
+    await bootPage({ query: query(lead), now: newYork(first.t) });
     const notice = document.querySelector('.notice[data-notice="before-table"]')!;
     expect(text(notice)).toBe(C.beforeTable(shortClock(first.start)));
     expect(document.querySelector('.schedule')).toBeNull();

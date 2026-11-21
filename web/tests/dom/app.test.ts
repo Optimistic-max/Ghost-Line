@@ -57,7 +57,8 @@ describe('the first running page', () => {
   });
 
   it('starts at the New York time of day when it is inside the slider range, and says so', async () => {
-    await bootPage({ now: new Date('2026-11-04T11:23:40-05:00') });
+    // A clock-derived start needs a valid share link (story-layer Req 3.3); with no query the visit is guided at 10:00.
+    await bootPage({ query: `?from=${LEAD_PAIR.origin}&to=${LEAD_PAIR.dest}`, now: new Date('2026-11-04T11:23:40-05:00') });
     expect(document.querySelector<HTMLInputElement>('#start-time')?.value).toBe(String(minutesOf('11:23')));
     expect(text(document.querySelector('.schedule'))).toContain(C.START_IS_NOW);
   });

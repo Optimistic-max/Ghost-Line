@@ -107,7 +107,7 @@ describe('every number has its row (P3, 13.5)', () => {
   const states: [string, PageOptions][] = [
     ['a 1938 win (the lead pair at 10:00)', {}],
     ['a today win (Westwood & Carey to Preston & Caroline at 11:23)', { query: query(westToPreston), now: newYork('11:23') }],
-    ['a photo finish (the lead pair at 10:30)', { now: newYork('10:30') }],
+    ['a photo finish (the lead pair at 10:30)', { query: query(lead), now: newYork('10:30') }],
     ['the desktop card, with the board', { layout: 'desktop' }],
     ['no one-seat ride (the fixture)', { folder: FIXTURE_DIR, query: query(noRide), leadPair: noRide }],
   ];
