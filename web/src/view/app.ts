@@ -21,7 +21,7 @@ import {
 } from '../copy/copy';
 import { pairKey } from '../data/files';
 import { type Loader, createLoader, dataBaseUrl } from '../data/load';
-import { cornerName, sliderRange } from '../data/lookup';
+import { cornerName, cycleAt, sliderRange } from '../data/lookup';
 import type { Index, Pair, RaceFile, Summary, TodayWin } from '../data/types';
 import { routeNumberOf, yearOf } from '../format/line';
 import { decode, encode, namesAPair } from '../format/share';
@@ -325,6 +325,35 @@ export function createApp(options: AppOptions): App {
     store.dispatch({ type: 'minute/set', minute: minutesOf(win.t) });
     // A new pair starts when its race file is in; the same pair starts after the usual pause.
     if (samePairNow) scheduleRace();
+  }
+
+  /** "Show a race today wins": the next entry of summary.today_wins in file order (Req 10.4, 10.5). */
+  function showTodayWin(): void {
+    const state = store.get();
+    if (state.data.status !== 'ready' || state.data.summary.today_wins.length === 0) return;
+    visitorInput();
+    const { entry } = cycleAt(state.data.summary.today_wins, state.todayWinNext);
+    const pair: Pair = { origin: entry.origin, dest: entry.dest };
+    const same = samePair(state.pair, pair);
+    stopRace();
+    held = false;
+    store.dispatch({ type: 'sheet/close' });
+    store.dispatch({ type: 'race/stop' });
+    store.dispatch({ type: 'todaywin/select' });
+    // A new pair also goes through the pair subscription; the address is set here for the same pair too.
+    options.address.replace(`${options.address.path}${encode(pair)}`);
+    // A new pair starts when its race file is in (changePair); the same pair starts after the usual pause.
+    if (same) scheduleRace();
+  }
+
+  /** "Try another time": focus the slider and bring it into view; a plain jump under reduced motion. */
+  function tryAnotherTime(): void {
+    visitorInput();
+    const slider = scroll.querySelector<HTMLElement>('#start-time');
+    if (!slider) return;
+    slider.focus({ preventScroll: true });
+    const reduced = store.get().motion === 'reduced';
+    slider.scrollIntoView?.({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
   }
 
   /** The motion level as a root class, so the stylesheets can gate the extra motion (design 9.4). */
@@ -722,6 +751,16 @@ export function createApp(options: AppOptions): App {
         break;
       case 'picker':
         store.dispatch({ type: 'picker/open' });
+        break;
+      case 'next-time':
+        tryAnotherTime();
+        break;
+      case 'next-corners':
+        visitorInput();
+        store.dispatch({ type: 'picker/open' });
+        break;
+      case 'next-today-win':
+        showTodayWin();
         break;
       case 'pick':
         chooseCorner(target.dataset['slug'] ?? '');

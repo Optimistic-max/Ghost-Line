@@ -433,6 +433,13 @@
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795266977737
       }
+    ],
+    "12.1 New `web/src/view/nextsteps.ts` with the three buttons in order, each at least 44 x 44 px; `view/buttons.ts` `cardButtons()` becomes Sources and Share this race as outline secondary buttons after them. \"Try another time\": `visitorInput()`, focus `#start-time`, scroll it into view (a plain jump under reduced motion). \"Try other corners\": `visitorInput()`, `picker/open`. \"Show a race today wins\": `visitorInput()`, stop any race, close any sheet, `todaywin/select`, update the address bar through the existing `pair/set` subscription, and play that race when its file has arrived. Empty `today_wins` does nothing.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795267580716
+      }
     ]
   }
 }

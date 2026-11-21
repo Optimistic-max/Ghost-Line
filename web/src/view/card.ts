@@ -28,6 +28,7 @@ import { honestLine } from './honest';
 import { type Stage, laneView } from './lanes';
 import { type RaceLayout, raceLayout } from './layout';
 import { type SourceRegistry, sentence } from './numbers';
+import { nextSteps } from './nextsteps';
 import { pairRow } from './pairrow';
 import { resultBox } from './resultbox';
 import { takeawayView } from './takeaway';
@@ -196,6 +197,7 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     h('p', { class: 'caption', id: 'race-caption' }, initialCaption(input)),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
+    nextSteps(),
     ...(boardShown(input) ? [cardBoard(registry, input)] : []),
   ];
 }

@@ -848,6 +848,20 @@
   font-size: 15px;
 }
 
+/* The three next-step actions: stacked, each at least 44 px tall and as wide as the column. */
+.next-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.next-step {
+  flex: none;
+  min-width: 44px;
+  min-height: 48px;
+}
+
 .button-outline {
   border: 1px solid var(--line);
   color: var(--ink);

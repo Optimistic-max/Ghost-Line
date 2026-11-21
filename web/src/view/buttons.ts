@@ -5,7 +5,7 @@ import { h } from './dom';
 export function cardButtons(): HTMLElement[] {
   return [
     h('button', { type: 'button', class: 'button button-outline', 'data-action': 'sources' }, SOURCES),
-    h('button', { type: 'button', class: 'button button-filled', 'data-action': 'share' }, SHARE_THIS_RACE),
+    h('button', { type: 'button', class: 'button button-outline', 'data-action': 'share' }, SHARE_THIS_RACE),
   ];
 }
 
