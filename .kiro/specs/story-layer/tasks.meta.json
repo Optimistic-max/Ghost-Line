@@ -327,6 +327,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795239954180
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240193836
+      }
+    ],
+    "8.2 `web/src/view/lanes.ts`, `view/racer.ts` and the lane CSS: each lane's title row holds its illustration (trolley at the config width with its two hairline wires; flat bus), the old travelling `.vehicle-row` runner is removed, a marker track (bar width plus half a marker each side, extended into `--pad`) holds one `.bar-marker` positioned by `transform: translateX` from `--x`; marker still before the ride and, for today, through both walks and the wait; the trolley no longer swaps size at the finish; bob, sparks, hubs and glow keyed to `.lane-1938.is-moving` only; no winner class on markers; only transform and opacity animated (the stylesheet scan test still passes). Name any race-screen test changed (vehicle sizes, the finish swap) in the commit message.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795240194518
       }
     ]
   }

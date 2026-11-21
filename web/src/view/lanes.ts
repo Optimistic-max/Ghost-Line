@@ -1,5 +1,6 @@
-// The two lanes (R5.3, design 13.3): title and total, the vehicle on its
-// hairlines, one 9 px bar on the shared scale, the status line while racing and
+// The two lanes (R5.3, design 13.3; story-layer Req 5, 6): the title row with
+// the lane's illustration and total, a marker track holding one bar marker,
+// one 9 px bar on the shared scale, the status line while racing and
 // the phase legend after the lane arrives. Playback (racer.ts) moves these same
 // elements by transform and opacity; nothing is re-laid out per frame.
 import {
@@ -19,7 +20,7 @@ import type { Num } from '../state/specs';
 import { fromMarkup, h, setVar } from './dom';
 import type { LaneLayout } from './layout';
 import { type SourceRegistry, numberButton, sentence } from './numbers';
-import { busSvg, trolleySvg } from './vehicles';
+import { busMarkerSvg, busSvg, markerSvg, trolleySvg } from './vehicles';
 
 /** Racing: before and during the race. Finished: after it. */
 export type Stage = 'racing' | 'finished';
@@ -110,28 +111,42 @@ export function vehicleMarkup(side: Lane['side'], width: number, routeNumber: st
   return fromMarkup(side === '1938' ? trolleySvg({ routeNumber, width }) : busSvg({ width }));
 }
 
-function vehicleRow(lane: Lane, layout: LaneLayout, options: LaneOptions): HTMLElement {
-  const vehicle = h(
+/**
+ * The lane's illustration (Req 5): the lane's identity, drawn once in the title
+ * row at one fixed size. It does not travel and does not change size. The
+ * trolley's two hairline wires run across the title row behind it.
+ */
+function laneArt(lane: Lane, options: LaneOptions): HTMLElement {
+  return h(
     'div',
-    { class: options.firstPaint ? 'vehicle first-paint' : 'vehicle' },
-    vehicleMarkup(lane.side, options.vehicleWidth, options.routeNumber),
+    { class: 'lane-art', 'aria-hidden': 'true' },
+    h(
+      'div',
+      { class: options.firstPaint ? 'vehicle first-paint' : 'vehicle' },
+      vehicleMarkup(lane.side, options.vehicleWidth, options.routeNumber),
+    ),
   );
-  const runner = h('div', { class: 'runner' }, vehicle);
-  // The vehicle's front edge: the end of its ride portion when parked (racer.ts moves it during the ride).
-  setVar(runner, '--x', layout.park);
-  setVar(runner, '--gaps', layout.gapsBefore);
-  const row = h(
-    'div',
-    { class: `vehicle-row vehicle-row-${lane.side}`, 'aria-hidden': 'true' },
-    ...(lane.side === '1938' ? [h('span', { class: 'wire wire-1' }), h('span', { class: 'wire wire-2' })] : [h('span', { class: 'road' })]),
-    runner,
-  );
-  setVar(row, '--veh-w', `${options.vehicleWidth}px`);
-  return row;
+}
+
+/**
+ * The marker track (Req 6): a row directly above the bar, the bar's width plus
+ * half a marker on each side (card.css), holding the one bar marker. The marker
+ * is moved by transform from --x, the share of the scale at its centre, and
+ * --gaps, the phase gaps drawn before it. Parked at the end of the ride until
+ * racer.ts moves it (reduced motion keeps it there).
+ */
+function markerTrack(lane: Lane, layout: LaneLayout, options: LaneOptions): HTMLElement {
+  const glyph = lane.side === '1938' ? markerSvg({ width: options.markerWidth }) : busMarkerSvg({ width: options.markerWidth });
+  const marker = h('div', { class: 'bar-marker' }, fromMarkup(glyph));
+  setVar(marker, '--x', layout.park);
+  setVar(marker, '--gaps', layout.gapsBefore);
+  return h('div', { class: 'marker-track', 'aria-hidden': 'true' }, marker);
 }
 
 export type LaneOptions = {
   vehicleWidth: number;
+  /** The bar marker's width (config.ts VEHICLE_SIZES.barMarker). */
+  markerWidth: number;
   routeNumber: string | null;
   stage: Stage;
   /** The trolley's one fade-in on the first paint (R2.5). */
@@ -154,14 +169,18 @@ export function laneView(registry: SourceRegistry, lane: Lane, layout: LaneLayou
     h(
       'div',
       { class: 'lane-head' },
+      ...(lane.side === '1938' ? [h('span', { class: 'wire wire-1', 'aria-hidden': 'true' }), h('span', { class: 'wire wire-2', 'aria-hidden': 'true' })] : []),
+      laneArt(lane, options),
       h('h3', { class: 'lane-title display' }, title),
       h('span', { class: 'lane-total display' }, numberButton(registry, nums.total)),
     ),
-    vehicleRow(lane, layout, options),
+    markerTrack(lane, layout, options),
     bar(lane, layout),
     racing ? h('p', { class: 'status' }) : null,
     legendEl,
   );
   setVar(el, '--end', layout.end);
+  setVar(el, '--veh-w', `${options.vehicleWidth}px`);
+  setVar(el, '--bar-marker-w', `${options.markerWidth}px`);
   return el;
 }

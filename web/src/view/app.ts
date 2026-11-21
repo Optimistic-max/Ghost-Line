@@ -429,7 +429,6 @@ export function createApp(options: AppOptions): App {
       timeline,
       layout: cardLayout(input),
       next: { '1938': nums.lane1938.next, today: nums.today?.next ?? null },
-      finishedTrolley: { width: vehicleWidths(layout).trolleyFinished, routeNumber: routeNumberOf(index.line) },
       keepBoard: boardShown({ layout, stage: 'finished' }),
     });
     racer.frame(clock.elapsed());

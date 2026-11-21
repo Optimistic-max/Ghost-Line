@@ -33,6 +33,7 @@ import { pairRow } from './pairrow';
 import { resultBox } from './resultbox';
 import { slider } from './slider';
 import { type Layout, vehicleWidths } from './vehicles';
+import { VEHICLE_SIZES } from '../config';
 
 export type { Stage };
 
@@ -109,7 +110,9 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   const widths = vehicleWidths(input.layout);
   const routeNumber = routeNumberOf(index.line);
   const { first, last } = sliderRange(race);
-  const trolleyWidth = stage === 'finished' ? widths.trolleyFinished : widths.trolleyRacing;
+  // One fixed size for each illustration, before, during and after the race (Req 5.3).
+  const trolleyWidth = widths.trolleyRacing;
+  const markerWidth = VEHICLE_SIZES[input.layout].barMarker;
 
   // Under the slider: the schedule line always shows (story-layer decision 16, Req 7.13), then the
   // notices block directly after it (Req 12.2).
@@ -135,7 +138,7 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     view.lane1938,
     layout.lane1938,
     { total: nums.lane1938.total, phases: [nums.lane1938.wait, nums.lane1938.ride], next: nums.lane1938.next },
-    { vehicleWidth: trolleyWidth, routeNumber, stage, firstPaint: input.firstPaint ?? false },
+    { vehicleWidth: trolleyWidth, markerWidth, routeNumber, stage, firstPaint: input.firstPaint ?? false },
   );
   const today =
     view.laneToday && layout.laneToday && nums.today
@@ -148,7 +151,7 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
             phases: [nums.today.walkTo, nums.today.wait, nums.today.ride, nums.today.walkFrom],
             next: nums.today.next,
           },
-          { vehicleWidth: widths.bus, routeNumber, stage },
+          { vehicleWidth: widths.bus, markerWidth, routeNumber, stage },
         )
       : // No one-seat ride: in place of the bus lane, its title and the sentence; no vehicle, total or margin (R6.8).
         h(

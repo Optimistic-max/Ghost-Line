@@ -12,7 +12,7 @@ import type { Num } from '../state/specs';
 import { keepFocus } from './a11y';
 import { h, setVar } from './dom';
 import type { LaneLayout, RaceLayout } from './layout';
-import { statusKey, statusLine, vehicleMarkup } from './lanes';
+import { statusKey, statusLine } from './lanes';
 import type { SourceRegistry } from './numbers';
 
 export type RacerInput = {
@@ -21,8 +21,6 @@ export type RacerInput = {
   layout: RaceLayout;
   /** The next car and the next bus, for the waiting status lines. */
   next: { '1938': Num; today: Num | null };
-  /** The trolley after the finish (phone: 104 px). */
-  finishedTrolley: { width: number; routeNumber: string | null };
   /** The departures board stays after the finish (desktop) or goes (phone) (R8.4). */
   keepBoard: boolean;
 };
@@ -33,7 +31,7 @@ export type Racer = {
   arrive(side: Side): void;
   /** The result moment. A photo finish gives both bar ends the emphasis now, together. */
   result(): void;
-  /** Both sides are done: the clock row (and on a phone the board) goes, the legends stay, the trolley takes its finished size. */
+  /** Both sides are done: the clock row (and on a phone the board) goes, the legends stay. The illustrations keep their size. */
   finish(): void;
 };
 
@@ -43,8 +41,7 @@ type BoundLane = {
   next: Num;
   el: HTMLElement;
   segs: HTMLElement[];
-  runner: HTMLElement | null;
-  row: HTMLElement | null;
+  marker: HTMLElement | null;
   status: HTMLElement | null;
   legend: HTMLElement | null;
   /** The phase and countdown the status line shows, so it is rewritten only when they change. */
@@ -60,8 +57,7 @@ function bind(root: ParentNode, lane: Lane, layout: LaneLayout | null, next: Num
     next,
     el,
     segs: [...el.querySelectorAll<HTMLElement>('.seg')],
-    runner: el.querySelector<HTMLElement>('.runner'),
-    row: el.querySelector<HTMLElement>('.vehicle-row'),
+    marker: el.querySelector<HTMLElement>('.bar-marker'),
     status: el.querySelector<HTMLElement>('.status'),
     legend: el.querySelector<HTMLElement>('.legend'),
     shown: '',
@@ -113,7 +109,7 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
       seg.toggleAttribute('data-reached', f.reached[k] ?? false);
       seg.toggleAttribute('data-current', k === f.current && !f.arrived);
     });
-    if (b.runner) setVar(b.runner, '--x', f.vehicle);
+    if (b.marker) setVar(b.marker, '--x', f.vehicle);
     if (b.lane.side === '1938') phases['1938'] = phaseOf(b.lane, f) as Side38;
     else phases.today = phaseOf(b.lane, f) as SideToday;
     b.el.classList.toggle('is-moving', f.moving);
@@ -181,13 +177,6 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
         b.status?.remove();
         b.status = null;
         if (b.legend) b.legend.hidden = false;
-      }
-      const trolley = lanes.find((b) => b.lane.side === '1938');
-      const { width, routeNumber } = input.finishedTrolley;
-      const size = `${width}px`;
-      if (trolley?.row && trolley.row.style.getPropertyValue('--veh-w') !== size) {
-        trolley.row.querySelector('.vehicle')?.replaceChildren(vehicleMarkup('1938', width, routeNumber));
-        setVar(trolley.row, '--veh-w', size);
       }
     },
   };

@@ -218,33 +218,40 @@
   color: var(--today);
 }
 
-/* The vehicle row: as tall as the vehicle; the trolley hangs from two hairline
-   wires across the whole card (at the drawing's own wire heights), the bus sits
-   on one hairline. */
-.vehicle-row {
+/* The title row (story-layer Req 5): the lane's illustration, its title and its
+   total. The illustration sits at one fixed size and does not travel. The
+   trolley hangs from two hairline wires across the whole title row (at the
+   drawing's own wire heights); the bus has none. */
+.lane-head {
   position: relative;
-  height: calc(var(--veh-w) * 104 / 240);
-  margin: 2px calc(var(--pad) * -1) 2px;
-  overflow: hidden;
+  align-items: center;
+  min-height: calc(var(--veh-w) * 104 / 240);
 }
 
-.vehicle-row-today {
-  height: calc(var(--veh-w) * 40 / 104);
+.lane-today .lane-head {
+  min-height: calc(var(--veh-w) * 40 / 104);
 }
 
-.wire,
-.road {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+.lane-art {
+  flex: none;
+  width: var(--veh-w);
+  line-height: 0;
+}
+
+.lane-head .lane-title {
+  flex: 1;
+  min-width: 0;
 }
 
 .wire {
+  position: absolute;
+  left: calc(var(--pad) * -1);
+  right: calc(var(--pad) * -1);
+  height: 1px;
   background: var(--ghost);
   opacity: 0.55;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
 
 .wire-1 {
@@ -255,30 +262,36 @@
   top: calc(var(--veh-w) * 11 / 240);
 }
 
-.road {
-  bottom: 0;
-  background: var(--line);
+/* The marker track (story-layer Req 6): directly above the bar, the bar's width
+   plus half a marker on each side, reaching into the card's side padding so a
+   marker at either end of the bar is whole. The bar keeps its width and scale.
+   The one .bar-marker spans the bar (inset by half a marker), so its percent
+   translate is the share of the scale; --x is the marker's centre as that
+   share and --gaps the phase gaps drawn before it. The glyph hangs half its
+   width to the left of the mover, so its centre is the mover's left edge. */
+.marker-track {
+  position: relative;
+  height: calc(var(--bar-marker-w) * 26 / 58);
+  margin: 2px calc(var(--bar-marker-w) / -2) 2px;
 }
 
-/* The runner spans the track, as wide as the bar. The vehicle's front edge is
-   the filled end of its ride portion: --x is that point as a share of the
-   scale, and --gaps the phase gaps drawn before it. The front edge is never
-   nearer the lane start than the vehicle's own width, so the vehicle never
-   reaches past the lane start: it stays parked there until the ride's filled
-   end passes its width (design 9.3, Emmanuel, Nov 19). */
-.runner {
+.bar-marker {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: var(--pad);
-  right: var(--pad);
-  transform: translateX(max(0px, calc(var(--x, 0) * 100% + var(--gaps, 0) * var(--seg-gap) - var(--veh-w))));
+  left: calc(var(--bar-marker-w) / 2);
+  right: calc(var(--bar-marker-w) / 2);
+  transform: translateX(calc(var(--x, 0) * 100% + var(--gaps, 0) * var(--seg-gap)));
+}
+
+.bar-marker > .marker {
+  position: absolute;
+  top: 0;
+  left: calc(var(--bar-marker-w) / -2);
 }
 
 .vehicle {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  display: block;
   width: var(--veh-w);
 }
 

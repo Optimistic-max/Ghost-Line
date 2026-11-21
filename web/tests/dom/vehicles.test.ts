@@ -256,18 +256,19 @@ describe('vehicle sizes', () => {
   const brief = readRepoText('docs/planning/screen-brief.md');
 
   it('come from config.ts, which matches ui.md and screen-brief 3A.2', () => {
-    const trolley = /Phone: (\d+) px wide while racing, (\d+) px after the finish\. Desktop: (\d+) px\./.exec(ui)!;
-    const bus = /Today's bus is flat and plain, (\d+) px on a phone and (\d+) px on desktop/.exec(ui)!;
+    // Screen-brief 3A.2 (section 3B sizes): one fixed trolley size, no shrink at the finish.
+    const trolley = /at one fixed size, (\d+) px wide on a phone and (\d+) px on desktop, and no longer shrinks at the finish/.exec(brief)!;
+    const bus = /Today's bus is (\d+) px wide on a phone and (\d+) px on desktop/.exec(brief)!;
     const marker = /(\d+) px wide on a phone map and (\d+) px on desktop/.exec(brief)!;
     expect(vehicleWidths('phone')).toEqual({
       trolleyRacing: Number(trolley[1]),
-      trolleyFinished: Number(trolley[2]),
+      trolleyFinished: Number(trolley[1]),
       bus: Number(bus[1]),
       marker: Number(marker[1]),
     });
     expect(vehicleWidths('desktop')).toEqual({
-      trolleyRacing: Number(trolley[3]),
-      trolleyFinished: Number(trolley[3]),
+      trolleyRacing: Number(trolley[2]),
+      trolleyFinished: Number(trolley[2]),
       bus: Number(bus[2]),
       marker: Number(marker[2]),
     });
