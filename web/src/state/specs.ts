@@ -23,9 +23,10 @@ import {
   whatBusGaps,
   whatFrom,
 } from '../copy/copy';
-import type { RaceFile, SourceId, Summary, Trip } from '../data/types';
+import { tripAt } from '../data/lookup';
+import type { RaceFile, RaceRow, SourceId, Summary, Trip } from '../data/types';
 import { formatCount } from '../format/count';
-import { isPlainRounding, roundWhole } from '../format/rounding';
+import { isPlainRounding, roundTotal, roundWhole } from '../format/rounding';
 import { dropSeconds, label12, shortClock } from '../format/time';
 import type { Lane, Phase, RaceView } from './model';
 
@@ -354,6 +355,44 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
       lane.next,
     ),
   };
+}
+
+/**
+ * The two totals of the chart's readout for one race row (story-layer Req 9.7): the stored totals
+ * through display rounding, with the sources of `total-1938` and `total-today` under the ids
+ * `readout-1938` and `readout-today`. `today` is null with no one-seat ride on that row.
+ */
+export function readoutNumbers(race: RaceFile, row: RaceRow, originName: string, destName: string) {
+  const between = (what: string): string => whatBetween(what, originName, destName);
+  const trolley = minutesNum(
+    {
+      id: 'readout-1938',
+      what: WHAT.total1938,
+      rowWhat: between(WHAT.total1938),
+      sourceIds: ['guide1938_diagram', 'guide1938_timetable'],
+      method: METHOD_TOTAL_1938,
+      date: 'effective',
+    },
+    roundTotal(row.y1938.total),
+  );
+  const trip = row.today ? tripAt(race, row.today.trip) : undefined;
+  const bus =
+    row.today && trip
+      ? minutesNum(
+          {
+            id: 'readout-today',
+            what: WHAT.totalToday,
+            rowWhat: between(WHAT.totalToday),
+            sourceIds: ['mta_gtfs', 'method'],
+            method: methodTotalToday(shortClock(row.start)),
+            date: 'feed',
+            trip: busTrip(trip),
+            tripLine: tripLineOf(trip),
+          },
+          roundTotal(row.today.total),
+        )
+      : null;
+  return { trolley, bus };
 }
 
 /** A count from summary.json as a number on screen. */

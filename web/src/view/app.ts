@@ -7,6 +7,7 @@
 import { BREAKPOINTS, EXAMPLE_START, FIXTURE_LINE, FONT_SIZES, LEAD_PAIR, TIMINGS } from '../config';
 import {
   ABOUT_AND_CREDITS,
+  CHART_HEADING,
   DATA_ERROR,
   DATA_INCOMPLETE,
   FIXTURE_TAG,
@@ -59,6 +60,7 @@ import { whenTodaySheet } from './sheets/whentoday';
 import { cornersSheet, firstChoice } from './sheets/corners';
 import { type ShareDeps, browserShareDeps, shareLink } from './sharing';
 import { createBanner } from './banner';
+import { updateChart } from './chart';
 import { updateSlider } from './slider';
 import { type Layout, vehicleWidths } from './vehicles';
 
@@ -495,6 +497,15 @@ export function createApp(options: AppOptions): App {
     // While the slider moves, only the time label and the departures board follow it (R3.5).
     if (held && drawn) {
       updateSlider(scroll, input.minute);
+      keepFocus(card, () =>
+        updateChart(scroll, registry, {
+          race,
+          originName: input.view.originName,
+          destName: input.view.destName,
+          minute: input.minute,
+          guided: input.guided ?? false,
+        }),
+      );
       redrawBoard(input);
       return;
     }
@@ -592,7 +603,12 @@ export function createApp(options: AppOptions): App {
   function visitorInput(): void {
     if (!store.get().guided) return;
     // The parts leave in place, so the card on screen (a race running, or held) is not redrawn for it.
-    scroll.querySelectorAll('.example-label, .chart-prompt').forEach((el) => el.remove());
+    scroll.querySelectorAll('.example-label').forEach((el) => el.remove());
+    // The prompt heading becomes the normal chart heading in place (Req 3.4, 9).
+    scroll.querySelectorAll('.chart-prompt').forEach((el) => {
+      el.classList.remove('chart-prompt');
+      el.textContent = CHART_HEADING;
+    });
     clearOrientation();
     if (drawn) drawn.guided = false;
     store.dispatch({ type: 'guided/end' });

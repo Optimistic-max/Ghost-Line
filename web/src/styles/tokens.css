@@ -37,6 +37,10 @@
   /* The drawn size of the small square controls (minus, plus, swap) in the
      mockups; each keeps a 44 x 44 px hit area around it. */
   --icon-button: 30px;
+  /* The slider thumb's width, shared by the thumb rules (card.css) and the chart's inset, so the chart's
+     first and last columns sit under the thumb's centre at the two ends (story-layer Req 9.1). */
+  --thumb: 22px;
+  --slider-gap: 12px;
 
   /* Phone zones (screen-brief 3A): top bar 40, map 150, card from 181 down. */
   --topbar-h: 40px;

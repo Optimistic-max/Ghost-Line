@@ -79,6 +79,31 @@ export function chartPlan(race: Pick<RaceFile, 'races'>): ChartPlan {
   };
 }
 
+/** The drawing's height in viewBox units; only its ratio to the plotted values matters. */
+export const CHART_HEIGHT = 40;
+
+export type ChartGeometry = {
+  /** The viewBox width: column k is centred on x = k, so the first and last columns are the slider's ends. */
+  width: number;
+  /** The hatched rect in viewBox units (column k spans k - 0.5 to k + 0.5), or null. */
+  hatch: { x: number; width: number } | null;
+  /** Where the hatch label starts, as a percentage of the plot width. */
+  hatchLeftPct: number;
+};
+
+/** Viewbox geometry of a plan: columns, the hatch and the label's offset. Scaling only. */
+export function chartGeometry(plan: ChartPlan): ChartGeometry {
+  const width = Math.max(1, plan.columns - 1);
+  const hatch = plan.hatch ? { x: plan.hatch.from - 0.5, width: plan.hatch.to - plan.hatch.from + 1 } : null;
+  const hatchLeftPct = plan.hatch ? Number(((plan.hatch.from / width) * 100).toFixed(3)) : 0;
+  return { width, hatch, hatchLeftPct };
+}
+
+/** The cursor's shift in viewBox units for a column (a column of -1, no such row, parks at 0). */
+export function cursorShift(column: number): number {
+  return Math.max(column, 0);
+}
+
 const unit = (n: number): string => String(Number(n.toFixed(3)));
 
 /**

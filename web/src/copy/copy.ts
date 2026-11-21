@@ -447,8 +447,6 @@ export function exactValue(exact: string, shownTotal: number): string {
 
 // ---- Controls, the desktop headline, the today-wins list, the map ------------
 
-export const START_TIME = 'Start time';
-
 /** The slider's aria-valuetext; `label` is the 12-hour start time. */
 export function sliderValueText(label: string): string {
   return `${label}, scheduled weekday time`;

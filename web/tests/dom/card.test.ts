@@ -75,7 +75,7 @@ describe('a 1938 win: the lead pair at 10:00', () => {
     const first = race.races[0]!.t;
     const last = race.races.at(-1)!.t;
     const input = root.querySelector<HTMLInputElement>('#start-time')!;
-    expect([...root.querySelectorAll('.slider-ends span')].map(text)).toEqual([shortClock(first), shortClock(last)]);
+    expect([...root.querySelectorAll('.slider-ends span')].map(text)).toEqual([label12(first), label12(last)]);
     expect([input.min, input.max, input.step, input.value]).toEqual(
       [minutesOf(first), minutesOf(last), 1, minutesOf('10:00')].map(String),
     );
@@ -100,8 +100,9 @@ describe('a 1938 win: the lead pair at 10:00', () => {
       const loose: string[] = [];
       for (let n = walker.nextNode(); n; n = walker.nextNode()) {
         const el = n.parentElement!;
-        if (el.closest('button.num, .slider-row, .schedule, .board-head')) continue;
-        const t = (n.textContent ?? '').replace(/\b1938\b/g, '');
+        if (el.closest('button.num, .slider-row, .start-row, .schedule, .board-head')) continue;
+        // The chart readout opens with the slider's start time, plain text like the slider's (story-layer Req 9.7).
+        const t = (n.textContent ?? '').replace(/\b1938\b/g, '').replace(/^At \d{1,2}:\d{2} [AP]M/, '');
         if (/\d/.test(t)) loose.push(t.trim());
       }
       expect(loose).toEqual([]);

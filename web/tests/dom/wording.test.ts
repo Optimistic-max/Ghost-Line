@@ -57,7 +57,7 @@ const WALK_TIME = /\bwalk\w*\b[^.]*?\b\d+ ?(min|minutes?)\b|\b\d+ ?(min|minutes?
 
 /** The line a run of text belongs to, for the time rule: a list row, the slider or a board row, else its own block. */
 function lineOf(el: Element): Element {
-  return el.closest('li, .slider-row, .board-row, [role="status"], .banner') ?? el.closest('p, h1, h2, h3, button, output, div') ?? el;
+  return el.closest('li, .slider-row, .start-row, .board-row, [role="status"], .banner') ?? el.closest('p, h1, h2, h3, button, output, div') ?? el;
 }
 
 /** The phrase a walk word belongs to: a legend item, a list row, else its own block. */

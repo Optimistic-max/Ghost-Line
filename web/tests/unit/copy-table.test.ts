@@ -141,7 +141,6 @@ const RENDERED: Record<string, string> = {
   dateEffective: C.dateEffective('{date}'),
   dateFeed: C.dateFeed('{feed_version}', '{date}'),
   exactValue: C.exactValue('{x}', N),
-  START_TIME: C.START_TIME,
   sliderValueText: C.sliderValueText('{hh:mm AM/PM}'),
   ONE_MINUTE_EARLIER: C.ONE_MINUTE_EARLIER,
   ONE_MINUTE_LATER: C.ONE_MINUTE_LATER,
@@ -204,6 +203,7 @@ const RENDERED: Record<string, string> = {
  * one fails the tests below. Each is replaced in copy.ts, in place.
  */
 const REPLACED = [
+  'Start time',
   'Scheduled departures from this corner after {h:mm}',
   'Same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins',
   'Today wins this race. Across this line: same ride, longer wait. Trolley first in {wins_1938} of {races} races. When today wins',
@@ -218,7 +218,6 @@ const REPLACED = [
  * Each stays in the effective table with its old text; its task removes both.
  */
 const KEPT_UNTIL_VIEW_CHANGES: Record<string, { text: string; task: string }> = {
-  START_TIME: { text: 'Start time', task: 'task 10.2 (slider input name)' },
   METHOD_RIDE_VERDICTS: {
     text: "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
     task: 'task 16.1 (specs.ts ride-same rows)',

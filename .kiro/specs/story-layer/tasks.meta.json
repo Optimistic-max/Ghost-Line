@@ -389,6 +389,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795241126747
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795241810300
+      }
+    ],
+    "10.2 New `web/src/view/chart.ts` and `view/slider.ts` split into `startRow` (example label while guided, large start time) and `sliderRow` (minus, input, plus, 12-hour ends from the first and last row `t`): inline SVG with `role=\"img\"` and the accessible name, `viewBox` by column, `preserveAspectRatio=\"none\"`, `pointer-events: none` and no listeners, two paths in `--ghost` and `--today`, hatched rect and its label, cursor moved by `transform`, heading (prompt heading while guided), subheading, legend, readout with Number_Buttons `readout-1938` and `readout-today` (specs as `total-1938` and `total-today`). Visible label \"Choose a scheduled start time\" and no `aria-label` \"Start time\". `--thumb` custom property shared by the slider thumb rules and the chart inset. `updateChart(minute)` on the held-slider path. A pair, swap or shortcut change redraws the chart from the new race file before the race starts, fetching nothing extra. Name any race-screen test changed (input name, end labels) in the commit message.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795241811671
       }
     ]
   }

@@ -80,10 +80,33 @@
 
 /* ---- Slider -------------------------------------------------------------------- */
 
+.start-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--slider-gap);
+  margin-top: 6px;
+}
+
+.start-text {
+  min-width: 0;
+}
+
+.slider-label {
+  display: block;
+  color: var(--ink);
+  font-size: var(--fs-body);
+}
+
+.example-label {
+  margin-top: 2px;
+  color: var(--muted);
+}
+
 .slider-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--slider-gap);
   margin-top: 6px;
 }
 
@@ -95,10 +118,142 @@
 .slider-input {
   display: block;
   width: 100%;
-  height: 22px;
+  height: var(--thumb);
   margin: 0;
   accent-color: var(--ink);
   background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider-input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--muted);
+}
+
+.slider-input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--muted);
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((4px - var(--thumb)) / 2);
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.slider-input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* ---- Start-time chart ------------------------------------------------------------- */
+
+.chart {
+  margin-top: 10px;
+}
+
+.chart-heading {
+  color: var(--ink);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.chart-sub {
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+.chart-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+}
+
+.chart-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.chart-swatch.is-1938 {
+  background: var(--ghost);
+}
+
+.chart-swatch.is-today {
+  background: var(--today);
+}
+
+/* The plot sits over the slider's track: inset by the two buttons, their gaps and half a thumb, so a
+   minute's column is under the thumb at that minute. No pointer input reaches it. */
+.chart-plot {
+  margin: 6px calc(var(--icon-button) + var(--slider-gap) + var(--thumb) / 2) 0;
+  pointer-events: none;
+}
+
+.chart-svg {
+  display: block;
+  width: 100%;
+  height: 56px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.chart-line {
+  fill: none;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-line-1938 {
+  stroke: var(--ghost);
+}
+
+.chart-line-today {
+  stroke: var(--today);
+}
+
+.chart-hatch {
+  opacity: 0.9;
+}
+
+.chart-hatch-line {
+  stroke: var(--muted);
+  stroke-width: 1px;
+}
+
+.chart-cursor {
+  stroke: var(--ink);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-hatch-label {
+  margin: 2px 0 0 var(--hatch-left, 0);
+  color: var(--ink);
+}
+
+.chart-readout {
+  margin-top: 6px;
+  color: var(--ink);
 }
 
 .slider-ends {

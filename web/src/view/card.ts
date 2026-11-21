@@ -1,10 +1,9 @@
-// The race card's content, in the order of the mockups: pair row, slider,
-// schedule line, the two lanes, the race clock row while racing, the result box
+// The race card's content, in the order of the mockups: pair row, start row,
+// start-time chart, slider row, schedule line, the two lanes, the race clock row while racing, the result box
 // and the honest line once the result is shown, and the departures board. Every
 // number in the race is a number button registered in the card's source
 // registry.
 import {
-  CHART_PROMPT_HEADING,
   INFERRED_CAUTION,
   LANE_TITLE_TODAY,
   NO_SINGLE_BUS,
@@ -13,13 +12,12 @@ import {
   START_IS_NOW,
   beforeTable,
   captionText,
-  exampleLabel,
   ready,
 } from '../copy/copy';
 import type { Index, RaceFile, Summary } from '../data/types';
 import { sliderRange } from '../data/lookup';
 import { routeNumberOf } from '../format/line';
-import { clockOf, label12, serviceDateLabel } from '../format/time';
+import { serviceDateLabel } from '../format/time';
 import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
 import { honestNumbers, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
@@ -32,7 +30,8 @@ import { type SourceRegistry, sentence } from './numbers';
 import { pairRow } from './pairrow';
 import { resultBox } from './resultbox';
 import { takeawayView } from './takeaway';
-import { slider } from './slider';
+import { chartView } from './chart';
+import { sliderRow, startRow } from './slider';
 import { type Layout, vehicleWidths } from './vehicles';
 import { VEHICLE_SIZES } from '../config';
 
@@ -168,13 +167,15 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
   // under it never pushes it out of sight on a phone (R1.2); it goes at the finish.
   return [
     pairRow(view.originName, view.destName, inferredEnd),
-    slider({ first, last, minute: input.minute }),
-    ...(input.guided
-      ? [
-          h('p', { class: 'example-label' }, exampleLabel(label12(clockOf(input.minute)))),
-          h('h3', { class: 'chart-prompt' }, CHART_PROMPT_HEADING),
-        ]
-      : []),
+    startRow(input.minute, input.guided ?? false),
+    chartView(registry, {
+      race,
+      originName: view.originName,
+      destName: view.destName,
+      minute: input.minute,
+      guided: input.guided ?? false,
+    }),
+    sliderRow({ first, last, minute: input.minute }),
     schedule,
     notices,
     h('div', { class: 'lanes' }, lane1938, today),
