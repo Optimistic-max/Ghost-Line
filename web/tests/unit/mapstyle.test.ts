@@ -11,7 +11,9 @@ import {
   ROUTE_FONT,
   ROUTE_SOURCE,
   type StyleSpecification,
+  STRETCH_SOURCE,
   mapStyle,
+  stretchData,
 } from '../../src/map/style';
 import type { Layout } from '../../src/view/vehicles';
 import { tokenBlocks } from '../support/css';
@@ -141,7 +143,7 @@ describe('the map style in palette B', () => {
     expect(source.data.features.map((f) => f.properties)).toEqual(
       route.features.map((f) => ({ street: f.properties.street, method: f.properties.method })),
     );
-    const ids = (style.layers as AnyLayer[]).map((l) => l.id);
+    const ids = (style.layers as AnyLayer[]).map((l) => l.id).filter((id) => id !== 'ghost-stretch');
     expect(ids.slice(-5)).toEqual(['ghost-route-glow', 'ghost-route', 'ghost-route-inferred', 'ghost-route-names', 'ghost-corner-names']);
     const byId = new Map((style.layers as AnyLayer[]).map((l) => [l.id, l]));
     expect(byId.get('ghost-route-glow')?.paint?.['line-blur']).toBeGreaterThan(0);
@@ -176,6 +178,27 @@ describe('the map style in palette B', () => {
     const names = (style.layers as AnyLayer[]).find((l) => l.id === 'ghost-route-names');
     expect(names?.layout?.['text-font']).toEqual(['Fake Sans Regular']);
     expect((style as { 'font-faces'?: unknown })['font-faces']).toBeUndefined();
+  });
+
+  it('on desktop draws the pair\'s stretch bright over dimmer route lines, with no label below 80% opacity; the phone is unchanged', () => {
+    const plan = planDrawing({ index, route, pair: lead, layout: 'desktop', direction: 'eastbound' });
+    expect(plan.track).not.toBeNull();
+    const style = mapStyle(structuredClone(BASE), { palette, layout: 'desktop', route, names: plan, track: plan.track, fontUrl: FONT });
+    const byId = new Map((style.layers as AnyLayer[]).map((l) => [l.id, l]));
+    const ids = (style.layers as AnyLayer[]).map((l) => l.id);
+    expect(ids.indexOf('ghost-stretch')).toBeGreaterThan(ids.indexOf('ghost-route-inferred'));
+    const stretch = (style.sources[STRETCH_SOURCE] as { data: ReturnType<typeof stretchData> }).data;
+    expect(stretch.features[0]!.geometry.coordinates.length).toBeGreaterThanOrEqual(2);
+    expect(byId.get('ghost-stretch')?.paint?.['line-opacity']).toBe(1);
+    for (const id of ['ghost-route', 'ghost-route-inferred', 'ghost-route-glow']) {
+      expect(byId.get(id)?.paint?.['line-opacity'] as number, id).toBeLessThan(1);
+    }
+    for (const l of visible(style).filter((x) => x.type === 'symbol')) expect(l.paint?.['text-opacity'] as number, l.id).toBeGreaterThanOrEqual(0.8);
+    expect(stretchData(null).features).toEqual([]);
+    const phone = styleFor('phone');
+    expect((phone.layers as AnyLayer[]).some((l) => l.id === 'ghost-stretch')).toBe(false);
+    expect(phone.sources[STRETCH_SOURCE]).toBeUndefined();
+    expect((phone.layers as AnyLayer[]).find((l) => l.id === 'ghost-route')?.paint?.['line-opacity']).toBeUndefined();
   });
 
   it('asks for no sprite, since it draws no icons', () => {

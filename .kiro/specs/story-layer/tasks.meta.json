@@ -569,6 +569,13 @@
         "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
         "timestamp": 1795273605929
       }
+    ],
+    "17.1 Only if time allows, and only after task 18 is otherwise green: `web/src/map/map.ts` and `map/style.ts` add a source for the selected pair's stretch (the polyline `layout.ts` `markerTrack` builds), drawn bright over the route, with the route lines at lower `line-opacity`; symbol layers keep opacity at 0.8 or more; updated on pair change through `map.corners(plan)`; phone and fallback drawing unchanged. Extend the `style.ts` unit test (no label below 80% opacity). If skipped, record it as cut in the final report; nothing else depends on it.": [
+      {
+        "executionId": "f8a3768f-01e4-4e54-8556-2dfd7d2031ee",
+        "chatSessionId": "sess_7b073abc-ca58-402f-adb5-a75c18bf6d15",
+        "timestamp": 1795273820180
+      }
     ]
   }
 }

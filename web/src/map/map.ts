@@ -17,7 +17,7 @@ import type { Index, Route } from '../data/types';
 import { lonLatBounds } from '../view/layout';
 import { markerSvg, type Layout, vehicleWidths } from '../view/vehicles';
 import { type DrawingPlan, drawingPoints } from './routedrawing';
-import { NAMES_SOURCE, PALETTE_TOKENS, type Palette, mapStyle, namesData } from './style';
+import { NAMES_SOURCE, PALETTE_TOKENS, type Palette, STRETCH_SOURCE, mapStyle, namesData, stretchData } from './style';
 
 export type MapStart = {
   container: HTMLElement;
@@ -130,6 +130,7 @@ export function startMap(start: MapStart): MapHandle {
       new Marker({ element: cornerElement(doc, plan, c.slug), anchor: 'center' }).setLngLat([c.lonlat[0], c.lonlat[1]]).addTo(map!),
     );
     map.getSource<GeoJSONSource>(NAMES_SOURCE)?.setData(namesData(plan));
+    if (layout === 'desktop') map.getSource<GeoJSONSource>(STRETCH_SOURCE)?.setData(stretchData(plan.track));
   }
 
   if (!hasWebGL(doc)) {
@@ -146,7 +147,7 @@ export function startMap(start: MapStart): MapHandle {
     map = new MapLibre({
       container,
       style: SOURCE_URLS.baseMapStyle,
-      transformStyle: (_previous, next) => mapStyle(next, { palette, layout, route, names: current, fontUrl }),
+      transformStyle: (_previous, next) => mapStyle(next, { palette, layout, route, names: current, track: current.track, fontUrl }),
       bounds: lonLatBounds(drawingPoints(index, route)),
       fitBoundsOptions: { padding: { ...look.padding } },
       interactive: false,

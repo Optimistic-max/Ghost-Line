@@ -12,6 +12,7 @@
 import type { TransformStyleFunction } from 'maplibre-gl';
 import { MAP_LAYOUT } from '../config';
 import type { Route } from '../data/types';
+import { type Track, trackPoint } from '../view/layout';
 import type { Layout } from '../view/vehicles';
 import type { DrawingPlan } from './routedrawing';
 
@@ -38,7 +39,28 @@ export const ROUTE_SOURCE = 'ghost-route';
 /** The route's street names and the corner names, as points where the route drawing sets them. */
 export const NAMES_SOURCE = 'ghost-names';
 
+/** The selected pair's stretch of the route (story-layer Req 14, desktop only). */
+export const STRETCH_SOURCE = 'ghost-stretch';
+/** The route lines' opacity on desktop while the pair's stretch is drawn bright over them. */
+export const DIMMED_ROUTE_OPACITY = 0.45;
+export const DIMMED_GLOW_OPACITY = 0.25;
+
+/** The stretch as a line: the marker track's own polyline, from where it starts to where it stops, or nothing before the race file is in. */
+export function stretchData(track: Track | null | undefined): StretchData {
+  if (!track || track.points.length < 2) return { type: 'FeatureCollection', features: [] };
+  const inside = track.points.filter((_, i) => (track.at[i] ?? 0) > track.from && (track.at[i] ?? 0) < track.to);
+  const coordinates = [trackPoint(track, 0), ...inside.map((p): [number, number] => [p[0] ?? 0, p[1] ?? 0]), trackPoint(track, 1)];
+  return { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates }, properties: {} }] };
+}
+
+export type StretchData = {
+  type: 'FeatureCollection';
+  features: { type: 'Feature'; geometry: { type: 'LineString'; coordinates: [number, number][] }; properties: Record<string, never> }[];
+};
+
 export type StyleInput = {
+  /** The pair's marker track, for the bright stretch on desktop; none before its race file is in. */
+  track?: Track | null;
   palette: Palette;
   layout: Layout;
   route: Route;
@@ -109,6 +131,7 @@ export type NamesData = {
 /** The base style recoloured to palette B, with the 1938 line over it. */
 export function mapStyle(base: StyleSpecification, input: StyleInput): StyleSpecification {
   const { palette, layout, route, names, fontUrl } = input;
+  const dim = layout === 'desktop';
   const look = MAP_LAYOUT[layout];
   const vector = Object.entries(base.sources).find(([, s]) => s.type === 'vector')?.[0] ?? null;
   const routeStreets = [...new Set(route.features.map((f) => f.properties.street))];
@@ -176,7 +199,7 @@ export function mapStyle(base: StyleSpecification, input: StyleInput): StyleSpec
       source: ROUTE_SOURCE,
       filter: ['!=', ['get', 'method'], 'inferred'],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': palette.ghost, 'line-width': look.lines.glow, 'line-blur': look.lines.glow, 'line-opacity': 0.55 },
+      paint: { 'line-color': palette.ghost, 'line-width': look.lines.glow, 'line-blur': look.lines.glow, 'line-opacity': dim ? DIMMED_GLOW_OPACITY : 0.55 },
     },
     {
       id: 'ghost-route',
@@ -184,15 +207,31 @@ export function mapStyle(base: StyleSpecification, input: StyleInput): StyleSpec
       source: ROUTE_SOURCE,
       filter: ['!=', ['get', 'method'], 'inferred'],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': palette.ghost, 'line-width': look.lines.route },
+      paint: { 'line-color': palette.ghost, 'line-width': look.lines.route, ...(dim ? { 'line-opacity': DIMMED_ROUTE_OPACITY } : {}) },
     },
     {
       id: 'ghost-route-inferred',
       type: 'line',
       source: ROUTE_SOURCE,
       filter: ['==', ['get', 'method'], 'inferred'],
-      paint: { 'line-color': palette.ghost, 'line-width': look.lines.inferred, 'line-dasharray': [2, 1.6] },
+      paint: {
+        'line-color': palette.ghost,
+        'line-width': look.lines.inferred,
+        'line-dasharray': [2, 1.6],
+        ...(dim ? { 'line-opacity': DIMMED_ROUTE_OPACITY } : {}),
+      },
     },
+    ...(dim
+      ? [
+          {
+            id: 'ghost-stretch',
+            type: 'line' as const,
+            source: STRETCH_SOURCE,
+            layout: { 'line-cap': 'round' as const, 'line-join': 'round' as const },
+            paint: { 'line-color': palette.ghost, 'line-width': look.lines.route, 'line-opacity': 1 },
+          },
+        ]
+      : []),
   ];
 
   // The names go where the route drawing sets them: street names in --ghost along their legs, corner names
@@ -248,6 +287,7 @@ export function mapStyle(base: StyleSpecification, input: StyleInput): StyleSpec
       ...base.sources,
       [ROUTE_SOURCE]: routeSource(route),
       [NAMES_SOURCE]: { type: 'geojson', data: namesData(names) },
+      ...(dim ? { [STRETCH_SOURCE]: { type: 'geojson' as const, data: stretchData(input.track) } } : {}),
     },
     layers: [...backgrounds, ...hidden, ...streets, ...tileLabels, ...routeLayers, ...nameLayers],
   };
