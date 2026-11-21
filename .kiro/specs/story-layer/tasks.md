@@ -122,9 +122,9 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - Depends on: task 10.2
 
 - [ ] 11. Notices under the schedule line (decision 16, Req 7.13, Req 12.2)
-  - [-] 11.1 `web/src/view/card.ts`: always render the schedule line ("... Scheduled, not live."), removing the race-screen condition that hid it while a notice showed (race-screen R6.7, superseded); render the before-the-table notice, the inferred-corner notice and the today-win notice in one `.notices` block directly after it. The today-win notice shows the pair names from index.json and the entry's `t` in 12-hour form as plain text (no Number_Button, no Sources row). Run `grep` for `.schedule` in `web/tests/`; change only the assertions that expect the line hidden while a notice shows, and name each in the commit message.
+  - [x] 11.1 `web/src/view/card.ts`: always render the schedule line ("... Scheduled, not live."), removing the race-screen condition that hid it while a notice showed (race-screen R6.7, superseded); render the before-the-table notice, the inferred-corner notice and the today-win notice in one `.notices` block directly after it. The today-win notice shows the pair names from index.json and the entry's `t` in 12-hour form as plain text (no Number_Button, no Sources row). Run `grep` for `.schedule` in `web/tests/`; change only the assertions that expect the line hidden while a notice shows, and name each in the commit message.
     - _Requirements: 7.13, 10.5, 12.2_
-  - [ ] 11.2 Write `web/tests/dom/notices.test.ts`: with each of the three notices showing, the schedule line containing "Scheduled, not live." is visible and the notice follows it directly in DOM order; the today-win notice and example label times contain no `button.num`.
+  - [x] 11.2 Write `web/tests/dom/notices.test.ts`: with each of the three notices showing, the schedule line containing "Scheduled, not live." is visible and the notice follows it directly in DOM order; the today-win notice and example label times contain no `button.num`.
     - **Validates: Requirements 3.8, 7.13, 10.5, 16.19**
     - Depends on: task 11.1
 
