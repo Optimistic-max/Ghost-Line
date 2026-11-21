@@ -284,6 +284,18 @@
         "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
         "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
         "timestamp": 1795237847823
+      },
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795238292838
+      }
+    ],
+    "7.2 Wiring: `view/card.ts` adds `<p class=\"caption\" id=\"race-caption\">` under the lanes, reserved at two lines in every state, plain text, outside `#result-status` and any live region; `view/racer.ts` rewrites it only when the key changes; the finished and skip states and reduced motion show the finished caption (or the orientation line on a guided visit); \"Scheduled, not live.\" stays visible through the schedule line.": [
+      {
+        "executionId": "7e437cec-2588-42df-990d-d41448d6120c",
+        "chatSessionId": "sess_923c4526-73d2-457a-86d4-2e1eb5fd7a07",
+        "timestamp": 1795238293516
       }
     ]
   }

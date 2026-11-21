@@ -12,6 +12,7 @@ import {
   SKIP_TO_RESULT,
   START_IS_NOW,
   beforeTable,
+  captionText,
   exampleLabel,
   ready,
 } from '../copy/copy';
@@ -19,6 +20,7 @@ import type { Index, RaceFile, Summary } from '../data/types';
 import { sliderRange } from '../data/lookup';
 import { routeNumberOf } from '../format/line';
 import { clockOf, label12, serviceDateLabel } from '../format/time';
+import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
 import { honestNumbers, raceNumbers, type RaceNumbers } from '../state/specs';
 import { boardView } from './board';
@@ -90,6 +92,16 @@ function clockRow(canSkip: boolean): HTMLElement {
   );
 }
 
+/** The caption once both sides are done (Req 7.9): both arrived, or the trolley alone with no one-seat ride. */
+export function finishedCaption(view: RaceView): string {
+  return captionText(captionFor({ p1938: 'arrived', today: view.laneToday ? 'arrived' : null, orientation: false }));
+}
+
+function initialCaption(input: CardInput): string {
+  if (input.orientation) return ORIENTATION_LINE;
+  return input.stage === 'finished' ? finishedCaption(input.view) : '';
+}
+
 export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElement[] {
   const { index, race, view, stage } = input;
   const nums = cardNumbers(input);
@@ -157,8 +169,9 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
       : []),
     under,
     h('div', { class: 'lanes' }, lane1938, today),
-    // Plain text, outside the announcer's region; task 7.2 owns the later captions.
-    h('p', { class: 'caption', id: 'race-caption' }, input.orientation ? ORIENTATION_LINE : ''),
+    // Plain text, outside the announcer's region. Racing, racer.ts writes it; a finished card (the finish,
+    // skip, reduced motion) is drawn with the finished caption, or the orientation line on a guided visit.
+    h('p', { class: 'caption', id: 'race-caption' }, initialCaption(input)),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
     ...(boardShown(input) ? [cardBoard(registry, input)] : []),

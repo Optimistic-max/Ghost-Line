@@ -3,9 +3,10 @@
 // the status lines and the clock readout into the elements lanes.ts and card.ts
 // built. Positions come from timeline.ts; nothing here does arithmetic. Only
 // custom properties read by transforms, opacity classes and text change.
-import { clockReadout } from '../copy/copy';
+import { type CaptionKey, ORIENTATION_LINE, captionText, clockReadout } from '../copy/copy';
 import { clockLabel } from '../format/time';
 import { type Timeline, laneFrame } from '../play/timeline';
+import { type Side38, type SideToday, captionFor, phaseOf } from '../state/captions';
 import type { Lane, RaceView, Side } from '../state/model';
 import type { Num } from '../state/specs';
 import { keepFocus } from './a11y';
@@ -91,6 +92,20 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
     lane.el.classList.add('is-arriving');
   }
 
+  // The caption area (Req 7): rewritten only when the caption key changes. While it shows the orientation
+  // line the racer leaves it alone; app.ts clears that line when the race starts.
+  const caption = root.querySelector<HTMLElement>('#race-caption');
+  let captionShown = '';
+  const phases: { '1938': Side38 | null; today: SideToday | null } = { '1938': null, today: null };
+
+  function drawCaption(key: CaptionKey): void {
+    if (!caption || caption.textContent === ORIENTATION_LINE) return;
+    const id = JSON.stringify(key);
+    if (id === captionShown) return;
+    captionShown = id;
+    caption.textContent = captionText(key);
+  }
+
   function drawLane(b: BoundLane, elapsed: number): void {
     const f = laneFrame(b.lane, timeline, elapsed, { from: b.layout.rideFrom, to: b.layout.park });
     b.segs.forEach((seg, k) => {
@@ -99,6 +114,8 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
       seg.toggleAttribute('data-current', k === f.current && !f.arrived);
     });
     if (b.runner) setVar(b.runner, '--x', f.vehicle);
+    if (b.lane.side === '1938') phases['1938'] = phaseOf(b.lane, f) as Side38;
+    else phases.today = phaseOf(b.lane, f) as SideToday;
     b.el.classList.toggle('is-moving', f.moving);
     b.el.toggleAttribute('data-arrived', f.arrived);
     if (!f.arrived) b.el.classList.remove('is-arriving');
@@ -131,6 +148,7 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
     frame(elapsed) {
       for (const b of lanes) drawLane(b, elapsed);
       drawReadout(elapsed);
+      if (phases['1938']) drawCaption(captionFor({ p1938: phases['1938'], today: view.laneToday ? phases.today : null, orientation: false }));
       // Drawn again mid-race (a layout change): a lane already in means the first arrival has passed.
       if (!framed) {
         framed = true;
@@ -148,6 +166,7 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
       if (view.result === 'photo_finish') lanes.forEach(emphasize);
     },
     finish() {
+      drawCaption(captionFor({ p1938: 'arrived', today: view.laneToday ? 'arrived' : null, orientation: false }));
       root.querySelector('.clock-row')?.remove();
       if (!input.keepBoard) {
         const board = root.querySelector('.board');

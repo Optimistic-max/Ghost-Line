@@ -186,7 +186,8 @@
 /* The caption area under the lanes: plain text, two lines reserved so nothing moves when it changes. */
 .caption {
   margin-top: 6px;
-  color: var(--muted);
+  color: var(--ink);
+  font-size: var(--fs-caption);
   line-height: 1.35;
   min-height: 2.7em;
 }

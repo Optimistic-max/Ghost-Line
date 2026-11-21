@@ -31,6 +31,7 @@
   --fs-result: 29px;
   --fs-body: 13px;
   --fs-body-small: 12px;
+  --fs-caption: 15px; /* the caption area under the lanes: a step above body, in --ink (story-layer Req 7) */
   /* The phase legend, as drawn in mockups 03 and 15 (one line per lane). */
   --fs-legend: 10.5px;
   /* The drawn size of the small square controls (minus, plus, swap) in the

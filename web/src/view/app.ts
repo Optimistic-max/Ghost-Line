@@ -41,6 +41,7 @@ import {
   cardBoard,
   cardLayout,
   cardNumbers,
+  finishedCaption,
   renderCard,
   resultElements,
 } from './card';
@@ -557,7 +558,10 @@ export function createApp(options: AppOptions): App {
   /** The orientation line leaves the caption area, in place (the card is not redrawn). */
   function clearOrientation(): void {
     const caption = scroll.querySelector('#race-caption');
-    if (caption?.textContent === ORIENTATION_LINE) caption.textContent = '';
+    if (caption?.textContent !== ORIENTATION_LINE) return;
+    // A card already drawn finished (reduced motion) takes the finished caption; a racing one is written by racer.ts.
+    const derived = derive(store.get());
+    caption.textContent = drawn?.stage === 'finished' && derived.status === 'ready' ? finishedCaption(derived.view) : '';
   }
 
   function startRace(): void {
