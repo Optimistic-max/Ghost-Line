@@ -162,7 +162,8 @@ Rules for every task:
     - Commit anything left over: "Finish skeptic spec checks".
     - _Requirements: R9.7_
 
-- [ ] 12. EMMANUEL ONLY: confirm acceptance in the Kiro IDE (R10). The agent must not tick this task or any step in it.
+- [x] 12. EMMANUEL ONLY: confirm acceptance in the Kiro IDE (R10). The agent must not tick this task or any step in it.
+  - Done Nov 22, 2026, reported by Emmanuel and ticked at his request. Steps 1, 3, 4 and 5 passed. Step 2 (R10.2, the different-working-directory check) was not run.
   - Step 1 (R10.1): open the MCP Server view in Kiro. Confirm "ghostline-gtfs" shows as running. In chat, call `feed_info` and a `trips_serving` call with `@ghostline-gtfs`. If the agent cannot see the tools, change the agent's tools entry to `"@mcp"` and nothing else (R6.4), then repeat.
   - Step 2 (R10.2): restart the server from Kiro with a different working directory open, or reconnect the server, and call `feed_info`. It must find the feed.
   - Step 3 (R10.3): type `/skeptic-check` in chat. Confirm it appears as a slash command.
@@ -171,7 +172,8 @@ Rules for every task:
   - Step 6 (R10.7): while doing steps 1 to 5, watch for a connection timeout during the server's startup read of stop_times. If Kiro times out, stop and tell the agent; the fallback is the synchronous read before `run()` (design 2.5).
   - _Requirements: R10.1, R10.2, R10.3, R10.4, R10.5, R10.7_
 
-- [ ] 13. EMMANUEL ONLY: record both runs in docs/kiro-usage.md (R10.6). The agent must not do this.
+- [x] 13. EMMANUEL ONLY: record both runs in docs/kiro-usage.md (R10.6). The agent must not do this.
+  - Done Nov 22, 2026: recorded by Kiro at Emmanuel's request, in the section "Skeptic acceptance in the Kiro IDE".
   - After task 12 passes, add to docs/kiro-usage.md, for each of the two runs: the date, the command, and the report's last line.
   - Check the added text for the words banned for service times (live, real-time, realtime, arriving now, right now). Run `python -m pipeline check_sources` to confirm.
   - Commit: "Record Skeptic fixture runs in kiro-usage".
