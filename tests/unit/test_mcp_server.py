@@ -200,3 +200,200 @@ def test_loading_writes_nothing_to_disk(tmp_path):
     srv.load_feed(path, expected_sha256=sha)
     assert sorted(p.name for p in tmp_path.iterdir()) == before
     assert path.read_bytes() == snapshot
+
+
+# --- queries (R3, R4, R5, R9.1) ------------------------------------------------
+
+
+def test_feed_info_answers_from_the_feed(tmp_path):
+    path, sha = write_zip(tmp_path, fake_tables())
+    answer = srv.feed_info_answer(srv.load_feed(path, expected_sha256=sha))
+    assert answer == {
+        "feed_version": None,
+        "sha256": sha,
+        "service_date": DATE,
+        "active_service_ids": ["1001", "1003"],
+    }
+
+
+def test_feed_info_with_a_load_error_is_an_error(tmp_path):
+    with pytest.raises(srv.FeedUnavailable, match="not found"):
+        srv.feed_info_answer(srv.load_feed(tmp_path / "nope.zip"))
+
+
+def test_trips_serving_with_a_load_error_is_an_error_not_an_empty_list(tmp_path):
+    feed = srv.load_feed(tmp_path / "nope.zip")
+    with pytest.raises(srv.FeedUnavailable):
+        srv.trips_serving_answer(feed, "S_A1", "S_B1", DATE)
+
+
+def test_the_basic_answer_counts_ordered_feed_spelled_trips(tmp_path):
+    answer = srv.trips_serving_answer(load(tmp_path), "S_A1", "S_B1", DATE)
+    assert answer["count"] == len(answer["trips"]) == 3
+    assert [t["trip_id"] for t in answer["trips"]] == ["T1", "T2", "T5"]
+    assert answer["trips"][0] == {
+        "trip_id": "T1",
+        "route_short_name": "FAKE1",
+        "headsign": "Fake Corner B",
+        "dep_a": "09:00:00",
+        "arr_b": "09:10:00",
+    }
+    assert answer["trips"][2]["dep_a"] == "24:05:00" and answer["trips"][2]["arr_b"] == "24:15:00"
+
+
+def test_an_inactive_service_is_not_counted(tmp_path):
+    ids = [t["trip_id"] for t in trips(load(tmp_path))]
+    assert "T3" not in ids  # service 1002 is removed on the date
+
+
+def test_a_trip_that_reaches_b_before_a_is_not_counted_the_other_way_round_it_is(tmp_path):
+    feed = load(tmp_path)
+    assert "T4" not in [t["trip_id"] for t in trips(feed, "S_A1", "S_B1")]
+    assert [t["trip_id"] for t in trips(feed, "S_B1", "S_A1")] == ["T4"]
+
+
+@pytest.mark.parametrize(
+    "after, before, expected",
+    [
+        ("09:30", "09:30", ["T2"]),  # both limits inclusive, exact boundary
+        ("09:30", None, ["T2", "T5"]),
+        (None, "09:00", ["T1"]),
+        (None, "09:29", ["T1"]),
+        ("09:01", "09:29", []),
+        ("24:00", None, ["T5"]),  # compared as GTFS times, past 24:00
+        ("24:05", "24:05", ["T5"]),
+        (None, "23:59", ["T1", "T2"]),
+        ("10:00", "09:00", []),  # an empty window is a true answer, not an error
+    ],
+)
+def test_limits_are_inclusive_and_compared_as_gtfs_times(tmp_path, after, before, expected):
+    assert [t["trip_id"] for t in trips(load(tmp_path), after=after, before=before)] == expected
+
+
+def test_sorting_is_by_seconds_then_trip_id_not_by_text(tmp_path):
+    tables = fake_tables()
+    add_trip(tables, "T7", [("S_A1", 1, "9:30:00", "9:30:00"), ("S_B1", 2, "9:40:00", "9:40:00")])  # ties T2
+    add_trip(tables, "T6", [("S_A1", 1, "10:00:00", "10:00:00"), ("S_B1", 2, "10:10:00", "10:10:00")])
+    add_trip(tables, "T0", [("S_A1", 1, "9:30:00", "9:30:00"), ("S_B1", 2, "9:40:00", "9:40:00")])  # ties T2
+    ids = [t["trip_id"] for t in trips(load(tmp_path, tables))]
+    assert ids == ["T1", "T0", "T2", "T7", "T6", "T5"]
+
+
+def test_a_trip_calling_at_a_twice_counts_once_at_its_first_call_with_a_later_b(tmp_path):
+    tables = fake_tables()
+    add_trip(
+        tables,
+        "T6",
+        [("S_A1", 1, "11:00:00", "11:00:00"), ("S_A1", 2, "11:30:00", "11:30:00"), ("S_B1", 3, "11:40:00", "11:40:00")],
+    )
+    add_trip(
+        tables,
+        "T7",
+        [
+            ("S_A1", 1, "12:00:00", "12:00:00"),
+            ("S_B1", 2, "12:10:00", "12:10:00"),
+            ("S_A1", 3, "12:20:00", "12:20:00"),
+            ("S_B1", 4, "12:30:00", "12:30:00"),
+        ],
+    )
+    found = {t["trip_id"]: t for t in trips(load(tmp_path, tables))}
+    assert [k for k in found if k in ("T6", "T7")].count("T6") == 1
+    assert found["T6"]["dep_a"] == "11:00:00" and found["T6"]["arr_b"] == "11:40:00"
+    assert found["T7"]["dep_a"] == "12:00:00" and found["T7"]["arr_b"] == "12:10:00"
+
+
+def test_a_known_stop_with_no_trips_gives_a_true_zero(tmp_path):
+    feed = load(tmp_path)
+    assert srv.trips_serving_answer(feed, "S_X1", "S_B1", DATE) == {"count": 0, "trips": []}
+    assert srv.trips_serving_answer(feed, "S_A2", "S_B2", DATE) == {"count": 0, "trips": []}
+
+
+def test_a_wrong_date_is_an_error_naming_the_date_and_the_supported_one(tmp_path):
+    with pytest.raises(srv.ToolInputError) as exc:
+        srv.trips_serving_answer(load(tmp_path), "S_A1", "S_B1", "2026-11-05")
+    assert "2026-11-05" in str(exc.value) and DATE in str(exc.value)
+
+
+@pytest.mark.parametrize("which", ["a", "b"])
+def test_an_unknown_stop_is_an_error_naming_the_stop(tmp_path, which):
+    a, b = ("NOPE", "S_B1") if which == "a" else ("S_A1", "NOPE")
+    with pytest.raises(srv.ToolInputError, match="NOPE"):
+        srv.trips_serving_answer(load(tmp_path), a, b, DATE)
+
+
+@pytest.mark.parametrize("bad", ["", "1000", "10:0", "ab:cd", "10:60", "-1:00", "10:00:00", "100:00", " 10:00"])
+@pytest.mark.parametrize("name", ["after", "before"])
+def test_a_malformed_limit_is_an_error_naming_the_value(tmp_path, name, bad):
+    with pytest.raises(srv.ToolInputError) as exc:
+        srv.trips_serving_answer(load(tmp_path), "S_A1", "S_B1", DATE, **{name: bad})
+    assert repr(bad) in str(exc.value) and name in str(exc.value)
+
+
+def test_errors_are_value_errors_and_never_an_empty_answer(tmp_path):
+    for exc_type in (srv.FeedUnavailable, srv.ToolInputError, srv.FeedStillLoading):
+        assert issubclass(exc_type, ValueError)
+
+
+# --- waiting for the background load (R2.3, R2.4, R5.4) ------------------------
+
+
+def slow_loader(path, sha, gate: threading.Event):
+    def loader(zip_path):
+        gate.wait(10)  # a deliberately slow load, released by the test
+        return srv.load_feed(zip_path, expected_sha256=sha)
+
+    return loader
+
+
+def test_a_call_during_a_slow_load_waits_then_answers_from_the_finished_feed(tmp_path):
+    path, sha = write_zip(tmp_path, fake_tables())
+    gate, ready, holder = threading.Event(), threading.Event(), {}
+    thread = srv.start_loader(path, holder, ready, loader=slow_loader(path, sha, gate))
+    assert not ready.is_set() and "feed" not in holder  # nothing published while loading
+    threading.Timer(0.3, gate.set).start()
+    started = time.monotonic()
+    feed = srv.wait_for_feed(ready, holder, timeout=5)  # the call arrives during the load
+    assert time.monotonic() - started >= 0.2
+    assert feed.error is None
+    assert [t["trip_id"] for t in srv.trips_serving_answer(feed, "S_A1", "S_B1", DATE)["trips"]] == ["T1", "T2", "T5"]
+    thread.join(5)
+
+
+def test_a_call_whose_wait_limit_passes_gets_feed_still_loading_and_no_data(tmp_path):
+    path, sha = write_zip(tmp_path, fake_tables())
+    gate, ready, holder = threading.Event(), threading.Event(), {}
+    thread = srv.start_loader(path, holder, ready, loader=slow_loader(path, sha, gate))
+    try:
+        with pytest.raises(srv.FeedStillLoading) as exc:
+            srv.wait_for_feed(ready, holder, timeout=0.05)  # short limit injected, constant untouched
+        assert str(exc.value).startswith("feed still loading")
+        assert "0.05" in str(exc.value)  # states how long it waited
+        assert holder == {}  # nothing partial was published
+    finally:
+        gate.set()
+        thread.join(5)
+    assert srv.wait_for_feed(ready, holder, timeout=5).error is None  # once finished it answers
+
+
+def test_the_default_wait_limit_is_the_module_constant():
+    assert inspect.signature(srv.wait_for_feed).parameters["timeout"].default == srv.LOAD_WAIT_SECONDS == 30
+
+
+def test_the_wait_never_reads_the_file_itself(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(srv, "load_feed", lambda *a, **k: calls.append(a) or srv.Feed())
+    with pytest.raises(srv.FeedStillLoading):
+        srv.wait_for_feed(threading.Event(), {}, timeout=0.01)
+    assert calls == []
+
+
+def test_a_loader_that_crashes_publishes_an_error_feed(tmp_path):
+    def boom(zip_path):
+        raise RuntimeError("made-up crash")
+
+    ready, holder = threading.Event(), {}
+    srv.start_loader(tmp_path / "x.zip", holder, ready, loader=boom).join(5)
+    feed = srv.wait_for_feed(ready, holder, timeout=1)
+    assert feed.error and "made-up crash" in feed.error
+    with pytest.raises(srv.FeedUnavailable):
+        srv.feed_info_answer(feed)

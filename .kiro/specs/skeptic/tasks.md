@@ -51,7 +51,7 @@ Rules for every task:
     - Commit: "Add needs_mcp_sdk marker, skip guard and check SDK line".
     - _Requirements: R9.6 (addition), R9.7_
 
-- [ ] 4. The server, layer by layer (pipeline/mcp_server.py)
+- [x] 4. The server, layer by layer (pipeline/mcp_server.py)
   - [x] 4.1 Reader layer: constants, data classes, load_feed
     - Create pipeline/mcp_server.py with the standard-library reader only (zipfile, csv, hashlib, datetime, os, pathlib, threading, logging, sys, dataclasses). Import the SDK nowhere at module level.
     - Constants: `PINNED_SHA256`, `SERVICE_DATE`, `ENV_ZIP`, `LOAD_WAIT_SECONDS = 30`, `DEFAULT_ZIP` from `Path(__file__).resolve().parents[1] / "raw" / "mta_local_bus.zip"`. A relative GHOSTLINE_GTFS_ZIP resolves against the repository root. Define the SHA-256 once as a literal here, not imported from pipeline.
@@ -65,22 +65,22 @@ Rules for every task:
     - Cover: missing zip, wrong hash (both give an error Feed and no tables read), active services computed from calendar plus exceptions (including an inactive service and a date-only service), times past 24:00 parsed and kept in the feed's own text, blank-time fallback and dropped-call count, malformed table names its member and column, relative env path resolves against the repository root, load writes nothing under tmp_path or the repository.
     - _Requirements: R1.3, R1.5, R2.3, R2.4, R3.2, R9.1_
 
-  - [ ] 4.3 Queries and error classes
+  - [x] 4.3 Queries and error classes
     - Add `FeedUnavailable`, `ToolInputError` and `FeedStillLoading` (all `ValueError` subclasses).
     - `feed_info_answer(feed)` returns feed_version, sha256, service_date, active_service_ids; raises FeedUnavailable when `feed.error` is set.
     - `trips_serving_answer(feed, stop_a, stop_b, date, after=None, before=None)` in the order of design 2.6: feed error, date, unknown stop, malformed limits (`^\d{1,2}:\d{2}$`, minutes under 60), then the first stop_a call that has a later stop_b call, once per trip, inclusive limits on dep_a in seconds, sort by (seconds, trip_id), feed's own spelling and times. A known stop with no trips gives count 0 as a true answer. Errors are raised, never converted to an empty list.
     - _Requirements: R3.1, R3.3, R4.1, R4.2, R4.3, R4.4, R4.5, R4.6, R4.7, R4.8, R5.1, R5.2, R5.3, R5.4_
 
-  - [ ] 4.4 Unit tests for the queries
+  - [x] 4.4 Unit tests for the queries
     - Extend tests/unit/test_mcp_server.py with feeds built in code: wrong date, unknown stop, malformed after and before (each an error naming the value, never an empty list), inclusive limits at the exact boundary, departure after 24:00 sorting after 09:00:00 and "9:00:00" before "10:00:00", a trip calling at stop_a twice counted once, a trip reaching stop_b before stop_a not counted, ordering by dep_a then trip_id, an inactive service not counted, feed_info with a load error, a known stop with no trips giving count 0.
     - _Requirements: R3, R4, R5, R9.1_
 
-  - [ ] 4.5 wait_for_feed and the load-wait tests
+  - [x] 4.5 wait_for_feed and the load-wait tests
     - Add `wait_for_feed(ready, holder, timeout=LOAD_WAIT_SECONDS)`: waits on the event, raises `FeedStillLoading` with text starting "feed still loading" and stating the wait when the limit passes, answers only from a complete Feed that the loader published into `holder` just before setting the event. It never reads the file itself.
     - Tests in tests/unit/test_mcp_server.py with an injected loader and a short `timeout` argument (never edit LOAD_WAIT_SECONDS): (a) a call made during a slow load waits and then answers correctly; (b) a call whose limit passes first raises FeedStillLoading and returns neither an empty list nor partial data.
     - _Requirements: R2.3, R2.4, R5.4, R9.1_
 
-  - [ ] 4.6 Serving layer
+  - [x] 4.6 Serving layer
     - Add `build_server(feed_ready, holder)` that imports `mcp.server.fastmcp.FastMCP` inside the function, registers `feed_info` and `trips_serving` with docstrings stating units and limits, and does not catch the error classes. Add `main()` that logs to stderr, starts the loader in a background thread, then runs stdio, and the `if __name__ == "__main__"` guard. Follow the findings in sdk-notes.md.
     - No `print`, no `sys.stdout`, no file writes, no network imports.
     - Start-up check: `python -c "import pipeline.mcp_server"` still works and imports no SDK at module level.
