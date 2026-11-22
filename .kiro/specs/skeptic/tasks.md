@@ -154,8 +154,8 @@ Rules for every task:
     - Commit (after the golden tests pass locally): "Add golden tests for the MCP server".
     - _Requirements: R9.3, R9.6_
 
-- [ ] 11. Final check
-  - [ ] 11.1 Run the full checks and confirm the protocol line
+- [x] 11. Final check
+  - [x] 11.1 Run the full checks and confirm the protocol line
     - Run `python -m pipeline check`, `python -m pipeline verify` and `python -m pipeline check_sources`, each as its own command. All three must pass. Confirm `git status` shows no change under web/ or web/public/data/ (P-F) and no raw/ files staged.
     - Confirm the check output contains "check: MCP SDK installed: the protocol test will run" before and after pytest, and that the protocol test ran and was not skipped.
     - If anything fails, stop and tell Emmanuel with the output. Do not edit a golden value, facts file or test to pass.
