@@ -35,6 +35,8 @@ export const TIMINGS = {
   mapTimeoutMs: 8000,
   /** On a guided first visit the race waits this long, orientation line showing, before it starts (story-layer Req 4.1). */
   orientationMs: 2000,
+  /** How long the time slider's highlight shows after "Try another time" (task 25.1). */
+  sliderFlashMs: 1200,
 } as const;
 
 /**

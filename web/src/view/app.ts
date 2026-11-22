@@ -173,6 +173,8 @@ export function createApp(options: AppOptions): App {
   const banner = createBanner(byId(doc, 'banner-root'), timers.later, timers.cancel);
   /** The timer that puts "Share this race" back after "Link copied". */
   let copied: number | null = null;
+  /** The timer that removes the slider's highlight after "Try another time". */
+  let flash: number | null = null;
 
   /** The sheet on screen, what it shows, and the control outside any sheet that opened it. */
   let sheet: OpenSheet | null = null;
@@ -371,11 +373,26 @@ export function createApp(options: AppOptions): App {
   /** "Try another time": focus the slider and bring it into view; a plain jump under reduced motion. */
   function tryAnotherTime(): void {
     visitorInput();
+    // It never starts a race: a start still waiting (the guided pause) is held, so the visitor's own time choice starts the next one.
+    if (pending !== null) holdRace();
     const slider = scroll.querySelector<HTMLElement>('#start-time');
     if (!slider) return;
     slider.focus({ preventScroll: true });
     const reduced = store.get().motion === 'reduced';
     slider.scrollIntoView?.({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+    // A brief highlight round the slider; none at all under reduced motion.
+    if (reduced) return;
+    const track = slider.closest('.slider-track');
+    if (!track) return;
+    if (flash !== null) timers.cancel(flash);
+    track.classList.remove('is-flash');
+    // Force a style flush so a second press restarts the animation.
+    void (track as HTMLElement).offsetWidth;
+    track.classList.add('is-flash');
+    flash = timers.later(() => {
+      flash = null;
+      track.classList.remove('is-flash');
+    }, TIMINGS.sliderFlashMs);
   }
 
   /** The motion level as a root class, so the stylesheets can gate the extra motion (design 9.4). */

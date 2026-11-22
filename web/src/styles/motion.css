@@ -40,6 +40,12 @@
   animation: fade-in 200ms var(--ease-out) 150ms both;
 }
 
+/* "Try another time": the slider's ring shows, then fades (task 25.1). Not under reduced motion. */
+.motion-full .slider-track.is-flash::after,
+.motion-lite .slider-track.is-flash::after {
+  animation: flash-ring 1200ms var(--ease-out) both;
+}
+
 /* The trolley alive while it moves, at full motion only: a 2 px bob, the wide
    glow breathing between 85% and 100%, and the pole sparks (a class the spark
    timer adds for 120 ms). The bus has none of them (R5.5). */
@@ -76,6 +82,16 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes flash-ring {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 

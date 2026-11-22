@@ -138,6 +138,28 @@ describe('each action ends the Guided_Parts (Req 10.2, 10.3, 10.4, 16.10)', () =
     expect(guidedPartsShown()).toBe(false);
   });
 
+  it('"Try another time" starts no race, even during the guided pause, and highlights the slider briefly (task 25.1)', async () => {
+    const time = fakeTime();
+    const app = await bootPage({ motion: 'full', time });
+    await settle();
+    expect(app.store.get().race.phase).toBe('idle');
+    button('next-time').click();
+    const track = document.querySelector('.slider-track')!;
+    expect(track.classList.contains('is-flash')).toBe(true);
+    time.advance(TIMINGS.orientationMs + TIMINGS.racePauseMs);
+    await settle();
+    expect(app.store.get().race.phase).toBe('idle');
+    expect(document.activeElement?.id).toBe('start-time');
+    expect(track.classList.contains('is-flash')).toBe(false);
+  });
+
+  it('"Try another time" gives no highlight under reduced motion (task 25.1)', async () => {
+    await open();
+    button('next-time').click();
+    expect(document.querySelector('.slider-track.is-flash')).toBeNull();
+    expect(document.activeElement?.id).toBe('start-time');
+  });
+
   it('"Try other corners" opens the corner picker', async () => {
     const { app } = await open();
     expect(guidedPartsShown()).toBe(true);
