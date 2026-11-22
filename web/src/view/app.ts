@@ -535,7 +535,12 @@ export function createApp(options: AppOptions): App {
   /** On desktop the pair names stay on one line, their font shrinking as far as a long pair needs (R1.3). */
   function fitPairRow(): void {
     const row = scroll.querySelector<HTMLElement>('.pair-row');
-    if (row && options.layout() === 'desktop') fitOneLine(row, FONT_SIZES.desktop.cornerNamesMin);
+    if (!row) return;
+    row.removeAttribute('data-wrap');
+    if (options.layout() !== 'desktop') return;
+    // A pair too long for one line even at the smallest size wraps between its two names, never inside one,
+    // so no name is cut off (task 25.9).
+    if (!fitOneLine(row, FONT_SIZES.desktop.cornerNamesMin)) row.setAttribute('data-wrap', '');
   }
 
   /** The result box and honest line arrive at the result moment, under the clock row (R5.7, R1.2). */
@@ -954,10 +959,32 @@ export function createApp(options: AppOptions): App {
   });
 
   // The display font arrives after the first paint; the pair names are fitted again with its real widths.
-  void doc.fonts?.ready.then(() => {
+  const refit = (): void => {
+    if (!onPage()) return;
     fitPairRow();
     if (reserved) reserveResult(reserved);
-  });
+  };
+  void doc.fonts?.ready.then(refit);
+  // fonts.ready can settle before the display font has even started loading; each finished load fits again.
+  doc.fonts?.addEventListener?.('loadingdone', refit);
+  // The race column's width changes when its scrollbar appears or goes (a classic scrollbar), or the window
+  // is resized: the pair names are fitted again to the new width (task 25.9).
+  const Observer = doc.defaultView?.ResizeObserver;
+  if (Observer) {
+    let width = -1;
+    let queued = false;
+    new Observer(() => {
+      if (scroll.clientWidth === width || queued) return;
+      // Fitted on the next frame, not inside the observer's callback, so the change of size it makes is not
+      // reported back in the same loop (which the browser logs as an error).
+      queued = true;
+      timers.requestFrame(() => {
+        queued = false;
+        width = scroll.clientWidth;
+        fitPairRow();
+      });
+    }).observe(scroll);
+  }
 
   function setMotion(level: MotionLevel): void {
     // After the watchdog, the extra motion stays off for the session.

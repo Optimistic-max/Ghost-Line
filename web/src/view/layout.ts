@@ -130,15 +130,18 @@ export function chartPath(series: readonly (number | null)[], max: number, heigh
  * pixels and never below `minPx` (the desktop pair names, R1.3). Without a
  * layout (jsdom) nothing is measured and nothing changes.
  */
-export function fitOneLine(el: HTMLElement, minPx: number): void {
+export function fitOneLine(el: HTMLElement, minPx: number): boolean {
   el.style.removeProperty('font-size');
-  for (let tries = 0; tries < 4 && el.scrollWidth > el.clientWidth && el.clientWidth > 0; tries += 1) {
+  const over = (): boolean => el.scrollWidth > el.clientWidth && el.clientWidth > 0;
+  for (let tries = 0; tries < 8 && over(); tries += 1) {
     const size = Number.parseFloat(getComputedStyle(el).fontSize);
     const next = Math.max(minPx, Math.floor(((size * el.clientWidth) / el.scrollWidth) * 2) / 2);
     const smaller = next < size ? next : Math.max(minPx, size - 0.5);
-    if (smaller >= size) return;
+    if (smaller >= size) break;
     el.style.fontSize = `${smaller}px`;
   }
+  // True when the line fits (or nothing could be measured); false when even `minPx` is too wide.
+  return !over();
 }
 
 /** The bars of both lanes on one scale: the longer stored total fills the track. */

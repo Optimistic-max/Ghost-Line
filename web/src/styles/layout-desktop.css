@@ -93,6 +93,12 @@
     overflow-x: clip;
   }
 
+  /* Too long for one line even at the smallest size: the pair wraps between its names, never inside one,
+     so nothing is clipped (task 25.9). Each .corner keeps white-space: nowrap (card.css). */
+  .card .pair-row[data-wrap] {
+    white-space: normal;
+  }
+
   /* The phone's line break between the two names (layout-phone.css) is not drawn here. */
   .pair-row .pair-break {
     display: none;

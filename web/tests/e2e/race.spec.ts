@@ -1222,3 +1222,58 @@ test.describe('the result keeps its place (25.4)', () => {
     });
   }
 });
+
+test.describe('the desktop pair names are never cut off (25.9)', () => {
+  /** The pair whose two names together are longest, from index.json. */
+  const longest = (() => {
+    const name = (slug: string): string => INDEX.corners.find((c: { slug: string }) => c.slug === slug).name;
+    return [...INDEX.pairs].sort((a: { origin: string; dest: string }, b: { origin: string; dest: string }) =>
+      (name(b.origin) + name(b.dest)).length - (name(a.origin) + name(a.dest)).length)[0] as { origin: string; dest: string };
+  })();
+
+  /** Whether each corner name ends inside the pair row, with the widths for the message. */
+  const cut = (page: Page): Promise<{ ok: boolean; detail: string }> =>
+    page.evaluate(() => {
+      const row = document.querySelector<HTMLElement>('.pair-row')!;
+      const box = row.getBoundingClientRect();
+      const names = [...row.querySelectorAll<HTMLElement>('.corner')].map((c) => ({ text: c.textContent, right: c.getBoundingClientRect().right }));
+      const ok = row.scrollWidth <= row.clientWidth && names.every((n) => n.right <= box.right + 0.5);
+      const column = document.getElementById('race-card')!;
+      return { ok, detail: JSON.stringify({ rowRight: box.right, scroll: row.scrollWidth, client: row.clientWidth, names, font: getComputedStyle(row).fontSize, scrollbar: column.offsetWidth - column.clientWidth }) };
+    });
+
+  for (const pair of [LEAD_PAIR, longest]) {
+    test(`${pair.origin} → ${pair.dest}: with a classic scrollbar on the race column and the font arriving late, both names fit`, async ({ playwright, baseURL }) => {
+      // Playwright's headless Chromium hides scrollbars; without that flag the race column has a classic one.
+      const browser = await playwright.chromium.launch({ ignoreDefaultArgs: ['--hide-scrollbars'] });
+      const context = await browser.newContext({ baseURL, viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
+      const seen = await guardNetwork(context, true);
+      // The display font arrives 1.5 s after the card is drawn.
+      let release: () => void = () => {};
+      const held = new Promise<void>((done) => (release = done));
+      await context.route('**/*.woff2', async (route) => {
+        await held;
+        await route.continue();
+      });
+      const page = await context.newPage();
+      await page.clock.setFixedTime(newYork('20:00'));
+      // The held font is preloaded, so the load event waits for it: navigation is done once the page is committed.
+      await page.goto(`./${query(pair)}`, { waitUntil: 'commit' });
+      await page.locator('.result').waitFor();
+      const scrollbar = await page.evaluate(() => {
+        const column = document.getElementById('race-card')!;
+        return column.offsetWidth - column.clientWidth;
+      });
+      expect(scrollbar, 'the race column shows a classic scrollbar').toBeGreaterThan(0);
+      const early = await cut(page);
+      expect(early.ok, `before the font: ${early.detail}`).toBe(true);
+      release();
+      await fontsReady(page);
+      await expect.poll(async () => (await cut(page)).ok, { timeout: 3000 }).toBe(true);
+      const late = await cut(page);
+      expect(late.ok, `after the font: ${late.detail}`).toBe(true);
+      await browser.close();
+      expect(seen).toEqual([]);
+    });
+  }
+});
