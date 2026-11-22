@@ -6,7 +6,7 @@ import type { Num } from '../state/specs';
 import { h } from './dom';
 import { type SourceRegistry, sentence } from './numbers';
 
-export type HonestNumbers = { wins1938: Num; races: Num };
+export type HonestNumbers = { wins1938: Num; races: Num; pairs: Num };
 
 export function honestLine(registry: SourceRegistry, honest: Honest, nums: HonestNumbers): HTMLElement {
   const lead =
@@ -17,7 +17,7 @@ export function honestLine(registry: SourceRegistry, honest: Honest, nums: Hones
     'p',
     { class: 'honest', 'data-form': honest.form },
     ...lead,
-    sentence(registry, trolleyFirst, nums.wins1938, nums.races),
+    sentence(registry, trolleyFirst, nums.wins1938, nums.races, nums.pairs),
     ' ',
     h('button', { type: 'button', class: 'link', 'data-action': 'whentoday' }, WHEN_TODAY_WINS),
   );

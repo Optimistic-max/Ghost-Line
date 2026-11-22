@@ -51,8 +51,8 @@ const RENDERED: Record<string, string> = {
   trolleyNoWinner: C.trolleyNoWinner(N),
   INFERRED_CHIP: C.INFERRED_CHIP,
   INFERRED_CAUTION: C.INFERRED_CAUTION,
-  honestLine: C.honestLine('{wins_1938}', '{races}'),
-  honestLineTodayWins: C.honestLineTodayWins('{wins_1938}', '{races}'),
+  honestLine: C.honestLine('{wins_1938}', '{races}', '{pairs}'),
+  honestLineTodayWins: C.honestLineTodayWins('{wins_1938}', '{races}', '{pairs}'),
   rideVerdicts: C.rideVerdicts('{ride_same}', '{pairs}', '{ride_faster_today}'),
   rideSlowerClause: C.rideSlowerClause('{ride_slower_today}'),
   SENTENCE_END: C.SENTENCE_END,
@@ -137,6 +137,10 @@ const RENDERED: Record<string, string> = {
   methodTotalToday: C.methodTotalToday('{h:mm}'),
   METHOD_MARGIN: C.METHOD_MARGIN,
   METHOD_RACE_COUNTS: C.METHOD_RACE_COUNTS,
+  METHOD_PHOTO_BAND: C.METHOD_PHOTO_BAND,
+  whatWins1938: C.whatWins1938('{pairs}'),
+  whatRaces: C.whatRaces('{pairs}'),
+  whatWinsToday: C.whatWinsToday('{pairs}'),
   dateEffective: C.dateEffective('{date}'),
   dateFeed: C.dateFeed('{feed_version}', '{date}'),
   exactValue: C.exactValue('{x}', N),
@@ -215,6 +219,7 @@ const REPLACED = [
   'Counted over every race on this line, one per corner pair and slider minute.',
   "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
   'Start is set. Now choose where the ride ends.',
+  "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners.",
 ];
 
 
@@ -229,6 +234,7 @@ const HELPERS = [
   'WHAT',
   'everyMinutesOr',
   'trolleyFirst',
+  'racesMeaning',
   'captionText',
   'whenTodayWinsSentence',
   'SAME_RIDE',
@@ -324,17 +330,19 @@ describe('helpers', () => {
     const lines = copyTable().raw.split('\n');
     const phrasesOf = (line: string): string[] => [...line.matchAll(/"([^"]*)"/g)].map((m) => m[1]!);
     const raceRow = phrasesOf(lines.find((l) => l.startsWith('| What a number is |'))!);
+    // The three counted phrases carry the number of corner pairs, read from summary.json, so they are functions
+    // of it (task 25.6) and no longer entries of WHAT; each is a quoted string of the story-layer row.
     const replacements: Record<string, string> = {
-      'races where the 1938 trolley arrives first': 'covered starts where the 1938 trolley arrives first',
-      'races on this line': 'covered starts on this line',
+      'races where the 1938 trolley arrives first': C.whatWins1938('{pairs}'),
+      'races on this line': C.whatRaces('{pairs}'),
     };
-    const additions = ["walks to and from the stop, together (estimate)", "covered starts where today's bus arrives first"];
-    // Every replacement and addition is a quoted string of the story-layer row.
+    const additions = ['walks to and from the stop, together (estimate)', 'photo-finish limit'];
+    const counted = [...Object.values(replacements), C.whatWinsToday('{pairs}')];
     const storyRow = storyCopyTable().raw.split('\n').find((l) => l.startsWith('| What a number is (Req 8, Req 13)'))!;
-    for (const phrase of [...Object.keys(replacements), ...Object.values(replacements), ...additions]) {
+    for (const phrase of [...Object.keys(replacements), ...counted, ...additions]) {
       expect(phrasesOf(storyRow), phrase).toContain(phrase);
     }
-    expect(Object.values(C.WHAT)).toEqual([...raceRow.map((p) => replacements[p] ?? p), ...additions]);
+    expect(Object.values(C.WHAT)).toEqual([...raceRow.filter((p) => !(p in replacements)), ...additions]);
   });
 
   it('the replaced race-screen strings are gone from the effective table and from copy.ts', () => {
@@ -401,7 +409,7 @@ describe('helpers', () => {
   });
 
   it('the honest-line parts are exactly the two honest lines, in order', () => {
-    const counts = C.trolleyFirst('{wins_1938}', '{races}');
+    const counts = C.trolleyFirst('{wins_1938}', '{races}', '{pairs}');
     expect([C.SAME_RIDE, counts, C.WHEN_TODAY_WINS].join(' ')).toBe(RENDERED.honestLine);
     expect([C.TODAY_WINS_THIS_RACE, C.ACROSS_THIS_LINE, counts, C.WHEN_TODAY_WINS].join(' ')).toBe(
       RENDERED.honestLineTodayWins,

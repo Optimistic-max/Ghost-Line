@@ -10,6 +10,7 @@ import {
   METHOD_TOTAL_1938,
   METHOD_WAIT_BUS,
   METHOD_WALK_SUM,
+  METHOD_PHOTO_BAND,
   WHAT,
   frequency,
   methodBusTrip,
@@ -22,6 +23,10 @@ import {
   whatBetween,
   whatBusGaps,
   whatFrom,
+  whatRaces,
+  whatWins1938,
+  whatWinsToday,
+  minutes,
 } from '../copy/copy';
 import { tripAt } from '../data/lookup';
 import type { RaceFile, RaceRow, SourceId, Summary, Trip } from '../data/types';
@@ -408,9 +413,28 @@ export function countNum(summary: Summary, key: keyof Summary['sources'] & strin
 
 /** The honest-line counts. */
 export function honestNumbers(summary: Summary) {
+  const pairs = formatCount(summary.pairs.length);
   return {
-    wins1938: countNum(summary, 'wins_1938', WHAT.wins1938, METHOD_RACE_COUNTS, summary.wins_1938, 'count-wins-1938'),
-    races: countNum(summary, 'races', WHAT.races, METHOD_RACE_COUNTS, summary.races, 'count-races'),
+    wins1938: countNum(summary, 'wins_1938', whatWins1938(pairs), METHOD_RACE_COUNTS, summary.wins_1938, 'count-wins-1938'),
+    races: countNum(summary, 'races', whatRaces(pairs), METHOD_RACE_COUNTS, summary.races, 'count-races'),
+    pairs: pairsNum(summary),
+  };
+}
+
+/** The number of corner pairs, read from summary.json: in the honest line and in the "When today wins" sentence. */
+export function pairsNum(summary: Summary): Num {
+  const rule = summary.ride_same_rule;
+  const verdicts = methodRideVerdicts(String(rule.minutes), String(rule.fraction_pct));
+  return countNum(summary, 'pairs', WHAT.pairs, verdicts, summary.pairs.length, 'count-pairs');
+}
+
+/** The photo-finish limit, from index.json: next to a photo-finish result (task 25.6). */
+export function photoBandNum(band: number): Num {
+  return {
+    spec: { id: 'photo-band', value: minutes(band), what: WHAT.photoBand, rowWhat: WHAT.photoBand, sourceIds: ['method'], method: METHOD_PHOTO_BAND, date: 'both' },
+    text: minutes(band),
+    bare: String(band),
+    n: band,
   };
 }
 
@@ -423,9 +447,9 @@ export function verdictNumbers(summary: Summary) {
   const rule = summary.ride_same_rule;
   const verdicts = methodRideVerdicts(String(rule.minutes), String(rule.fraction_pct));
   return {
-    winsToday: countNum(summary, 'wins_today', WHAT.winsToday, METHOD_RACE_COUNTS, summary.wins_today, 'count-wins-today'),
+    winsToday: countNum(summary, 'wins_today', whatWinsToday(formatCount(summary.pairs.length)), METHOD_RACE_COUNTS, summary.wins_today, 'count-wins-today'),
     rideSame: countNum(summary, 'ride_same', WHAT.rideSame, verdicts, summary.ride_same, 'count-ride-same'),
-    pairs: countNum(summary, 'pairs', WHAT.pairs, verdicts, summary.pairs.length, 'count-pairs'),
+    pairs: pairsNum(summary),
     rideFaster: countNum(
       summary,
       'ride_faster_today',

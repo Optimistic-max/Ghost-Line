@@ -336,7 +336,7 @@ describe('When today wins (13.4)', () => {
         today_wins: real.today_wins.slice(0, 3),
       };
       await finished({ override: { 'summary.json': other } });
-      expect(text(document.querySelector('.honest'))).toBe(C.honestLine(formatCount(1234), formatCount(4321)));
+      expect(text(document.querySelector('.honest'))).toBe(C.honestLine(formatCount(1234), formatCount(4321), formatCount(other.pairs.length)));
       click('#card-scroll [data-action="whentoday"]');
       expect(text(sheet()!.querySelector('.whentoday-sentence'))).toBe(sentenceOf(other));
       expect(text(sheet()!.querySelector('.whentoday-sentence')).includes(C.rideSlowerClause(formatCount(2)))).toBe(slower > 0);

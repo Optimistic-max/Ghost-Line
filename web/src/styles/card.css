@@ -789,6 +789,12 @@
   color: var(--ink);
 }
 
+/* What a photo finish means, under the result box of a photo finish (task 25.6). */
+.result-note {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
 /* ---- Honest line --------------------------------------------------------------- */
 
 .honest {

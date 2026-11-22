@@ -59,7 +59,7 @@ describe('a 1938 win: the lead pair at 10:00', () => {
   it('uses the plain honest line, with the counts of summary.json', () => {
     const honest = root.querySelector('.honest')!;
     expect(honest.getAttribute('data-form')).toBe('plain');
-    expect(text(honest)).toBe(C.honestLine(formatCount(data.summary.wins_1938), formatCount(data.summary.races)));
+    expect(text(honest)).toBe(C.honestLine(formatCount(data.summary.wins_1938), formatCount(data.summary.races), formatCount(data.summary.pairs.length)));
     expect(text(num(root, 'count-wins-1938'))).toBe(formatCount(data.summary.wins_1938));
     expect(text(num(root, 'count-races'))).toBe(formatCount(data.summary.races));
   });
@@ -133,7 +133,7 @@ describe('a today win: Westwood & Carey to Preston & Caroline at 11:23', () => {
   it('uses the today-wins honest line', () => {
     const honest = root.querySelector('.honest')!;
     expect(honest.getAttribute('data-form')).toBe('today-wins');
-    expect(text(honest)).toBe(C.honestLineTodayWins(formatCount(data.summary.wins_1938), formatCount(data.summary.races)));
+    expect(text(honest)).toBe(C.honestLineTodayWins(formatCount(data.summary.wins_1938), formatCount(data.summary.races), formatCount(data.summary.pairs.length)));
   });
 
   it('draws the result box exactly like a 1938 win, apart from the colour (P8)', () => {

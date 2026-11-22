@@ -12,6 +12,7 @@ import {
   START_IS_NOW,
   beforeTable,
   captionText,
+  photoFinishMeaning,
   ready,
   todayWinNotice,
 } from '../copy/copy';
@@ -21,7 +22,7 @@ import { routeNumberOf } from '../format/line';
 import { label12, serviceDateLabel } from '../format/time';
 import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
-import { honestNumbers, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
+import { honestNumbers, photoBandNum, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
 import { boardView } from './board';
 import { departuresView } from './departures';
 import { h } from './dom';
@@ -83,13 +84,19 @@ export function resultElements(registry: SourceRegistry, input: CardInput, enter
     margin: nums.margin,
   });
   const honest = honestLine(registry, input.view.honest, honestNumbers(input.summary));
+  // A photo finish says what it means, next to the result (task 25.6); the limit is a number with its source.
+  const note =
+    input.view.result === 'photo_finish'
+      ? h('p', { class: 'result-note' }, sentence(registry, photoFinishMeaning, photoBandNum(input.index.photo_finish_min)))
+      : null;
   const takeaway = takeawayView(registry, input.view, takeawayNumbers(input.race, input.view));
   if (entering) {
     box.classList.add('entering');
     honest.classList.add('entering');
+    note?.classList.add('entering');
     takeaway.classList.add('entering');
   }
-  return [box, honest, takeaway];
+  return note ? [box, note, honest, takeaway] : [box, honest, takeaway];
 }
 
 /** The race clock row while anything moves: "10:08 scheduled" (racer.ts writes it) and "Skip to result". */

@@ -135,19 +135,24 @@ export const TODAY_WINS_THIS_RACE = 'Today wins this race.';
 export const ACROSS_THIS_LINE = 'Across this line: same ride, longer wait.';
 export const WHEN_TODAY_WINS = 'When today wins';
 
-/** Counts from summary.json: wins_1938 and races, already formatted. */
-export function trolleyFirst(wins1938: string, races: string): string {
-  return `Trolley first in ${wins1938} of ${races} covered starts.`;
+/** What a race is, in brackets; `pairs` is summary.pairs.length, already formatted (task 25.6). */
+export function racesMeaning(pairs: string): string {
+  return `(every start time the 1938 timetable covers, at all ${pairs} pairs of corners)`;
+}
+
+/** Counts from summary.json: wins_1938, races and the number of corner pairs, already formatted. */
+export function trolleyFirst(wins1938: string, races: string, pairs: string): string {
+  return `Trolley first in ${wins1938} of ${races} races ${racesMeaning(pairs)}.`;
 }
 
 /** The honest line for a 1938 win, a photo finish and no one-seat ride. */
-export function honestLine(wins1938: string, races: string): string {
-  return `${SAME_RIDE} ${trolleyFirst(wins1938, races)} ${WHEN_TODAY_WINS}`;
+export function honestLine(wins1938: string, races: string, pairs: string): string {
+  return `${SAME_RIDE} ${trolleyFirst(wins1938, races, pairs)} ${WHEN_TODAY_WINS}`;
 }
 
 /** The honest line when today wins the race on screen. */
-export function honestLineTodayWins(wins1938: string, races: string): string {
-  return `${TODAY_WINS_THIS_RACE} ${ACROSS_THIS_LINE} ${trolleyFirst(wins1938, races)} ${WHEN_TODAY_WINS}`;
+export function honestLineTodayWins(wins1938: string, races: string, pairs: string): string {
+  return `${TODAY_WINS_THIS_RACE} ${ACROSS_THIS_LINE} ${trolleyFirst(wins1938, races, pairs)} ${WHEN_TODAY_WINS}`;
 }
 
 export function rideVerdicts(rideSame: string, pairs: string, rideFasterToday: string): string {
@@ -360,8 +365,6 @@ export const WHAT = {
   totalToday: "today's scheduled total, walking included (estimated)",
   busDeparture: 'scheduled bus departure',
   margin: 'difference of the two scheduled totals',
-  wins1938: 'covered starts where the 1938 trolley arrives first',
-  races: 'covered starts on this line',
   rideSame: 'corner pairs with about the same scheduled ride',
   pairs: 'corner pairs on this line',
   rideFasterToday: "corner pairs where today's scheduled ride is faster",
@@ -369,8 +372,24 @@ export const WHAT = {
   spacing1938: 'scheduled spacing of 1938 cars at this corner',
   // Story-layer rows, after the race-screen phrases.
   walkSum: 'walks to and from the stop, together (estimate)',
-  winsToday: "covered starts where today's bus arrives first",
+  photoBand: 'photo-finish limit',
 } as const;
+
+/**
+ * What the three race counts are (task 25.6): "races", with the brackets that say what a race is. `pairs` is
+ * summary.pairs.length, already formatted; none of these holds a count of its own.
+ */
+export function whatWins1938(pairs: string): string {
+  return `races ${racesMeaning(pairs)} where the 1938 trolley arrives first`;
+}
+
+export function whatRaces(pairs: string): string {
+  return `races ${racesMeaning(pairs)} on this line`;
+}
+
+export function whatWinsToday(pairs: string): string {
+  return `races ${racesMeaning(pairs)} where today's bus arrives first`;
+}
 
 /** What the board's bus gaps are; the window is the race file's, in 12-hour form. */
 export function whatBusGaps(windowFrom: string, windowTo: string): string {
@@ -420,6 +439,8 @@ export function methodTotalToday(hm: string): string {
   return `Walks, wait and ride, from ${hm} to the destination corner.`;
 }
 
+/** How the photo-finish limit was set (task 25.6). */
+export const METHOD_PHOTO_BAND = 'A race whose two totals are less than this apart is a photo finish.';
 export const METHOD_MARGIN = 'The difference of the two totals as shown.';
 export const METHOD_RACE_COUNTS =
   'Counted over every corner pair and every start minute that the 1938 midday timetable covers at the start corner. Earlier minutes, which race from the first listed car, are not counted.';
@@ -451,7 +472,7 @@ export const ONE_MINUTE_LATER = 'One minute later';
 export const SWAP_DIRECTION = 'Swap direction';
 
 export const HEADLINE_LINE =
-  "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners.";
+  "Baltimore's 1938 trackless trolley, an electric bus that ran on overhead wires, raced against today's scheduled bus between the same two corners.";
 
 export function todayWinEntry(origin: string, dest: string, hm: string): string {
   return `${origin} → ${dest}, ${hm} (scheduled)`;
@@ -473,7 +494,8 @@ export function exampleLabel(time: string): string {
   return `Example start: ${time} scheduled.`;
 }
 
-export const PHONE_INTRO = "Race Baltimore's 1938 trolley against today's scheduled bus.";
+export const PHONE_INTRO =
+  "Race Baltimore's 1938 trackless trolley, an electric bus that ran on overhead wires, against today's scheduled bus.";
 export const ORIENTATION_LINE = 'Same two corners. Walking included for today; walks are estimates.';
 
 // ---- Captions (Req 7). No template takes a number. -----------------------------
