@@ -31,5 +31,6 @@ include = ["pipeline*"]
 addopts = "-m 'not timing'"
 markers = [
     "requires_feed: reads the pinned feed zip in raw/; skipped with a visible warning when it is absent",
+    "needs_mcp_sdk: talks to the MCP server; skipped with a visible warning only when the MCP SDK (skeptic group) is not installed, and must run where it is installed",
     "timing: asserts a wall-clock limit; excluded by default, run with python -m pipeline check --timing on a quiet machine",
 ]

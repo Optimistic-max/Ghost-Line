@@ -5,6 +5,7 @@ until their tasks are done.
 """
 
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -250,6 +251,18 @@ def cmd_build(args: argparse.Namespace) -> None:
     print("build: OK")
 
 
+def mcp_sdk_line() -> str:
+    """One line saying whether the protocol test of the MCP server will run or be skipped.
+
+    The test needs the optional "skeptic" dependency group. It is skipped, with a
+    warning, only when the SDK is not installed. The exit code of check does not
+    depend on this, so the hosted build still passes without the SDK.
+    """
+    if importlib.util.find_spec("mcp") is not None:
+        return "check: MCP SDK installed: the protocol test will run"
+    return "check: WARNING: MCP SDK not installed: the protocol test will be SKIPPED (pip install -e .[skeptic])"
+
+
 def run_check(root: Path, say=print, runner=None) -> int:
     """Build, then run pytest. Returns the exit code: 1 if the build fails,
     otherwise pytest's own exit code.
@@ -268,9 +281,11 @@ def run_check(root: Path, say=print, runner=None) -> int:
         say(f"check: build FAILED: {exc}")
         return 1
     say("check: build OK, running pytest")
+    say(mcp_sdk_line())
     result = runner([sys.executable, "-m", "pytest", "-q"], cwd=str(root))
     code = int(result.returncode)
     say(f"check: pytest exited with {code}")
+    say(mcp_sdk_line())
     return code
 
 
@@ -294,9 +309,11 @@ def run_check_quick(root: Path, say=print, runner=None) -> int:
             say(f"  {p}")
         return 1
     say("check --quick: validate OK, running pytest without requires_feed and timing tests")
+    say(mcp_sdk_line())
     result = runner([sys.executable, "-m", "pytest", *QUICK_PYTEST_ARGS], cwd=str(root))
     code = int(result.returncode)
     say(f"check --quick: pytest exited with {code}")
+    say(mcp_sdk_line())
     return code
 
 

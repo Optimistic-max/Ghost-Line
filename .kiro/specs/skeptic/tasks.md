@@ -32,19 +32,19 @@ Rules for every task:
     - Commit: "Add skeptic optional dependency group".
     - _Requirements: R1.7, R1.8_
 
-- [ ] 3. Test plumbing: marker, conftest hooks, check-command line
-  - [ ] 3.1 Register the needs_mcp_sdk marker and the conftest hooks
+- [x] 3. Test plumbing: marker, conftest hooks, check-command line
+  - [x] 3.1 Register the needs_mcp_sdk marker and the conftest hooks
     - Register `needs_mcp_sdk` in pyproject.toml next to requires_feed and timing.
     - In tests/conftest.py, add a collection hook that uses `importlib.util.find_spec("mcp") is None`. When absent: skip marked items with the reason "the MCP SDK is not installed: protocol test SKIPPED (pip install -e .[skeptic])" and call `warnings.warn` with the count and that reason, as the feed hook does. When present but broken: do not skip.
     - Add `pytest_runtest_logreport` to record node ids of needs_mcp_sdk tests whose outcome is skipped, and `pytest_sessionfinish` to print the list and set `session.exitstatus = 1` if the SDK is installed and the list is not empty. Deselected tests do not count.
     - _Requirements: R9.6 (addition), R9.7_
 
-  - [ ] 3.2 Add mcp_sdk_line() to pipeline/cli.py and use it in the check commands
+  - [x] 3.2 Add mcp_sdk_line() to pipeline/cli.py and use it in the check commands
     - `mcp_sdk_line()` returns "check: MCP SDK installed: the protocol test will run" or "check: WARNING: MCP SDK not installed: the protocol test will be SKIPPED (pip install -e .[skeptic])", chosen with `importlib.util.find_spec("mcp")`.
     - `run_check` and `run_check_quick` say the line before pytest starts and again after "pytest exited with N". The exit code does not change when the SDK is absent. Leave `QUICK_PYTEST_ARGS`, the pytest argument lists and the `runner` interface unchanged. `check --timing` prints no line.
     - _Requirements: R9.6 (addition), R9.7_
 
-  - [ ] 3.3 Write tests for the helper, the check output and the skip guard
+  - [x] 3.3 Write tests for the helper, the check output and the skip guard
     - Unit tests for `mcp_sdk_line()` with a patched `find_spec` (both lines), and for `run_check` and `run_check_quick` with an injected `say` and runner: line appears before and after pytest, exit code unchanged when absent.
     - A pytester-style or subprocess test for the guard: an SDK-installed run with a needs_mcp_sdk test that calls `pytest.skip` ends with exit status 1 and lists the test; the same test with the SDK absent (find_spec patched) skips with the warning and does not fail.
     - Run the existing cli tests to confirm they still pass.
