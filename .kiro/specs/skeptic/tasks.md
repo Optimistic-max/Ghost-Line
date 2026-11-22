@@ -101,15 +101,15 @@ Rules for every task:
     - Commit: "Add independence tests for the MCP server".
     - _Requirements: R1.5, R1.6, R2.1, R2.2, R2.5, R7.10, R9.5_
 
-- [ ] 7. Fixtures for the Skeptic
-  - [ ] 7.1 Write clean.md and planted.md
+- [x] 7. Fixtures for the Skeptic
+  - [x] 7.1 Write clean.md and planted.md
     - Before writing, read web/public/data/index.json, summary.json and race/*.json for the lead pair. Verify the two required sentences against the data at this time: "36 scheduled one-seat buses from Biddle St & Caroline Ave to Caroline St & Eastern Ave on the Wed Nov 4, 2026 weekday schedule" and "1938 wins by 30 minutes at 10:00 AM (Preston & Caroline to Aliceanna & Bond)".
     - If a number in either sentence does not match the data, stop and tell Emmanuel. Do not change a value to fit.
     - Create tests/fixtures/skeptic/clean.md with those two sentences and a few more claims, each taken from the data files as read in this task, not from memory. Create tests/fixtures/skeptic/planted.md identical except 36 becomes 38 and the added sentence "Ridership on the No. 21 doubled in 1938."
     - No wording banned for service times in either file. Neither file goes under docs/.
     - _Requirements: R8.1, R8.2, R8.3, R8.5_
 
-  - [ ] 7.2 Test the fixtures
+  - [x] 7.2 Test the fixtures
     - Create tests/unit/test_skeptic_fixtures.py: both required sentences are in clean.md; clean and planted differ in exactly the two places (one changed line, 36 to 38, and one added sentence); neither file contains a term found by `pipeline.check_sources.find_banned_terms`; neither path is under docs/.
     - Commit: "Add planted-error fixtures for the Skeptic".
     - _Requirements: R8.1, R8.2, R8.3, R8.4, R8.5_
