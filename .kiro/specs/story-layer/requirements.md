@@ -373,6 +373,7 @@ New rows, and rows that replace a race-screen row (marked **replaces**). Placeho
 | Slider ends (Req 9) | "{h:mm AM/PM}" for both ends, read from the Race_File (**replaces** the 24-hour end labels) |
 | Chart heading (Req 9) | "How much does the start time matter?" |
 | Chart prompt heading, Guided_Parts only (Req 3, Req 9) | "How much does your start time matter?" (replaces the chart heading while the Guided_Parts show) |
+| Chart reading line (task 25.7) | "Each point is a different start time. Lower is faster." (directly under the chart heading) |
 | Chart subheading (Req 9) | "Scheduled journey minutes for each start time, for these corners and this direction." |
 | Chart legend (Req 9) | "1938 trolley"; "Today's bus, walking included (estimated)" |
 | Chart readout (Req 9) | "At {h:mm AM/PM}: trolley {n} min, today's bus {m} min." (with no one-seat ride: "At {h:mm AM/PM}: trolley {n} min.") |

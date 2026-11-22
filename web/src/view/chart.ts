@@ -9,6 +9,7 @@ import {
   CHART_LEGEND_1938,
   CHART_LEGEND_TODAY,
   CHART_PROMPT_HEADING,
+  CHART_READING,
   CHART_SUBHEADING,
   chartReadout,
   chartReadoutTrolley,
@@ -92,6 +93,7 @@ export function chartView(registry: SourceRegistry, input: ChartInput): HTMLElem
     'section',
     { class: 'chart' },
     h('h3', { class: input.guided ? 'chart-heading chart-prompt' : 'chart-heading' }, input.guided ? CHART_PROMPT_HEADING : CHART_HEADING),
+    h('p', { class: 'chart-reading' }, CHART_READING),
     h('p', { class: 'chart-sub' }, CHART_SUBHEADING),
     h(
       'ul',

@@ -623,6 +623,8 @@ export const SLIDER_LABEL = 'Choose a scheduled start time';
 export const CHART_HEADING = 'How much does the start time matter?';
 export const CHART_PROMPT_HEADING = 'How much does your start time matter?';
 export const CHART_SUBHEADING = 'Scheduled journey minutes for each start time, for these corners and this direction.';
+/** How to read the chart, directly under its heading (task 25.7). */
+export const CHART_READING = 'Each point is a different start time. Lower is faster.';
 export const CHART_LEGEND_1938 = '1938 trolley';
 export const CHART_LEGEND_TODAY = "Today's bus, walking included (estimated)";
 

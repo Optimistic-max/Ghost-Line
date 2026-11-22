@@ -71,3 +71,14 @@ describe('the photo-finish meaning', () => {
     expect(r.root.querySelector('.result-note')).toBeNull();
   });
 });
+
+describe('the chart reading line (task 25.7)', () => {
+  it('sits directly under the chart heading, before the subheading', () => {
+    const r = renderAt(real, lead, '10:00');
+    const heading = r.root.querySelector('.chart-heading')!;
+    const line = heading.nextElementSibling!;
+    expect(line.className).toBe('chart-reading');
+    expect(text(line)).toBe('Each point is a different start time. Lower is faster.');
+    expect(line.nextElementSibling!.className).toBe('chart-sub');
+  });
+});

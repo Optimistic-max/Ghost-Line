@@ -224,7 +224,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - [x] 25.4 Reserve the result box's space before it appears, so nothing below it moves when it does.
   - [x] 25.5 Say whose wait: "The trolley passenger's wait accounts for most of the difference." when today wins, and "Today's passenger's wait accounts for most of the difference." when 1938 wins.
   - [x] 25.6 Plain words: explain "trackless trolley" once in the intro line; replace "covered starts" with "races (every start time the 1938 timetable covers, at all 20 pairs of corners)" in the honest line and the matching "what a number is" rows; show the photo-finish meaning next to a photo-finish result.
-  - [ ] 25.7 Chart: add the line "Each point is a different start time. Lower is faster." under its heading.
+  - [x] 25.7 Chart: add the line "Each point is a different start time. Lower is faster." under its heading.
   - [ ] 25.8 Readability: small map, strip and chart labels at least 12 px and full --ink or --muted contrast (4.5:1 checked).
   - [ ] 25.9 Desktop title cut-off ("Aliceanna & Bon" at 1280 px): reproduce with a classic scrollbar on the race column and while the font is loading, fix it, test the longest pair.
   - [ ] 25.10 Find and fix the browser console error on the deployed page, log the URL that fails, and add a test that the page logs no errors.

@@ -183,6 +183,7 @@
   line-height: 1.25;
 }
 
+.chart-reading,
 .chart-sub {
   margin-top: 2px;
   color: var(--muted);
