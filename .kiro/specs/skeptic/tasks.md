@@ -114,19 +114,19 @@ Rules for every task:
     - Commit: "Add planted-error fixtures for the Skeptic".
     - _Requirements: R8.1, R8.2, R8.3, R8.4, R8.5_
 
-- [ ] 8. Kiro wiring
-  - [ ] 8.1 Register the server in .kiro/settings/mcp.json
+- [x] 8. Kiro wiring
+  - [x] 8.1 Register the server in .kiro/settings/mcp.json
     - If the file exists, read it and add only the "ghostline-gtfs" entry (command `python`, args `["-m", "pipeline.mcp_server"]`, env GHOSTLINE_GTFS_ZIP "raw/mta_local_bus.zip", disabled false). Keep every other entry as it is. If it does not exist, create it with that one entry.
     - _Requirements: R6.1_
 
-  - [ ] 8.2 Write the agent and the steering file
+  - [x] 8.2 Write the agent and the steering file
     - Create .kiro/agents/skeptic.md with front matter name `skeptic`, a description saying it is a read-only fact checker given file paths that reports each claim as OK, MISMATCH or UNSOURCED with evidence, and `tools: ["read", "@ghostline-gtfs"]`. No write tool, no shell tool.
     - Body follows design 3.2: role, evidence order with exact paths (index.json, summary.json, race/*.json, route.geojson, data/lines/no21-1938.yaml, web/src/copy/copy.ts, docs/kiro-usage.md, then the ghostline-gtfs tools), output line format and last line (PASS or "FAIL: <n> MISMATCH, <m> UNSOURCED"), MISMATCH and UNSOURCED definitions, matching rules, honesty rules as evidence including the banned words and "citywide" and the one exception "Scheduled, not live.", how to check a bus-trip claim (stop ids from evidence, feed_info once, then trips_serving, quote the answer; no stop ids in evidence means UNSOURCED), wording and field checks read from the evidence at check time (the honest line, `summary.ride_same_rule`, `wait_most`) with none of their values typed in, and the ban on editing, proposing replacement numbers and guessing. A missing input file is reported as an error line, not a pass.
     - Create .kiro/steering/skeptic-check.md with front matter `inclusion: manual`. It asks the main agent to invoke the skeptic agent on the files named after the command, or on docs/video_script.md and docs/devpost.md when none are named, and to show the report unchanged.
     - No golden value in either file.
     - _Requirements: R6.2, R6.3, R6.5, R7.1, R7.2, R7.3, R7.4, R7.5, R7.6, R7.7, R7.8, R7.9, R7.10_
 
-  - [ ] 8.3 Test the wiring and the agent's permissions
+  - [x] 8.3 Test the wiring and the agent's permissions
     - Create tests/unit/test_skeptic_agent.py. Parse front matter with PyYAML. Assert: name is `skeptic`; tools are exactly "read" plus entries starting with "@" that name ghostline-gtfs (or "@mcp" only as the documented fallback); neither `write` nor `shell` appears and no other tool appears; skeptic-check.md has `inclusion: manual`; mcp.json holds the entry exactly as specified; `.gitignore` has no `.kiro` line.
     - Assert none of the golden tokens appear in skeptic.md or skeptic-check.md (R7.10).
     - Commit: "Add Skeptic agent, steering command and Kiro MCP entry" (stage .kiro/ files and the test).

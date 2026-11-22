@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ghostline-gtfs": {
+      "command": "python",
+      "args": ["-m", "pipeline.mcp_server"],
+      "env": {
+        "GHOSTLINE_GTFS_ZIP": "raw/mta_local_bus.zip"
+      },
+      "disabled": false
+    }
+  }
+}
