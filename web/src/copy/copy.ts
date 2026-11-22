@@ -576,6 +576,9 @@ export function takeawayRidingTrolley(c: number): string {
 }
 
 export const TAKEAWAY_MOST = 'Waiting accounts for most of the difference in this race.';
+/** Whose wait it is (task 25.5): the loser's. When today wins, the trolley passenger waited longer; when 1938 wins, today's passenger did. */
+export const TAKEAWAY_MOST_TROLLEY = "The trolley passenger's wait accounts for most of the difference.";
+export const TAKEAWAY_MOST_TODAY = "Today's passenger's wait accounts for most of the difference.";
 export const METHOD_WALK_SUM = 'Sum of the two walks as shown, to and from the stop.';
 
 // ---- Next steps and the today-win notice (Req 10) ----------------------------------

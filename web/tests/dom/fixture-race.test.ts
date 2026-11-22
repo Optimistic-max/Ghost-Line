@@ -81,7 +81,7 @@ describe('the made-up race file on the page (Req 16.8)', () => {
     expect(row).toBeDefined();
     await at(row.t);
     expect(clockOf(minutesOf(row.t))).toBe(row.t);
-    expect(text(document.querySelector('.takeaway .takeaway-most'))).toBe(C.TAKEAWAY_MOST);
+    expect(text(document.querySelector('.takeaway .takeaway-most'))).toBe(row.result === 'today' ? C.TAKEAWAY_MOST_TROLLEY : C.TAKEAWAY_MOST_TODAY);
     const readout = document.querySelector('.chart-readout')!;
     expect(value(readout.querySelector('button.num[data-source="readout-1938"]')!)).toBe(shown(row.y1938.total));
     expect(value(readout.querySelector('button.num[data-source="readout-today"]')!)).toBe(shown(row.today!.total));

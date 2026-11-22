@@ -174,6 +174,8 @@ const RENDERED: Record<string, string> = {
   takeawayWaitingTrolley: C.takeawayWaitingTrolley(n('{a}')),
   takeawayRidingTrolley: C.takeawayRidingTrolley(n('{c}')),
   TAKEAWAY_MOST: C.TAKEAWAY_MOST,
+  TAKEAWAY_MOST_TROLLEY: C.TAKEAWAY_MOST_TROLLEY,
+  TAKEAWAY_MOST_TODAY: C.TAKEAWAY_MOST_TODAY,
   METHOD_WALK_SUM: C.METHOD_WALK_SUM,
   NEXT_TRY_TIME: C.NEXT_TRY_TIME,
   NEXT_TRY_CORNERS: C.NEXT_TRY_CORNERS,

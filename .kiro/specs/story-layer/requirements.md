@@ -364,7 +364,8 @@ New rows, and rows that replace a race-screen row (marked **replaces**). Placeho
 | {still } rule | "still " only while the other side has arrived; otherwise nothing |
 | Takeaway heading (Req 8) | "Where the time goes" |
 | Takeaway rows (Req 8) | "Waiting: trolley {a} min, today's bus {b} min."; "Walking (estimate): today's bus {w} min."; "Riding: trolley {c} min, today's bus {d} min." ({w} is the sum of the shown walk parts. With no one-seat ride: "Waiting: trolley {a} min." and "Riding: trolley {c} min.") |
-| Most of the difference (Req 8) | "Waiting accounts for most of the difference in this race." |
+| Most of the difference (Req 8) | "Waiting accounts for most of the difference in this race." (kept only for a row that is not a win and still carries the flag, which the pipeline never writes) |
+| Most of the difference, whose wait (task 25.5) | when today wins: "The trolley passenger's wait accounts for most of the difference."; when 1938 wins: "Today's passenger's wait accounts for most of the difference." |
 | Next-step actions (Req 10) | "Try another time"; "Try other corners"; "Show a race today wins" |
 | Today-win notice (Req 10) | "Showing a race today wins: {origin} → {dest}, starting {h:mm AM/PM} (scheduled)." (the time is plain text, not a Number_Button; the notice sits directly under the schedule line) |
 | Slider label (Req 9) | visible label and input name "Choose a scheduled start time" (**replaces** the input name "Start time") |

@@ -18,6 +18,9 @@ const legend = (root: Element, side: '1938' | 'today'): number[] =>
   [...root.querySelectorAll(`.lane-${side} .legend button.num`)].map(value);
 
 const takeawayRows = (root: Element): string[] => [...root.querySelectorAll('.takeaway .takeaway-row')].map(text);
+/** Whose wait the sentence names: the loser's (task 25.5). */
+const mostText = (result: string): string =>
+  result === 'today' ? C.TAKEAWAY_MOST_TROLLEY : result === '1938' ? C.TAKEAWAY_MOST_TODAY : C.TAKEAWAY_MOST;
 const mostSentence = (root: Element): Element | null => root.querySelector('.takeaway .takeaway-most');
 
 /** The rows the takeaway must show, worked out from the lane legends of the same render. */
@@ -67,7 +70,7 @@ describe('Property 8: the takeaway repeats the lane values and follows the store
         checkNumbers(r);
         const stored = r.view.row.wait_most;
         expect(mostSentence(r.root) !== null).toBe(stored);
-        if (mostSentence(r.root)) expect(text(mostSentence(r.root))).toBe(C.TAKEAWAY_MOST);
+        if (mostSentence(r.root)) expect(text(mostSentence(r.root))).toBe(mostText(r.view.result));
 
         // The same row with the flag flipped: only the sentence changes.
         const flipped = renderAt(withFlag(data, race, t, !stored), race, t);
@@ -87,7 +90,7 @@ describe('the lead race at 10:00 on real data', () => {
     expect(r.view.row.wait_most).toBe(true);
     expect(text(r.root.querySelector('.takeaway .takeaway-heading'))).toBe(C.TAKEAWAY_HEADING);
     expect(takeawayRows(r.root)).toEqual(expectedRows(r));
-    expect(text(mostSentence(r.root))).toBe(C.TAKEAWAY_MOST);
+    // 1938 wins this race, so it is today's passenger's wait (task 25.5).\r\n    expect(r.view.result).toBe('1938');\r\n    expect(text(mostSentence(r.root))).toBe(C.TAKEAWAY_MOST_TODAY);
   });
 
   it('repeats the lane legend values as its own number buttons', () => {
