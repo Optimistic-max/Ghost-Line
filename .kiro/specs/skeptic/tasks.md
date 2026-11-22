@@ -132,8 +132,8 @@ Rules for every task:
     - Commit: "Add Skeptic agent, steering command and Kiro MCP entry" (stage .kiro/ files and the test).
     - _Requirements: R6.1, R6.2, R6.3, R6.4, R6.5, R6.6, R7.10, R9.5_
 
-- [ ] 9. Protocol test
-  - [ ] 9.1 Write the stdio protocol test (needs_mcp_sdk, must run where the SDK is installed)
+- [x] 9. Protocol test
+  - [x] 9.1 Write the stdio protocol test (needs_mcp_sdk, must run where the SDK is installed)
     - Create tests/unit/test_mcp_protocol.py marked `needs_mcp_sdk`, with no `skip`, `skipif` or `xfail` inside it. Start `python -m pipeline.mcp_server` as a subprocess with GHOSTLINE_GTFS_ZIP pointing at a path that does not exist. Send initialize and tools/list over stdio. Assert every line of standard output parses as a protocol message and that both tools are listed. Call `feed_info` and assert the reply is flagged as an error (fail closed on the wire). Use timeouts so a hang fails the test and the subprocess is always terminated.
     - Run it and confirm it runs, not skips. If an exception in a tool does not become an error result, change only the wrapper to return the SDK's error result, keep R5.4's contract, and note it in sdk-notes.md.
     - Commit: "Add MCP protocol test".
