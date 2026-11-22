@@ -36,7 +36,7 @@ def trip_specs(draw):
         t = start
         calls = []
         for seq in range(1, length + 1):
-            calls.append((seq * draw(st.integers(1, 3)), draw(st.sampled_from(STOPS)), t))
+            calls.append((seq * 3 + draw(st.integers(0, 2)), draw(st.sampled_from(STOPS)), t))  # unique, with gaps
             t += draw(st.integers(0, 3600))
         calls.sort(key=lambda c: c[0])
         specs[f"T{draw(st.integers(0, 999))}_{n}"] = calls

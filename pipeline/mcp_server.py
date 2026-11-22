@@ -252,6 +252,9 @@ def _read_feed(zf: zipfile.ZipFile, sha256: str) -> Feed:
     stop_trips: dict[str, set[str]] = {}
     for trip_id, rows in calls.items():
         rows.sort(key=lambda call: call.seq)
+        for earlier, later in zip(rows, rows[1:]):
+            if earlier.seq == later.seq:  # GTFS: stop_sequence is unique within a trip
+                raise _FeedFormatError(f"stop_times.txt: trip {trip_id!r} repeats stop_sequence {later.seq}")
         route_name, headsign = trip_info[trip_id]
         trips[trip_id] = Trip(trip_id, route_name, headsign, tuple(rows))
         for call in rows:

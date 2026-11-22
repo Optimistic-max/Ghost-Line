@@ -397,3 +397,11 @@ def test_a_loader_that_crashes_publishes_an_error_feed(tmp_path):
     assert feed.error and "made-up crash" in feed.error
     with pytest.raises(srv.FeedUnavailable):
         srv.feed_info_answer(feed)
+
+
+def test_a_repeated_stop_sequence_in_one_trip_is_an_error_not_an_order_dependent_answer(tmp_path):
+    tables = fake_tables()
+    add_trip(tables, "T6", [("S_A1", 1, "11:00:00", "11:00:00"), ("S_B1", 1, "11:10:00", "11:10:00")])
+    feed = load(tmp_path, tables)
+    assert feed.error and "stop_times.txt" in feed.error and "repeats stop_sequence 1" in feed.error
+    assert feed.trips == {}

@@ -1,4 +1,4 @@
-﻿"""Golden tests for the MCP server on the pinned feed (R9.2, R9.3).
+"""Golden tests for the MCP server on the pinned feed (R9.2, R9.3).
 
 The values come from tests/golden/golden_tokens.py. They are recounts made with a
 separate script (zipfile and csv only) and must not be edited to make a test pass:
@@ -22,7 +22,7 @@ if not FEED_PATH.is_file():
 pytestmark = pytest.mark.requires_feed
 
 from pipeline import mcp_server as srv  # noqa: E402
-from pipeline.feed_check import PINNED_FEED_SHA256  # noqa: E402
+from pipeline.feed_check import PINNED_FEED_SHA256, check_feed  # noqa: E402
 from tests.mcp_stdio import StdioServer  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("golden_tokens", ROOT / "tests" / "golden" / "golden_tokens.py")
@@ -41,6 +41,10 @@ def feed():
 
 def ask(feed, **kw):
     return srv.trips_serving_answer(feed, G.STOP_A, G.STOP_B, G.SERVICE_DATE, **kw)
+
+
+def test_the_pipeline_and_the_server_agree_this_zip_is_the_pinned_feed(feed):
+    assert check_feed(FEED_PATH) == PINNED_FEED_SHA256 == feed.sha256
 
 
 def test_feed_info_on_the_pinned_feed(feed):
