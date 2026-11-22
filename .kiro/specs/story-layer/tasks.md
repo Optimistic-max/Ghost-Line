@@ -220,7 +220,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
 - [ ] 25. Friction fixes from the first human test
   - [x] 25.1 "Try another time" no longer starts a race: it scrolls to and focuses the time slider and briefly highlights it (no highlight animation under reduced motion).
   - [x] 25.2 "Try other corners" opens the corner list directly. After the first corner tap on the map or the strip, show the hint "Now tap where the ride ends." (added to the copy table).
-  - [ ] 25.3 Add a "Replay this race" action after the finish (copy table), which replays the same race.
+  - [x] 25.3 Add a "Replay this race" action after the finish (copy table), which replays the same race.
   - [ ] 25.4 Reserve the result box's space before it appears, so nothing below it moves when it does.
   - [ ] 25.5 Say whose wait: "The trolley passenger's wait accounts for most of the difference." when today wins, and "Today's passenger's wait accounts for most of the difference." when 1938 wins.
   - [ ] 25.6 Plain words: explain "trackless trolley" once in the intro line; replace "covered starts" with "races (every start time the 1938 timetable covers, at all 20 pairs of corners)" in the honest line and the matching "what a number is" rows; show the photo-finish meaning next to a photo-finish result.

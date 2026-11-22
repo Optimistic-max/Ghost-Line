@@ -583,6 +583,8 @@ export const METHOD_WALK_SUM = 'Sum of the two walks as shown, to and from the s
 export const NEXT_TRY_TIME = 'Try another time';
 export const NEXT_TRY_CORNERS = 'Try other corners';
 export const NEXT_SHOW_TODAY_WIN = 'Show a race today wins';
+/** After the finish: plays the same race again (task 25.3). */
+export const REPLAY_RACE = 'Replay this race';
 
 /** `time` is the entry's start in 12-hour form, plain text. */
 export function todayWinNotice(origin: string, dest: string, time: string): string {

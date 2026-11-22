@@ -160,6 +160,36 @@ describe('each action ends the Guided_Parts (Req 10.2, 10.3, 10.4, 16.10)', () =
     expect(document.activeElement?.id).toBe('start-time');
   });
 
+  it('"Replay this race" shows after the finish and plays the same pair and start again (task 25.3)', async () => {
+    const time = fakeTime();
+    const app = await bootPage({ motion: 'full', time });
+    time.advance(TIMINGS.orientationMs);
+    await settle();
+    const row = (): Element => document.querySelector('.replay-row')!;
+    const before = { pair: app.store.get().pair, minute: app.store.get().minute };
+    // Reserved from the start, but not shown (and not in the tab order) while racing.
+    expect(app.store.get().race.phase).toBe('running');
+    expect(row().hasAttribute('data-ready')).toBe(false);
+    (document.querySelector('[data-action="skip"]') as HTMLElement).click();
+    await settle();
+    expect(app.store.get().race.phase).toBe('finished');
+    expect(row().hasAttribute('data-ready')).toBe(true);
+    expect(text(button('replay'))).toBe(C.REPLAY_RACE);
+    button('replay').click();
+    expect(app.store.get().race.phase).toBe('idle');
+    time.advance(TIMINGS.racePauseMs);
+    await settle();
+    expect(app.store.get().race.phase).toBe('running');
+    expect({ pair: app.store.get().pair, minute: app.store.get().minute }).toEqual(before);
+    expect(row().hasAttribute('data-ready')).toBe(false);
+  });
+
+  it('offers no replay under reduced motion, where every race is drawn finished (task 25.3)', async () => {
+    await open();
+    expect(document.documentElement.classList.contains('motion-reduced')).toBe(true);
+    expect(declarations('.motion-reduced .replay-row').some((d) => /display\s*:\s*none/.test(d))).toBe(true);
+  });
+
   it('"Try other corners" opens the corner picker', async () => {
     const { app } = await open();
     expect(guidedPartsShown()).toBe(true);

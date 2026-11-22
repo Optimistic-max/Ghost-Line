@@ -29,7 +29,7 @@ import { honestLine } from './honest';
 import { type Stage, laneView } from './lanes';
 import { type RaceLayout, raceLayout } from './layout';
 import { type SourceRegistry, sentence } from './numbers';
-import { nextSteps } from './nextsteps';
+import { nextSteps, replayRow } from './nextsteps';
 import { pairRow } from './pairrow';
 import { resultBox } from './resultbox';
 import { takeawayView } from './takeaway';
@@ -193,6 +193,7 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     h('p', { class: 'caption', id: 'race-caption' }, initialCaption(input)),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
+    replayRow(stage === 'finished'),
     nextSteps(),
     // After the next-step actions, so the result is above the fold; it shares the slider's range (Req 9.1, 12.2).
     chartView(registry, {

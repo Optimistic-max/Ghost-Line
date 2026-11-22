@@ -878,6 +878,26 @@
   min-height: 48px;
 }
 
+/* "Replay this race": its space is kept from the start, so the finish moves nothing; it shows at the finish. */
+.replay-row {
+  display: flex;
+  margin-top: 16px;
+}
+
+.replay-row:not([data-ready]) {
+  visibility: hidden;
+}
+
+/* Under reduced motion every race is drawn finished, so a replay would show nothing: it is not offered. */
+.motion-reduced .replay-row {
+  display: none;
+}
+
+.replay {
+  min-width: 44px;
+  min-height: 48px;
+}
+
 /* The Scheduled departures section: a full-width toggle of at least 44 px, then the board. */
 .departures {
   margin-top: 16px;

@@ -178,6 +178,7 @@ const RENDERED: Record<string, string> = {
   NEXT_TRY_TIME: C.NEXT_TRY_TIME,
   NEXT_TRY_CORNERS: C.NEXT_TRY_CORNERS,
   NEXT_SHOW_TODAY_WIN: C.NEXT_SHOW_TODAY_WIN,
+  REPLAY_RACE: C.REPLAY_RACE,
   todayWinNotice: C.todayWinNotice('{origin}', '{dest}', '{h:mm AM/PM}'),
   SLIDER_LABEL: C.SLIDER_LABEL,
   CHART_HEADING: C.CHART_HEADING,

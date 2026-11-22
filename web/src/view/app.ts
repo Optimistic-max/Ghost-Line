@@ -222,6 +222,7 @@ export function createApp(options: AppOptions): App {
       stopSparks();
       // The clock row leaves at the finish (R5.8); focus on it moves to the next control.
       keepFocus(card, () => racer?.finish());
+      scroll.querySelector('.replay-row')?.setAttribute('data-ready', '');
       if (drawn) drawn.stage = 'finished';
       store.dispatch({ type: 'race/finish' });
     },
@@ -368,6 +369,14 @@ export function createApp(options: AppOptions): App {
     options.address.replace(`${options.address.path}${encode(pair)}`);
     // A new pair starts when its race file is in (changePair); the same pair starts after the usual pause.
     if (same) scheduleRace();
+  }
+
+  /** "Replay this race": the same pair and start time race again, after the usual pause. Not a change of either. */
+  function replayRace(): void {
+    stopRace();
+    held = false;
+    store.dispatch({ type: 'race/stop' });
+    scheduleRace();
   }
 
   /** "Try another time": focus the slider and bring it into view; a plain jump under reduced motion. */
@@ -826,6 +835,9 @@ export function createApp(options: AppOptions): App {
       case 'next-corners':
         visitorInput();
         store.dispatch({ type: 'picker/open' });
+        break;
+      case 'replay':
+        replayRace();
         break;
       case 'departures':
         // Not a Visitor_Input (Req 11.2): the guided visit and a running race go on.
