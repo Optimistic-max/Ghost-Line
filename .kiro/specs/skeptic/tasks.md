@@ -93,8 +93,8 @@ Rules for every task:
     - Commit: "Add property tests for the MCP server queries".
     - _Requirements: R4.3, R4.6, R4.7, R9.4_
 
-- [ ] 6. Independence tests
-  - [ ] 6.1 Write the AST, hash and hygiene tests for the server
+- [x] 6. Independence tests
+  - [x] 6.1 Write the AST, hash and hygiene tests for the server
     - Create tests/unit/test_mcp_independence.py. AST scan of pipeline/mcp_server.py: no import of any pipeline module (absolute, from-import and relative), no network module (socket, urllib, http, requests), no `print(`, no `sys.stdout`, no write-mode `open` ("w", "a", "x").
     - Assert `PINNED_SHA256 == pipeline.feed_check.PINNED_FEED_SHA256`.
     - Assert none of the golden tokens (stop ids 8564 and 9486, the five departures, 20260821, the count 36) appear in pipeline/mcp_server.py. To keep P-D (golden values only in the golden module), do not type the tokens here: create tests/golden/golden_tokens.py here (a plain module-level tuple, the only other place golden values are written, with no raw/ skip) and import it. Task 10.1 reuses it.
