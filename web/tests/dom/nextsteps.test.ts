@@ -231,7 +231,9 @@ describe('the made-up summary: the order and the notice follow the file (Req 16.
       const notice = document.querySelector('.notice[data-notice="today-win"]');
       expect(text(notice)).toBe(C.todayWinNotice(cornerName(fake.index, entry.origin)!, cornerName(fake.index, entry.dest)!, label12(entry.t)));
     }
-  });
+    // Task 25.11: each press redraws the whole card for a new pair; about 15 s on a quiet machine, so the dom
+    // project's 30 s ran out under load. Every press and check is kept; the time allowed is 90 s.
+  }, 90_000);
 
   it('a later change of the start time removes the notice', async () => {
     const pair = fake.index.pairs[0]!;

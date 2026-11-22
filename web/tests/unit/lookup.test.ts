@@ -4,11 +4,21 @@ import { cornerName, hasPair, nextAfter, rowAt, sliderRange, sourcesOf, tripAt }
 import { raceOf, realData } from '../support/realdata';
 
 describe('rowAt', () => {
+  // Task 25.11: every row is still checked, by identity, but the misses are gathered and asserted once (one
+  // expect per row made this slow under load). Reading the 20 race files takes most of the rest: 30 s stated.
   it('finds every row of every real race file by its slider time', () => {
+    const missed: string[] = [];
+    let rows = 0;
     for (const race of realData().races.values()) {
-      for (const row of race.races) expect(rowAt(race, row.t)).toBe(row);
+      for (const row of race.races) {
+        rows += 1;
+        if (rowAt(race, row.t) !== row) missed.push(`${race.origin} → ${race.dest} ${row.t}`);
+      }
     }
-  });
+    expect(rows).toBe([...realData().races.values()].reduce((n, race) => n + race.races.length, 0));
+    expect(rows).toBeGreaterThan(0);
+    expect(missed).toEqual([]);
+  }, 30_000);
 
   it('gives undefined for a time with no row', () => {
     const race = raceOf(LEAD_PAIR);
