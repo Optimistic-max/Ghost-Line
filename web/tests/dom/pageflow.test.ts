@@ -36,7 +36,7 @@ const FROM_PAIR_DOWN: [name: string, selector: string][] = [
   ['departures section', '.departures'],
   ['Sources', '[data-action="sources"]'],
   ['Share this race', '[data-action="share"]'],
-  ['About and credits', '[data-action="about"]'],
+  ['About and credits', '#card-footer [data-action="about"]'],
 ];
 
 const PHONE_ONLY_ABOVE: [name: string, selector: string][] = [

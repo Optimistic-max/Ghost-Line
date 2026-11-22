@@ -423,11 +423,11 @@ test.describe('the keyboard alone (20.2, R13.1)', () => {
     }
 
     // About and credits, from the info button; Escape returns focus to it.
-    await tabTo(page, '#app > button.info');
+    await tabTo(page, 'button.info');
     await page.keyboard.press('Enter');
     await page.locator('.sheet.is-open[data-sheet="about"]').waitFor();
     await page.keyboard.press('Escape');
-    expect(await focusMatches(page, '#app > button.info')).toBe(true);
+    expect(await focusMatches(page, 'button.info')).toBe(true);
 
     // Skip to result, once the race runs: focus goes to the result.
     await page.clock.runFor(TIMINGS.racePauseMs + 500);
@@ -567,7 +567,7 @@ test.describe('axe-core on the drawn page (20.3, R13.4)', () => {
       ['today wins', `?from=${slug('Westwood & Carey')}&to=${slug('Preston & Caroline')}`, []],
       ['the Sources sheet at a number', '', ['#card-scroll button.num[data-source="wait-1938"]']],
       ['the corner picker, second step', '', ['[data-action="picker"]', `.corner-choice[data-slug="${LEAD_PAIR.origin}"]`]],
-      ['About and credits', '', ['#app > button.info']],
+      ['About and credits', '', ['button.info']],
       ['When today wins', '', ['[data-action="whentoday"]']],
       ['a bad link, with its banner', `?from=nowhere&to=${LEAD_PAIR.dest}`, []],
     ];
@@ -1102,4 +1102,59 @@ test.describe('the result scrolls into view (24.1)', () => {
       expect(seen).toEqual([]);
     });
   }
+});
+
+test.describe('the About button on desktop sits in the top bar (24.2)', () => {
+  test('it is next to the line label and overlaps no text at any race column scroll position', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
+    const seen = await guardNetwork(context, true);
+    const page = await context.newPage();
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    await fontsReady(page);
+    const info = page.locator('#topbar > button.info');
+    await expect(info).toBeVisible();
+    const label = (await page.locator('#line-label').boundingBox())!;
+    const box = (await info.boundingBox())!;
+    expect(box.x, 'after the line label').toBeGreaterThanOrEqual(label.x + label.width);
+    expect(box.x + box.width, 'inside the left top bar').toBeLessThanOrEqual(1280 - 440);
+    const range = await page.evaluate(() => {
+      const card = document.getElementById('race-card')!;
+      return card.scrollHeight - card.clientHeight;
+    });
+    // The column must be able to scroll for this check to mean anything; at 800 px tall it does with the board open.
+    await page.locator('[data-action="departures"]').click();
+    const room = await page.evaluate(() => {
+      const card = document.getElementById('race-card')!;
+      return card.scrollHeight - card.clientHeight;
+    });
+    expect(Math.max(range, room)).toBeGreaterThan(100);
+    const stops = [0, 0.25, 0.5, 0.75, 1];
+    for (const share of stops) {
+      const overlaps = await page.evaluate((at) => {
+        const card = document.getElementById('race-card')!;
+        card.scrollTop = (card.scrollHeight - card.clientHeight) * at;
+        const button = document.querySelector('#topbar > button.info')!.getBoundingClientRect();
+        const hits: string[] = [];
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          if (!node.textContent?.trim()) continue;
+          const parent = node.parentElement!;
+          if (parent.closest('button.info') || parent.closest('script, style')) continue;
+          if (getComputedStyle(parent).visibility === 'hidden') continue;
+          const r = document.createRange();
+          r.selectNodeContents(node);
+          for (const q of r.getClientRects()) {
+            if (q.width === 0 || q.height === 0) continue;
+            if (q.left < button.right && button.left < q.right && q.top < button.bottom && button.top < q.bottom) hits.push(node.textContent.trim().slice(0, 40));
+          }
+        }
+        return hits;
+      }, share);
+      expect(overlaps, `column scrolled to ${share}`).toEqual([]);
+    }
+    await context.close();
+    expect(seen).toEqual([]);
+  });
 });

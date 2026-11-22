@@ -139,7 +139,16 @@ export function createApp(options: AppOptions): App {
     { type: 'button', class: 'icon-button info', 'data-action': 'about', 'aria-label': ABOUT_AND_CREDITS, hidden: true },
     GLYPH.info,
   );
+  // On a phone it stays in the page's own element, at the top bar's right edge. On desktop it moves into the
+  // left top bar, after the line label (placeInfo), so nothing in the race column scrolls under it.
   byId(doc, 'app').append(info);
+  const topbar = byId(doc, 'topbar');
+  const appRoot = byId(doc, 'app');
+  function placeInfo(): void {
+    const home = options.layout() === 'desktop' ? topbar : appRoot;
+    if (info.parentElement !== home) home.append(info);
+  }
+  placeInfo();
   const headline = doc.getElementById('headline');
   const headlineLine = headline?.querySelector<HTMLElement>('.headline-line') ?? null;
   const intro = doc.getElementById('intro-line');
@@ -228,6 +237,7 @@ export function createApp(options: AppOptions): App {
     label.textContent = n && year ? lineLabel(n, year) : '';
     label.hidden = !(n && year);
     info.hidden = data.status !== 'ready';
+    placeInfo();
     // The phone intro line names the year 1938, so it leaves the page with the data error, like the
     // headline's second line (P7).
     if (intro && introParent) {

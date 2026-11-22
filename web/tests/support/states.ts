@@ -134,7 +134,7 @@ export const STATES: [string, Reach][] = [
   ['the Sources sheet, before the midday table', finished(beforeTable, sources)],
   ['the Sources sheet, the inferred corner', finished({ query: query(inferredPair) }, sources)],
   ['the Sources sheet, no one-seat ride', finished(fixtureLine, '#card-scroll button.num[data-source="total-1938"]')],
-  ['About and credits', finished({}, '#app > button.info')],
+  ['About and credits', finished({}, 'button.info')],
   ['When today wins', finished({}, '[data-action="whentoday"]')],
   [
     'the link copied',

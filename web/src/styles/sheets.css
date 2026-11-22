@@ -196,9 +196,12 @@
 }
 
 @media (min-width: 900px) {
-  .info {
-    top: 13px;
-    right: var(--column-pad);
+  /* In the left top bar's own row, next to "Ghost Line No. 21, 1938", so the race column's content never scrolls under it.
+     The bar lets the pointer through to the map; the button takes it back. */
+  .topbar .info {
+    position: static;
+    flex: none;
+    pointer-events: auto;
   }
 
   /* The desktop sheet slides in from the side: no handle, and a title that fits the column on one line (mockup 17). */
