@@ -236,7 +236,7 @@ export const MAP_CREDIT = 'Streets © OpenStreetMap contributors. Dashed stretch
 
 export const PICKER_TITLE = 'Choose two corners';
 export const PICKER_STEP_START = 'Choose where the ride starts';
-export const PICKER_STEP_END = 'Start is set. Now choose where the ride ends.';
+export const PICKER_STEP_END = 'Now tap where the ride ends.';
 
 /** The picker note; `inferredName` is the inferred corner's name from index.json. */
 export function pickerNote(inferredName: string): string {

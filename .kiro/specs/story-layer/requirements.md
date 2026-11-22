@@ -386,6 +386,7 @@ New rows, and rows that replace a race-screen row (marked **replaces**). Placeho
 | Sources, how it was worked out: ride-same count (Req 2, Req 13) | "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides. About as long means within {ride_same_rule.minutes} minutes or {ride_same_rule.fraction_pct}% of the 1938 ride, whichever is larger." (**replaces** the race-screen ride line) |
 | Frequency (Req 13) | "For these corners and this direction, scheduled one-seat buses leave {gap part} between {window_from} and {window_to} ({route_names}, weekday schedule as of {service_date}). In the covered 1938 midday timetable, a trolley was scheduled at this corner every {a} or {b} minutes." (**replaces**; the {gap part} and equal-value rules of race-screen R8.5 are unchanged) |
 | Sources, how it was worked out: Takeaway walk sum (Req 8) | "Sum of the two walks as shown, to and from the stop." |
+| Picker, second step (task 25.2) | "Now tap where the ride ends." (**replaces** the race-screen picker line "Start is set. Now choose where the ride ends."; shown in the corner list and in the desktop map hint after the first corner tap on the map or the strip) |
 
 ## Open points (all resolved)
 

@@ -211,6 +211,7 @@ const REPLACED = [
   'races on this line',
   'Counted over every race on this line, one per corner pair and slider minute.',
   "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
+  'Start is set. Now choose where the ride ends.',
 ];
 
 
@@ -342,6 +343,10 @@ describe('helpers', () => {
     for (const old of ['Scheduled departures from this corner after', 'In 1938 a trolley was scheduled', ' races.`', 'races on this line']) {
       expect(source, old).not.toContain(old);
     }
+  });
+
+  it('the picker hint after the first corner tap is "Now tap where the ride ends." (task 25.2)', () => {
+    expect(C.PICKER_STEP_END).toBe('Now tap where the ride ends.');
   });
 
   it('the race-screen ride-same line is gone from copy.ts', () => {
