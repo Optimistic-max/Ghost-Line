@@ -75,7 +75,7 @@ export const FONT_SIZES = {
     cornerNames: 21,
     cornerNamesWithChip: 17,
     sliderTime: 24,
-    sliderEnds: 9.5,
+    sliderEnds: 12,
     laneTitle: 17,
     laneTotal: 22,
     resultLine: 29,
@@ -110,9 +110,14 @@ export const MAP_LAYOUT = {
      * (map.css); the top needs only the names of the corners at the top.
      */
     padding: { top: 8, right: 16, bottom: 45, left: 16 },
+    /**
+     * Still 9 px (task 25.8 asked for 12): at 12 px the lead pair's street names no longer fit along their legs
+     * on the phone map, so Caroline Street and Preston Street (Emmanuel, Nov 20; maplabels.test.ts, map.test.ts)
+     * would be dropped. Reported to Emmanuel; every other map, strip and chart label is at least 12 px.
+     */
     streetFont: 9,
     nameFont: 13,
-    otherNameFont: 11,
+    otherNameFont: 12,
     dot: { chosen: 5, other: 3.5 },
     /** The trolley marker stops this far before the destination dot: half its width and the dot. */
     markerStop: 20,
@@ -151,14 +156,14 @@ export const MAP_LAYOUT = {
   desktop: {
     size: { width: 840, height: 800 },
     padding: { top: 200, right: 150, bottom: 110, left: 110 },
-    streetFont: 11,
+    streetFont: 12,
     nameFont: 16,
     otherNameFont: 13,
     dot: { chosen: 7, other: 4.5 },
     markerStop: 36,
     lines: { route: 3.5, glow: 9, inferred: 3, street: 0.8, main: 1.6 },
-    /** Street and water names from the tiles (desktop only): size and opacity, never below 80% (R11.3). */
-    tileLabels: { size: 11, opacity: 0.9 },
+    /** Street and water names from the tiles (desktop only): size and opacity: at least 12 px and full opacity (task 25.8; R11.3 only asks for 80%). */
+    tileLabels: { size: 12, opacity: 1 },
   },
   /** The display face's average glyph advance, in ems, for fitting names before they are drawn. */
   glyphEm: 0.38,

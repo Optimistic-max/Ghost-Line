@@ -196,7 +196,7 @@
   /* Clear of the map's attribution button, bottom right. */
   right: var(--tap);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.25;
   pointer-events: none;
 }
