@@ -1051,6 +1051,9 @@ test.describe('the result scrolls into view (24.1)', () => {
 
   for (const [label, width, height] of [['phone', 375, 667], ['desktop', 1280, 800]] as const) {
     test(`${label}: after a live race the result headline and all three next steps are whole`, async ({ browser }) => {
+      // Task 25.14 follow-up (approved): the whole race is stepped in 100 ms frames of the page clock, which took
+      // 23 to 30 s under load; 60 s stated. Every check is kept.
+      test.setTimeout(60_000);
       const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
       const seen = await guardNetwork(context, true);
       const page = await context.newPage();
@@ -1081,6 +1084,8 @@ test.describe('the result scrolls into view (24.1)', () => {
     });
 
     test(`${label}: a visitor who scrolled during the race is not scrolled`, async ({ browser }) => {
+      // As above: a whole live race stepped frame by frame; 60 s stated (approved), every check kept.
+      test.setTimeout(60_000);
       const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
       const seen = await guardNetwork(context, true);
       const page = await context.newPage();
