@@ -87,8 +87,8 @@ Rules for every task:
     - Commit: "Add independent MCP server for the pinned feed".
     - _Requirements: R1.1, R1.2, R1.4, R1.5, R1.6, R2.4_
 
-- [ ] 5. Property tests for the queries
-  - [ ] 5.1 Write Hypothesis property tests on generated small feeds
+- [x] 5. Property tests for the queries
+  - [x] 5.1 Write Hypothesis property tests on generated small feeds
     - Create tests/property/test_mcp_server_props.py. Properties: results sorted by (dep seconds, trip_id); `count` equals the length of `trips`; every returned trip has its a-call before its b-call by stop_sequence; widening `after`/`before` never removes a trip; a trip appears at most once; shuffling the rows of stop_times does not change the answer.
     - Commit: "Add property tests for the MCP server queries".
     - _Requirements: R4.3, R4.6, R4.7, R9.4_
