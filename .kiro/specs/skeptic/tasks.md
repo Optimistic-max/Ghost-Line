@@ -52,7 +52,7 @@ Rules for every task:
     - _Requirements: R9.6 (addition), R9.7_
 
 - [ ] 4. The server, layer by layer (pipeline/mcp_server.py)
-  - [ ] 4.1 Reader layer: constants, data classes, load_feed
+  - [x] 4.1 Reader layer: constants, data classes, load_feed
     - Create pipeline/mcp_server.py with the standard-library reader only (zipfile, csv, hashlib, datetime, os, pathlib, threading, logging, sys, dataclasses). Import the SDK nowhere at module level.
     - Constants: `PINNED_SHA256`, `SERVICE_DATE`, `ENV_ZIP`, `LOAD_WAIT_SECONDS = 30`, `DEFAULT_ZIP` from `Path(__file__).resolve().parents[1] / "raw" / "mta_local_bus.zip"`. A relative GHOSTLINE_GTFS_ZIP resolves against the repository root. Define the SHA-256 once as a literal here, not imported from pipeline.
     - `Call`, `Trip`, `Feed` as in design 2.3.
@@ -60,7 +60,7 @@ Rules for every task:
     - No golden value in the file. Write no file, make no network call.
     - _Requirements: R1.3, R1.5, R1.6, R2.1, R2.2, R2.3, R2.4, R3.2_
 
-  - [ ] 4.2 Unit tests for the reader
+  - [x] 4.2 Unit tests for the reader
     - Create tests/unit/test_mcp_server.py with a helper that writes a small zip into tmp_path from table dictionaries, starting from tests/fixtures/fake-gtfs (made-up feed, test-only hash).
     - Cover: missing zip, wrong hash (both give an error Feed and no tables read), active services computed from calendar plus exceptions (including an inactive service and a date-only service), times past 24:00 parsed and kept in the feed's own text, blank-time fallback and dropped-call count, malformed table names its member and column, relative env path resolves against the repository root, load writes nothing under tmp_path or the repository.
     - _Requirements: R1.3, R1.5, R2.3, R2.4, R3.2, R9.1_
