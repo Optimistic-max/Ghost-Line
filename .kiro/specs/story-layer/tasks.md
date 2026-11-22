@@ -229,6 +229,8 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - [x] 25.9 Desktop title cut-off ("Aliceanna & Bon" at 1280 px): reproduce with a classic scrollbar on the race column and while the font is loading, fix it, test the longest pair.
   - [x] 25.10 Find and fix the browser console error on the deployed page, log the URL that fails, and add a test that the page logs no errors.
   - [x] 25.11 The two tests that time out under load (nextsteps.test.ts "walks the whole list in file order…", lookup.test.ts "rowAt finds every row…") get faster or a stated longer timeout, checking the same things.
+  - [x] 25.13 Replace the empty inline icon with the 28 px trolley marker drawing as an inline SVG favicon (no new file request, palette B colours).
+  - [ ] 25.14 Fix the four pre-existing `tsc` errors in app.ts and layout.ts without changing behaviour; add `npx tsc --noEmit` (src and tests) to the checks that must pass.
   - [x] 25.12 Add to docs/kiro-usage.md: Nov 21, `npm run perf` on the deployed site after the story layer: median 1,379 ms (runs 3889, 1309, 1292, 1379, 1577), limit 5,000 ms.
   - Same rules as before: no weakened test, no changed golden value or facts file, all new wording in the copy table, no network.
 
