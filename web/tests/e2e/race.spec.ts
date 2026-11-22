@@ -1185,3 +1185,40 @@ test.describe('the card content is no wider than the card (24.3)', () => {
     }
   }
 });
+
+test.describe('the result keeps its place (25.4)', () => {
+  /**
+   * Where each control sits below the race clock row, the element just above the result's place. Measured
+   * from it, so scrolling does not count and neither does the lanes' own change when a side arrives.
+   */
+  const positions = (page: Page): Promise<Record<string, number>> =>
+    page.evaluate(() => {
+      const origin = document.querySelector('.clock-row')!.getBoundingClientRect().bottom;
+      const top = (s: string): number => document.querySelector(s)!.getBoundingClientRect().top - origin;
+      return {
+        nextSteps: top('.next-steps'),
+        chart: top('.chart'),
+        departures: top('.departures'),
+        replay: top('.replay-row'),
+      };
+    });
+
+  for (const [label, width, height] of [['phone', 375, 667], ['desktop', 1280, 800]] as const) {
+    test(`${label}: nothing below the result moves when the result appears`, async ({ browser }) => {
+      const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+      const seen = await guardNetwork(context, true);
+      const page = await context.newPage();
+      await pausedAt(page, '20:00');
+      await page.goto('./');
+      await page.locator('.clock-row').waitFor();
+      await fontsReady(page);
+      expect(await page.locator('.result').count()).toBe(0);
+      const before = await positions(page);
+      await runUntil(page, async () => (await page.locator('.result').count()) > 0, 30_000, 100);
+      const after = await positions(page);
+      for (const key of Object.keys(before)) expect(Math.abs(after[key]! - before[key]!), `${key}: ${JSON.stringify({ before, after })}`).toBeLessThanOrEqual(1);
+      await context.close();
+      expect(seen).toEqual([]);
+    });
+  }
+});

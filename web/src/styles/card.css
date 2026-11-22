@@ -878,6 +878,13 @@
   min-height: 48px;
 }
 
+/* The result's reserved place while the race runs (task 25.4). The probe is the real result laid out unseen,
+   only long enough to be measured; flow-root keeps its outer margins inside the height. */
+.result-probe {
+  display: flow-root;
+  visibility: hidden;
+}
+
 /* "Replay this race": its space is kept from the start, so the finish moves nothing; it shows at the finish. */
 .replay-row {
   display: flex;

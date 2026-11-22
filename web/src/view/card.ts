@@ -192,6 +192,8 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
     // skip, reduced motion) is drawn with the finished caption, or the orientation line on a guided visit.
     h('p', { class: 'caption', id: 'race-caption' }, initialCaption(input)),
     ...(stage === 'racing' ? [clockRow(input.canSkip)] : []),
+    // The result's place, kept while the race runs (task 25.4); app.ts sizes it, and the result replaces it.
+    ...(stage === 'racing' && !input.resultShown ? [h('div', { class: 'result-space', 'aria-hidden': 'true' })] : []),
     ...(input.resultShown ? resultElements(registry, input, false) : []),
     replayRow(stage === 'finished'),
     nextSteps(),

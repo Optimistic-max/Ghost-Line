@@ -202,6 +202,8 @@ export function createApp(options: AppOptions): App {
   let spark: number | null = null;
   /** The visitor scrolled the page or the race column since this race started: the result does not scroll it for them. */
   let visitorScrolled = false;
+  /** The card input the result's reserved place was measured for, measured again once the display font is in (task 25.4). */
+  let reserved: CardInput | null = null;
   const SCROLL_ROOM = 8;
 
   const clock = createClock(timers, {
@@ -489,6 +491,7 @@ export function createApp(options: AppOptions): App {
       foot.replaceChildren(...footer());
     });
     fitPairRow();
+    reserveResult(input);
     painted = true;
     // The first card with data on screen (the orientation line already in it on a guided visit): the
     // 2,000 ms and 300 ms start pauses do not count against the 5,000 ms limit (story-layer Req 4.7).
@@ -514,6 +517,21 @@ export function createApp(options: AppOptions): App {
     racer.frame(clock.elapsed());
   }
 
+  /**
+   * Keep the result's place (task 25.4): the real result, honest line and takeaway are laid out once, unseen,
+   * where they will go, and the empty placeholder takes their height, so nothing below moves when they arrive.
+   */
+  function reserveResult(input: CardInput): void {
+    const space = scroll.querySelector<HTMLElement>('.result-space');
+    reserved = space ? input : null;
+    if (!space) return;
+    const probe = h('div', { class: 'result-probe', 'aria-hidden': 'true' }, ...resultElements(registry, input, false));
+    space.before(probe);
+    const height = probe.getBoundingClientRect().height;
+    probe.remove();
+    space.style.minHeight = `${height}px`;
+  }
+
   /** On desktop the pair names stay on one line, their font shrinking as far as a long pair needs (R1.3). */
   function fitPairRow(): void {
     const row = scroll.querySelector<HTMLElement>('.pair-row');
@@ -522,6 +540,8 @@ export function createApp(options: AppOptions): App {
 
   /** The result box and honest line arrive at the result moment, under the clock row (R5.7, R1.2). */
   function showResult(input: CardInput, motion: MotionLevel): void {
+    scroll.querySelector('.result-space')?.remove();
+    reserved = null;
     const above = scroll.querySelector('.clock-row') ?? scroll.querySelector('.caption') ?? scroll.querySelector('.lanes');
     above?.after(...resultElements(registry, input, motion !== 'reduced'));
     if (drawn) drawn.resultShown = true;
@@ -934,7 +954,10 @@ export function createApp(options: AppOptions): App {
   });
 
   // The display font arrives after the first paint; the pair names are fitted again with its real widths.
-  void doc.fonts?.ready.then(fitPairRow);
+  void doc.fonts?.ready.then(() => {
+    fitPairRow();
+    if (reserved) reserveResult(reserved);
+  });
 
   function setMotion(level: MotionLevel): void {
     // After the watchdog, the extra motion stays off for the session.
