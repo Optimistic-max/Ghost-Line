@@ -217,7 +217,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - [x] 24.3 Fix the `#card-scroll` overflow from the two bar-marker boxes so it is no wider than the card.
   - Same rules as before: no weakened test, no changed golden value or facts file, no new wording outside the copy table, no network.
 
-- [ ] 25. Friction fixes from the first human test
+- [x] 25. Friction fixes from the first human test
   - [x] 25.1 "Try another time" no longer starts a race: it scrolls to and focuses the time slider and briefly highlights it (no highlight animation under reduced motion).
   - [x] 25.2 "Try other corners" opens the corner list directly. After the first corner tap on the map or the strip, show the hint "Now tap where the ride ends." (added to the copy table).
   - [x] 25.3 Add a "Replay this race" action after the finish (copy table), which replays the same race.
@@ -229,7 +229,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
   - [x] 25.9 Desktop title cut-off ("Aliceanna & Bon" at 1280 px): reproduce with a classic scrollbar on the race column and while the font is loading, fix it, test the longest pair.
   - [x] 25.10 Find and fix the browser console error on the deployed page, log the URL that fails, and add a test that the page logs no errors.
   - [x] 25.11 The two tests that time out under load (nextsteps.test.ts "walks the whole list in file order…", lookup.test.ts "rowAt finds every row…") get faster or a stated longer timeout, checking the same things.
-  - [ ] 25.12 Add to docs/kiro-usage.md: Nov 21, `npm run perf` on the deployed site after the story layer: median 1,379 ms (runs 3889, 1309, 1292, 1379, 1577), limit 5,000 ms.
+  - [x] 25.12 Add to docs/kiro-usage.md: Nov 21, `npm run perf` on the deployed site after the story layer: median 1,379 ms (runs 3889, 1309, 1292, 1379, 1577), limit 5,000 ms.
   - Same rules as before: no weakened test, no changed golden value or facts file, all new wording in the copy table, no network.
 
 ## Notes
