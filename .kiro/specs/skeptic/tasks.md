@@ -15,8 +15,8 @@ Rules for every task:
 
 ## Tasks
 
-- [ ] 1. Read the MCP SDK documentation
-  - [ ] 1.1 Check the SDK's current docs and record the findings
+- [x] 1. Read the MCP SDK documentation
+  - [x] 1.1 Check the SDK's current docs and record the findings
     - Read the current official Python MCP SDK docs (1.x line, stdio transport, FastMCP tool registration, how an exception raised in a tool is reported, how to keep stdout clean).
     - Write the findings, with source links and the date, to .kiro/specs/skeptic/sdk-notes.md. Note any difference from the design's section 2.8 sketch.
     - If the docs contradict the design on a point that changes behaviour (for example tool errors), stop and tell Emmanuel.
