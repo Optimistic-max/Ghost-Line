@@ -23,8 +23,8 @@ Rules for every task:
     - Commit: "Record MCP SDK notes for the skeptic spec".
     - _Requirements: R1.1_
 
-- [ ] 2. Add and install the "skeptic" dependency group
-  - [ ] 2.1 Pin the group, ask Emmanuel, install, check the import
+- [x] 2. Add and install the "skeptic" dependency group
+  - [x] 2.1 Pin the group, ask Emmanuel, install, check the import
     - Add `skeptic = ["mcp>=1.27,<2"]` under optional-dependencies in pyproject.toml. Not in base or dev dependencies.
     - Use user_input to ask Emmanuel once, immediately before the install, for approval to run `pip install -e .[skeptic]` (a network step). Wait for the answer. Do not install without a yes.
     - After approval, run the install, then `python -c "import mcp"` on this machine (Python 3.14).
