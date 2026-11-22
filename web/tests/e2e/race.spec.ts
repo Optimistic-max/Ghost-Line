@@ -1277,3 +1277,46 @@ test.describe('the desktop pair names are never cut off (25.9)', () => {
     });
   }
 });
+
+test.describe('the page logs no errors (25.10)', () => {
+  test('declares its icon inline, so no browser asks for /favicon.ico at the site root (a 404 on GitHub Pages)', async ({ page }) => {
+    // Headless Chromium never fetches a favicon, so the request check below cannot see this one: the page's own
+    // declaration is checked instead. A data: icon makes no request at all.
+    await page.goto('./');
+    const icons = await page.evaluate(() => [...document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]')].map((l) => l.href));
+    expect(icons.length, 'an icon link').toBeGreaterThan(0);
+    for (const href of icons) expect(href.startsWith('data:'), href).toBe(true);
+  });
+
+  test('no console error, no page error and no failed request through the whole first race and the next steps', async ({ page, context }, info) => {
+    // The tile host is blocked (no network in tests); its refusals are the guard's own and are not counted.
+    await guardNetwork(context, true);
+    const problems: string[] = [];
+    const blocked = (url: string): boolean => new URL(url).hostname === MAP_HOST;
+    page.on('console', (m) => {
+      if (m.type() !== 'error') return;
+      const url = m.location().url ?? '';
+      if (url && blocked(url)) return;
+      if (/ERR_BLOCKED_BY_CLIENT|blockedbyclient/i.test(m.text())) return;
+      problems.push(`console: ${m.text()} (${url})`);
+    });
+    page.on('pageerror', (e) => problems.push(`page error: ${e.message}`));
+    page.on('response', (r) => {
+      if (r.status() >= 400) problems.push(`HTTP ${r.status()}: ${r.url()}`);
+    });
+    page.on('requestfailed', (r) => {
+      if (!blocked(r.url())) problems.push(`request failed: ${r.url()} (${r.failure()?.errorText})`);
+    });
+    await pausedAt(page, '20:00');
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await runUntil(page, async () => (await page.locator('.clock-row').count()) === 0, 30_000, 100);
+    await page.locator('[data-action="next-time"]').click();
+    await page.locator('[data-action="next-corners"]').click();
+    await page.keyboard.press('Escape');
+    await page.clock.runFor(2000);
+    // The failing URLs, if any, are written into the report as well as into the failure message.
+    info.annotations.push({ type: 'console and network problems', description: problems.length === 0 ? 'none' : problems.join('\n') });
+    expect(problems).toEqual([]);
+  });
+});

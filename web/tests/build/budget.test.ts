@@ -194,6 +194,15 @@ describe('the checks fail when they should', () => {
     expect(measureFirstLoad(out(...missing), BASE, readData).problems.join('\n')).toMatch(/not in the build/);
   });
 
+  it('counts an inline data: icon as part of the page, fetching nothing, and still flags an outside icon (task 25.10)', () => {
+    const inline = sound().map((p) => (p.fileName === 'index.html' ? asset('index.html', PAGE('<link rel="icon" href="data:," />')) : p));
+    const found = firstLoadFiles(out(...inline), BASE);
+    expect(found.problems).toEqual([]);
+    expect(found.files.some((f) => f.startsWith('data:'))).toBe(false);
+    const outside = sound().map((p) => (p.fileName === 'index.html' ? asset('index.html', PAGE('<link rel="icon" href="https://cdn.example/i.png" />')) : p));
+    expect(firstLoadFiles(out(...outside), BASE).problems.join('\n')).toMatch(/outside the site/);
+  });
+
   it('fails the report over the budget, names the excess, and passes at the budget exactly', () => {
     const rows = [{ file: 'a.js', bytes: 500_000, sent: BUDGET_BYTES + 1 }];
     const over = report(rows, []);

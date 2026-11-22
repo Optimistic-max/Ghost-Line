@@ -85,6 +85,8 @@ export function firstLoadFiles(output: Output, base: string): { files: string[];
   for (const { tag, attrs } of fetchTags(html)) {
     const address = tag === 'script' ? attrs['src'] : attrs['href'];
     if (!address) continue;
+    // An inline data: address (the empty icon, task 25.10) fetches nothing; its bytes are the page's own.
+    if (/^data:/i.test(address)) continue;
     const file = fileOf(address, base);
     if (file === null) {
       problems.push(`the page reaches outside the site: ${address}`);
