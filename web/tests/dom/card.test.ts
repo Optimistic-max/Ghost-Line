@@ -6,7 +6,7 @@ import { LEAD_PAIR } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { formatCount } from '../../src/format/count';
 import { roundTotal } from '../../src/format/rounding';
-import { label12, minutesOf, shortClock } from '../../src/format/time';
+import { label12, minutesOf } from '../../src/format/time';
 import { rowAt } from '../../src/data/lookup';
 import { bannedTerms } from '../support/banned';
 import { readRepoText } from '../support/files';

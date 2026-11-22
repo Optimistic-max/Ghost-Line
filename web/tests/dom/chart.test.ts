@@ -322,8 +322,8 @@ function expectFollows(page: Page, races: Map<string, RaceFile>, visited: Set<st
   expect(page.scroll.querySelectorAll('.chart-svg')).toHaveLength(1);
   expectSeries(page.scroll, race.races);
   expectHatch(page.scroll, race.races);
-  expectCursor(page.scroll, race.races, state.minute);
-  const row = race.races.find((r) => r.t === clockOf(state.minute))!;
+  expectCursor(page.scroll, race.races, state.minute!);
+  const row = race.races.find((r) => r.t === clockOf(state.minute!))!;
   const registry = page.app.registry;
   expectReadout(page.scroll, registry, row, row.today !== null);
   // The chart is drawn before the new race starts: the start pause has not run yet.
@@ -380,7 +380,7 @@ describe('the chart follows the race file on the page', () => {
       await settle();
       const entry = wins[k]!;
       expect(store.get().pair).toEqual({ origin: entry.origin, dest: entry.dest });
-      expect(clockOf(store.get().minute)).toBe(entry.t);
+      expect(clockOf(store.get().minute!)).toBe(entry.t);
       expectFollows(page, fake.races, visited);
     }
   }, 30_000);
@@ -406,7 +406,7 @@ describe('the chart follows the race file on the page', () => {
       await settle();
       const entry = wins[k % wins.length]!;
       expect(store.get().pair).toEqual({ origin: entry.origin, dest: entry.dest });
-      expect(clockOf(store.get().minute)).toBe(entry.t);
+      expect(clockOf(store.get().minute!)).toBe(entry.t);
       expectFollows(page, real.races, visited);
     }
     // Every file asked for was a race file of a pair on the line, and none twice.

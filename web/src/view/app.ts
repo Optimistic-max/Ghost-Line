@@ -106,7 +106,8 @@ type Drawn = {
   layout: Layout;
   stage: Stage;
   resultShown: boolean;
-  guided: boolean;
+  /** As CardInput carries it (optional there); render() always passes the state's boolean. */
+  guided: boolean | undefined;
   todayWinNotice: TodayWin | null;
 };
 

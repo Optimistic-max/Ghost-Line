@@ -27,6 +27,8 @@ inclusion: always
 - `python -m pipeline check_sources`  fail on a banned word or an unsourced
   number in web/ or docs/.
 - In web/: `npm run dev`, `npm run build`, `npm test`.
+- In web/: `npm run typecheck` (`tsc --noEmit` over src/ and tests/). Must pass
+  before a commit to web/; the deploy workflow runs it before the build.
 
 ## Pinned feed
 

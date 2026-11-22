@@ -418,11 +418,6 @@ test('desktop pair names on one line, for every pair (1280 x 800)', async ({ bro
   await context.close();
 });
 
-/** "#rrggbb" as the browser reports a computed colour. */
-function hexToRgb(hex: string): string {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)!;
-  return `rgb(${parseInt(m[1]!, 16)}, ${parseInt(m[2]!, 16)}, ${parseInt(m[3]!, 16)})`;
-}
 
 // The vehicle sheet reads the real index.json from the dev server, so the
 // trolleys carry the line's real route number, from the data.

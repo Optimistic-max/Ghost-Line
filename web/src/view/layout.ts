@@ -69,7 +69,8 @@ export function chartPlan(race: Pick<RaceFile, 'races'>): ChartPlan {
   const last = rows.findLastIndex((r) => r.before_table);
   return {
     columns: rows.length,
-    max: Math.max(0, ...series1938, ...(seriesToday ?? [])),
+    // A row with no one-seat ride is a gap in the bus line and adds nothing to the scale (0 is already counted).
+    max: Math.max(0, ...series1938, ...(seriesToday ?? []).filter((v): v is number => v !== null)),
     series1938,
     seriesToday,
     hatch: first === -1 ? null : { from: first, to: last },

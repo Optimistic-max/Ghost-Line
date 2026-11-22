@@ -252,7 +252,6 @@ describe('every drawing', () => {
 });
 
 describe('vehicle sizes', () => {
-  const ui = readRepoText('.kiro/steering/ui.md').replace(/\s+/g, ' ');
   const brief = readRepoText('docs/planning/screen-brief.md');
 
   it('come from config.ts, which matches ui.md and screen-brief 3A.2', () => {

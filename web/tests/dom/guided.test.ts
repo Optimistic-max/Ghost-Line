@@ -6,7 +6,7 @@ import { EXAMPLE_START, LEAD_PAIR, TIMINGS } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { cornerName } from '../../src/data/lookup';
 import type { Pair } from '../../src/data/types';
-import { clockOf, label12, minutesOf } from '../../src/format/time';
+import { label12, minutesOf } from '../../src/format/time';
 import { type PageOptions, bootPage } from '../support/page';
 import { realData } from '../support/realdata';
 import { text } from '../support/render';

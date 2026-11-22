@@ -37,6 +37,11 @@ describe('the Pages workflow (22.1)', () => {
     expect(code).toMatch(/- run: npm run build\b/);
     expect(code).toMatch(/uses: actions\/upload-pages-artifact@v\d+\s+with:\s+path: web\/dist\b/);
     expect(code).toMatch(/uses: actions\/deploy-pages@v\d+/);
+    // Task 25.14: the type check runs, as one npm script of one command, before the build.
+    expect(code).toMatch(/- run: npm ci\s+- run: npm run typecheck\s+- run: npm run build\b/);
+    const { scripts } = readRepoJson<{ scripts: Record<string, string> }>('web/package.json');
+    expect(scripts['typecheck']).toBe('tsc --noEmit');
+    expect(readRepoJson<{ include: string[] }>('web/tsconfig.json').include).toEqual(expect.arrayContaining(['src', 'tests']));
     // The lockfile is the one the build is made from.
     expect(code).toMatch(/cache-dependency-path:\s*web\/package-lock\.json/);
   });

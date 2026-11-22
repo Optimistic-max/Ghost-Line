@@ -38,7 +38,8 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - run: npm ci
-
+      # The TypeScript check of src/ and tests/ (task 25.14): a type error stops the deploy. Vite does not check types.
+      - run: npm run typecheck
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
