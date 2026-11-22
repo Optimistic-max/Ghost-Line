@@ -6,7 +6,7 @@ inclusion: always
 
 ## Stack (fixed)
 
-- Pipeline: Python 3.12, pandas, pyproj, PyYAML, jsonschema, pytest, Hypothesis.
+- Pipeline: Python >=3.12 (developed and tested on 3.14), pandas, pyproj, PyYAML, jsonschema, pytest, Hypothesis.
 - MCP server: the official Python MCP SDK, stdio transport. Check its current
   docs before writing the server.
 - Site: Vite, TypeScript, MapLibre GL JS, vitest, fast-check. Plain TypeScript
