@@ -428,6 +428,10 @@
   position: relative;
   height: calc(var(--bar-marker-w) * 26 / 58);
   margin: 2px calc(var(--bar-marker-w) / -2) 2px;
+  /* The mover is as wide as the bar and is shifted by up to its own width, so its box would reach a bar's width past
+     the card (a 674 px scroll width in a 375 px card). The track is exactly as wide as the marker's travel plus its
+     own width, so clipping sideways here cuts nothing the eye sees. */
+  overflow-x: clip;
 }
 
 .bar-marker {

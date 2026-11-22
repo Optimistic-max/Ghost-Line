@@ -1158,3 +1158,30 @@ test.describe('the About button on desktop sits in the top bar (24.2)', () => {
     expect(seen).toEqual([]);
   });
 });
+
+test.describe('the card content is no wider than the card (24.3)', () => {
+  for (const [label, width, height] of [['phone', 375, 667], ['desktop', 1280, 800]] as const) {
+    for (const reducedMotion of ['reduce', 'no-preference'] as const) {
+      test(`${label}, ${reducedMotion === 'reduce' ? 'finished' : 'racing'}: #card-scroll scrolls no wider than it shows`, async ({ browser }) => {
+        const context = await browser.newContext({ viewport: { width, height }, reducedMotion });
+        const seen = await guardNetwork(context, true);
+        const page = await context.newPage();
+        if (reducedMotion === 'no-preference') await pausedAt(page, '20:00');
+        else await page.clock.setFixedTime(newYork('20:00'));
+        await page.goto('./');
+        await page.locator(reducedMotion === 'reduce' ? '.result' : '.clock-row').waitFor();
+        await fontsReady(page);
+        const widths = await page.evaluate(() => {
+          const el = document.getElementById('card-scroll')!;
+          const card = document.getElementById('race-card')!;
+          return { scroll: el.scrollWidth, client: el.clientWidth, cardClient: card.clientWidth, cardScroll: card.scrollWidth };
+        });
+        expect(widths.scroll, JSON.stringify(widths)).toBeLessThanOrEqual(widths.client);
+        expect(widths.scroll, JSON.stringify(widths)).toBeLessThanOrEqual(widths.cardClient);
+        expect(widths.cardScroll, JSON.stringify(widths)).toBeLessThanOrEqual(widths.cardClient);
+        await context.close();
+        expect(seen).toEqual([]);
+      });
+    }
+  }
+});
