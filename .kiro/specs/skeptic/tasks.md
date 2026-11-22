@@ -139,8 +139,8 @@ Rules for every task:
     - Commit: "Add MCP protocol test".
     - _Requirements: R1.4, R5.4, R9.6_
 
-- [ ] 10. Golden tests on the pinned feed
-  - [ ] 10.1 Write the golden tests for feed_info and trips_serving
+- [x] 10. Golden tests on the pinned feed
+  - [x] 10.1 Write the golden tests for feed_info and trips_serving
     - Create tests/golden/test_mcp_server_golden.py marked `requires_feed`, skipping itself at import with a clear message when raw/ is missing (as the other golden modules do). Load the real zip with the module's own `load_feed`.
     - feed_info: feed_version 20260821, the pinned SHA-256, active services ["2251"].
     - trips_serving "8564" to "9486" on "2026-11-04": 36 trips, all route_short_name "CityLink LIME" and headsign "HARBOR EAST". With after "10:00" and before "13:00": 5 trips with dep_a 10:32:43, 11:08:43, 11:44:43, 12:20:43 and 12:56:43. The last trip of the day leaves at 25:15:53 (known behaviour).
@@ -149,7 +149,7 @@ Rules for every task:
     - If any computed value differs from a golden value, stop and tell Emmanuel. Never edit a golden value or test to pass.
     - _Requirements: R9.2, R9.3_
 
-  - [ ] 10.2 Write the real-server end-to-end test over stdio
+  - [x] 10.2 Write the real-server end-to-end test over stdio
     - In the same golden module, start the real server as a subprocess with the real feed, send initialize, then call `feed_info` over stdio and check feed_version and the pinned hash. Wait for the background load with a bounded retry on "feed still loading". Always terminate the subprocess.
     - Commit (after the golden tests pass locally): "Add golden tests for the MCP server".
     - _Requirements: R9.3, R9.6_
