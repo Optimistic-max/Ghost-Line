@@ -504,6 +504,23 @@ export function exampleLabel(time: string): string {
   return `Example start: ${time} scheduled.`;
 }
 
+// ---- Ghost cars (ghost-cars spec copy table) -----------------------------------
+
+/** The counter while it counts; `k` is the number of 1938 cars past the corner so far. */
+export function ghostCounting(k: number | string): string {
+  return `1938 trolleys scheduled past this corner: ${k}`;
+}
+
+/** The counter once today's bus has left, and on every finished card. */
+export function ghostFinished(n: number | string): string {
+  return `${n} 1938 trolleys were scheduled here before today's bus.`;
+}
+
+export const METHOD_GHOST_COUNT =
+  "Counted from the 1938 timetable's scheduled departures at the origin corner, from the start time until today's bus is scheduled to leave.";
+
+export const MAP_GHOSTS = 'Fainter cars: other scheduled 1938 departures.';
+
 export const ORIENTATION_LINE = 'Same two corners. Walking included for today; walks are estimates.';
 
 // ---- Captions (Req 7). No template takes a number. -----------------------------

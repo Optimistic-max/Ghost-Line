@@ -70,6 +70,53 @@ Run by Kiro while a film render loaded the laptop. A test that failed only by it
 | `npm run test:e2e` and the checkpoint spec | 131 passed, 3 skipped, 6 failed: five 30 s time limits in race.spec.ts (sideways scroll, story with no map on both projects, desktop pair names, page logs no errors) and `still: og-1200x630` with the map unavailable | The five race.spec tests: all passed. `still: og-1200x630`: map unavailable again, then passed |
 | `npm run screens` | 50 passed, 1 failed: `16-desktop-todaywins` at its 30 s time limit | passed |
 
+## Ghost cars (polish brief P6, ghost-cars spec), Nov 23, 2026
+
+Built by Kiro from docs/planning/final/08-ghost-cars-brief.md, as the ghost-cars spec (requirements, design, tasks). Run while a film render loaded the laptop; a test that failed only by its time limit was run again on its own and both runs are listed. No time limit was raised.
+
+**Golden (Req 7.1):** the lead pair at 10:00 gives n = 4, cars at 10:06, 10:13, 10:21 and 10:28, the bus at 10:32:43: matches the brief.
+
+**Emmanuel's changes during the build:** the finished counter reads "{n} 1938 trolleys were scheduled here before today's bus." (the brief's sentence took two lines). It fits one line: 343.0 x 16.2 px in the phone card, 383.0 x 16.2 px in the desktop column.
+
+**Found and fixed while making the pictures:**
+- On a phone, "View route" drew the route drawing for the 100 px strip's height and then stretched it to 150 px, so the trolley markers stood off the route. The area's height is now set before the drawing is made. This also affected the race's own marker before this spec.
+- On the 100 px strip the map line covered the destination dot and name (screens 02-racing), and two cars on the stretch stood about 17 px apart. The strip shows no ghost car and no map line; "View route", the map and desktop show them (design decision 5).
+
+**Real-data sweep (Req 7.4):** n at 10:00 for each pair, and whether 10:00 is a Ghost_Row. 102 rows, all between 13:36 and 13:52, have a bus that leaves after the last listed 1938 pass, so they show no counter and no ghost cars (correct, Emmanuel, Nov 23). The list is in web/test-results/ghost-cars-sweep.md, written by web/tests/real/ghosts.test.ts.
+
+| Pair | n at 10:00 | Ghost_Row |
+| --- | --- | --- |
+| westwood-carey to dolphin-myrtle | 2 | yes |
+| westwood-carey to brevard-preston | 2 | yes |
+| westwood-carey to preston-caroline | 2 | yes |
+| westwood-carey to aliceanna-bond | 2 | yes |
+| dolphin-myrtle to westwood-carey | 1 | no |
+| dolphin-myrtle to brevard-preston | 3 | yes |
+| dolphin-myrtle to preston-caroline | 3 | yes |
+| dolphin-myrtle to aliceanna-bond | 3 | yes |
+| brevard-preston to westwood-carey | 0 | no |
+| brevard-preston to dolphin-myrtle | 0 | no |
+| brevard-preston to preston-caroline | 3 | yes |
+| brevard-preston to aliceanna-bond | 3 | yes |
+| preston-caroline to westwood-carey | 5 | yes |
+| preston-caroline to dolphin-myrtle | 5 | yes |
+| preston-caroline to brevard-preston | 2 | yes |
+| preston-caroline to aliceanna-bond | 4 | yes |
+| aliceanna-bond to westwood-carey | 2 | yes |
+| aliceanna-bond to dolphin-myrtle | 4 | yes |
+| aliceanna-bond to brevard-preston | 4 | yes |
+| aliceanna-bond to preston-caroline | 4 | yes |
+
+| Check | First run | Run again on its own |
+|---|---|---|
+| Phone fit with the counter in place, worst of 3 stable runs | 375 x 667: 19.5, 19.5 and 19.5 px to spare; 390 x 844: 196.5 px each: pass | |
+| Counter height while counting, start to bus departure | 16.2 px throughout on both layouts (one line): pass | |
+| `npx tsc --noEmit` | pass | |
+| `npm test` | 949 passed, 4 failed: two copy-table failures were real (the replaced brief sentence was not dropped from the ghost-cars table; fixed in tests/support/copytable.ts), two were 5 s time limits in maplabels.test.ts | maplabels.test.ts: 1 time limit with the copy-table file, 2 alone, then 10 passed in 11.7 s |
+| `npm run check:size` | 76.7 KB of 100 KB: pass | |
+| Browser suites, phone, laptop, checkpoint and screens | 180 passed, 3 skipped, 10 failed: nine 30 s time limits or slow-machine steps in race.spec.ts, and screens 02-racing (real: the map line over the strip, fixed above) | the nine race.spec tests: 13 passed (both projects); 02-racing, ghost-cars stills, phone fit: 6 passed |
+| Browser suites again after the strip fix, phone, laptop, checkpoint | 132 passed, 3 skipped, 5 failed, all 30 s time limits | the five: 6 passed (both projects) |
+
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
 
 Run by Emmanuel in the Kiro IDE on Nov 22, 2026 and reported by him; the chat output is not in git †.

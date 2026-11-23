@@ -32,16 +32,16 @@ No schema change, no bus paths, no tilt, no new library, no new URL. The feature
 1. WHILE a race runs, THE Site SHALL show each Ghost car from its pass time `p` and move it along the same 1938 stretch, origin to destination, over `y1938.ride_min`, linear in time by length, with the same track helper and the same clock as the own car.
 2. THE Site SHALL remove a Ghost car when it reaches the destination; it does not stand at the stop.
 3. THE Site SHALL leave the own car unchanged.
-4. THE Site SHALL draw Ghost cars wherever the own car's marker is drawn: on the map, and on the bundled route drawing (the phone strip, and the drawing while the map is not ready or is unavailable).
+4. THE Site SHALL draw Ghost cars wherever the own car's marker is drawn: on the map, and on the bundled route drawing while the map is not ready or is unavailable. The one exception is the phone's collapsed 100 px strip, which shows no Ghost car and no map line: its stretch is too short to tell the cars apart, and the map line would cover its drawing (design decision 5; found by the 02-racing picture check, Nov 23). "View route" shows them.
 5. THE Site SHALL draw a Ghost car as the simplified trolley marker in --ghost at 45% opacity with a softer glow, moved by transform only. Only 1938 glows; today's side is unchanged.
 6. WHEN the race is not running (before it starts, finished, held), THE Site SHALL show no Ghost car.
 
 ## Requirement 4: The counter (G4)
 
-1. THE Site SHALL place the Counter in the today lane, on one line of 12 px text, and reserve that line's height for the whole race and the finished card, so the card never reflows when its text changes.
+1. THE Site SHALL place the Counter in the today lane, on one line of 12 px text, and reserve that one line's height for the whole race and the finished card, so the card never reflows when its text changes.
 2. WHILE the race runs, from the own car's pass until the bus departure, THE Site SHALL show "1938 trolleys scheduled past this corner: {k}", where `k` is the number of Cars whose pass time has been reached; `k` changes at each pass time with no animation beyond the number changing.
 3. WHILE the race runs before the own car's pass, THE Site SHALL leave the Counter's reserved line empty.
-4. WHEN the bus departure has passed, and on every finished card (reduced motion, skip, replay end, a shared link), THE Site SHALL show "{n} trolleys were scheduled past this corner in 1938 before today's bus leaves."
+4. WHEN the bus departure has passed, and on every finished card (reduced motion, skip, replay end, a shared link), THE Site SHALL show "{n} 1938 trolleys were scheduled here before today's bus." on one line, in the 343 px phone card and the desktop race column (Emmanuel, Nov 23: the brief's longer sentence took two lines and cost the phone fit 16 px).
 5. THE Site SHALL make `{k}` and `{n}` Number_Buttons that open the Sources sheet at the 1938 timetable row: the 1938 timetable link of the race file, the effective date, and the method line "Counted from the 1938 timetable's scheduled departures at the origin corner, from the start time until today's bus is scheduled to leave."
 6. THE Counter SHALL keep keyboard focus on its number button when the number changes.
 
@@ -53,7 +53,7 @@ No schema change, no bus paths, no tilt, no new library, no new URL. The feature
 
 ## Requirement 6: Honesty (G6)
 
-1. WHILE Ghost cars show, THE Site SHALL add the map line "Fainter cars: other scheduled 1938 departures." to the map area's lines, on the map and on the drawing.
+1. WHILE Ghost cars show, THE Site SHALL add the map line "Fainter cars: other scheduled 1938 departures." to the map area's lines, on the map and on the drawing (not on the phone strip, Req 3.4).
 2. THE Site SHALL show no other new text and no number on the map.
 3. THE banned-word scans SHALL cover the new strings.
 
@@ -71,7 +71,7 @@ No schema change, no bus paths, no tilt, no new library, no new URL. The feature
 | Where | String |
 | --- | --- |
 | Counter while counting (Req 4.2) | "1938 trolleys scheduled past this corner: {k}" |
-| Counter finished (Req 4.4) | "{n} trolleys were scheduled past this corner in 1938 before today's bus leaves." |
+| Counter finished (Req 4.4) | "{n} 1938 trolleys were scheduled here before today's bus." (Emmanuel, Nov 23, NEW COPY; **replaces** the brief's "{n} trolleys were scheduled past this corner in 1938 before today's bus leaves.", which does not fit one line) |
 | Sources method line (Req 4.5) | "Counted from the 1938 timetable's scheduled departures at the origin corner, from the start time until today's bus is scheduled to leave." |
 | Map line (Req 6.1) | "Fainter cars: other scheduled 1938 departures." |
 

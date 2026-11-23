@@ -33,6 +33,13 @@ export function stepMinute(minute: number, step: -1 | 1, first: string, last: st
   return Math.min(minutesOf(last), Math.max(minutesOf(first), minute + step));
 }
 
+/** Seconds after midnight of an "hh:mm" or a GTFS "hh:mm:ss" string (hours may pass 24), for comparing the two (ghost-cars Req 1.1). */
+export function secondsOf(clock: string): number {
+  const m = /^(\d{2}):([0-5]\d)(?::([0-5]\d))?$/.exec(clock);
+  if (!m) throw new Error(`not an hh:mm or hh:mm:ss clock string: ${clock}`);
+  return Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3] ?? 0);
+}
+
 /** "hh:mm" from a GTFS "hh:mm:ss": the seconds are dropped, not rounded. */
 export function dropSeconds(hhmmss: string): string {
   const m = HHMMSS.exec(hhmmss);

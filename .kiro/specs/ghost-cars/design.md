@@ -57,7 +57,7 @@ export function counterAt(timeline: Timeline, elapsed: number): { kind: 'empty' 
 
 ## 4. The counter on the card
 
-- `view/lanes.ts`: the today lane of a Ghost_Row ends with `p.ghost-counter` (12 px text, `--fs-body-small`, line height 1.35, `min-height: 1.35em`, `margin-top: 2px`), on both the racing and the finished card, so its line is there from the first frame (Req 4.1).
+- `view/card.ts`: the today lane of a Ghost_Row ends with `p.ghost-counter` (12 px text, `--fs-body-small`, line height 1.35, one line reserved, `margin-top: 2px`), on both the racing and the finished card, so its line is there from the first frame (Req 4.1).
 - Its content: racing, empty until the first frame; finished, `sentence(registry, ghostFinished, nNum)`.
 - `view/racer.ts`: each frame reads `counterAt(...)` and rewrites the line only when the kind or `k` changes, through the same focus-keeping helper the status line uses (Req 4.6). `finish()` writes the finished sentence (skip and the natural end both pass through it).
 - Reduced motion and shared links draw the finished card, so the finished sentence is there at once (Req 5.1).
@@ -80,3 +80,4 @@ The counter takes one 12 px line plus 2 px in the today lane, above the result b
 2. A row whose bus leaves after the last listed pass gets neither Counter nor Ghost cars (brief G2 names the Counter; the cars go with it so the map never shows cars the counter does not count).
 3. One Sources row id for `{k}` and `{n}`.
 4. No new "what a number is" phrase: the count's button is named with the existing 1938-car phrase.
+5. No Ghost car and no map line on the phone's collapsed 100 px strip (Nov 23). The line covered the strip's destination dot and name (screens 02-racing), and on the strip two cars on the same stretch stood about 17 px apart. They show on the 150 px area after "View route", on the map and on desktop.

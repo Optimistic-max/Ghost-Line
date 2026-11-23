@@ -618,6 +618,17 @@
   visibility: hidden;
 }
 
+/* The ghost-cars counter (ghost-cars Req 4.1): one line of 12 px text, its height reserved from the first
+   frame, so the card never moves when its text changes or when it is empty. Both its sentences fit one line
+   in the 343 px phone card and the desktop race column (screens.spec.ts checks it). */
+.ghost-counter {
+  min-height: calc(var(--fs-body-small) * 1.35);
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--fs-body-small);
+  line-height: 1.35;
+}
+
 .status {
   margin-top: 3px;
   color: var(--ink);

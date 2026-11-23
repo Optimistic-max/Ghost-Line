@@ -816,7 +816,7 @@ async function phoneFit(browser: Browser, size: { width: number; height: number 
           result: atTop('.result-line'),
           counter: atTop('.ghost-counter'),
           lineAt12: (12 * parseFloat(style.lineHeight)) / parseFloat(style.fontSize),
-          key: [...document.querySelectorAll('#app *')].slice(0, 400).map((el) => { const r = el.getBoundingClientRect(); return `${Math.round((r.top + window.scrollY) * 10)},${Math.round(r.height * 10)}`; }).join('|'),
+          key: [...document.querySelectorAll('#race-card *')].slice(0, 400).map((el) => { const r = el.getBoundingClientRect(); return `${Math.round((r.top + window.scrollY) * 10)},${Math.round(r.height * 10)}`; }).join('|'),
         };
       });
     // One frame is 16 ms of the page clock; stop after two frames in a row with no layout change.
@@ -852,6 +852,78 @@ for (const size of [PHONE, { width: 390, height: 844 }]) {
     console.log(`phone fit ${size.width} x ${size.height}: ${line}`);
     for (const r of runs) expect(r.headline).toBe('Same ride, longer wait.');
     expect(Math.min(...runs.map((r) => r.spare))).toBeGreaterThanOrEqual(PHONE_FIT_SPARE_PX);
+  });
+}
+
+// Ghost-cars pictures (ghost-cars Req 7.5) and the counter's reserved line (Req 4.1). The picture is the lead race
+// at 10:14 scheduled: the race's own car is nearly at Aliceanna & Bond, the 10:13 car has just left Preston & Caroline
+// and is on the route at the other end of the stretch, and the counter reads 2 (Emmanuel, Nov 23: a ghost mid-route, not beside the own car).
+// From the race start to the bus departure the counter keeps one line's height, and its finished sentence fits on
+// one line, in the phone card and in the desktop column.
+const GHOST_STILL_MS = 3500; // 1 s of play is 4 scheduled minutes: 10:14 is 3.5 s into the race.
+const GHOST_BUS_MS = 8250; // past the bus departure, 10:32:43
+
+for (const [label, size] of [['phone', PHONE], ['desktop', DESKTOP]] as const) {
+  test(`ghost cars: one mid-route, the counter at 2, one line throughout (${label})`, async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: size.width, height: size.height }, deviceScaleFactor: size.deviceScaleFactor, reducedMotion: 'no-preference' });
+    await guardNetwork(context, true);
+    const page = await context.newPage();
+    await page.clock.install({ time: beforeNewYork('20:00') });
+    await page.clock.pauseAt(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.clock-row').waitFor();
+    await fontsReady(page);
+    // On a phone the 100 px strip leaves the stretch too short to tell two cars apart: View route opens the
+    // 150 px area. With the tiles blocked it shows the route drawing, as the desktop picture does.
+    if (label === 'phone') {
+      await page.locator('.route-toggle').click();
+      await page.locator('.map-notice:not([hidden])').waitFor();
+    }
+    await page.clock.runFor(TIMINGS.orientationMs + 20);
+    const lineHeight = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.ghost-counter')!).lineHeight));
+    const heights = new Set<string>();
+    const measure = async (): Promise<void> => {
+      heights.add((await page.locator('.ghost-counter').boundingBox())!.height.toFixed(1));
+    };
+    for (let ms = 0; ms < GHOST_STILL_MS; ms += 250) {
+      await page.clock.runFor(250);
+      await measure();
+    }
+    expect(await page.locator('.clock-readout').innerText()).toBe('10:14 scheduled');
+    expect(await page.locator('.ghost-counter').innerText()).toBe('1938 trolleys scheduled past this corner: 2');
+    // One ghost on the route, clear of the race's own car (more than a marker's width between their centres).
+    const ghosts = page.locator('.drawing-marker.ghost-car:not([hidden])');
+    expect(await ghosts.count()).toBe(1);
+    const ghost = (await ghosts.first().boundingBox())!;
+    const own = (await page.locator('.drawing-marker:not(.ghost-car)').boundingBox())!;
+    const apart = Math.hypot(ghost.x + ghost.width / 2 - (own.x + own.width / 2), ghost.y + ghost.height / 2 - (own.y + own.height / 2));
+    console.log(`ghost cars ${label}: ghost and own car ${apart.toFixed(1)} px apart, marker ${own.width.toFixed(1)} px`);
+    await expect(page.locator('.map-ghosts')).toBeVisible();
+    // The result appeared at the trolley's arrival and scrolled itself into view (smoothly, on the real clock):
+    // wait for that scroll to end, then take the picture from the top.
+    const toTop = () =>
+      page.evaluate(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.getElementById('race-card')?.scrollTo({ top: 0, behavior: 'instant' });
+        return window.scrollY + (document.getElementById('race-card')?.scrollTop ?? 0);
+      });
+    await page.waitForTimeout(800);
+    await toTop();
+    await page.waitForTimeout(200);
+    expect(await toTop()).toBe(0);
+    await page.screenshot({ path: resolve(OUT, `ghost-cars-${label}.png`), animations: 'disabled' });
+    expect(apart).toBeGreaterThan(own.width);
+    // On past the bus departure (10:32:43): the finished sentence, still on its one line.
+    for (let ms = GHOST_STILL_MS; ms < GHOST_BUS_MS; ms += 250) {
+      await page.clock.runFor(250);
+      await measure();
+    }
+    expect(await page.locator('.ghost-counter').innerText()).toBe("4 1938 trolleys were scheduled here before today's bus.");
+    const box = (await page.locator('.ghost-counter').boundingBox())!;
+    console.log(`ghost cars ${label}: counter heights ${[...heights].join(', ')} px, line ${lineHeight} px, finished ${box.width.toFixed(1)} x ${box.height.toFixed(1)}`);
+    expect([...heights]).toHaveLength(1);
+    expect(box.height).toBeLessThan(lineHeight * 1.5);
+    await context.close();
   });
 }
 

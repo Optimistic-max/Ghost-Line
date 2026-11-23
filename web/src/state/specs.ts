@@ -11,6 +11,7 @@ import {
   METHOD_WAIT_BUS,
   METHOD_WALK_SUM,
   METHOD_PHOTO_BAND,
+  METHOD_GHOST_COUNT,
   WHAT,
   frequency,
   methodBusTrip,
@@ -473,3 +474,26 @@ export function verdictNumbers(summary: Summary) {
 }
 
 export type RaceNumbers = ReturnType<typeof raceNumbers>;
+
+/**
+ * The ghost-cars counter's number (ghost-cars Req 4.5): `k` while counting, `n` once the bus has left. One
+ * Sources row, `ghost-count`, at the race file's 1938 timetable page, named with the 1938-car phrase.
+ */
+export function ghostCountNum(race: RaceFile, view: RaceView, count: number): Num {
+  const text = String(count);
+  return {
+    spec: {
+      id: 'ghost-count',
+      value: text,
+      what: WHAT.car1938,
+      rowWhat: whatAt(WHAT.car1938, view.originName),
+      sourceIds: ['guide1938_timetable'],
+      url: race.y1938.sources.passes,
+      method: METHOD_GHOST_COUNT,
+      date: 'effective',
+    },
+    text,
+    bare: text,
+    n: count,
+  };
+}

@@ -132,6 +132,11 @@ export type RaceView = {
   frequency: Frequency | null;
   honest: Honest;
   takeaway: Takeaway;
+  /** The 1938 cars past the origin before today's bus leaves, for a Ghost_Row only (ghost-cars Req 2). */
+  ghosts: GhostPlan | null;
 };
+
+/** The cars of a Ghost_Row: `passes[0]` is the race's own car; `n` is how many there are. */
+export type GhostPlan = { passes: string[]; n: number };
 
 export type Derived = { status: 'loading' } | { status: 'error' } | { status: 'ready'; view: RaceView };

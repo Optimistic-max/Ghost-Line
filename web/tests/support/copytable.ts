@@ -38,8 +38,15 @@ export function storyCopyTable(): CopyTable {
   return { raw, quoted: quotedOf(raw) };
 }
 
+/** The ghost-cars copy table alone (ghost-cars spec). */
+export function ghostCopyTable(): CopyTable {
+  const raw = sectionOf('.kiro/specs/ghost-cars/requirements.md', '## Ghost cars copy table');
+  return { raw, quoted: quotedOf(raw) };
+}
+
 /**
- * Both copy tables, with the story-layer row winning (story-layer Requirement 13.8).
+ * The copy tables, with the story-layer row winning (story-layer Requirement 13.8); the ghost-cars rows
+ * are added after them and replace nothing.
  * `replaced` lists the race-screen strings that story rows replace (and the story
  * table's own mentions of them); each is removed from both tables, so a template
  * still carrying one of them fails the copy-table test. The story table's rows are
@@ -49,8 +56,9 @@ export function effectiveCopyTable(replaced: readonly string[]): CopyTable {
   const drop = (raw: string): string => replaced.reduce((acc, s) => acc.split(`"${s}"`).join(''), raw);
   const race = drop(copyTable().raw);
   const story = drop(storyCopyTable().raw);
-  const raw = `${race}\n${story}`;
-  return { raw, quoted: [...quotedOf(race), ...quotedOf(story)] };
+  const ghost = drop(ghostCopyTable().raw);
+  const raw = `${race}\n${story}\n${ghost}`;
+  return { raw, quoted: [...quotedOf(race), ...quotedOf(story), ...quotedOf(ghost)] };
 }
 
 /**

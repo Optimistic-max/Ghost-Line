@@ -14,6 +14,7 @@ import { FIXTURE_LINE, TIMINGS } from '../config';
 import {
   HIDE_ROUTE,
   MAP_CREDIT,
+  MAP_GHOSTS,
   MAP_UNAVAILABLE,
   MAP_UNAVAILABLE_NO_DRAWING,
   PICKER_STEP_END,
@@ -58,6 +59,8 @@ export type MapView = {
   painted(): void;
   /** The 1938 ride's progress, 0 to 1, from the race clock. */
   ride(progress: number): void;
+  /** Each ghost car's share of its ride, null where it is off the route (ghost-cars Req 3). */
+  ghosts(shares: (number | null)[]): void;
 };
 
 /** The made-up line has no map: its area shows only the fixture tag (mockups 21 and 25). */
@@ -73,6 +76,8 @@ export function createMapView(deps: MapViewDeps): MapView {
   const { doc, area, loader } = deps;
   const notice = h('p', { class: 'map-notice', hidden: true }, MAP_UNAVAILABLE);
   const credit = h('p', { class: 'map-credit', hidden: true }, MAP_CREDIT);
+  // While ghost cars show (ghost-cars Req 6.1), on the map and the drawing alike.
+  const ghostLine = h('p', { class: 'map-ghosts', hidden: true });
   const hint = h('p', { class: 'map-hint', hidden: true });
   const trolley = h('div', { class: 'drawing-marker', 'aria-hidden': 'true', hidden: true });
   // The phone's View route / Hide route button (Req 12.8); never shown on desktop.
@@ -81,7 +86,10 @@ export function createMapView(deps: MapViewDeps): MapView {
     { type: 'button', class: 'route-toggle', 'aria-expanded': 'false', 'aria-controls': area.id || null, hidden: true },
     VIEW_ROUTE,
   );
-  area.append(h('div', { class: 'map-lines' }, notice, credit), hint, trolley, toggle);
+  /** The ghost cars on the drawing: one marker each, made as needed (ghost-cars design 3). */
+  const ghostEls: HTMLElement[] = [];
+  let ghostShares: (number | null)[] = [];
+  area.append(h('div', { class: 'map-lines' }, notice, credit, ghostLine), hint, trolley, toggle);
   toggle.addEventListener('click', () => deps.dispatch({ type: 'route/toggle' }));
 
   let route: Route | null = null;
@@ -154,6 +162,38 @@ export function createMapView(deps: MapViewDeps): MapView {
     const at = drawing.plan.project(point);
     setVar(trolley, '--mx', `${at.x}px`);
     setVar(trolley, '--my', `${at.y}px`);
+  }
+
+  /** The ghost cars, at their shares of the ride; all hidden at rest (ghost-cars Req 3.6). */
+  function placeGhosts(state: AppState, layout: Layout): void {
+    const track = drawing?.plan.track ?? null;
+    // Not on the phone's 100 px strip: its stretch is too short to tell the cars apart, and the strip has no
+    // room for the map line under its drawing (ghost-cars Req 3.4, decision 5; screens 02-racing, Nov 23).
+    const running = state.race.phase === 'running' && drawing?.preview !== true;
+    const points = ghostShares.map((share) => (running && track && share !== null ? trackPoint(track, share) : null));
+    const onMap = state.mapStatus === 'ready' && map !== null;
+    map?.ghosts?.(onMap ? points : []);
+    while (ghostEls.length < points.length) {
+      const el = h('div', { class: 'drawing-marker ghost-car', 'aria-hidden': 'true', hidden: true });
+      trolley.after(el);
+      ghostEls.push(el);
+    }
+    ghostEls.forEach((el, k) => {
+      const point = points[k] ?? null;
+      el.hidden = onMap || !point || !drawing;
+      if (el.hidden || !point || !drawing) return;
+      if (el.dataset['layout'] !== layout) {
+        el.dataset['layout'] = layout;
+        el.innerHTML = markerSvg({ width: vehicleWidths(layout).marker });
+      }
+      const at = drawing.plan.project(point);
+      setVar(el, '--mx', `${at.x}px`);
+      setVar(el, '--my', `${at.y}px`);
+    });
+    ghostLine.hidden = !running || ghostShares.length === 0 || drawing === null;
+    // The line names the year, so it holds its text only while it shows: the data error has no number (P7).
+    const line = ghostLine.hidden ? '' : MAP_GHOSTS;
+    if (ghostLine.textContent !== line) ghostLine.textContent = line;
   }
 
   /** The desktop hint strip: the picker's step line while a pair is picked on the map, or on a corner under the pointer. */
@@ -244,6 +284,11 @@ export function createMapView(deps: MapViewDeps): MapView {
       if (layout === 'phone') routeToggled(first.routeOpen);
     }
     const state = deps.state();
+    // The phone's map area is the 100 px strip unless the route is open (or the made-up line has no map to preview).
+    // Set before the drawing is made, so the drawing is laid out for the area's new height and the trolley
+    // markers it places land on its route (found by the ghost-cars phone picture, Nov 23).
+    const expanded = layout !== 'phone' || state.routeOpen || (state.data.status === 'ready' && !hasMap(state));
+    doc.documentElement.dataset['route'] = expanded ? 'open' : 'strip';
     if (hasMap(state)) drawFor(state, layout);
     // A change of layout draws the map again for the new one, or drops it on a phone with the route closed.
     if (map && mapLayout !== null && mapLayout !== layout && state.mapStatus !== 'unavailable') {
@@ -256,9 +301,6 @@ export function createMapView(deps: MapViewDeps): MapView {
       // The map starts here when the visitor asked for it (phone) or the idle load has already run (desktop).
       if (layout === 'phone' ? state.routeOpen : idleDone) startMap();
     }
-    // The phone's map area is the 100 px strip unless the route is open (or the made-up line has no map to preview).
-    const expanded = layout !== 'phone' || state.routeOpen || (state.data.status === 'ready' && !hasMap(state));
-    doc.documentElement.dataset['route'] = expanded ? 'open' : 'strip';
     const unavailable = state.mapStatus === 'unavailable';
     const preview = drawing?.preview === true;
     // "Showing the route diagram" only while the drawing is on screen; without route.geojson there is none.
@@ -275,6 +317,8 @@ export function createMapView(deps: MapViewDeps): MapView {
     // At rest the trolley waits at the origin; after the finish it stands short of the destination.
     if (state.race.phase !== 'running') progress = state.race.phase === 'finished' ? 1 : 0;
     placeMarker(state, layout);
+    if (state.race.phase !== 'running') ghostShares = [];
+    placeGhosts(state, layout);
     syncHint(state, layout);
   }
 
@@ -318,6 +362,10 @@ export function createMapView(deps: MapViewDeps): MapView {
     ride(next) {
       progress = next;
       placeMarker(deps.state(), deps.layout());
+    },
+    ghosts(shares) {
+      ghostShares = shares;
+      placeGhosts(deps.state(), deps.layout());
     },
   };
 }

@@ -28,7 +28,7 @@ import { decode, encode, namesAPair } from '../format/share';
 import { defaultStart, minutesOf } from '../format/time';
 import { type PageTimers, browserTimers, createClock } from '../play/clock';
 import { initialMotion, motionClass, watchMotion } from '../play/motion';
-import { SPARK, type Timeline, buildTimeline, rideShare, sparkGapMs } from '../play/timeline';
+import { SPARK, type Timeline, buildTimeline, ghostShares, rideShare, sparkGapMs } from '../play/timeline';
 import { initialState } from '../state/actions';
 import { derive } from '../state/derive';
 import type { AppState, MotionLevel, RaceView } from '../state/model';
@@ -46,6 +46,7 @@ import {
   renderCard,
   resultElements,
 } from './card';
+import { ghostCountNum } from '../state/specs';
 import { syncDepartures } from './departures';
 import { h, setVar } from './dom';
 import { GLYPH } from './glyphs';
@@ -211,6 +212,8 @@ export function createApp(options: AppOptions): App {
       setVar(root, '--elapsed', elapsed);
       // The trolley on the map moves in step with the 1938 lane, during its ride only (R5.9).
       if (timeline) mapView.ride(rideShare(timeline, '1938', elapsed));
+      // The other scheduled 1938 cars, while today's passenger waits (ghost-cars Req 3).
+      if (timeline) mapView.ghosts(ghostShares(timeline, elapsed));
     },
     arrive(side) {
       racer?.arrive(side);
@@ -508,6 +511,7 @@ export function createApp(options: AppOptions): App {
       layout: cardLayout(input),
       next: { '1938': nums.lane1938.next, today: nums.today?.next ?? null },
       keepBoard: boardShown({ layout, stage: 'finished' }),
+      ghostCount: input.view.ghosts ? (count) => ghostCountNum(input.race, input.view, count) : null,
     });
     racer.frame(clock.elapsed());
   }

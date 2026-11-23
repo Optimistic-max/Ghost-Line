@@ -2,7 +2,9 @@
 // cumulative stored parts on the scheduled-minute axis, the playback speed, and
 // positions and countdowns for drawing. Nothing here produces a result, a total
 // or a margin, and the shown (rounded) minutes never set a position.
-import type { Lane, PhaseKind, RaceView, Side } from '../state/model';
+import type { RaceFile, RaceRow } from '../data/types';
+import { minutesOf, secondsOf } from '../format/time';
+import type { GhostPlan, Lane, PhaseKind, RaceView, Side } from '../state/model';
 
 /** Scheduled minutes per real second at normal speed (R5.2). */
 export const BASE_SPEED = 4;
@@ -52,6 +54,11 @@ export type Timeline = {
   speed: number;
   /** Real milliseconds from start to finish. */
   durationMs: number;
+  /**
+   * The 1938 cars of a Ghost_Row (ghost-cars design 2), or null: `at[k]` is car k's pass in minutes from
+   * the start (car 0 is the race's own), `ride` the stored 1938 ride, `busAt` when today's bus leaves.
+   */
+  ghosts: { at: number[]; ride: number; busAt: number } | null;
 };
 
 function laneSegments(lane: Lane): Segment[] {
@@ -76,7 +83,62 @@ export function buildTimeline(view: RaceView): Timeline {
     finishAt,
     speed,
     durationMs: (finishAt / speed) * 1000,
+    ghosts: ghostTimes(view),
   };
+}
+
+// ---- Ghost cars (ghost-cars spec) ---------------------------------------------------
+
+/**
+ * The cars of a row (Req 1): every listed pass p at the origin with start <= p < the bus departure, compared
+ * in whole seconds, and whether the passes cover the whole wait (the bus leaves at or before the last pass).
+ * Null when the row has no bus.
+ */
+export function carsOf(race: RaceFile, row: RaceRow): { passes: string[]; covered: boolean } | null {
+  const trip = row.today ? race.today.trips[row.today.trip] : undefined;
+  if (!trip) return null;
+  const start = secondsOf(row.start);
+  const bus = secondsOf(trip.dep);
+  const last = race.y1938.passes.at(-1);
+  return {
+    passes: race.y1938.passes.filter((p) => secondsOf(p) >= start && secondsOf(p) < bus),
+    covered: last !== undefined && bus <= secondsOf(last),
+  };
+}
+
+/** The ghost plan of a row (Req 2): only for a row not before the table, with a bus, covered, and two cars or more. */
+export function ghostPlanOf(race: RaceFile, row: RaceRow): GhostPlan | null {
+  if (row.before_table || row.result === 'no_one_seat_ride') return null;
+  const cars = carsOf(race, row);
+  if (!cars || !cars.covered || cars.passes.length < 2) return null;
+  return { passes: cars.passes, n: cars.passes.length };
+}
+
+function ghostTimes(view: RaceView): Timeline['ghosts'] {
+  const plan = view.ghosts;
+  const ride = view.lane1938.phases.find((p) => p.kind === 'ride');
+  const wait = view.laneToday ? laneSegments(view.laneToday).find((s) => s.kind === 'wait') : undefined;
+  if (!plan || !ride || !wait) return null;
+  const start = minutesOf(view.start);
+  return { at: plan.passes.map((p) => minutesOf(p) - start), ride: ride.stored, busAt: wait.to };
+}
+
+/** Each ghost car's share of its ride at `elapsed` (car 1 onward), or null where it is not on the route (Req 3.1, 3.2). */
+export function ghostShares(timeline: Timeline, elapsed: number): (number | null)[] {
+  const g = timeline.ghosts;
+  if (!g || g.ride <= 0) return [];
+  return g.at.slice(1).map((at) => (elapsed >= at && elapsed < at + g.ride ? (elapsed - at) / g.ride : null));
+}
+
+export type Counter = { kind: 'empty' } | { kind: 'counting'; k: number } | { kind: 'finished' };
+
+/** The counter at `elapsed` (Req 4.2 to 4.4): empty before the race's own car, counting until the bus leaves, then finished. */
+export function counterAt(timeline: Timeline, elapsed: number): Counter {
+  const g = timeline.ghosts;
+  if (!g) return { kind: 'empty' };
+  if (elapsed >= g.busAt) return { kind: 'finished' };
+  const k = g.at.filter((at) => at <= elapsed).length;
+  return k === 0 ? { kind: 'empty' } : { kind: 'counting', k };
 }
 
 /** Scheduled minutes elapsed after `ms` real milliseconds, never past the finish. */

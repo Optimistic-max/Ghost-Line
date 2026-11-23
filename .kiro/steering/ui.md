@@ -71,6 +71,6 @@ match them closely, except where section 3B changes the layout.
 - The result is announced once, through an aria-live region, when the race ends.
 - Every number is a button with a dotted underline that opens the Sources sheet
   at its row.
-- Use only the copy strings in the race-screen and story-layer specs; where
-  both have a row for the same place, the story-layer row wins. Do not write
-  new wording.
+- Use only the copy strings in the race-screen, story-layer and ghost-cars
+  specs; where race-screen and story-layer both have a row for the same place,
+  the story-layer row wins. Do not write new wording.

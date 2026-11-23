@@ -3,9 +3,9 @@
 // the status lines and the clock readout into the elements lanes.ts and card.ts
 // built. Positions come from timeline.ts; nothing here does arithmetic. Only
 // custom properties read by transforms, opacity classes and text change.
-import { type CaptionKey, ORIENTATION_LINE, captionText, clockReadout } from '../copy/copy';
+import { type CaptionKey, ORIENTATION_LINE, captionText, clockReadout, ghostCounting, ghostFinished } from '../copy/copy';
 import { clockLabel } from '../format/time';
-import { type Timeline, laneFrame } from '../play/timeline';
+import { type Timeline, counterAt, laneFrame } from '../play/timeline';
 import { type Side38, type SideToday, captionFor, phaseOf } from '../state/captions';
 import type { Lane, RaceView, Side } from '../state/model';
 import type { Num } from '../state/specs';
@@ -13,7 +13,7 @@ import { keepFocus } from './a11y';
 import { h, setVar } from './dom';
 import type { LaneLayout, RaceLayout } from './layout';
 import { statusKey, statusLine } from './lanes';
-import type { SourceRegistry } from './numbers';
+import { type SourceRegistry, sentence } from './numbers';
 
 export type RacerInput = {
   view: RaceView;
@@ -23,6 +23,8 @@ export type RacerInput = {
   next: { '1938': Num; today: Num | null };
   /** The departures board stays after the finish (desktop) or goes (phone) (R8.4). */
   keepBoard: boolean;
+  /** The ghost-cars counter's number for a count, on a Ghost_Row; null otherwise (ghost-cars Req 4). */
+  ghostCount: ((count: number) => Num) | null;
 };
 
 export type Racer = {
@@ -138,12 +140,33 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
     );
   }
 
+  // The ghost-cars counter (ghost-cars Req 4): rewritten only when its kind or count changes, keeping
+  // keyboard focus on its number (Req 4.6). Its line is reserved by CSS, so the card does not move.
+  const counter = input.ghostCount ? root.querySelector<HTMLElement>('.ghost-counter') : null;
+  let counterShown = '';
+
+  function drawCounter(state: 'empty' | 'finished' | number): void {
+    const make = input.ghostCount;
+    if (!counter || !make || !view.ghosts) return;
+    const key = String(state);
+    if (key === counterShown) return;
+    counterShown = key;
+    changeStatus(root, counter, () => {
+      registry.delete('ghost-count');
+      if (state === 'empty') counter.replaceChildren();
+      else if (state === 'finished') counter.replaceChildren(sentence(registry, ghostFinished, make(view.ghosts!.n)));
+      else counter.replaceChildren(sentence(registry, ghostCounting, make(state)));
+    });
+  }
+
   let framed = false;
 
   return {
     frame(elapsed) {
       for (const b of lanes) drawLane(b, elapsed);
       drawReadout(elapsed);
+      const c = counterAt(timeline, elapsed);
+      drawCounter(c.kind === 'counting' ? c.k : c.kind);
       if (phases['1938']) drawCaption(captionFor({ p1938: phases['1938'], today: view.laneToday ? phases.today : null, orientation: false }));
       // Drawn again mid-race (a layout change): a lane already in means the first arrival has passed.
       if (!framed) {
@@ -164,6 +187,7 @@ export function createRacer(root: HTMLElement, registry: SourceRegistry, input: 
     finish() {
       drawCaption(captionFor({ p1938: 'arrived', today: view.laneToday ? 'arrived' : null, orientation: false }));
       root.querySelector('.clock-row')?.remove();
+      drawCounter('finished');
       if (!input.keepBoard) {
         const board = root.querySelector('.board');
         board?.querySelectorAll<HTMLElement>('button.num').forEach((b) => registry.delete(b.dataset['source'] ?? ''));

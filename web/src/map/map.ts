@@ -39,6 +39,8 @@ export type MapHandle = {
   corners(plan: DrawingPlan): void;
   /** Where the trolley marker is, or null to hide it. */
   marker(point: [number, number] | null): void;
+  /** Where each ghost car is, null where it is off the route; an empty list removes them all (ghost-cars design 3). */
+  ghosts?(points: ([number, number] | null)[]): void;
   remove(): void;
 };
 
@@ -99,6 +101,7 @@ export function startMap(start: MapStart): MapHandle {
   let timer: number | null = null;
   let cornerMarkers: Marker[] = [];
   let trolley: Marker | null = null;
+  let ghostMarkers: (Marker | null)[] = [];
   /** The plan the map shows; a newer pair's arrives through corners(). */
   let current = start.plan;
 
@@ -110,6 +113,8 @@ export function startMap(start: MapStart): MapHandle {
     cornerMarkers = [];
     trolley?.remove();
     trolley = null;
+    ghostMarkers.forEach((m) => m?.remove());
+    ghostMarkers = [];
     map?.remove();
     map = null;
     container.replaceChildren();
@@ -136,7 +141,7 @@ export function startMap(start: MapStart): MapHandle {
   if (!hasWebGL(doc)) {
     // Reported after this returns, as every other failure is.
     queueMicrotask(() => fail('no WebGL'));
-    return { corners() {}, marker() {}, remove };
+    return { corners() {}, marker() {}, ghosts() {}, remove };
   }
 
   try {
@@ -156,7 +161,7 @@ export function startMap(start: MapStart): MapHandle {
     });
   } catch (error) {
     queueMicrotask(() => fail(error instanceof Error ? error.message : String(error)));
-    return { corners() {}, marker() {}, remove };
+    return { corners() {}, marker() {}, ghosts() {}, remove };
   }
 
   // MapLibre adds the style's own attribution, bottom right beside the credit line. On a phone it is its compact
@@ -195,6 +200,29 @@ export function startMap(start: MapStart): MapHandle {
       }
       if (!trolley) trolley = new Marker({ element: markerEl, anchor: 'bottom' }).setLngLat(point).addTo(map);
       else trolley.setLngLat(point);
+    },
+    ghosts(points) {
+      const on = map;
+      if (!on || !ready) return;
+      points.forEach((point, k) => {
+        const m = ghostMarkers[k] ?? null;
+        if (!point) {
+          m?.remove();
+          ghostMarkers[k] = null;
+          return;
+        }
+        if (m) {
+          m.setLngLat(point);
+          return;
+        }
+        const el = doc.createElement('div');
+        el.className = 'map-trolley ghost-car';
+        el.setAttribute('aria-hidden', 'true');
+        el.innerHTML = markerSvg({ width: vehicleWidths(layout).marker });
+        ghostMarkers[k] = new Marker({ element: el, anchor: 'bottom' }).setLngLat(point).addTo(on);
+      });
+      ghostMarkers.slice(points.length).forEach((m) => m?.remove());
+      ghostMarkers.length = points.length;
     },
     remove,
   };

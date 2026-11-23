@@ -160,6 +160,18 @@
   opacity: 0;
 }
 
+/* Ghost cars (ghost-cars Req 3.5): the same simplified trolley in --ghost, fainter, with a softer glow. They
+   are placed by transform like the race's own marker and never animate on their own. */
+.map-trolley.ghost-car,
+.drawing-marker.ghost-car {
+  opacity: 0.45;
+  filter: drop-shadow(0 0 2px var(--ghost));
+}
+
+.route-drawing.is-faded ~ .drawing-marker.ghost-car {
+  opacity: 0;
+}
+
 /* MapLibre's attribution in palette B: muted text on the night background, never faint (R11.3). */
 .map-area .maplibregl-ctrl.maplibregl-ctrl-attrib {
   background: var(--night);

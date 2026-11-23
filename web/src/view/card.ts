@@ -12,6 +12,7 @@ import {
   START_IS_NOW,
   beforeTable,
   captionText,
+  ghostFinished,
   photoFinishMeaning,
   ready,
   todayWinNotice,
@@ -22,7 +23,7 @@ import { routeNumberOf } from '../format/line';
 import { label12, serviceDateLabel } from '../format/time';
 import { captionFor } from '../state/captions';
 import type { RaceView } from '../state/model';
-import { honestNumbers, photoBandNum, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
+import { ghostCountNum, honestNumbers, photoBandNum, raceNumbers, takeawayNumbers, type RaceNumbers } from '../state/specs';
 import { boardView } from './board';
 import { departuresView } from './departures';
 import { h } from './dom';
@@ -185,6 +186,18 @@ export function renderCard(registry: SourceRegistry, input: CardInput): HTMLElem
           h('h3', { class: 'lane-title display' }, LANE_TITLE_TODAY),
           h('p', { class: 'no-bus' }, NO_SINGLE_BUS),
         );
+
+  // The ghost-cars counter (ghost-cars Req 4): one reserved 12 px line at the foot of the today lane, on a
+  // Ghost_Row only. Racing, racer.ts writes it each frame; a finished card shows the finished sentence at once.
+  if (view.ghosts && view.laneToday && today.classList.contains('lane-today')) {
+    today.append(
+      h(
+        'p',
+        { class: 'ghost-counter' },
+        stage === 'finished' ? sentence(registry, ghostFinished, ghostCountNum(input.race, view, view.ghosts.n)) : '',
+      ),
+    );
+  }
 
   // The clock row sits right under the lanes while racing, so the result arriving
   // under it never pushes it out of sight on a phone (R1.2); it goes at the finish.

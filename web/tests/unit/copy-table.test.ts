@@ -156,6 +156,11 @@ const RENDERED: Record<string, string> = {
   // Story-layer rows.
   // The phone headline row (polish brief P4) is the SAME_RIDE constant on its own.
   phoneHeadline: C.SAME_RIDE,
+  // Ghost-cars rows.
+  ghostCounting: C.ghostCounting('{k}'),
+  ghostFinished: C.ghostFinished('{n}'),
+  METHOD_GHOST_COUNT: C.METHOD_GHOST_COUNT,
+  MAP_GHOSTS: C.MAP_GHOSTS,
   exampleLabel: C.exampleLabel('{h:mm AM/PM}'),
   STILL: C.STILL,
   ORIENTATION_LINE: C.ORIENTATION_LINE,
@@ -224,6 +229,7 @@ const REPLACED = [
   "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
   'Start is set. Now choose where the ride ends.',
   'Straight-line {n} m from the corner to the stop.',
+  "{n} trolleys were scheduled past this corner in 1938 before today's bus leaves.",
   "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners.",
   "Race Baltimore's 1938 trackless trolley, an electric bus that ran on overhead wires, against today's scheduled bus.",
 ];
