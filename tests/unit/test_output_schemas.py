@@ -46,6 +46,9 @@ def index_doc():
         "service_date": "2026-11-04", "feed_version": "20260821", "feed_sha256": SHA,
         "street_order_checked": False,
         "photo_finish_min": 1,
+        "stop_radius_m": 400,
+        "walk_detour_factor": 1.3,
+        "walk_speed_m_s": 1.2,
         "sources": {
             "guide1938_diagram": entry(), "guide1938_timetable": entry(),
             "guide1938_route": entry(), "mta_gtfs": entry(2026), "osm": entry(2026),

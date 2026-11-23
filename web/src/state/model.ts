@@ -95,7 +95,7 @@ export type Frequency = {
   spacing1938: string;
 };
 
-export type Honest = { form: 'plain' | 'today-wins'; wins1938: number; races: number };
+export type Honest = { form: 'plain' | 'photo-finish' | 'today-wins'; wins1938: number; races: number };
 
 /** The "Where the time goes" values (Req 8): the lane legends' shown parts, and the stored wait_most flag. */
 export type Takeaway = {

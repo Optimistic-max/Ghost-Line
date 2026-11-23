@@ -29,7 +29,7 @@ import {
   minutes,
 } from '../copy/copy';
 import { tripAt } from '../data/lookup';
-import type { RaceFile, RaceRow, SourceId, Summary, Trip } from '../data/types';
+import type { Index, RaceFile, RaceRow, SourceId, Summary, Trip } from '../data/types';
 import { formatCount } from '../format/count';
 import { isPlainRounding, roundTotal, roundWhole } from '../format/rounding';
 import { dropSeconds, label12, shortClock } from '../format/time';
@@ -71,7 +71,10 @@ export type SourceSpec = {
  */
 export type Num = { spec: SourceSpec; text: string; bare: string; n: number };
 
-type Ctx = { race: RaceFile; view: RaceView };
+/** The walk estimate's constants, read from index.json (polish brief P3). */
+export type WalkMethod = Pick<Index, 'walk_detour_factor' | 'walk_speed_m_s'>;
+
+type Ctx = { race: RaceFile; view: RaceView; walkMethod: WalkMethod };
 
 const RACE_IDS: SourceId[] = ['guide1938_diagram', 'guide1938_timetable', 'mta_gtfs', 'method'];
 
@@ -99,8 +102,8 @@ function tripLineOf(trip: Trip): string {
 }
 
 /** The numbers of one race on screen: phases, totals, next departures, margin and board times. */
-export function raceNumbers(race: RaceFile, view: RaceView) {
-  const ctx: Ctx = { race, view };
+export function raceNumbers(race: RaceFile, view: RaceView, walkMethod: WalkMethod) {
+  const ctx: Ctx = { race, view, walkMethod };
   const between = (what: string): string => whatBetween(what, view.originName, view.destName);
   const start = shortClock(view.start);
   const urls = race.y1938.sources;
@@ -214,8 +217,8 @@ export function raceNumbers(race: RaceFile, view: RaceView) {
  * source of the legend number it repeats under its own id, and the sum of the two shown walks.
  * Null `today` when there is no one-seat ride.
  */
-export function takeawayNumbers(race: RaceFile, view: RaceView) {
-  const nums = raceNumbers(race, view);
+export function takeawayNumbers(race: RaceFile, view: RaceView, walkMethod: WalkMethod) {
+  const nums = raceNumbers(race, view, walkMethod);
   const again = (num: Num, id: string): Num => ({ ...num, spec: { ...num.spec, id } });
   const today =
     nums.today && view.takeaway.today
@@ -296,7 +299,7 @@ function todayNumbers(ctx: Ctx, lane: Lane, trip: Trip, between: (what: string) 
         what,
         rowWhat: between(what),
         sourceIds: ['mta_gtfs', 'method'],
-        method: methodWalk(roundWhole(metres)),
+        method: methodWalk(roundWhole(metres), ctx.walkMethod.walk_detour_factor, ctx.walkMethod.walk_speed_m_s),
         date: 'feed',
         walk: true,
         exact: exactOf(phase, lane),

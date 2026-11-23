@@ -42,6 +42,10 @@ export type Index = {
   street_order_checked: boolean;
   /** The photo-finish band in minutes (race-engine task 36). */
   photo_finish_min: number;
+  /** The walk method's constants, from pipeline.stops (polish brief P3). */
+  stop_radius_m: number;
+  walk_detour_factor: number;
+  walk_speed_m_s: number;
   sources: Record<SourceId, SourceEntry>;
 };
 

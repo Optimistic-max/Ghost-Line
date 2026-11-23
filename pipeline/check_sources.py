@@ -18,7 +18,8 @@ from pathlib import Path
 from pipeline.emit import check_source_coverage
 from pipeline.errors import ValidationError
 
-BANNED_TERMS = ["live", "real-time", "realtime", "arriving now", "right now"]
+# "citywide": the counts cover this line's 20 corner pairs only (product.md rule 6).
+BANNED_TERMS = ["live", "real-time", "realtime", "arriving now", "right now", "citywide"]
 ALLOWED_PHRASE = "Scheduled, not live."
 PROSE_PATHS = ["web/index.html", "web/src/**", "docs/*.md", "README.md"]
 PROSE_EXCLUDES = ["docs/planning", "node_modules", "dist", "web/public/data"]

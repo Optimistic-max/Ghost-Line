@@ -204,6 +204,10 @@ const index = {
   feed_sha256: '0'.repeat(64),
   street_order_checked: true,
   photo_finish_min: BAND,
+  // Made-up walk constants, unlike the real ones, so tests catch any typed value (polish brief P3).
+  stop_radius_m: 250,
+  walk_detour_factor: 1.5,
+  walk_speed_m_s: 1.1,
   sources: {
     guide1938_diagram: entry('Fake 1938 diagram', 'Made-up route diagram', 1900, 'https://example.org/fake/diagram'),
     guide1938_timetable: entry('Fake 1938 timetable', 'Made-up timetable', 1900, 'https://example.org/fake/timetable'),

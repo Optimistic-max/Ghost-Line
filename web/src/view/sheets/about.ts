@@ -12,6 +12,7 @@ import {
   SOURCES_AND_CREDITS,
   SOURCE_CODE,
   VEHICLE_CREDIT,
+  honestLimits,
   howItWasMade,
   photoFinishMeaning,
 } from '../../copy/copy';
@@ -37,6 +38,7 @@ export function aboutSheet(index: Index): SheetParts {
     line(FONT_CREDIT),
     line(VEHICLE_CREDIT),
     line(photoFinishMeaning(index.photo_finish_min)),
+    line(honestLimits(index.stop_radius_m)),
     line(howItWasMade(index.street_order_checked)),
     line(INFERRED_CAUTION),
     line(NOT_LIVE),

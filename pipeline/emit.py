@@ -26,7 +26,7 @@ from pipeline.errors import ValidationError
 from pipeline.facts import FactsFile
 from pipeline.race import PHOTO_FINISH_MIN, SLIDER_FIRST_MIN, SLIDER_LAST_MIN, RaceRow
 from pipeline.route import RouteLeg
-from pipeline.stops import DEFAULT_STOP_RADIUS_M, Stop
+from pipeline.stops import DEFAULT_STOP_RADIUS_M, DETOUR_FACTOR, WALK_SPEED_M_PER_S, Stop
 from pipeline.summary import (
     GAP_WINDOW_END,
     GAP_WINDOW_START,
@@ -92,6 +92,9 @@ INDEX_COVERAGE = {
     "feed_version": ["mta_gtfs"],
     "feed_sha256": ["mta_gtfs"],
     "photo_finish_min": ["method"],
+    "stop_radius_m": ["method"],
+    "walk_detour_factor": ["method"],
+    "walk_speed_m_s": ["method"],
 }
 
 
@@ -242,7 +245,7 @@ def build_source_catalog(facts: FactsFile, feed_sha256: str, feed_version: str, 
         "method": {
             "label": "Ghost Line method",
             "what": (
-                f"Ghost Line race method: walk minutes = metres x 1.3 / 1.2 / 60, "
+                f"Ghost Line race method: walk minutes = metres x {DETOUR_FACTOR} / {WALK_SPEED_M_PER_S} / 60, "
                 f"{int(DEFAULT_STOP_RADIUS_M)} m stop radius, photo finish under {PHOTO_FINISH_MIN} minute"
             ),
             "year": None,
@@ -282,6 +285,11 @@ def _index_doc(
         # The photo-finish band, from the one constant (race.PHOTO_FINISH_MIN), so the
         # site reads it rather than typing it (race-engine task 36).
         "photo_finish_min": _r(PHOTO_FINISH_MIN),
+        # The walk method's constants, from pipeline.stops, so the site's walk and
+        # honest-limits lines read them rather than typing them (polish brief P3).
+        "stop_radius_m": _r(DEFAULT_STOP_RADIUS_M),
+        "walk_detour_factor": _r(DETOUR_FACTOR),
+        "walk_speed_m_s": _r(WALK_SPEED_M_PER_S),
         "sources": build_source_catalog(facts, feed_sha256, feed_version, service_date),
     }
 

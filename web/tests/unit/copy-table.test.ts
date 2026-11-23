@@ -53,6 +53,7 @@ const RENDERED: Record<string, string> = {
   INFERRED_CAUTION: C.INFERRED_CAUTION,
   honestLine: C.honestLine('{wins_1938}', '{races}', '{pairs}'),
   honestLineTodayWins: C.honestLineTodayWins('{wins_1938}', '{races}', '{pairs}'),
+  honestLinePhotoFinish: C.honestLinePhotoFinish('{wins_1938}', '{races}', '{pairs}'),
   rideVerdicts: C.rideVerdicts('{ride_same}', '{pairs}', '{ride_faster_today}'),
   rideSlowerClause: C.rideSlowerClause('{ride_slower_today}'),
   SENTENCE_END: C.SENTENCE_END,
@@ -128,10 +129,11 @@ const RENDERED: Record<string, string> = {
   methodNextCar: C.methodNextCar('{h:mm}'),
   METHOD_CAR_1938: C.METHOD_CAR_1938,
   METHOD_TOTAL_1938: C.METHOD_TOTAL_1938,
-  methodWalk: C.methodWalk(N),
+  methodWalk: C.methodWalk(N, n('{walk_detour_factor}'), n('{walk_speed_m_s}')),
   METHOD_WAIT_BUS: C.METHOD_WAIT_BUS,
   DATA_INCOMPLETE: C.DATA_INCOMPLETE,
   photoFinishMeaning: C.photoFinishMeaning(n('{photo_finish_min}')),
+  honestLimits: C.honestLimits(n('{stop_radius_m}')),
   METHOD_RIDE_BUS: C.METHOD_RIDE_BUS,
   methodBusTrip: C.methodBusTrip('{route}', '{headsign}', '{stop_id}', '{h:mm}'),
   methodTotalToday: C.methodTotalToday('{h:mm}'),
@@ -220,6 +222,7 @@ const REPLACED = [
   'Counted over every race on this line, one per corner pair and slider minute.',
   "Counted over this line's corner pairs, comparing each 1938 ride with the median of today's scheduled rides.",
   'Start is set. Now choose where the ride ends.',
+  'Straight-line {n} m from the corner to the stop.',
   "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners.",
 ];
 
@@ -415,6 +418,20 @@ describe('helpers', () => {
     expect([C.TODAY_WINS_THIS_RACE, C.ACROSS_THIS_LINE, counts, C.WHEN_TODAY_WINS].join(' ')).toBe(
       RENDERED.honestLineTodayWins,
     );
+    expect([C.PHOTO_FINISH, C.ACROSS_THIS_LINE, counts, C.WHEN_TODAY_WINS].join(' ')).toBe(
+      RENDERED.honestLinePhotoFinish,
+    );
+  });
+
+  it('the photo-finish honest line is the one product.md rule 6 gives (polish brief P3)', () => {
+    expect(RENDERED.honestLinePhotoFinish.startsWith('Photo finish. Across this line: same ride, longer wait. ')).toBe(true);
+  });
+
+  it('the walk method line names the detour factor and speed it is given (polish brief P3)', () => {
+    expect(C.methodWalk(125, 1.3, 1.2)).toBe(
+      'Estimate: straight-line 125 m from the corner to the stop, times 1.3 for street detours, at 1.2 m/s.',
+    );
+    expect(C.methodWalk(80, 1.5, 1.1)).toContain('times 1.5 for street detours, at 1.1 m/s.');
   });
 
   it('NOT_LIVE is the fixed phrase that ends the Ready line', () => {

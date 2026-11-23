@@ -32,6 +32,12 @@ def test_each_banned_term_is_found(term):
     assert find_banned_terms(f"The bus is {term} today.") == [term]
 
 
+@pytest.mark.parametrize("text", ["citywide", "Citywide", "CITYWIDE"])
+def test_citywide_is_banned(text):
+    # product.md rule 6: the counts cover this line's 20 corner pairs only (polish brief P3).
+    assert find_banned_terms(f"Trolley first {text}.") == [text]
+
+
 @pytest.mark.parametrize("text", ["LIVE", "Live", "Real-Time", "REALTIME", "Arriving Now", "Right NOW"])
 def test_matching_is_case_insensitive(text):
     assert find_banned_terms(f"x {text} y") == [text]

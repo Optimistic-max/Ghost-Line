@@ -16,6 +16,9 @@
     "feed_sha256",
     "street_order_checked",
     "photo_finish_min",
+    "stop_radius_m",
+    "walk_detour_factor",
+    "walk_speed_m_s",
     "sources"
   ],
   "additionalProperties": false,
@@ -76,6 +79,21 @@
       "type": "number",
       "exclusiveMinimum": 0,
       "description": "The photo-finish band in minutes: a race is a photo finish when the two totals differ by less than this (race.PHOTO_FINISH_MIN). Covered by the method source. The site reads it for its photo-finish wording (race-engine task 36)."
+    },
+    "stop_radius_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "The stop radius in metres (stops.DEFAULT_STOP_RADIUS_M): a stop counts for a corner when it is within this geodesic distance. Covered by the method source. The site reads it for the honest-limits line (polish brief P3)."
+    },
+    "walk_detour_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "The street-detour factor of the walk estimate (stops.DETOUR_FACTOR): straight-line metres are multiplied by it. Covered by the method source. The site reads it for the walk method line (polish brief P3)."
+    },
+    "walk_speed_m_s": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "The walking speed of the walk estimate in metres per second (stops.WALK_SPEED_M_PER_S). Covered by the method source. The site reads it for the walk method line (polish brief P3)."
     },
     "sources": {
       "type": "object",

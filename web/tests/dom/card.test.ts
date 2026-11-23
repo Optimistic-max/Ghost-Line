@@ -174,7 +174,15 @@ describe('a photo finish: the lead pair at 10:30', () => {
     const expected = a === b ? C.bothAbout(a) : C.aboutAnd(Math.min(a, b), Math.max(a, b));
     expect(text(box.querySelector('.result-totals'))).toBe(expected);
     expect(root.querySelector('[data-source="margin"]')).toBeNull();
-    expect(view.honest.form).toBe('plain');
+  });
+
+  it('uses the photo-finish honest line, with the counts of summary.json (product.md rule 6, polish brief P3)', () => {
+    expect(view.honest.form).toBe('photo-finish');
+    const honest = root.querySelector('.honest')!;
+    expect(honest.getAttribute('data-form')).toBe('photo-finish');
+    expect(text(honest)).toBe(
+      C.honestLinePhotoFinish(formatCount(data.summary.wins_1938), formatCount(data.summary.races), formatCount(data.summary.pairs.length)),
+    );
   });
 });
 

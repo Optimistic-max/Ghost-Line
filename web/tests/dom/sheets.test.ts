@@ -176,6 +176,19 @@ describe('the Sources rows (13.2): the lead pair at 10:00', () => {
     }
   });
 
+  it('says how each walk was estimated, with the detour factor and speed read from index.json (polish brief P3)', async () => {
+    await finished();
+    click('[data-action="sources"]');
+    const method = (id: string): string => text(rowFor(id).querySelector('.source-method'));
+    expect(method('walk-to-stop')).toBe(C.methodWalk(Math.round(trip.board.walk_m), index.walk_detour_factor, index.walk_speed_m_s));
+    expect(method('walk-from-stop')).toBe(C.methodWalk(Math.round(trip.alight.walk_m), index.walk_detour_factor, index.walk_speed_m_s));
+    // Other constants in index.json change the line: the numbers are read, not typed.
+    const other = { ...readData<Index>('index.json'), walk_detour_factor: 1.7, walk_speed_m_s: 0.9 };
+    await finished({ override: { 'index.json': other } });
+    click('[data-action="sources"]');
+    expect(method('walk-to-stop')).toContain('times 1.7 for street detours, at 0.9 m/s.');
+  });
+
   it('names the trip, its route and its title-case headsign, on the bus wait, ride and total', async () => {
     await finished();
     click('[data-action="sources"]');
@@ -244,6 +257,7 @@ describe('About and credits (13.3)', () => {
       C.FONT_CREDIT,
       C.VEHICLE_CREDIT,
       C.photoFinishMeaning(index.photo_finish_min),
+      C.honestLimits(index.stop_radius_m),
       C.howItWasMade(index.street_order_checked),
       C.INFERRED_CAUTION,
       C.NOT_LIVE,
@@ -262,10 +276,12 @@ describe('About and credits (13.3)', () => {
     await finished();
     click('#app > button.info');
     expect(text(sheet())).not.toContain(C.CHECKED_BY_HAND.trim());
-    const checked = { ...readData<Index>('index.json'), street_order_checked: true };
+    const checked = { ...readData<Index>('index.json'), street_order_checked: true, stop_radius_m: 321 };
     await finished({ override: { 'index.json': checked } });
     click('#app > button.info');
     expect(lines()).toContain(C.howItWasMade(true));
+    // The honest-limits radius is read from index.json too (polish brief P3).
+    expect(lines()).toContain(C.honestLimits(321));
   });
 
   it('is not offered until the data is in', async () => {

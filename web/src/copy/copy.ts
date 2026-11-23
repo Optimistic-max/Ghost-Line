@@ -145,9 +145,14 @@ export function trolleyFirst(wins1938: string, races: string, pairs: string): st
   return `Trolley first in ${wins1938} of ${races} races ${racesMeaning(pairs)}.`;
 }
 
-/** The honest line for a 1938 win, a photo finish and no one-seat ride. */
+/** The honest line for a 1938 win and no one-seat ride. */
 export function honestLine(wins1938: string, races: string, pairs: string): string {
   return `${SAME_RIDE} ${trolleyFirst(wins1938, races, pairs)} ${WHEN_TODAY_WINS}`;
+}
+
+/** The honest line under a photo finish (product.md rule 6, polish brief P3). */
+export function honestLinePhotoFinish(wins1938: string, races: string, pairs: string): string {
+  return `${PHOTO_FINISH} ${ACROSS_THIS_LINE} ${trolleyFirst(wins1938, races, pairs)} ${WHEN_TODAY_WINS}`;
 }
 
 /** The honest line when today wins the race on screen. */
@@ -273,6 +278,10 @@ export const VEHICLE_CREDIT = 'Vehicle drawings: original illustrations.';
 /** What a photo finish means; `band` is index.json's photo_finish_min. */
 export function photoFinishMeaning(band: number): string {
   return `Photo finish: the two totals are less than ${band} ${minuteWord(band)} apart. Walks are estimates, so neither side counts as a win.`;
+}
+/** What today's side leaves out; `radius` is index.json's stop_radius_m (polish brief P3, About sheet). */
+export function honestLimits(radius: number): string {
+  return `Today's side counts only trips with no transfer, from a stop within ${radius} m of each corner. A rider who changes buses, or rides part way and walks, may do better; Ghost Line does not model that.`;
 }
 export const CHECKED_BY_HAND = ' and checked by hand against the scans';
 
@@ -423,8 +432,9 @@ export function methodNextCar(hm: string): string {
 export const METHOD_CAR_1938 = 'Listed in the 1938 timetable at this corner.';
 export const METHOD_TOTAL_1938 = 'Wait plus ride.';
 
-export function methodWalk(metres: number): string {
-  return `Straight-line ${metres} m from the corner to the stop.`;
+/** The walk estimate; `detour` and `speed` are index.json's walk_detour_factor and walk_speed_m_s (polish brief P3). */
+export function methodWalk(metres: number, detour: number, speed: number): string {
+  return `Estimate: straight-line ${metres} m from the corner to the stop, times ${detour} for street detours, at ${speed} m/s.`;
 }
 
 export const METHOD_WAIT_BUS = 'Time at the stop, from arriving after the walk to the scheduled departure.';

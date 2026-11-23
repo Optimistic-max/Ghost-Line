@@ -97,3 +97,39 @@ def test_emitted_trips_carry_the_display_headsign_beside_the_gtfs_one(tmp_path):
     by_id = {t["trip_id"]: t for t in load(tmp_path / "race" / f"{A}__{B}.json")["today"]["trips"]}
     assert (by_id["fake-600"]["headsign"], by_id["fake-600"]["headsign_display"]) == ("HARBOR EAST", "Harbor East")
     assert (by_id["fake-630"]["headsign"], by_id["fake-630"]["headsign_display"]) == ("MALL/METRO", "Mall/Metro")
+
+
+# --- walk method constants in index.json (polish brief P3) -------------------
+
+WALK_FIELDS = ("stop_radius_m", "walk_detour_factor", "walk_speed_m_s")
+
+
+@pytest.mark.parametrize("field", WALK_FIELDS)
+def test_index_schema_requires_each_positive_walk_constant(field):
+    v = validator("index")
+    doc = index_doc()
+    del doc[field]
+    assert list(v.iter_errors(doc))
+    for bad in (0, -1, "1", None):
+        doc = index_doc()
+        doc[field] = bad
+        assert list(v.iter_errors(doc)), (field, bad)
+
+
+def test_emitted_index_carries_the_walk_constants_of_pipeline_stops(tmp_path):
+    from pipeline.stops import DEFAULT_STOP_RADIUS_M, DETOUR_FACTOR, WALK_SPEED_M_PER_S
+
+    run_emit(tmp_path)
+    index = load(tmp_path / "index.json")
+    assert index["stop_radius_m"] == DEFAULT_STOP_RADIUS_M
+    assert index["walk_detour_factor"] == DETOUR_FACTOR
+    assert index["walk_speed_m_s"] == WALK_SPEED_M_PER_S
+    for field in WALK_FIELDS:
+        assert emit.INDEX_COVERAGE[field] == ["method"]
+
+
+def test_method_text_names_the_same_walk_constants(tmp_path):
+    run_emit(tmp_path)
+    index = load(tmp_path / "index.json")
+    what = index["sources"]["method"]["what"]
+    assert f"metres x {index['walk_detour_factor']} / {index['walk_speed_m_s']} / 60" in what

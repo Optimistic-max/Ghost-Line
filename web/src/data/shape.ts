@@ -184,6 +184,9 @@ const indexShape = {
   feed_sha256: sha256,
   street_order_checked: bool,
   photo_finish_min: positive,
+  stop_radius_m: positive,
+  walk_detour_factor: positive,
+  walk_speed_m_s: positive,
   sources: object(indexSourcesShape),
 };
 

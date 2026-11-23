@@ -68,7 +68,7 @@ export type CardInput = {
 
 /** The numbers of the race on screen, with their sources. */
 export function cardNumbers(input: CardInput): RaceNumbers {
-  return raceNumbers(input.race, input.view);
+  return raceNumbers(input.race, input.view, input.index);
 }
 
 export function cardLayout(input: CardInput): RaceLayout {
@@ -89,7 +89,7 @@ export function resultElements(registry: SourceRegistry, input: CardInput, enter
     input.view.result === 'photo_finish'
       ? h('p', { class: 'result-note' }, sentence(registry, photoFinishMeaning, photoBandNum(input.index.photo_finish_min)))
       : null;
-  const takeaway = takeawayView(registry, input.view, takeawayNumbers(input.race, input.view));
+  const takeaway = takeawayView(registry, input.view, takeawayNumbers(input.race, input.view, input.index));
   if (entering) {
     box.classList.add('entering');
     honest.classList.add('entering');

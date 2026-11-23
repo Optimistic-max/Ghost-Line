@@ -195,6 +195,14 @@ def test_every_trip_has_a_title_case_headsign_of_the_same_letters(built):
     assert ("HARBOR EAST", "Harbor East") in seen  # the lead pair's eastbound trips
 
 
+def test_index_walk_constants_are_the_brief_values(built):
+    # tech.md: walk minutes = metres x 1.3 / 1.2 / 60; stop radius 400 m (polish brief P3).
+    index = load(built / "index.json")
+    assert index["stop_radius_m"] == 400
+    assert index["walk_detour_factor"] == 1.3
+    assert index["walk_speed_m_s"] == 1.2
+
+
 def test_index_photo_finish_band_is_the_race_constant(built):
     from pipeline.race import PHOTO_FINISH_MIN
 

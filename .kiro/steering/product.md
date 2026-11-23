@@ -46,7 +46,8 @@ did this neighborhood once have better scheduled service, and by how much?
    A win for today is shown exactly as plainly as a win for 1938.
 6. The line "Same ride, longer wait." appears under every result. When today
    wins the race on screen it reads "Today wins this race. Across this line:
-   same ride, longer wait." Every count beside it is read from summary.json,
+   same ride, longer wait." Under a photo finish it reads "Photo finish.
+   Across this line: same ride, longer wait." Every count beside it is read from summary.json,
    never typed into the code. The count covers this line's 20 corner pairs
    only: never write "citywide".
 7. Every number is one tap from its source: what it is, the year, the page or

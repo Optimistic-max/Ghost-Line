@@ -9,7 +9,7 @@ import { boardGaps, boardSpacing1938, gapPart, spacing1938 } from '../format/gap
 import { joinNames } from '../format/list';
 import { RoundingError, photoTotals, roundParts, shownMargin, sumShown } from '../format/rounding';
 import { clockOf, dropSeconds, label12, serviceDateLabel } from '../format/time';
-import type { AppState, Board, Derived, Frequency, Lane, Notice, PhaseKind, RaceView, ResultColour, ResultView, Side } from './model';
+import type { AppState, Board, Derived, Frequency, Honest, Lane, Notice, PhaseKind, RaceView, ResultColour, ResultView, Side } from './model';
 
 /** Data that cannot be shown consistently. derive() turns it into the data-error state. */
 export class ViewError extends Error {
@@ -24,6 +24,14 @@ const COLOURS: Record<RaceResult, ResultColour> = {
   today: 'today',
   photo_finish: 'ink',
   no_one_seat_ride: 'ink',
+};
+
+/** Which honest line goes under each result (product.md rule 6; the photo-finish line is polish brief P3). */
+const HONEST_FORM: Record<RaceResult, Honest['form']> = {
+  '1938': 'plain',
+  today: 'today-wins',
+  photo_finish: 'photo-finish',
+  no_one_seat_ride: 'plain',
 };
 
 function lane(side: Side, kinds: PhaseKind[], stored: number[], storedTotal: number, next: string): Lane {
@@ -121,7 +129,7 @@ export function buildView(index: Index, summary: Summary, race: RaceFile, hhmm: 
     notices,
     board: board(race, row, trip),
     frequency: frequency(race),
-    honest: { form: row.result === 'today' ? 'today-wins' : 'plain', wins1938: summary.wins_1938, races: summary.races },
+    honest: { form: HONEST_FORM[row.result], wins1938: summary.wins_1938, races: summary.races },
     takeaway: {
       wait1938: shownOf(old, 'wait'),
       ride1938: shownOf(old, 'ride'),
