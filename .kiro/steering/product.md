@@ -9,6 +9,10 @@ trackless trolley (timetable effective 1938-03-06) and races it against today's
 scheduled MTA bus between the same two corners, walking included.
 Kiroween 2026, Resurrection category. Solo student build, $0 budget.
 
+## Terms
+
+- A trackless trolley (trolleybus) is an electric bus that draws power from two overhead wires through two trolley poles and runs on rubber tyres, not rails. Source: https://en.wikipedia.org/wiki/Trolleybus
+
 ## Who it is for
 
 A transit advocate, reporter or planner who wants a fair, checkable answer to:

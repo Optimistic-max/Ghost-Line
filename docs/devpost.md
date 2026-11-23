@@ -37,7 +37,7 @@ Two public datasets, joined: the **MDOT MTA local bus GTFS feed** (version 20260
 
 The Skeptic's 38-against-36 run in the video is a **planted test**: a fixture file says 38 one-seat buses, `trips_serving` answers 36, and the Skeptic reports FAIL.
 
-**Specs and vibe coding.** Every feature went through a spec. Fixes found by hand in between, such as the fourteen friction fixes after the first human test, were written into the story-layer spec as tasks 24 and 25 and built from there.
+**Specs and vibe coding.** Every feature went through a spec. Fixes found by hand in between were written into the spec and built from there: the fourteen friction fixes from the first human test are story-layer task 25 (25.1 to 25.14), and the result-visibility and desktop About-button fixes are task 24.
 
 **Not used.** Kiro Powers and Kiro Crew were not used.
 
@@ -61,7 +61,7 @@ The Skeptic's 38-against-36 run in the video is a **planted test**: a fixture fi
 - **The race starts by itself.** The first screen plays the lead race at the labelled example start, 10:00 AM, with short captions for what each passenger is doing, then shows where the time went.
 - **The result reads like a destination sign,** in the winner's colour: "1938 wins", "Today wins", "Photo finish" or "No one-seat ride today".
 - **Each era looks like itself.** The 1938 vehicle is a trackless trolley with two poles under two overhead wires, tyres and no rails. Today's is a plain bus. Only the trolley glows.
-- **Phone first:** designed at 375 x 667, with a desktop layout from 900 px. It works with reduced motion, a keyboard and a screen reader, and the race never waits for the map.
+- **Phone first:** designed at 375 x 667, with a desktop layout from 900 px (ui.md). The slider, its minus and plus, "Skip to result", the next-step actions and the other controls are reachable by keyboard (race-screen R1.4, R3.1, R5.8; story-layer Requirement 15.2). The result is announced once, through an aria-live region (ui.md; story-layer Requirement 15.3). Under reduced motion each race is drawn finished, with no animation (ui.md).
 - The cinematic map shots in the video are illustrations driven by the same scheduled data; the app's map is flat.
 
 ## Credits
