@@ -156,7 +156,13 @@ Later runs on Nov 23, after Emmanuel's decisions (statements recorded above; LIC
 
 After run 5 the only UNSOURCED claims are the race-film lines Emmanuel is holding: the devpost line that the video's map shots are illustrations driven by the same scheduled data, and the script's film length (30.1 s), Google tiles (26.1 s) and lower third.
 
-Skeptic task 14 stays open until each document gives PASS.
+Then Emmanuel added the race film's source and QA in film/ (built with Claude Code, not Kiro). film/notes.md and film/qa/ joined the Skeptic's evidence, and the script and devpost took the final take's facts (v3b: 32.7 s, 28.7 s of Google tiles) and the film's own on-screen caption.
+
+| Run | README.md | docs/devpost.md | docs/video_script.md |
+|---|---|---|---|
+| 6 | PASS | PASS | PASS |
+
+Skeptic task 14 is ticked (Nov 23). The run was made by Kiro through the `skeptic` agent at Emmanuel's request; Emmanuel records it on screen for the video in P8.
 
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
 

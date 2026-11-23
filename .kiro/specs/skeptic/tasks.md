@@ -179,7 +179,8 @@ Rules for every task:
   - Commit: "Record Skeptic fixture runs in kiro-usage".
   - _Requirements: R10.6_
 
-- [ ] 14. EMMANUEL ONLY, after this spec: check the real documents. Not part of "done" for this spec.
+- [x] 14. EMMANUEL ONLY, after this spec: check the real documents. Not part of "done" for this spec.
+  - Done Nov 23, 2026: run 6 gave PASS on README.md, docs/devpost.md and docs/video_script.md (docs/kiro-usage.md). Run by Kiro through the `skeptic` agent at Emmanuel's request, not typed by him in Kiro chat; ticked at his request.
   - When docs/video_script.md and docs/devpost.md exist, run `/skeptic-check docs/video_script.md docs/devpost.md` in Kiro chat.
   - Expect the census figure (43%) to be reported UNSOURCED until the census pipeline exists. That is correct.
   - Fix each MISMATCH and UNSOURCED line in the documents (not in the evidence files), then run the command again until the last line is "PASS".
