@@ -55,7 +55,7 @@ This guide lists the No. 21's cars minute by minute, with running times between 
 
 | What | Where | Notes |
 |---|---|---|
-| 1938 route, running minutes and timetable | [No. 21 guide, effective March 6, 1938](https://collections.digitalmaryland.org/digital/collection/btjk/id/203), Enoch Pratt Free Library via Digital Maryland | Entered by hand in `data/lines/no21-1938.yaml`, each value with its page link. Scans are linked, not copied. |
+| 1938 route, running minutes and timetable | [No. 21 guide, effective March 6, 1938](https://collections.digitalmaryland.org/digital/collection/btjk/id/203), Digital Maryland | Entered by hand in `data/lines/no21-1938.yaml`, each value with its page link. Scans are linked, not copied. |
 | Today's schedule | MDOT MTA local bus GTFS, feed version 20260821 | Pinned by SHA-256 `8cc37d54d3a360979a6bcc70038b6f532a1e6475041ad970bdaafde34ab3f694`. Not endorsed by MDOT MTA. |
 | Street shapes | OpenStreetMap, snapshot dated 2026-11-01 in `data/osm/ways.json` | © OpenStreetMap contributors, ODbL. |
 
@@ -104,7 +104,7 @@ npm run dev --prefix web
 - `data/lines/`: the hand-entered 1938 facts.
 - `tests/`: example tests, golden tests on the pinned feed, and property-based tests.
 
-No server, no accounts, no tracking, and no AI model in the deployed app.
+No AI model runs in the deployed app.
 
 ## How Kiro was used
 

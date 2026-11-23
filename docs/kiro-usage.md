@@ -6,7 +6,7 @@ A dated log of the moments where Kiro shaped the build, checked against `git log
 
 | Kiro feature | What it did on this project | Proof path |
 |---|---|---|
-| Specs | Four specs (race-engine, race-screen, story-layer, skeptic), each with requirements, design and tasks, drove the pipeline, the site, the story layer and the fact-checker. | `.kiro/specs/` |
+| Specs | Five specs (race-engine, race-screen, story-layer, skeptic, ghost-cars), each with requirements, design and tasks, drove the pipeline, the site, the story layer, the fact-checker and the ghost cars. | `.kiro/specs/` |
 | Steering | Five files (four always on, plus the manual skeptic-check command) hold the honesty rules, stack and layout every task ran under. | `.kiro/steering/` |
 | Hooks | Three editor hooks: validate after agent edits, rebuild and test when the agent stops, and a copy-and-source guard on saved web/ and docs/ files. All three are enabled. | `.kiro/hooks/`, 6912b89, ed7a1e0, 5e50b61, 48189c3 |
 | Custom agent | The read-only Skeptic checks a document's claims against the feed tools and reports PASS or FAIL. | `.kiro/agents/skeptic.md`, 0a883a7 |
