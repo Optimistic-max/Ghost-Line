@@ -62,7 +62,7 @@ The Skeptic's 38-against-36 run in the video is a **planted test**: a fixture fi
 - **The result reads like a destination sign,** in the winner's colour: "1938 wins", "Today wins", "Photo finish" or "No one-seat ride today".
 - **Each era looks like itself.** The 1938 vehicle is a trackless trolley with two poles under two overhead wires, tyres and no rails. Today's is a plain bus. Only the trolley glows.
 - **Phone first:** designed at 375 x 667, with a desktop layout from 900 px (ui.md). The slider, its minus and plus, "Skip to result", the next-step actions and the other controls are reachable by keyboard (race-screen R1.4, R3.1, R5.8; story-layer Requirement 15.2). The result is announced once, through an aria-live region (ui.md; story-layer Requirement 15.3). Under reduced motion each race is drawn finished, with no animation (ui.md).
-- The cinematic map shots in the video are illustrations driven by the same scheduled data; the app's map is flat.
+- The cinematic map shots in the video are illustrations driven by the same scheduled data; the app's map is flat. The race film (film/, built with Claude Code, not Kiro) reads the lead race's 10:00 row from the race file and the bus trip from the pinned feed. It runs 32.7 s, 28.7 s of them over Google Photorealistic 3D Tiles, and its timing and render checks all pass (film/qa/timing.json).
 
 ## Credits
 

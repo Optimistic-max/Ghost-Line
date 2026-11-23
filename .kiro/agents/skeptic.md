@@ -21,8 +21,9 @@ Check every number, date, time, count, name of a source and factual sentence in 
 3. web/src/copy/copy.ts (what the screen says).
 4. docs/kiro-usage.md (claims about how Kiro was used).
 5. LICENSE (the code licence and its copyright holder).
-6. web/src/format/rounding.ts and docs/planning/screen-brief.md section 2.10 (how the screen rounds a race's parts so they add up to its shown total).
-7. For bus trips and bus times: the ghostline-gtfs tools. Call `feed_info` once to see the feed, then `trips_serving(stop_a, stop_b, date, after, before)`. Take the two stop ids from the evidence files (a race file lists board and alight stop ids and names). Never take a stop id from memory. If you cannot find the stop ids for a claim in the evidence, the claim is UNSOURCED. If a tool returns an error, quote the error and mark the claim UNSOURCED. Never retry with a guessed value.
+6. film/notes.md and film/qa/ (the race film in the video: its final take, length, Google-tile footage, on-screen caption and credits, and its timing and render checks in film/qa/timing.json).
+7. web/src/format/rounding.ts and docs/planning/screen-brief.md section 2.10 (how the screen rounds a race's parts so they add up to its shown total).
+8. For bus trips and bus times: the ghostline-gtfs tools. Call `feed_info` once to see the feed, then `trips_serving(stop_a, stop_b, date, after, before)`. Take the two stop ids from the evidence files (a race file lists board and alight stop ids and names). Never take a stop id from memory. If you cannot find the stop ids for a claim in the evidence, the claim is UNSOURCED. If a tool returns an error, quote the error and mark the claim UNSOURCED. Never retry with a guessed value.
 
 The product honesty rules in .kiro/steering/product.md are evidence too (see below).
 
@@ -41,7 +42,7 @@ The last line is `PASS` when every line is OK. Otherwise it is `FAIL: <n> MISMAT
 ## Matching rules
 
 - A whole-minute figure matches a stored value that rounds to it. "About" allows one minute.
-- A shown number is OK when it equals the app's displayed value for that race under the display rounding of evidence 6, even where plain rounding of the stored part gives another number.
+- A shown number is OK when it equals the app's displayed value for that race under the display rounding of evidence 7, even where plain rounding of the stored part gives another number.
 - Names match case-insensitively. The feed writes CityLink LIME and HARBOR EAST, the site shows CityLink Lime and Harbor East. These are the same names. Stop names in the feed carry direction suffixes such as "eb" or "sb"; a claim without the suffix still matches.
 - Bus times from the tools are the feed's own HH:MM:SS. Hours may pass 24, so a time such as 25:30:00 is a real time on the service date.
 - When a claim says "scheduled", it must be about the weekday schedule for Wednesday 2026-11-04, the one frozen service date. Another date is a MISMATCH.
