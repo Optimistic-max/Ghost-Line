@@ -5,6 +5,7 @@ import { LICENCE_PATH, SOURCE_URLS } from '../../config';
 import {
   BASE_MAP_CREDIT,
   FONT_CREDIT,
+  HEADLINE_LINE,
   INFERRED_CAUTION,
   MIT_LICENCE,
   NOT_ENDORSED,
@@ -33,6 +34,9 @@ export function aboutSheet(index: Index): SheetParts {
     return id === 'mta_gtfs' ? line(link, ' ', NOT_ENDORSED) : line(link);
   });
   const items = [
+    // What a trackless trolley is, in the desktop headline line's words: the phone shows no intro line
+    // (polish brief P4, Emmanuel, Nov 23). It names the year; the sheet opens only once the data is in.
+    line(HEADLINE_LINE),
     ...catalog,
     line(BASE_MAP_CREDIT),
     line(FONT_CREDIT),

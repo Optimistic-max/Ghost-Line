@@ -504,8 +504,6 @@ export function exampleLabel(time: string): string {
   return `Example start: ${time} scheduled.`;
 }
 
-export const PHONE_INTRO =
-  "Race Baltimore's 1938 trackless trolley, an electric bus that ran on overhead wires, against today's scheduled bus.";
 export const ORIENTATION_LINE = 'Same two corners. Walking included for today; walks are estimates.';
 
 // ---- Captions (Req 7). No template takes a number. -----------------------------

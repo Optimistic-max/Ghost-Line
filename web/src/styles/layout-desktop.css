@@ -14,8 +14,22 @@
     overflow: hidden;
   }
 
-  .intro-line {
+  /* Desktop shows the headline over the map instead. */
+  .phone-headline {
     display: none;
+  }
+
+  /* The card.css spacing, which the phone trims by 8 px (polish brief P4). */
+  .card .lanes {
+    margin-top: 6px;
+  }
+
+  .card .caption {
+    margin-top: 6px;
+  }
+
+  .card .result {
+    margin-top: 10px;
   }
 
   .topbar {

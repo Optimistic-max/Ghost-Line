@@ -783,6 +783,78 @@ test.describe.serial('layout report', () => {
   });
 });
 
+// Polish brief P4: on a phone the "Same ride, longer wait." headline shows, and at the lead example's result
+// moment the result line ends at least 16 px above the foot of the first screen. Measured from the top of the
+// page (getBoundingClientRect plus scrollY), so the result-into-view scroll (story-layer 24.1) does not count.
+// The room of the ghost-cars counter line (polish brief P6) is counted before it exists: one 12 px line at the
+// body line height plus its 2 px margin. After P6 the counter is in the page and is measured as it is.
+// Stable measurement (Emmanuel, Nov 23): fonts ready, the route strip drawn, then the page clock is stepped one
+// frame at a time until two frames in a row show no layout change. Three runs; the assertion is on the worst.
+const PHONE_FIT_SPARE_PX = 16;
+const PHONE_FIT_RUNS = 3;
+
+type Fit = { height: number; headline: string | null; resultBottom: number; counter: { top: number; bottom: number } | null; reserve: number; spare: number };
+
+async function phoneFit(browser: Browser, size: { width: number; height: number }): Promise<Fit> {
+  const { context, page } = await resultMoment(browser, size);
+  try {
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    await page.locator('#map-area svg.route-drawing').first().waitFor();
+    const read = () =>
+      page.evaluate(() => {
+        const atTop = (selector: string): { top: number; bottom: number } | null => {
+          const el = document.querySelector(selector);
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY };
+        };
+        const headline = document.querySelector<HTMLElement>('#phone-headline');
+        const style = getComputedStyle(document.body);
+        return {
+          height: window.innerHeight,
+          headline: headline && headline.offsetParent !== null ? headline.textContent : null,
+          result: atTop('.result-line'),
+          counter: atTop('.ghost-counter'),
+          lineAt12: (12 * parseFloat(style.lineHeight)) / parseFloat(style.fontSize),
+          key: [...document.querySelectorAll('#app *')].slice(0, 400).map((el) => { const r = el.getBoundingClientRect(); return `${Math.round((r.top + window.scrollY) * 10)},${Math.round(r.height * 10)}`; }).join('|'),
+        };
+      });
+    // One frame is 16 ms of the page clock; stop after two frames in a row with no layout change.
+    let last = await read();
+    let still = 0;
+    for (let frame = 0; frame < 300 && still < 2; frame++) {
+      await page.clock.runFor(16);
+      const now = await read();
+      still = now.key === last.key ? still + 1 : 0;
+      last = now;
+    }
+    if (still < 2) throw new Error('the layout never settled');
+    if (!last.result) throw new Error('no result line');
+    const reserve = last.counter && last.counter.bottom <= last.result.top ? 0 : last.lineAt12 + 2;
+    const spare = last.height - last.result.bottom - reserve;
+    return { height: last.height, headline: last.headline, resultBottom: last.result.bottom, counter: last.counter, reserve, spare };
+  } finally {
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })).catch(() => undefined);
+    await page.screenshot({ path: resolve(OUT, `p4-phone-fit-${size.width}x${size.height}.png`), animations: 'disabled' }).catch(() => undefined);
+    await context.close();
+  }
+}
+
+for (const size of [PHONE, { width: 390, height: 844 }]) {
+  test(`phone headline shows and the result line fits the first screen with ${PHONE_FIT_SPARE_PX} px to spare, worst of ${PHONE_FIT_RUNS} runs (${size.width} x ${size.height})`, async ({ browser }) => {
+    test.setTimeout(180_000);
+    const runs: Fit[] = [];
+    for (let k = 0; k < PHONE_FIT_RUNS; k++) runs.push(await phoneFit(browser, size));
+    const line = runs
+      .map((r, k) => `run ${k + 1}: result line bottom ${r.resultBottom.toFixed(1)} of ${r.height}, counter ${r.counter ? `${r.counter.top.toFixed(1)}-${r.counter.bottom.toFixed(1)}` : `not built, ${r.reserve.toFixed(1)} px counted`}, ${r.spare.toFixed(1)} px to spare`)
+      .join('; ');
+    test.info().annotations.push({ type: 'phone-fit', description: `${size.width} x ${size.height}: ${line}` });
+    console.log(`phone fit ${size.width} x ${size.height}: ${line}`);
+    for (const r of runs) expect(r.headline).toBe('Same ride, longer wait.');
+    expect(Math.min(...runs.map((r) => r.spare))).toBeGreaterThanOrEqual(PHONE_FIT_SPARE_PX);
+  });
+}
+
 // Story-layer pictures (task 21.2, Req 16.15): test-results/screens/story-<name>-<phone|desktop>.png, git-ignored.
 // The lead pair at the labelled example start, 10:00. Finished states are full-page, because the page scrolls.
 type StoryShot = { name: string; racing?: number; click?: string; wait?: string; fullPage?: boolean };

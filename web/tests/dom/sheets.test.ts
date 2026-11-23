@@ -252,7 +252,10 @@ describe('About and credits (13.3)', () => {
       expect(link?.href, id).toBe(index.sources[id].url);
     }
     expect(all.find((l) => l.startsWith(index.sources.mta_gtfs.label))).toContain(C.NOT_ENDORSED);
+    // The trolley explained, first, in the desktop headline line's own words (polish brief P4, Emmanuel, Nov 23).
+    expect(all[0]).toBe(C.HEADLINE_LINE);
     for (const expected of [
+      C.HEADLINE_LINE,
       C.BASE_MAP_CREDIT,
       C.FONT_CREDIT,
       C.VEHICLE_CREDIT,

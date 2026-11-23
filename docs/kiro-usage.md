@@ -57,6 +57,19 @@ Recorded on Nov 23, 2026 by Kiro, on the committed data at 193f684, with `raw/` 
 | `python -m pipeline check_sources` | OK |
 | `python -m pipeline check` (build, then pytest) | Build OK. pytest: 891 passed, 1 failed, 3 timing tests deselected, in 19 min 28 s on a busy machine. The failure was `tests/golden/test_mcp_server_golden.py::test_the_real_server_over_stdio_answers_with_the_real_feed`: the server gave no answer to `initialize` within the test's 30 s. Run again on its own, that file passed: 8 passed in 71 s. |
 
+## Polish brief P4: phone headline, test runs (Nov 23, 2026)
+
+Run by Kiro while a film render loaded the laptop. A test that failed only by its time limit was run again on its own; both runs are listed. No time limit was raised.
+
+| Check | First run | Run again on its own |
+|---|---|---|
+| Phone fit, 375 x 667, worst of 3 stable runs (fonts ready, route strip drawn, two still frames), with the ghost-cars counter line counted (12 px line plus 2 px margin) | 19.4, 19.4 and 19.4 px to spare against the 16 px target: pass | |
+| Phone fit, 390 x 844, same method | 196.4, 196.4 and 196.4 px to spare: pass. An earlier run of the same test, before the method above, gave 188.6 px once | |
+| `npx tsc --noEmit` | pass | |
+| `npm test` (vitest) | 936 passed, 5 failed. One was real: the copy-table test had no template for the new phone headline row, fixed. One was real: a phone-only `max-width` media query broke the one-breakpoint rule, fixed by moving the desktop values into layout-desktop.css. Three were 5 s time limits in `maplabels.test.ts` and `routestrip.test.ts` | `routestrip.test.ts`: 5 passed. `maplabels.test.ts`: 2 time limits again, then 10 passed in 9.2 s on a third run; the same file at the last commit passed in 19.5 s |
+| `npm run test:e2e` and the checkpoint spec | 131 passed, 3 skipped, 6 failed: five 30 s time limits in race.spec.ts (sideways scroll, story with no map on both projects, desktop pair names, page logs no errors) and `still: og-1200x630` with the map unavailable | The five race.spec tests: all passed. `still: og-1200x630`: map unavailable again, then passed |
+| `npm run screens` | 50 passed, 1 failed: `16-desktop-todaywins` at its 30 s time limit | passed |
+
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
 
 Run by Emmanuel in the Kiro IDE on Nov 22, 2026 and reported by him; the chat output is not in git †.

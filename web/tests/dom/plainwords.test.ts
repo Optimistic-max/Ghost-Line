@@ -1,4 +1,4 @@
-// Task 25.6: plain words. The intro line explains the trolley once, the honest line and its number rows say
+// Task 25.6: plain words. The desktop headline line explains the trolley once, the honest line and its number rows say
 // what a race is with the number of corner pairs read from summary.json, and a photo finish shows what it means.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -14,13 +14,17 @@ const real = realData();
 const fake = fixtureData();
 const lead = { origin: LEAD_PAIR.origin, dest: LEAD_PAIR.dest };
 
-describe('the intro line', () => {
-  it('explains "trackless trolley" as an electric bus that ran on overhead wires, once, and the page shows the same text', () => {
-    expect(C.PHONE_INTRO).toContain('trackless trolley, an electric bus that ran on overhead wires,');
-    expect(C.PHONE_INTRO.split('electric bus').length - 1).toBe(1);
+// Polish brief P4 (Emmanuel's choice B, Nov 23): the phone intro line gave way to the phone headline, so the
+// desktop headline's second line is now the one place that explains the term.
+describe('the trolley explained', () => {
+  it('explains "trackless trolley" as an electric bus that ran on overhead wires, once, in the desktop headline line the page shows', () => {
+    expect(C.HEADLINE_LINE).toContain('trackless trolley, an electric bus that ran on overhead wires,');
+    expect(C.HEADLINE_LINE.split('electric bus').length - 1).toBe(1);
     const html = readFileSync(resolve(import.meta.dirname, '..', '..', 'index.html'), 'utf8');
-    expect(html).toContain(C.PHONE_INTRO);
-    expect(html).toContain(C.HEADLINE_LINE);
+    const body = /<body>([\s\S]*)<\/body>/.exec(html)![1]!;
+    expect(body).toContain(C.HEADLINE_LINE);
+    expect(body.split('electric bus').length - 1).toBe(1);
+    expect(body).toContain(`<p class="phone-headline" id="phone-headline">${C.SAME_RIDE}</p>`);
   });
 });
 

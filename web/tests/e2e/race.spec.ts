@@ -677,7 +677,7 @@ test.describe('the phone flows in one page (20.2, R12.1, R12.2)', () => {
     await page.locator('.result').waitFor();
     const order = [
       '#topbar',
-      '#intro-line',
+      '#phone-headline',
       '#map-area .route-toggle',
       '#pair-names',
       '.example-label',

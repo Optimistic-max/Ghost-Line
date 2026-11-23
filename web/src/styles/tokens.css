@@ -22,6 +22,7 @@
   --font-display: 'Barlow Condensed', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --fs-wordmark: 24px;
+  --fs-phone-headline: 22px; /* the phone headline, "Same ride, longer wait." (polish brief P4) */
   --fs-corner: 21px;
   --fs-corner-chip: 17px;
   --fs-slider-time: 24px;

@@ -1,5 +1,5 @@
 /* Phone layout, below 900 px wide (designed at 375 x 667): top bar 40 px, the
-   intro line, the map, then the race card with its rounded top over the map's
+   phone headline, the map, then the race card with its rounded top over the map's
    lower edge. Everything is in normal page flow: the page scrolls, nothing is
    pinned and nothing scrolls inside the card; Sources and Share this race, then
    About and credits, follow the content (story-layer Req 12). Only the overlays
@@ -12,11 +12,15 @@
   min-height: 100vh;
 }
 
-/* The phone intro line sits under the top bar (story-layer Req 12.2). */
-.intro-line {
+/* The phone headline, "Same ride, longer wait.", sits under the top bar where the intro line was
+   (story-layer Req 12.2; polish brief P4). */
+.phone-headline {
   flex: none;
-  padding: 0 var(--pad) 8px;
-  color: var(--muted);
+  padding: 0 var(--pad) 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-phone-headline);
+  line-height: 1.05;
 }
 
 .topbar {
@@ -49,8 +53,23 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.intro-line {
+.phone-headline {
   grid-row: 1;
+}
+
+/* Phone only: 8 px less space above the lanes, the caption and the result box, so the result line
+   sits on the first screen with room to spare (polish brief P4, Emmanuel's choice B, Nov 23). */
+/* layout-desktop.css puts the card.css values back from 900 px up. */
+.card .lanes {
+  margin-top: 4px;
+}
+
+.card .caption {
+  margin-top: 4px;
+}
+
+.card .result {
+  margin-top: 6px;
 }
 
 .map-area {

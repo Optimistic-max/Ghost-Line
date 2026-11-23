@@ -154,8 +154,9 @@ const RENDERED: Record<string, string> = {
   todayWinEntry: C.todayWinEntry('{origin}', '{dest}', '{h:mm}'),
   MAP_INFERRED: C.MAP_INFERRED,
   // Story-layer rows.
+  // The phone headline row (polish brief P4) is the SAME_RIDE constant on its own.
+  phoneHeadline: C.SAME_RIDE,
   exampleLabel: C.exampleLabel('{h:mm AM/PM}'),
-  PHONE_INTRO: C.PHONE_INTRO,
   STILL: C.STILL,
   ORIENTATION_LINE: C.ORIENTATION_LINE,
   caption1938Waiting: C.caption1938Waiting(false),
@@ -224,6 +225,7 @@ const REPLACED = [
   'Start is set. Now choose where the ride ends.',
   'Straight-line {n} m from the corner to the stop.',
   "Baltimore's 1938 trackless trolley, raced against today's scheduled bus between the same two corners.",
+  "Race Baltimore's 1938 trackless trolley, an electric bus that ran on overhead wires, against today's scheduled bus.",
 ];
 
 

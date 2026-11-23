@@ -2,7 +2,7 @@
 // The order is read from the real DOM the app builds from index.html; the fixed and sticky scan reads
 // the real stylesheets. Pixel geometry runs in task 20.
 import { afterEach, describe, expect, it } from 'vitest';
-import { PHONE_INTRO } from '../../src/copy/copy';
+import { SAME_RIDE } from '../../src/copy/copy';
 import type { Layout } from '../../src/view/vehicles';
 import { listRepoFiles, readRepoText } from '../support/files';
 import { bootPage } from '../support/page';
@@ -41,7 +41,7 @@ const FROM_PAIR_DOWN: [name: string, selector: string][] = [
 
 const PHONE_ONLY_ABOVE: [name: string, selector: string][] = [
   ['top bar', '#topbar'],
-  ['intro line', '#intro-line'],
+  ['phone headline', '#phone-headline'],
   ['route area', '#map-area'],
 ];
 
@@ -73,7 +73,7 @@ async function bootFull(layout: Layout) {
 }
 
 describe('page order (Req 12.2, 12.4)', () => {
-  it('phone: top bar, intro line, route area, then the race column down to About and credits', async () => {
+  it('phone: top bar, phone headline, route area, then the race column down to About and credits', async () => {
     await bootFull('phone');
     expectOrder([...PHONE_ONLY_ABOVE, ...FROM_PAIR_DOWN]);
   });
@@ -93,24 +93,26 @@ describe('page order (Req 12.2, 12.4)', () => {
     expect(find('.schedule').nextElementSibling).toBe(find('.notices'));
   });
 
-  it('desktop: the intro line is in the page but its stylesheet hides it from 900 px up', () => {
+  it('desktop: the phone headline is in the page but its stylesheet hides it from 900 px up', () => {
     const css = readRepoText('web/src/styles/layout-desktop.css').replace(/\/\*[\s\S]*?\*\//g, '');
     expect(/@media \(min-width: 900px\)/.test(css)).toBe(true);
-    expect(/\.intro-line\s*\{[^}]*display:\s*none/.test(css)).toBe(true);
+    expect(/\.phone-headline\s*\{[^}]*display:\s*none/.test(css)).toBe(true);
   });
 });
 
-describe('the intro line (Req 12.2)', () => {
-  it('holds the copy.ts constant, before and after the app boots, and sits in the main landmark', async () => {
+// Polish brief P4 (Emmanuel's choice B, Nov 23): the phone headline replaced the phone intro line.
+describe('the phone headline (Req 12.2; polish brief P4)', () => {
+  it('holds "Same ride, longer wait.", before and after the app boots, and sits in the main landmark', async () => {
     await bootPage({ layout: 'phone', motion: 'reduced' });
-    const intro = find('#intro-line');
-    expect(text(intro)).toBe(PHONE_INTRO);
-    expect(intro.closest('main')).not.toBeNull();
+    const headline = find('#phone-headline');
+    expect(text(headline)).toBe(SAME_RIDE);
+    expect(headline.closest('main')).not.toBeNull();
+    expect(document.getElementById('intro-line')).toBeNull();
   });
 
   it('index.html carries the same text', () => {
     const doc = new DOMParser().parseFromString(readRepoText('web/index.html'), 'text/html');
-    expect(text(doc.getElementById('intro-line'))).toBe(PHONE_INTRO);
+    expect(text(doc.getElementById('phone-headline'))).toBe(SAME_RIDE);
   });
 });
 

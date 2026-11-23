@@ -54,8 +54,9 @@ match them closely, except where section 3B changes the layout.
 - Map: real streets as hairlines, the 1938 line as the brightest thing, its
   streets named along it. No neighbourhood names. Streets come from
   OpenStreetMap data or the base-map tiles; the route from route.geojson.
-- Desktop only: the headline "Same ride, longer wait." sits over the top left
-  of the map (screen-brief.md 3A.1).
+- Desktop: the headline "Same ride, longer wait." sits over the top left
+  of the map (screen-brief.md 3A.1). Phone: the same headline sits under the
+  top bar, in place of the old intro line (polish brief P4, Nov 23).
 - Every walk time carries the word "estimate" ("Walk 2 min · estimate"). The
   slider is labelled "Choose a scheduled start time" and shows its two ends in
   12-hour form ("9:00 AM", "1:52 PM") in small muted text, read from the race
