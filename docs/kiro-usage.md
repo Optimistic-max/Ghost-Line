@@ -43,6 +43,20 @@ A dated log of the moments where Kiro shaped the build, checked against `git log
 | 2026-11-22 | Skeptic spec: the Hypothesis generator could give one trip two calls with the same stop_sequence, and the shuffle property found that the MCP server's answer then depended on row order. The server now rejects a repeated stop_sequence as a feed format error, with a unit test, and the generator makes unique sequence numbers. That the shuffle property was the failing one is reported in the chat session, not in git †. | Spec task execution, property tests | The independent checker gives one answer for a feed or an error, never an answer that depends on row order. | 0cfcfe9, pipeline/mcp_server.py, tests/property/test_mcp_server_props.py, tests/unit/test_mcp_server.py |
 | 2026-11-22 | Skeptic spec: the token test, which fails if a golden value from tests/golden/golden_tokens.py appears in the Skeptic agent or its steering file, caught a golden value in the draft of .kiro/agents/skeptic.md, and it was removed before the commit. The catch is reported in the chat session; git holds only the passing test and the clean agent file †. | Custom agent, spec task execution | The Skeptic has to get every number from the feed tools, so it cannot pass a document by matching a number it was told. | 0a883a7, tests/unit/test_skeptic_agent.py, .kiro/agents/skeptic.md |
 
+## Story-layer checkpoint: pipeline phase (story-layer task 2)
+
+Recorded on Nov 23, 2026 by Kiro, on the committed data at 193f684, with `raw/` present and its SHA-256 matching the pin. The task was ticked on Nov 22; this is the record that backs the tick.
+
+| Check | Result |
+|---|---|
+| Lead pair, Preston & Caroline to Aliceanna & Bond, `10:00` row: `wait_most` | `true` (1938 wait 6, today's wait 30.458, result 1938, margin 30.156) |
+| Comparison (task 1.8 rule): every committed race file against 2208b69^, the commit before the story-layer pipeline, with `wait_most` dropped from each row; `summary.json` with `ride_same_rule` and `sources.ride_same_rule` dropped; `index.json` and `route.geojson` byte for byte | 20 race files compared; no differences |
+| `python -m pipeline validate` | OK |
+| `python -m pipeline build` | OK; 23 files written; every file under its gzip limit; the data matched the committed files |
+| `python -m pipeline verify` | OK: web/public/data matches a fresh build |
+| `python -m pipeline check_sources` | OK |
+| `python -m pipeline check` (build, then pytest) | Build OK. pytest: 891 passed, 1 failed, 3 timing tests deselected, in 19 min 28 s on a busy machine. The failure was `tests/golden/test_mcp_server_golden.py::test_the_real_server_over_stdio_answers_with_the_real_feed`: the server gave no answer to `initialize` within the test's 30 s. Run again on its own, that file passed: 8 passed in 71 s. |
+
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
 
 Run by Emmanuel in the Kiro IDE on Nov 22, 2026 and reported by him; the chat output is not in git †.

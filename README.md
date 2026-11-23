@@ -9,7 +9,7 @@
 ## What it does
 
 1. Open the page. A race starts by itself: Preston & Caroline to Aliceanna & Bond, at the labelled example start, 10:00 AM scheduled.
-2. Drag the time from 9:00 AM to 1:52 PM. Both vehicles start from that same moment.
+2. Drag the time from 9:00 AM to 1:52 PM. Both riders leave the corner at that minute; each vehicle leaves at its own scheduled time.
 3. Pick any two of the line's five timing corners, or swap direction.
 4. Tap any number to see where it comes from.
 
