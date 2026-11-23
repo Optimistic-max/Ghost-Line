@@ -146,6 +146,16 @@ Run by Kiro through the `skeptic` agent on README.md, docs/devpost.md and docs/v
 - the idea that any city with an old timetable could run the same race: cut;
 - reworded after run 2: "The 1938 trolley is gone" (tagline), "gone from Baltimore" (video), "corrected by hand" (hooks).
 
+Later runs on Nov 23, after Emmanuel's decisions (statements recorded above; LICENSE and the display-rounding rule, web/src/format/rounding.ts with screen-brief.md 2.10, added to the Skeptic's evidence; the trolleybus term added to product.md):
+
+| Run | README.md | docs/devpost.md | docs/video_script.md |
+|---|---|---|---|
+| 3 | PASS | FAIL: 1 MISMATCH, 3 UNSOURCED | FAIL: 2 MISMATCH, 5 UNSOURCED |
+| 4 | | FAIL: 0 MISMATCH, 3 UNSOURCED | FAIL: 0 MISMATCH, 5 UNSOURCED |
+| 5 | | FAIL: 0 MISMATCH, 1 UNSOURCED | FAIL: 0 MISMATCH, 3 UNSOURCED |
+
+After run 5 the only UNSOURCED claims are the race-film lines Emmanuel is holding: the devpost line that the video's map shots are illustrations driven by the same scheduled data, and the script's film length (30.1 s), Google tiles (26.1 s) and lower third.
+
 Skeptic task 14 stays open until each document gives PASS.
 
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
