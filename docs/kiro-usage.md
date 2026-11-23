@@ -117,6 +117,29 @@ Built by Kiro from docs/planning/final/08-ghost-cars-brief.md, as the ghost-cars
 | Browser suites, phone, laptop, checkpoint and screens | 180 passed, 3 skipped, 10 failed: nine 30 s time limits or slow-machine steps in race.spec.ts, and screens 02-racing (real: the map line over the strip, fixed above) | the nine race.spec tests: 13 passed (both projects); 02-racing, ghost-cars stills, phone fit: 6 passed |
 | Browser suites again after the strip fix, phone, laptop, checkpoint | 132 passed, 3 skipped, 5 failed, all 30 s time limits | the five: 6 passed (both projects) |
 
+## Skeptic on the real documents (polish brief P7, skeptic task 14), Nov 23, 2026
+
+Run by Kiro through the `skeptic` agent on README.md, docs/devpost.md and docs/video_script.md. The text was fixed between runs; no data was changed.
+
+| Run | README.md | docs/devpost.md | docs/video_script.md |
+|---|---|---|---|
+| 1 | FAIL: 0 MISMATCH, 5 UNSOURCED | FAIL: 0 MISMATCH, 8 UNSOURCED | FAIL: 0 MISMATCH, 4 UNSOURCED |
+| 2 | FAIL: 0 MISMATCH, 1 UNSOURCED | FAIL: 0 MISMATCH, 6 UNSOURCED | FAIL: 0 MISMATCH, 5 UNSOURCED |
+
+**Real catches from these runs:**
+- This log said "Four specs" after the ghost-cars spec made five. Fixed in the summary table.
+- The drafts named the Enoch Pratt Free Library as the scanner of the 1938 guide. No evidence file says so; the text now names Digital Maryland, which publishes the scan.
+- "No server, no accounts, no tracking" was not in the evidence; the text now says only what product.md rule 11 says.
+
+**Still UNSOURCED after run 2, for Emmanuel:** facts that only he holds, plus three sentences reworded since:
+- the race film: its length (30.1 s), its Google tiles (26.1 s), its lower third, and that it is driven by the same scheduled data;
+- Codex's part in the planning (this log names Claude Code only);
+- that Kiro Powers and Kiro Crew were not used;
+- the idea that any city with an old timetable could run the same race;
+- reworded after run 2, not yet re-checked: "The 1938 trolley is gone" (tagline), "gone from Baltimore" (video), "corrected by hand" (hooks).
+
+Skeptic task 14 stays open until each document gives PASS.
+
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
 
 Run by Emmanuel in the Kiro IDE on Nov 22, 2026 and reported by him; the chat output is not in git †.
