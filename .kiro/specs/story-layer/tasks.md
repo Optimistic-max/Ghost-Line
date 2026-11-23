@@ -50,7 +50,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - Depends on: tasks 1.1 to 1.10
     - _Requirements: 1.9, 1.11, 2.5, 2.6_
 
-- [ ] 2. Checkpoint: pipeline phase
+- [x] 2. Checkpoint: pipeline phase
   - Ensure all tests pass, ask the user if questions arise. Report to Emmanuel: lead `10:00` `wait_most` value, the comparison result, and the five command results.
 
 ## Site foundation
@@ -105,14 +105,14 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 5.3, 5.5, 5.6, 6.2, 6.3, 6.4, 6.5, 6.9**
     - Depends on: task 8.2
 
-- [ ] 9. Where the time goes (Req 8)
+- [x] 9. Where the time goes (Req 8)
   - [x] 9.1 `web/src/state/derive.ts`: add `takeaway` to `RaceView` from the lane legends' shown parts and `sumShown` of the two shown walks, with `waitMost` read from `row.wait_most` (no comparison anywhere in the site). `web/src/state/specs.ts`: `takeawayNumbers` (`take-wait-1938`, `take-ride-1938`, `take-wait-today`, `take-ride-today`, `take-walk-today` with `walk: true` and the sum method line). New `web/src/view/takeaway.ts`; `resultElements` appends it after the honest line, so it shows with the result box and at once under reduced motion; trolley rows only when there is no one-seat ride; the "most of the difference" sentence only when `waitMost`.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_
   - [x] 9.2 Tests. **Property 8: The takeaway repeats the lane values and follows the stored flag** (including a copy of the row with the flag flipped). DOM tests with real data and the fixture row where `wait_most` is false; the no-ride fixture shows trolley rows only; every takeaway number is a Number_Button with a Sources row.
     - **Validates: Requirements 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 16.8**
     - Depends on: task 9.1
 
-- [ ] 10. Start-time chart and slider (Req 9)
+- [x] 10. Start-time chart and slider (Req 9)
   - [x] 10.1 `web/src/view/layout.ts`: `chartPlan(race)` and `chartPath(series, max, height)` as in design 6.1 (one column per row, step paths, shared scale from 0, hatch range from `before_table`, today series null when every row has no one-seat ride).
     - _Requirements: 9.3, 9.4, 9.5, 9.9_
   - [x] 10.2 New `web/src/view/chart.ts` and `view/slider.ts` split into `startRow` (example label while guided, large start time) and `sliderRow` (minus, input, plus, 12-hour ends from the first and last row `t`): inline SVG with `role="img"` and the accessible name, `viewBox` by column, `preserveAspectRatio="none"`, `pointer-events: none` and no listeners, two paths in `--ghost` and `--today`, hatched rect and its label, cursor moved by `transform`, heading (prompt heading while guided), subheading, legend, readout with Number_Buttons `readout-1938` and `readout-today` (specs as `total-1938` and `total-today`). Visible label "Choose a scheduled start time" and no `aria-label` "Start time". `--thumb` custom property shared by the slider thumb rules and the chart inset. `updateChart(minute)` on the held-slider path. A pair, swap or shortcut change redraws the chart from the new race file before the race starts, fetching nothing extra. Name any race-screen test changed (input name, end labels) in the commit message.
@@ -121,7 +121,7 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 9.2, 9.3, 9.4, 9.5, 9.7, 9.8, 9.9, 16.8, 16.9**
     - Depends on: task 10.2
 
-- [ ] 11. Notices under the schedule line (decision 16, Req 7.13, Req 12.2)
+- [x] 11. Notices under the schedule line (decision 16, Req 7.13, Req 12.2)
   - [x] 11.1 `web/src/view/card.ts`: always render the schedule line ("... Scheduled, not live."), removing the race-screen condition that hid it while a notice showed (race-screen R6.7, superseded); render the before-the-table notice, the inferred-corner notice and the today-win notice in one `.notices` block directly after it. The today-win notice shows the pair names from index.json and the entry's `t` in 12-hour form as plain text (no Number_Button, no Sources row). Run `grep` for `.schedule` in `web/tests/`; change only the assertions that expect the line hidden while a notice shows, and name each in the commit message.
     - _Requirements: 7.13, 10.5, 12.2_
   - [x] 11.2 Write `web/tests/dom/notices.test.ts`: with each of the three notices showing, the schedule line containing "Scheduled, not live." is visible and the notice follows it directly in DOM order; the today-win notice and example label times contain no `button.num`.
@@ -149,14 +149,14 @@ Implements `requirements.md` and `design.md` in this folder. "Req N.M" is a requ
     - **Validates: Requirements 12.1, 12.2, 12.4, 16.12**
     - Depends on: task 14.1
 
-- [ ] 15. Route preview on phones (Req 12.3, 12.8 to 12.10)
+- [x] 15. Route preview on phones (Req 12.3, 12.8 to 12.10)
   - [x] 15.1 `web/src/view/mapview.ts` and `map/routedrawing.ts`: on a phone the map area is the 100 px strip of the bundled route drawing with the two chosen corners and a "View route" button, with no MapLibre code and no tile request until it is pressed; pressing it dispatches `route/toggle`, expands to the 150 px map, lazy-imports `map/map` and reads "Hide route"; "Hide route" calls `stopMap()` (no map instance, no further tiles), redraws the strip and does not stay open. Desktop keeps the idle load and shows no preview or toggle. `route.geojson` still loads after the card is on screen on both layouts; a failure shows "Map unavailable." and the toggle still tries the map. The race never waits for either.
     - _Requirements: 12.3, 12.8, 12.9, 12.10, 14.3_
   - [x] 15.2 DOM tests for the toggle states, `aria-expanded`, the strip versus the map drawing, desktop having no toggle, and the failure paths (import, WebGL, tile) leaving the race unaffected. The request-log checks run in task 20.
     - **Validates: Requirements 12.3, 12.8, 12.9, 12.10**
     - Depends on: task 15.1
 
-- [ ] 16. Sources specs and counts (Req 2, Req 13)
+- [x] 16. Sources specs and counts (Req 2, Req 13)
   - [x] 16.1 `web/src/state/specs.ts` and `view/sheets/sources.ts`: the `races`, `wins_1938` and `wins_today` rows use the covered-starts method line; the ride-same row fills `methodRideVerdicts` with `String(summary.ride_same_rule.minutes)` and `String(summary.ride_same_rule.fraction_pct)` as plain text (no Number_Button); the "When today wins" sheet heading "The {wins_today} races today wins" with `wins_today` as Number_Button `count-wins-today` ("covered starts where today's bus arrives first"); the replaced "what a number is" lines; the frequency sentence; the honest lines with counts read from `summary.json`.
     - _Requirements: 2.1, 13.1, 13.2, 13.3, 13.4, 13.6_
   - [x] 16.2 Tests. **Property 12: The tolerance line shows the file's numbers** (any finite non-negative minutes and percentage; plain text, no Number_Button). Made-up summary: every count, the heading, the shortcut order and the Sources method lines show the fixture's values; the three counts show the covered-starts line; `today_wins` list length equals the file's.
