@@ -850,11 +850,12 @@
   "all_pass": true,
   "film": {
     "file": "film/race-split.mp4",
-    "frames": 903,
-    "seconds": 30.1,
-    "tile_seconds": 26.1,
+    "frames": 981,
+    "seconds": 32.7,
+    "tile_seconds": 28.7,
     "codec": "h264 High",
     "size": "1920x1080",
-    "fps": 30
+    "fps": 30,
+    "matches_timeline": true
   }
 }

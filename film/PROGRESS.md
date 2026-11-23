@@ -63,6 +63,7 @@ node scripts/capture.mjs stills                    # key stills (tiles)
 node scripts/capture.mjs frames                    # full render -> frames\ (resumable)
 powershell -File scripts\encode.ps1                # -> film\race-split.mp4
 node scripts/qa-render.mjs                         # render QA -> qa\timing.json
+node scripts/film-summary.mjs                      # "film" block + top-level all_pass from the encoded mp4 (ffprobe)
 ```
 
 ## Decisions

@@ -22,7 +22,7 @@
 > Schedules: Baltimore No. 21 trackless trolley timetable and route diagram, effective March 6, 1938 (Digital Maryland, collections.digitalmaryland.org, btjk id/201 and id/202). MDOT MTA local bus GTFS schedule, feed version 20260821, weekday service of November 4, 2026 (not endorsed by MDOT MTA).
 > Streets: © OpenStreetMap contributors (ODbL). Vehicles: original illustrative models made in Blender for Ghost Line.
 
-**Secret check before publishing (Nov 23, v3b): PASS, 0 hits.** `node scripts\secret-scan.mjs .` scanned all 97 files (16.3 MB, binaries included) under `page\`, `scripts\`, `data\`, `models\`, `qa\` and `notes.md`. It looked for:
+**Secret check before publishing (Nov 23, v3b): PASS, 0 hits.** `node scripts\secret-scan.mjs .` scanned all 98 files (16.3 MB, binaries included) under `page\`, `scripts\`, `data\`, `models\`, `qa\` and `notes.md`. It looked for:
 - the Cesium ion token, read at runtime from `cesium-token.txt`, both whole and as each of its JWT parts;
 - any URL parameter `key=`, `session=`, `access_token=`, `token=`, `sig=` or `signature=` with a real value;
 - Bearer headers, JWT-shaped strings and Google API keys (`AIza…`).
@@ -143,8 +143,6 @@ CesiumJS 1.135 + Google Photorealistic 3D Tiles via Cesium ion (Emmanuel's token
 - End card: "15 min vs 45 min." and "Four trolleys were scheduled past this corner before today's bus left." (both from the brief); bar labels "wait 6", "ride 9" and "walk 2", "wait 31", "ride 8", "walk 4" (the app's sum-preserving rounding, so the parts add up to the 45 shown; the raw wait is 30.458 and the bar widths stay exact); totals "15 min", "45 min"; footer "Scheduled trip from Preston & Caroline to Aliceanna & Bond, leaving at 10:00 AM. Bars to scale."
 - Brief copy used as given: "For promotional purposes only", "×120 · 1 s = 2 min", "10:32:43 AM · scheduled" (clock format), "1938 trolleys scheduled past this corner", "1938", "Today".
 
-The data providers in the credits text (hand-off, above) are the ones Cesium showed during the render (they change with the view). `IBCAO` appeared in some right-half frames.
-
 ## Honesty decisions
 - Every time and count comes from `preston-caroline__aliceanna-bond.json` (row 10:00, trip index 2) and is asserted in `scripts\build-data.mjs`. The four ghosts are recounted from `y1938.passes` (10:06, 10:13, 10:21, 10:28; the first is the rider's own car).
 - Vehicles appear exactly at their scheduled departure. The bus provably does not exist before 10:32:43 (every frame plus a 0.25 s sweep).
@@ -155,7 +153,7 @@ The data providers in the credits text (hand-off, above) are the ones Cesium sho
 - v2: the camera target follows each vehicle with only a 0.08 s ease, so the camera never moves noticeably before its vehicle does; the vehicles themselves never move before their scheduled departure.
 
 ## Not done / for the edit
-- No audio (as briefed). Exact cue times are in `qa\cues.json`: bells at 0:06.419, 0:09.919, 0:14.519 and 0:18.019 of this clip (each 1938 car passing today's rider); the trolley finishes at 0:10.7 and today's rider at 0:28.178.
+- No audio (as briefed). Exact cue times are in `qa\cues.json`: bells (ghost passes) at 0:06.42, 0:09.92, 0:14.52 and 0:18.02 of this clip; door chimes at the holds at 0:05.6, 0:10.7, 0:20.16 and 0:25.2; the trolley finishes at 0:10.7 and today's rider at 0:28.18; the end card starts at 0:28.7.
 - The Cesium ion credit reads "Upgrade for commercial use." (Community plan). Left as shown, because the attribution must not be altered.
 - The trolley's poles end at the wire height but don't animate; at drone height that reads fine.
 - Tiles at the top edge of some frames (far distance) are softer, which is normal level-of-detail.
