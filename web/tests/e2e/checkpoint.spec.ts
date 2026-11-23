@@ -4,7 +4,7 @@
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { MAP_LAYOUT, TIMINGS } from '../../src/config';
-import { DESKTOP, PHONE, beforeNewYork, fontsReady, guardNetwork, newYork } from './support';
+import { DESKTOP, PHONE, beforeNewYork, fontsReady, guardNetwork, mapSettled, newYork } from './support';
 
 const OUT = resolve(import.meta.dirname, '..', '..', 'test-results', 'screens');
 
@@ -158,5 +158,44 @@ for (const moment of ['before the race', 'finished'] as const) {
     // Hidden names are allowed; the dots are not hidden.
     expect(m.names.length).toBeLessThanOrEqual(2);
     expect(m.dotsBySlug.length).toBeGreaterThanOrEqual(2);
+  });
+}
+
+// Polish brief P4: the stills for the link preview and the README, the finished lead race at the labelled
+// example start, with the race column scrolled to its top so the whole card shows from the pair names down.
+// og-1200x630.png is the desktop layout at 1280 x 672 drawn at 0.9375x, so it is exactly 1200 x 630; copy it to
+// web/public/og.png. readme-race-screen.png is 1280 x 800; copy it to docs/images/race-screen.png.
+for (const still of [
+  { file: 'og-1200x630', width: 1280, height: 672, scale: 1200 / 1280 },
+  { file: 'readme-race-screen', width: 1280, height: 800, scale: 1 },
+]) {
+  test(`still: ${still.file}`, async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: still.width, height: still.height },
+      deviceScaleFactor: still.scale,
+      reducedMotion: 'reduce',
+    });
+    // The real map, as a visitor sees it: tiles are allowed here.
+    await guardNetwork(context, false);
+    const page = await context.newPage();
+    await page.clock.setFixedTime(newYork('20:00'));
+    await page.goto('./');
+    await page.locator('.result').waitFor();
+    await fontsReady(page);
+    expect(await mapSettled(page)).toBe('ready');
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => {
+      document.getElementById('race-card')!.scrollTop = 0;
+      window.scrollTo(0, 0);
+    });
+    const path = resolve(OUT, `${still.file}.png`);
+    await page.screenshot({ path, animations: 'disabled' });
+    // The pair names, the result box and the honest line are all on the picture.
+    for (const selector of ['#pair-names', '.result', '.honest']) {
+      const r = (await page.locator(selector).first().boundingBox())!;
+      expect(r.y, selector).toBeGreaterThanOrEqual(0);
+      expect(r.y + r.height, selector).toBeLessThanOrEqual(still.height);
+    }
+    await context.close();
   });
 }
