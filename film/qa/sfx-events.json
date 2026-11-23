@@ -1,0 +1,73 @@
+{
+  "duration_s": 32.7,
+  "tile_end_s": 28.7,
+  "bells": [
+    {
+      "t": 6.419,
+      "what": "1938 car 1 of 4 passes today's rider"
+    },
+    {
+      "t": 9.919,
+      "what": "1938 car 2 of 4 passes today's rider"
+    },
+    {
+      "t": 14.519,
+      "what": "1938 car 3 of 4 passes today's rider"
+    },
+    {
+      "t": 18.019,
+      "what": "1938 car 4 of 4 passes today's rider"
+    }
+  ],
+  "chimes": [
+    {
+      "t": 5.6,
+      "d": 0.6,
+      "what": "1938 board"
+    },
+    {
+      "t": 10.7,
+      "d": 0.6,
+      "what": "1938 alight"
+    },
+    {
+      "t": 20.158,
+      "d": 0.9,
+      "what": "today board"
+    },
+    {
+      "t": 25.2,
+      "d": 0.9,
+      "what": "today alight"
+    }
+  ],
+  "hum": {
+    "from": 6.2,
+    "to": 10.7,
+    "what": "1938 trolley riding"
+  },
+  "rumble": [
+    {
+      "from": 19.992,
+      "to": 20.158
+    },
+    {
+      "from": 21.058,
+      "to": 25.2
+    }
+  ],
+  "ticks": {
+    "from": 3.729,
+    "to": 20.158,
+    "every_s": 1,
+    "what": "today's wait"
+  },
+  "hush_before_freeze": {
+    "from": 10.3,
+    "to": 10.7
+  },
+  "freeze_bell": {
+    "t": 10.7,
+    "what": "1938 stopwatch freezes at 15:00"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "fps": 30,
+  "speed": "×120 (1 s = 2 scheduled min)",
+  "tile_footage_s": 28.7,
+  "cues": [
+    {
+      "label": "film start (establishing shot)",
+      "film_s": 0,
+      "frame": 0
+    },
+    {
+      "label": "race start: both riders leave Preston & Caroline",
+      "scheduled": "10:00:00 AM",
+      "film_s": 2.6,
+      "frame": 78
+    },
+    {
+      "label": "today's rider reaches stop 8564",
+      "scheduled": "10:02:15 AM",
+      "film_s": 3.729,
+      "frame": 111.87
+    },
+    {
+      "label": "1938 trolley 1 of 4 passes today's rider at stop 8564 (bell 1, alternative to the corner departure)",
+      "scheduled": "10:06:26 AM",
+      "film_s": 6.419,
+      "frame": 192.58,
+      "sound": "bell (pass)"
+    },
+    {
+      "label": "1938 trolley 2 of 4 passes today's rider at stop 8564 (bell 2, alternative to the corner departure)",
+      "scheduled": "10:13:26 AM",
+      "film_s": 9.919,
+      "frame": 297.58,
+      "sound": "bell (pass)"
+    },
+    {
+      "label": "1938 trolley 3 of 4 passes today's rider at stop 8564 (bell 3, alternative to the corner departure)",
+      "scheduled": "10:21:26 AM",
+      "film_s": 14.519,
+      "frame": 435.58,
+      "sound": "bell (pass)"
+    },
+    {
+      "label": "1938 trolley 4 of 4 passes today's rider at stop 8564 (bell 4, alternative to the corner departure)",
+      "scheduled": "10:28:26 AM",
+      "film_s": 18.019,
+      "frame": 540.58,
+      "sound": "bell (pass)"
+    },
+    {
+      "label": "1938 trolley leaves Preston & Caroline (the 1938 rider's car; bell 1)",
+      "scheduled": "10:06:00 AM",
+      "film_s": 5.6,
+      "frame": 168,
+      "sound": "bell"
+    },
+    {
+      "label": "1938 trolley 2 of 4 leaves Preston & Caroline (bell 2)",
+      "scheduled": "10:13:00 AM",
+      "film_s": 9.7,
+      "frame": 291,
+      "sound": "bell"
+    },
+    {
+      "label": "1938 trolley 3 of 4 leaves Preston & Caroline (bell 3)",
+      "scheduled": "10:21:00 AM",
+      "film_s": 14.3,
+      "frame": 429,
+      "sound": "bell"
+    },
+    {
+      "label": "1938 trolley 4 of 4 leaves Preston & Caroline (bell 4)",
+      "scheduled": "10:28:00 AM",
+      "film_s": 17.8,
+      "frame": 534,
+      "sound": "bell"
+    },
+    {
+      "label": "1938 trolley arrives at Aliceanna & Bond (stopwatch freezes 15:00)",
+      "scheduled": "10:15:00 AM",
+      "film_s": 10.7,
+      "frame": 321
+    },
+    {
+      "label": "hold: clock paused, 1938 rider boards (door chime / bell)",
+      "scheduled": "10:06:00 AM",
+      "film_s": 5.6,
+      "frame": 168,
+      "end_frame": 186,
+      "hold_s": 0.6,
+      "sound": "door chime"
+    },
+    {
+      "label": "hold: clock paused, 1938 rider gets off (door chime / bell)",
+      "scheduled": "10:15:00 AM",
+      "film_s": 10.7,
+      "frame": 321,
+      "end_frame": 339,
+      "hold_s": 0.6,
+      "sound": "door chime"
+    },
+    {
+      "label": "hold: clock paused, today's rider boards (door chime / bell)",
+      "scheduled": "10:32:43 AM",
+      "film_s": 20.158,
+      "frame": 604.75,
+      "end_frame": 631.75,
+      "hold_s": 0.9,
+      "sound": "door chime"
+    },
+    {
+      "label": "hold: clock paused, today's rider gets off (door chime / bell)",
+      "scheduled": "10:41:00 AM",
+      "film_s": 25.2,
+      "frame": 756,
+      "end_frame": 783,
+      "hold_s": 0.9,
+      "sound": "door chime"
+    },
+    {
+      "label": "bus leaves stop 8564",
+      "scheduled": "10:32:43 AM",
+      "film_s": 20.158,
+      "frame": 604.75
+    },
+    {
+      "label": "bus arrives at stop 9486",
+      "scheduled": "10:41:00 AM",
+      "film_s": 25.2,
+      "frame": 756
+    },
+    {
+      "label": "today's rider finishes at Aliceanna & Bond (stopwatch 45:00, rounded)",
+      "scheduled": "10:45:09 AM",
+      "film_s": 28.178,
+      "frame": 845.34
+    },
+    {
+      "label": "end card (no map imagery)",
+      "film_s": 28.7,
+      "frame": 861
+    },
+    {
+      "label": "film end",
+      "film_s": 32.7,
+      "frame": 981
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+    "film":  "film/race-split.mp4 (v2, close cameras), 30.1 s, 903 frames; backup film/race-split-v1-140m.mp4",
+    "checked":  "2026-11-23",
+    "items":  [
+                  {
+                      "n":  1,
+                      "item":  "Within 2 s it\u0027s obvious which side is 1938 and which is today",
+                      "result":  "PASS",
+                      "how":  "58 px \u00271938\u0027 (#FFE7A8) and \u0027Today\u0027 (#F47C5A) panels top of each half from frame 0; mini-maps in lane colours"
+                  },
+                  {
+                      "n":  2,
+                      "item":  "Today\u0027s rider reads as a person, with label and waiting caption",
+                      "result":  "PASS",
+                      "how":  "SVG person glyph + \u0027Today\u0027s rider\u0027 + \u0027Waiting for the 10:32:43 AM bus (scheduled)\u0027 during the wait; same for the 1938 rider (\u0027Waiting for the 10:06 AM trolley (scheduled)\u0027)"
+                  },
+                  {
+                      "n":  3,
+                      "item":  "Ghosts read as other 1938 trolleys; first one labelled; tally wording true on screen",
+                      "result":  "PASS",
+                      "how":  "Each ghost labelled (\u00271938 rider\u0027s trolley (scheduled)\u0027 for the 10:06 car, \u0027Another 1938 trolley (scheduled)\u0027 after). Wait camera faces north with Preston \u0026 Caroline in the upper frame, so the tally reads \u00271938 trolleys scheduled past this corner while you wait\u0027. Note: at the exact moment a ghost leaves the corner it can sit behind the Today panel (top right) for a few frames; it is in clear view as it passes the rider."
+                  },
+                  {
+                      "n":  4,
+                      "item":  "All on-screen text at least 28 px at 1080p (attribution strip excepted)",
+                      "result":  "PASS",
+                      "how":  "CSS minimum 28 px for every text class (caption and promo 28 px, one line each); mini-maps carry no text"
+                  },
+                  {
+                      "n":  5,
+                      "item":  "Trees / melted mesh: vehicle never hidden or sunk (every 15th chase frame)",
+                      "result":  "PASS",
+                      "how":  "qa/chase-left.jpg (frames 180-315) and qa/chase-right.jpg (585-705) checked; vehicle visible in all; models 12 cm above the sampled street; overlay ring always drawn on top. Minor: a tree crowds the trolley at 10:07 but the ring and roof stay visible"
+                  },
+                  {
+                      "n":  6,
+                      "item":  "Chase speed honest and camera smooth",
+                      "result":  "PASS",
+                      "how":  "Constant ×120; camera target follows the vehicle exactly (0.08 s ease), heading smoothed ±0.4 s; every frame waited for tilesLoaded + 4 quiet renders (0 timeouts). Checked on frame samples, not watched in motion"
+                  },
+                  {
+                      "n":  7,
+                      "item":  "Headings: every vehicle faces travel direction, no flips",
+                      "result":  "PASS",
+                      "how":  "qa/timing.json checks: within 45° of travel at 0.25 s steps (mid-corner the body points along the bisector), no jump over 90° per 0.25 s"
+                  },
+                  {
+                      "n":  8,
+                      "item":  "No popping / half-loaded frames",
+                      "result":  "PASS",
+                      "how":  "Automated tile-detail check on every frame of both halves (gradient \u003e= 45% of median, contrast \u003e= 12): 0 flagged; 0 settle timeouts; visual check of 27 credit strips, 4 samples and 19 review stills"
+                  },
+                  {
+                      "n":  9,
+                      "item":  "Positions only from scheduled times on real geometry; nothing before its departure; bus never before 10:32:43",
+                      "result":  "PASS",
+                      "how":  "qa/timing.json (every frame + 0.25 s sweep)"
+                  },
+                  {
+                      "n":  10,
+                      "item":  "45:00 vs 10:45:09 consistent with the app",
+                      "result":  "PASS",
+                      "how":  "Stopwatch freezes at 45:00 with \u0027ARRIVED · 45:00 (rounded, as in the app)\u0027; master clock shows 10:45:09"
+                  },
+                  {
+                      "n":  11,
+                      "item":  "Google logo, data credits and \u0027For promotional purposes only\u0027 in every tile frame; tile footage \u003c= 30 s",
+                      "result":  "PASS",
+                      "how":  "DOM check on every tile frame of both halves + visual contact sheet; race-split.mp4 has 26.1 s of tiles. wait-loop.mp4 adds 10 s of tiles: using it together with the whole race exceeds 30 s, so trim the race by the same amount if it\u0027s used"
+                  },
+                  {
+                      "n":  12,
+                      "item":  "qa/cues.json with exact timestamps",
+                      "result":  "PASS",
+                      "how":  "film seconds and frames for race start, rider at stop, each ghost leaving the corner (bells), trolley arrival, bus departure, bus arrival, finish, end card"
+                  },
+                  {
+                      "n":  13,
+                      "item":  "film/wait-loop.mp4, 10 s silent, right half, credits visible",
+                      "result":  "PASS",
+                      "how":  "frames 170-469 (film 5.67-15.63 s, ghosts 1-3 pass), 960 px right half centred on a 1920x1080 #17121F frame; counts toward the Google cap (see 11)"
+                  },
+                  {
+                      "n":  14,
+                      "item":  "End card parts add up to the shown totals (app rounding)",
+                      "result":  "PASS",
+                      "how":  "largest-remainder rounding ported from web/src/format/rounding.ts: today walk 2 · wait 31 · ride 8 · walk 4 = 45, 1938 wait 6 · ride 9 = 15; checked in qa/timing.json; bar widths exact"
+                  }
+              ]
+}

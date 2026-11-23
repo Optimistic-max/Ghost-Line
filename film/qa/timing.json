@@ -1,0 +1,860 @@
+{
+  "timing": {
+    "generated": "2026-11-23T18:03:17.970Z",
+    "all_pass": true,
+    "checks": [
+      {
+        "name": "10:06:00: master clock",
+        "pass": true,
+        "at": "10:06:00",
+        "film_s": 5.6,
+        "frame": 168,
+        "clock": "10:06:00 AM · scheduled"
+      },
+      {
+        "name": "10:06:00: stopwatches",
+        "pass": true,
+        "at": "10:06:00",
+        "film_s": 5.6,
+        "frame": 168,
+        "y1938": "06:00",
+        "today": "06:00"
+      },
+      {
+        "name": "10:06:00: tally",
+        "pass": true,
+        "at": "10:06:00",
+        "film_s": 5.6,
+        "frame": 168,
+        "tally": 1
+      },
+      {
+        "name": "10:06:00: trolley car 1 of 4 at Preston & Caroline",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5980361,
+          39.3052226
+        ],
+        "at": "10:06:00",
+        "film_s": 5.6,
+        "frame": 168
+      },
+      {
+        "name": "10:06:00: rider's trolley leaves Preston & Caroline",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5980361,
+          39.3052226
+        ],
+        "at": "10:06:00",
+        "film_s": 5.6,
+        "frame": 168
+      },
+      {
+        "name": "10:06:00: trolley visible",
+        "pass": true,
+        "at": "10:06:00",
+        "film_s": 5.6,
+        "frame": 168
+      },
+      {
+        "name": "10:13: master clock",
+        "pass": true,
+        "at": "10:13",
+        "film_s": 9.7,
+        "frame": 291,
+        "clock": "10:13:00 AM · scheduled"
+      },
+      {
+        "name": "10:13: stopwatches",
+        "pass": true,
+        "at": "10:13",
+        "film_s": 9.7,
+        "frame": 291,
+        "y1938": "13:00",
+        "today": "13:00"
+      },
+      {
+        "name": "10:13: tally",
+        "pass": true,
+        "at": "10:13",
+        "film_s": 9.7,
+        "frame": 291,
+        "tally": 2
+      },
+      {
+        "name": "10:13: trolley car 2 of 4 at Preston & Caroline",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5980361,
+          39.3052226
+        ],
+        "at": "10:13",
+        "film_s": 9.7,
+        "frame": 291
+      },
+      {
+        "name": "10:15:00: master clock",
+        "pass": true,
+        "at": "10:15:00",
+        "film_s": 10.7,
+        "frame": 321,
+        "clock": "10:15:00 AM · scheduled"
+      },
+      {
+        "name": "10:15:00: stopwatches",
+        "pass": true,
+        "at": "10:15:00",
+        "film_s": 10.7,
+        "frame": 321,
+        "y1938": "15:00 (frozen)",
+        "today": "15:00"
+      },
+      {
+        "name": "10:15:00: tally",
+        "pass": true,
+        "at": "10:15:00",
+        "film_s": 10.7,
+        "frame": 321,
+        "tally": 2
+      },
+      {
+        "name": "10:15:00: trolley at Aliceanna & Bond",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5951999,
+          39.2834628
+        ],
+        "at": "10:15:00",
+        "film_s": 10.7,
+        "frame": 321
+      },
+      {
+        "name": "10:15:00: 1938 stopwatch frozen at 15:00",
+        "pass": true,
+        "at": "10:15:00",
+        "film_s": 10.7,
+        "frame": 321,
+        "text": "15:00"
+      },
+      {
+        "name": "10:21: master clock",
+        "pass": true,
+        "at": "10:21",
+        "film_s": 14.3,
+        "frame": 429,
+        "clock": "10:21:00 AM · scheduled"
+      },
+      {
+        "name": "10:21: stopwatches",
+        "pass": true,
+        "at": "10:21",
+        "film_s": 14.3,
+        "frame": 429,
+        "y1938": "15:00 (frozen)",
+        "today": "21:00"
+      },
+      {
+        "name": "10:21: tally",
+        "pass": true,
+        "at": "10:21",
+        "film_s": 14.3,
+        "frame": 429,
+        "tally": 3
+      },
+      {
+        "name": "10:21: trolley car 3 of 4 at Preston & Caroline",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5980361,
+          39.3052226
+        ],
+        "at": "10:21",
+        "film_s": 14.3,
+        "frame": 429
+      },
+      {
+        "name": "10:28: master clock",
+        "pass": true,
+        "at": "10:28",
+        "film_s": 17.8,
+        "frame": 534,
+        "clock": "10:28:00 AM · scheduled"
+      },
+      {
+        "name": "10:28: stopwatches",
+        "pass": true,
+        "at": "10:28",
+        "film_s": 17.8,
+        "frame": 534,
+        "y1938": "15:00 (frozen)",
+        "today": "28:00"
+      },
+      {
+        "name": "10:28: tally",
+        "pass": true,
+        "at": "10:28",
+        "film_s": 17.8,
+        "frame": 534,
+        "tally": 4
+      },
+      {
+        "name": "10:28: trolley car 4 of 4 at Preston & Caroline",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5980361,
+          39.3052226
+        ],
+        "at": "10:28",
+        "film_s": 17.8,
+        "frame": 534
+      },
+      {
+        "name": "10:32:43: master clock",
+        "pass": true,
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75,
+        "clock": "10:32:43 AM · scheduled"
+      },
+      {
+        "name": "10:32:43: stopwatches",
+        "pass": true,
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75,
+        "y1938": "15:00 (frozen)",
+        "today": "32:43"
+      },
+      {
+        "name": "10:32:43: tally",
+        "pass": true,
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75,
+        "tally": 4
+      },
+      {
+        "name": "10:32:43: bus front door at stop 8564's pole (within 6 m; the shape passes 5.2 m from it)",
+        "pass": true,
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75,
+        "distance_m": 3.77
+      },
+      {
+        "name": "10:32:43: today's rider at stop 8564",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.598133,
+          39.304099
+        ],
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75
+      },
+      {
+        "name": "10:32:43: bus visible",
+        "pass": true,
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75
+      },
+      {
+        "name": "10:32:43: tally is 4 when the bus leaves",
+        "pass": true,
+        "at": "10:32:43",
+        "film_s": 20.1583,
+        "frame": 604.75,
+        "tally": 4
+      },
+      {
+        "name": "10:41:00: master clock",
+        "pass": true,
+        "at": "10:41:00",
+        "film_s": 25.2,
+        "frame": 756,
+        "clock": "10:41:00 AM · scheduled"
+      },
+      {
+        "name": "10:41:00: stopwatches",
+        "pass": true,
+        "at": "10:41:00",
+        "film_s": 25.2,
+        "frame": 756,
+        "y1938": "15:00 (frozen)",
+        "today": "41:00"
+      },
+      {
+        "name": "10:41:00: tally",
+        "pass": true,
+        "at": "10:41:00",
+        "film_s": 25.2,
+        "frame": 756,
+        "tally": 4
+      },
+      {
+        "name": "10:41:00: bus at stop 9486 (the trip's shape end, where it lays over)",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.59675,
+          39.28544
+        ],
+        "at": "10:41:00",
+        "film_s": 25.2,
+        "frame": 756
+      },
+      {
+        "name": "10:41:00: today's rider steps off beside the bus's front door (within 4 m)",
+        "pass": true,
+        "at": "10:41:00",
+        "film_s": 25.2,
+        "frame": 756,
+        "distance_m": 2.2
+      },
+      {
+        "name": "the final walk passes stop 9486's own coordinates (within 2 m)",
+        "pass": true,
+        "distance_m": 0.08,
+        "note": "the feed shape ends 39 m north of the stop pole"
+      },
+      {
+        "name": "finish: master clock",
+        "pass": true,
+        "at": "finish",
+        "film_s": 28.178,
+        "frame": 845.34,
+        "clock": "10:45:09 AM · scheduled"
+      },
+      {
+        "name": "finish: stopwatches",
+        "pass": true,
+        "at": "finish",
+        "film_s": 28.178,
+        "frame": 845.34,
+        "y1938": "15:00 (frozen)",
+        "today": "45:00 (frozen)"
+      },
+      {
+        "name": "finish: tally",
+        "pass": true,
+        "at": "finish",
+        "film_s": 28.178,
+        "frame": 845.34,
+        "tally": 4
+      },
+      {
+        "name": "finish: rider at Aliceanna & Bond",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.5952,
+          39.283463
+        ],
+        "at": "finish",
+        "film_s": 28.178,
+        "frame": 845.34
+      },
+      {
+        "name": "finish: today stopwatch frozen at 45:00",
+        "pass": true,
+        "at": "finish",
+        "film_s": 28.178,
+        "frame": 845.34,
+        "text": "45:00",
+        "source_total_min": 45.156
+      },
+      {
+        "name": "10:02:15 AM: rider reaches stop 8564",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.598133,
+          39.304099
+        ],
+        "film_s": 3.729
+      },
+      {
+        "name": "10:00: rider starts at Preston & Caroline",
+        "pass": true,
+        "distance_m": 0,
+        "source": [
+          -76.598036,
+          39.305223
+        ]
+      },
+      {
+        "name": "the bus is shown only where its scheduled times put it: not before stop 4021 at 10:30:00, at each stop at its stop time, linear between stops along the GTFS shape, laid over at 9486 after 10:41:00 (its next trip leaves 11:04)",
+        "pass": true,
+        "violations": 0,
+        "stops": [
+          {
+            "stop": "4021",
+            "clock": "10:30:00 AM",
+            "m": 0
+          },
+          {
+            "stop": "9480",
+            "clock": "10:31:03 AM",
+            "m": 0
+          },
+          {
+            "stop": "8564",
+            "clock": "10:32:43 AM",
+            "m": 0
+          },
+          {
+            "stop": "4028",
+            "clock": "10:35:01 AM",
+            "m": 0
+          },
+          {
+            "stop": "4029",
+            "clock": "10:35:29 AM",
+            "m": 0
+          },
+          {
+            "stop": "10548",
+            "clock": "10:38:00 AM",
+            "m": 0
+          },
+          {
+            "stop": "4034",
+            "clock": "10:39:41 AM",
+            "m": 0
+          },
+          {
+            "stop": "4035",
+            "clock": "10:40:05 AM",
+            "m": 0
+          },
+          {
+            "stop": "9486",
+            "clock": "10:41:00 AM",
+            "m": 0
+          }
+        ],
+        "layover": {
+          "until": "11:04:00",
+          "next_trip": "4110916",
+          "note": "trips.txt block 4805, service 2251"
+        }
+      },
+      {
+        "name": "tally counts exactly 4, at the right times",
+        "pass": true,
+        "steps": [
+          {
+            "frame": 168,
+            "film_s": 5.6,
+            "clock": "10:06:00 AM",
+            "tally": 1
+          },
+          {
+            "frame": 291,
+            "film_s": 9.7,
+            "clock": "10:13:00 AM",
+            "tally": 2
+          },
+          {
+            "frame": 429,
+            "film_s": 14.3,
+            "clock": "10:21:00 AM",
+            "tally": 3
+          },
+          {
+            "frame": 534,
+            "film_s": 17.8,
+            "clock": "10:28:00 AM",
+            "tally": 4
+          }
+        ],
+        "passes": [
+          "10:06:00 AM",
+          "10:13:00 AM",
+          "10:21:00 AM",
+          "10:28:00 AM"
+        ]
+      },
+      {
+        "name": "pauses: 1938 holds 0.6 s (18 frames) at 10:06:00 and 10:15:00; bus holds 0.9 s (27 frames) at 10:32:43 and 10:41:00",
+        "pass": true,
+        "frames_per_hold": [
+          18,
+          18,
+          27,
+          27
+        ],
+        "holds": [
+          {
+            "at": "10:06:00 AM",
+            "who": "1938",
+            "kind": "board",
+            "from_frame": 168,
+            "to_frame": 186,
+            "seconds": 0.6
+          },
+          {
+            "at": "10:15:00 AM",
+            "who": "1938",
+            "kind": "alight",
+            "from_frame": 321,
+            "to_frame": 339,
+            "seconds": 0.6
+          },
+          {
+            "at": "10:32:43 AM",
+            "who": "today",
+            "kind": "board",
+            "from_frame": 604.8,
+            "to_frame": 631.8,
+            "seconds": 0.9
+          },
+          {
+            "at": "10:41:00 AM",
+            "who": "today",
+            "kind": "alight",
+            "from_frame": 756,
+            "to_frame": 783,
+            "seconds": 0.9
+          }
+        ]
+      },
+      {
+        "name": "pauses change no scheduled time label: during a hold the clock and both stopwatches show the event time; outside the holds every frame is exactly START + (film - holds so far) x 120",
+        "pass": true,
+        "label_violations": 0,
+        "mapping_violations": 0
+      },
+      {
+        "name": "stopwatches never run backwards",
+        "pass": true,
+        "violations": 0
+      },
+      {
+        "name": "film race length",
+        "pass": true,
+        "race_s": 22.578,
+        "trolley_leaves_s": 3,
+        "trolley_arrives_s": 8.1,
+        "rider_at_stop_s": 1.129,
+        "bus_leaves_s": 17.558,
+        "bus_arrives_s": 22.6,
+        "finish_s": 25.578
+      },
+      {
+        "name": "Google-tile footage <= 29 s (margin under the 30 s cap)",
+        "pass": true,
+        "tile_seconds": 28.7,
+        "card_seconds": 4,
+        "total_frames": 981
+      },
+      {
+        "name": "vehicles face their direction of travel (within 45° of the travel over one vehicle length, checked every 0.25 s), ghosts included",
+        "pass": true,
+        "violations": []
+      },
+      {
+        "name": "no heading flips (no jump over 90° per 0.25 s scheduled; the 90° Caroline-to-Aliceanna corner is a turn)",
+        "pass": true,
+        "max_deg_per_quarter_s": 12.3
+      },
+      {
+        "name": "today's rider stays within about 8 m (limit 9 m) of a street centreline, every 0.25 s scheduled, walks and waits",
+        "pass": true,
+        "note": "the MTA stop 9486 coordinate itself is 8.5 m from the centreline (on the sidewalk); sidewalk path offset 7 m",
+        "samples": 8970,
+        "max_m": 8.5,
+        "violations": [],
+        "streets": 708,
+        "osm": "data/osm.json (OpenStreetMap contributors, ODbL; snapshot 2026-11-23)"
+      },
+      {
+        "name": "today's rider is never inside an OSM building footprint",
+        "pass": true,
+        "samples": 8970,
+        "buildings": 6132,
+        "violations": []
+      },
+      {
+        "name": "1938 rider (waiting at Preston & Caroline, then at Aliceanna & Bond) is on the street, not in a building",
+        "pass": true,
+        "m": [
+          3,
+          3.6
+        ]
+      },
+      {
+        "name": "walk timing unchanged: walk 1 10:00:00-10:02:15.48 (2.258 min), walk 2 10:41:00-10:45:09.36 (4.156 min)",
+        "pass": true,
+        "walk1": "10:00:00 AM to 10:02:15 AM",
+        "walk2": "10:41:00 AM to 10:45:09 AM",
+        "drawn_path_m": {
+          "walk1": 134.9,
+          "walk2": 334.7
+        },
+        "source_straight_m": {
+          "walk1": 125.068,
+          "walk2": 230.154
+        }
+      },
+      {
+        "name": "end card 1938: shown parts add up to the shown total",
+        "pass": true,
+        "shown": "wait 6 · ride 9",
+        "sum": 15,
+        "shown_total": 15
+      },
+      {
+        "name": "end card today: shown parts add up to the shown total",
+        "pass": true,
+        "shown": "walk 2 · wait 31 · ride 8 · walk 4",
+        "sum": 45,
+        "shown_total": 45
+      },
+      {
+        "name": "end card values match the app: today walk 2 · wait 31 · ride 8 · walk 4 = 45; 1938 wait 6 · ride 9 = 15",
+        "pass": true,
+        "today": {
+          "shownTotal": 45,
+          "shown": [
+            2,
+            31,
+            8,
+            4
+          ]
+        },
+        "y1938": {
+          "shownTotal": 15,
+          "shown": [
+            6,
+            9
+          ]
+        }
+      }
+    ]
+  },
+  "render": {
+    "generated": "2026-11-23T18:03:22.150Z",
+    "all_pass": true,
+    "checks": [
+      {
+        "name": "Google attribution present in both halves of every tile frame (DOM check)",
+        "pass": true,
+        "tile_frames": 861,
+        "missing": [],
+        "logos_not_loaded": [],
+        "sample": [
+          {
+            "text": "Upgrade for commercial use.••Google•Data SIO, NOAA, U.S. Navy, NGA, GEBCO•Landsat / Copernicus",
+            "logos": [
+              "ion-credit.png",
+              "Google"
+            ],
+            "top": 1043,
+            "covered": false
+          },
+          {
+            "text": "Upgrade for commercial use.••Google•Data SIO, NOAA, U.S. Navy, NGA, GEBCO•Landsat / Copernicus",
+            "logos": [
+              "ion-credit.png",
+              "Google"
+            ],
+            "top": 1043,
+            "covered": false
+          }
+        ]
+      },
+      {
+        "name": "No overlay covers the attribution strip",
+        "pass": true,
+        "covered_frames": []
+      },
+      {
+        "name": "Every tile frame settled (no load timeout)",
+        "pass": true,
+        "timeouts": []
+      },
+      {
+        "name": "Frame count",
+        "pass": true,
+        "frames": 981,
+        "tile_frames": 861,
+        "card_frames": 120
+      },
+      {
+        "name": "Tile detail: no half is blank or blurry (gradient >= 45% of its median, contrast std >= 12)",
+        "pass": true,
+        "stats": {
+          "left": {
+            "frames": 861,
+            "median_grad": 27.03,
+            "min_grad": 20.74,
+            "min_std": 47.78
+          },
+          "right": {
+            "frames": 861,
+            "median_grad": 43.68,
+            "min_grad": 24.08,
+            "min_std": 43.37
+          }
+        },
+        "flagged": []
+      },
+      {
+        "name": "Vehicle never sits on a dark smear (60 x 40 px around it: not mean < 45 with std < 12)",
+        "pass": true,
+        "frames_measured": 819,
+        "flagged": []
+      },
+      {
+        "name": "Today's rider never stands on a dark smear while walking (60 x 40 px around them)",
+        "pass": true,
+        "frames_measured": 175,
+        "flagged": []
+      },
+      {
+        "name": "Camera never inside a roof or tree (clearance >= 12 m above the mesh under it)",
+        "pass": true,
+        "min_clearance_m": 19.3,
+        "frames_backed_out": []
+      },
+      {
+        "name": "No overlay colour outside the palette (#FFE7A8 #F47C5A #ECE7F2 #17121F, any alpha)",
+        "pass": true,
+        "audited_frames": [
+          0,
+          30,
+          60,
+          90,
+          120,
+          150,
+          180,
+          210,
+          240,
+          270,
+          300,
+          330,
+          360,
+          390,
+          420,
+          450,
+          480,
+          510,
+          540,
+          570,
+          600,
+          630,
+          660,
+          690,
+          720,
+          750,
+          780,
+          810,
+          840,
+          870,
+          900,
+          901,
+          930,
+          960,
+          0,
+          30,
+          60,
+          90,
+          120,
+          150,
+          180,
+          210,
+          240,
+          270,
+          300,
+          330,
+          360,
+          390,
+          420,
+          450,
+          480,
+          510,
+          540,
+          570,
+          600,
+          630,
+          660,
+          690,
+          720,
+          750,
+          780,
+          810,
+          840
+        ],
+        "colours_seen": [
+          "236,231,242",
+          "255,231,168",
+          "244,124,90",
+          "23,18,31"
+        ],
+        "off_palette": []
+      },
+      {
+        "name": "No banned word (live, now, real-time, citywide)",
+        "pass": true,
+        "found": []
+      },
+      {
+        "name": "Contact sheet of every 30th tile frame written for the visual check",
+        "pass": true,
+        "frames": [
+          0,
+          30,
+          60,
+          90,
+          120,
+          150,
+          180,
+          210,
+          240,
+          270,
+          300,
+          330,
+          360,
+          390,
+          420,
+          450,
+          480,
+          510,
+          540,
+          570,
+          600,
+          630,
+          660,
+          690,
+          720,
+          750,
+          780,
+          810,
+          840
+        ],
+        "file": "qa/credit-strips.jpg",
+        "visual_check": "pending (see notes.md)"
+      }
+    ]
+  },
+  "all_pass": true,
+  "film": {
+    "file": "film/race-split.mp4",
+    "frames": 903,
+    "seconds": 30.1,
+    "tile_seconds": 26.1,
+    "codec": "h264 High",
+    "size": "1920x1080",
+    "fps": 30
+  }
+}
