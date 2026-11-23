@@ -1,6 +1,6 @@
 # Ghost Line: video script (2:50)
 
-Written Nov 23, 2026 from docs/planning/final/WIN-PLAN.md section 5, with Emmanuel's changes of Nov 23. Every string marked "On screen" is copied from the deployed site as it appears. Every number said or shown is in the app or in `web/public/data/summary.json`.
+Every string marked "On screen" is copied from the deployed site as it appears. Every number said or shown is in the app or in `web/public/data/summary.json`.
 
 **Rules for the edit**
 - Never say or caption: the banned words for service times, "every 7.5 minutes", "came every", "ran every", "buses come every N minutes". Say "scheduled".
@@ -32,7 +32,7 @@ Written Nov 23, 2026 from docs/planning/final/WIN-PLAN.md section 5, with Emmanu
 | 1:42-1:52 | `.kiro/steering/product.md`, the honesty rules. Zoom on rule 3, "Never invent a number." | "Steering holds the rules that never bend." | "Steering holds the honesty rules: every time is scheduled, and no number is invented." |
 | 1:52-2:02 | In a docs file, type one of the banned words for service times and save. The `copy-and-source-guard` hook fails the save. | "A hook guards every saved word." | "Save a banned word in the docs, and the hook fails the save." |
 | 2:02-2:12 | The MCP Server view, `ghostline-gtfs`: `trips_serving` for stops 8564 and 9486 answers 36. | "An MCP server reads the real feed." | "Our MCP server reads the transit feed on its own, without the pipeline's code: thirty-six one-seat trips." |
-| 2:12-2:22 | `/skeptic-check tests/fixtures/skeptic/planted.md`: FAIL on the planted 38. Then `/skeptic-check` on the real docs: PASS. | "Planted test: 38 against 36." | "A Skeptic agent checks our own words against it. This 38 is a planted test, and it fails. Our real docs pass." |
+| 2:12-2:22 | `/skeptic-check tests/fixtures/skeptic/planted.md`: FAIL on the planted 38. Then `/skeptic-check` on README.md, docs/devpost.md and this file. Step still to record: film this part only once all three give PASS (check 3 below). | "Planted test: 38 against 36." | "A Skeptic agent checks our own words against it. This 38 is a planted test, and it fails. Then it checks our real docs." |
 | 2:22-2:32 | Commit 0cfcfe9: the shuffle property and the fix in `pipeline/mcp_server.py`. | "A property test caught a real bug." | "And a property test caught a real bug: the server's answer depended on row order." |
 
 ## Checks before recording

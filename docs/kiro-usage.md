@@ -21,6 +21,7 @@ Recorded as Emmanuel wrote them on Nov 23, 2026. They are his statements, not so
 
 - "Codex (OpenAI) made design mockups and a moving-camera map prototype during planning; Claude Code wrote planning briefs and rendered the race film used in the video. The app and pipeline were built in Kiro."
 - "Kiro Powers and Kiro Crew were not used."
+- "The OpenStreetMap way snapshot (data/osm/ways.json) was also prepared during planning with Claude Code."
 
 ## Log
 
