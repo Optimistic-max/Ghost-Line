@@ -40,7 +40,7 @@ The last line is `PASS` when every line is OK. Otherwise it is `FAIL: <n> MISMAT
 ## Matching rules
 
 - A whole-minute figure matches a stored value that rounds to it. "About" allows one minute.
-- A shown number is OK when it equals the app's displayed value for that race under the display rounding of evidence 6, even where plain rounding of the stored part gives another number.
+- A shown number is OK when it equals the app's displayed value for that race under the display rounding of evidence 5, even where plain rounding of the stored part gives another number.
 - Names match case-insensitively. The feed writes CityLink LIME and HARBOR EAST, the site shows CityLink Lime and Harbor East. These are the same names. Stop names in the feed carry direction suffixes such as "eb" or "sb"; a claim without the suffix still matches.
 - Bus times from the tools are the feed's own HH:MM:SS. Hours may pass 24, so a time such as 25:30:00 is a real time on the service date.
 - When a claim says "scheduled", it must be about the weekday schedule for Wednesday 2026-11-04, the one frozen service date. Another date is a MISMATCH.
