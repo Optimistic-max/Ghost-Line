@@ -5,7 +5,7 @@
 // screen), the credits with the flag true and false, and the today_wins list.
 // Expected values are read from the files.
 import { afterEach, describe, expect, it } from 'vitest';
-import { LEAD_PAIR, LICENCE_PATH, SOURCE_URLS, TIMINGS } from '../../src/config';
+import { AUDIT_LOG_PATH, LEAD_PAIR, LICENCE_PATH, SOURCE_URLS, TIMINGS } from '../../src/config';
 import * as C from '../../src/copy/copy';
 import { cornerName, rowAt, tripAt } from '../../src/data/lookup';
 import type { Index, Pair, SourceId, Summary } from '../../src/data/types';
@@ -271,6 +271,9 @@ describe('About and credits (13.3)', () => {
       [...sheet()!.querySelectorAll<HTMLAnchorElement>('.credit a')].find((a) => text(a) === name)?.href;
     expect(href(C.MIT_LICENCE)).toBe(`${SOURCE_URLS.repository}${LICENCE_PATH}`);
     expect(href(C.SOURCE_CODE)).toBe(SOURCE_URLS.repository);
+    // The audit line links to the Kiro audit log on GitHub, an absolute address (Emmanuel, Nov 23).
+    expect(href(C.AUDIT_LINE)).toBe(`${SOURCE_URLS.repository}${AUDIT_LOG_PATH}`);
+    expect(href(C.AUDIT_LINE)).toBe('https://github.com/Optimistic-max/Ghost-Line/blob/main/docs/kiro-usage.md');
     expect(text(sheet())).not.toContain('1933');
   });
 

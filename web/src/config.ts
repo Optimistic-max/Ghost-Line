@@ -204,6 +204,9 @@ export const MAP_LAYOUT = {
 /** Where the licence file sits in the repository, for the "MIT licence" link (R10.3). */
 export const LICENCE_PATH = '/blob/main/LICENSE';
 
+/** Where the Kiro audit log sits in the repository, for the About sheet's audit line (Emmanuel, Nov 23). */
+export const AUDIT_LOG_PATH = '/blob/main/docs/kiro-usage.md';
+
 /**
  * Links and credit text from the "Source URLs" list in .kiro/steering/tech.md.
  * Do not add a URL anywhere else in src/; a test checks both rules.

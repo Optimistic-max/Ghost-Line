@@ -1,8 +1,9 @@
 // About and credits (R10): a plain list, one line each. Catalog-backed lines
 // use the catalog's label and link; the rest are copy-table lines. The
 // checked-by-hand clause follows index.json's one flag. No 1933 line.
-import { LICENCE_PATH, SOURCE_URLS } from '../../config';
+import { AUDIT_LOG_PATH, LICENCE_PATH, SOURCE_URLS } from '../../config';
 import {
+  AUDIT_LINE,
   BASE_MAP_CREDIT,
   FONT_CREDIT,
   HEADLINE_LINE,
@@ -48,6 +49,7 @@ export function aboutSheet(index: Index): SheetParts {
     line(NOT_LIVE),
     line(sourceLink(MIT_LICENCE, `${SOURCE_URLS.repository}${LICENCE_PATH}`)),
     line(sourceLink(SOURCE_CODE, SOURCE_URLS.repository)),
+    line(sourceLink(AUDIT_LINE, `${SOURCE_URLS.repository}${AUDIT_LOG_PATH}`)),
   ];
   return { name: 'about', title: SOURCES_AND_CREDITS, body: [h('ul', { class: 'credits' }, ...items)] };
 }

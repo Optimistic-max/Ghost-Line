@@ -293,6 +293,9 @@ export function howItWasMade(streetOrderChecked: boolean): string {
 
 export const MIT_LICENCE = 'MIT licence';
 export const SOURCE_CODE = 'Source code';
+/** The About sheet's audit line, a link to docs/kiro-usage.md (Emmanuel, Nov 23). */
+export const AUDIT_LINE =
+  'Our write-up and video script were checked claim by claim by a read-only Kiro agent against the raw MTA feed — see the audit log.';
 
 // ---- Test fixture ----------------------------------------------------------------
 
