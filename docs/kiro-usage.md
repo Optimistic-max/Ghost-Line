@@ -15,6 +15,13 @@ A dated log of the moments where Kiro shaped the build, checked against `git log
 
 † From the chat session; git holds the result, not the exchange.
 
+## Emmanuel's statements
+
+Recorded as Emmanuel wrote them on Nov 23, 2026. They are his statements, not something git or `.kiro/` can show.
+
+- "Codex (OpenAI) made design mockups and a moving-camera map prototype during planning; Claude Code wrote planning briefs and rendered the race film used in the video. The app and pipeline were built in Kiro."
+- "Kiro Powers and Kiro Crew were not used."
+
 ## Log
 
 | Date | What happened | Kiro feature | Why it mattered | Where to see it |
@@ -131,12 +138,12 @@ Run by Kiro through the `skeptic` agent on README.md, docs/devpost.md and docs/v
 - The drafts named the Enoch Pratt Free Library as the scanner of the 1938 guide. No evidence file says so; the text now names Digital Maryland, which publishes the scan.
 - "No server, no accounts, no tracking" was not in the evidence; the text now says only what product.md rule 11 says.
 
-**Still UNSOURCED after run 2, for Emmanuel:** facts that only he holds, plus three sentences reworded since:
-- the race film: its length (30.1 s), its Google tiles (26.1 s), its lower third, and that it is driven by the same scheduled data;
-- Codex's part in the planning (this log names Claude Code only);
-- that Kiro Powers and Kiro Crew were not used;
-- the idea that any city with an old timetable could run the same race;
-- reworded after run 2, not yet re-checked: "The 1938 trolley is gone" (tagline), "gone from Baltimore" (video), "corrected by hand" (hooks).
+**Still UNSOURCED after run 2, and what Emmanuel decided (Nov 23):**
+- the race film: its length (30.1 s), its Google tiles (26.1 s), its lower third, and that it is driven by the same scheduled data. Held: Emmanuel adds the film's source and QA results in a film/ folder after its final render, then the Skeptic runs again;
+- Codex's part in the planning: recorded as Emmanuel's statement above;
+- that Kiro Powers and Kiro Crew were not used: recorded as Emmanuel's statement above;
+- the idea that any city with an old timetable could run the same race: cut;
+- reworded after run 2: "The 1938 trolley is gone" (tagline), "gone from Baltimore" (video), "corrected by hand" (hooks).
 
 Skeptic task 14 stays open until each document gives PASS.
 

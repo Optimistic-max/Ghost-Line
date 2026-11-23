@@ -18,8 +18,6 @@ Ghost Line brings back Baltimore's 1938 No. 21 trackless trolley and races its t
 
 Two public datasets, joined: the **MDOT MTA local bus GTFS feed** (version 20260821, pinned by its SHA-256) and the **No. 21 guide, effective March 6, 1938**, a scan published by Digital Maryland. Street shapes come from OpenStreetMap.
 
-**The idea travels.** The pipeline needs only a scanned timetable and a GTFS feed; any city with an old timetable could run the same race.
-
 ## How Kiro was used
 
 | Kiro feature | What it did here | Where to see it |
