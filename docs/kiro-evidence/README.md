@@ -7,9 +7,9 @@ Screenshots and raw output that show Kiro features working. Git holds the result
 | File to add | What it shows |
 |---|---|
 | `hooks-panel.png` | The Agent Hooks panel listing the three hooks, all enabled. |
-| `guard-hook-fail.png` | The copy-and-source-guard hook failing after saving a docs file that contains a banned word, naming the file and line. |
+| `guard-hook-fail.png` | The `rebuild-and-test-when-agent-stops` hook card after the agent stopped, failing on the banned word in docs/hook-test.md and naming the file and line. (The copy-and-source-guard hook did not fire on a manual save in the Nov 24 test; see docs/kiro-usage.md.) |
 | `mcp-trips-serving.png` | The MCP Server view with `ghostline-gtfs` running and a `trips_serving` answer. |
-| `spec-task-view.png` | The spec task view for one of the four specs. |
+| `spec-task-view.png` | The spec task view for one of the five specs. |
 | `skeptic-fail-planted.png` | `/skeptic-check tests/fixtures/skeptic/planted.md` ending in FAIL. |
 | `skeptic-pass-docs.png` | `/skeptic-check` on the real docs ending in PASS. |
 

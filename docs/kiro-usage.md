@@ -41,7 +41,7 @@ Recorded as Emmanuel wrote them on Nov 23, 2026. They are his statements, not so
 | 2026-11-17 | Walk-formula unit test case 2 missed by 0.000514 min against a 0.0005 tolerance; Kiro stopped instead of changing the value. The brief paired a rounded input (230.15 m) with the result from stop 9486's real distance (230.153500791945 m). Emmanuel chose to correct the test input's expected value to 4.155 and the golden test now confirms the real stop gives 4.156. | Spec task execution, golden tests | The stop-and-report rule worked on a real mismatch, and no golden value was edited to pass. | b418bba, tests/unit/test_stops.py, tests/golden/test_stops_golden.py |
 | 2026-11-17 | When the task-status tool was unavailable, the task orchestrator would not dispatch or write the code itself and reported the blocker; work resumed after the task was re-run. | Spec task orchestration | Kiro did not bypass its own task workflow to finish faster. | Chat session only, not in git (then b418bba) |
 | 2026-11-17 | The validate-after-agent-edit and rebuild-and-test-when-agent-stops hooks were enabled once `validate` and `check` existed. | Agent hooks | Two of the three hooks now run in the editor; they are no longer disabled. | ed7a1e0, 5e50b61, .kiro/hooks/ |
-| 2026-11-18 | The copy-and-source-guard hook was enabled, and the Stop hook was pointed at `check --quick`. All three hooks are now enabled. | Agent hooks | Saving a web/ or docs/ file runs `check_sources`; a banned word or unsourced number fails the save. | 48189c3, d9c9dcb, .kiro/hooks/ |
+| 2026-11-18 | The copy-and-source-guard hook was enabled, and the Stop hook was pointed at `check --quick`. All three hooks are now enabled. | Agent hooks | The guard is configured to run `check_sources` when a web/ or docs/ file is saved (see the Nov 24 hook test: it did not fire). | 48189c3, d9c9dcb, .kiro/hooks/ |
 | 2026-11-18 | Race-screen spec: requirements, design and tasks written one after another, with the design decisions folded back into the requirements. | Specs (requirements-first flow) | The screen's copy, layout and states became tracked requirements before any site code existed. | 57afcf5, 5ddc710, 450e95b, 74ab081, .kiro/specs/race-screen/ |
 | 2026-11-19 | Race-screen tasks from 1 onward built the site, one task per commit: scaffold, data types, lookups, formatting, vehicles, card, timeline, picker, states and route drawing. | Spec task execution | The site was built to the spec's tasks, each with tests. | ecf075a, ffd4951, 85c4616, b95c1d7, .kiro/specs/race-screen/tasks.md |
 | 2026-11-20 | Race-screen tasks 20 to 23 added the Playwright tests, the size budget, the deploy workflow and the first-race measurement. The task 23 run: 816 site tests, 41 browser tests passed, 67.5 KB of the 100 KB budget. | Spec task execution | The first screen stays under budget and the deploy is a workflow in git. | c8498b4, 8345421, c282663, 2801898, e7827a5 |
@@ -50,6 +50,13 @@ Recorded as Emmanuel wrote them on Nov 23, 2026. They are his statements, not so
 | 2026-11-22 | Story-layer tasks 23 to 25 (Nov 21 to 22): final checkpoint, the result-visibility fix and 14 friction fixes from the first human test, ending with `npm run typecheck` in the deploy workflow. | Spec task execution | A type error now stops the deploy. | e8bdfd9, 0dcf67d, 9bb07d4, 76c1314 |
 | 2026-11-22 | Skeptic spec: the Hypothesis generator could give one trip two calls with the same stop_sequence, and the shuffle property found that the MCP server's answer then depended on row order. The server now rejects a repeated stop_sequence as a feed format error, with a unit test, and the generator makes unique sequence numbers. That the shuffle property was the failing one is reported in the chat session, not in git †. | Spec task execution, property tests | The independent checker gives one answer for a feed or an error, never an answer that depends on row order. | 0cfcfe9, pipeline/mcp_server.py, tests/property/test_mcp_server_props.py, tests/unit/test_mcp_server.py |
 | 2026-11-22 | Skeptic spec: the token test, which fails if a golden value from tests/golden/golden_tokens.py appears in the Skeptic agent or its steering file, caught a golden value in the draft of .kiro/agents/skeptic.md, and it was removed before the commit. The catch is reported in the chat session; git holds only the passing test and the clean agent file †. | Custom agent, spec task execution | The Skeptic has to get every number from the feed tools, so it cannot pass a document by matching a number it was told. | 0a883a7, tests/unit/test_skeptic_agent.py, .kiro/agents/skeptic.md |
+
+## Hook test (Nov 24, 2026)
+
+What can be shown about the two hooks that should catch a banned word in docs/:
+
+- **rebuild-and-test-when-agent-stops (shown).** With docs/hook-test.md holding a one-line test sentence that uses a banned word for service times (a test file, never committed, deleted after the test), each time the agent stopped the hook ran `python -m pipeline check --quick` and its card failed: `check --quick: validate FAILED with 1 problem(s)`, naming `docs/hook-test.md:1` and the banned term. Screenshot: `docs/kiro-evidence/guard-hook-fail.png`.
+- **copy-and-source-guard (configured, not shown).** Its command was changed for the test to first write the time to `raw/guard-ran.txt`, then run `check_sources` (one `python -c` command, as tech.md requires). Run by hand, that command wrote the file and failed on the banned word as expected; the file was then deleted. Emmanuel reloaded the window and saved docs/hook-test.md by hand at 17:24:29. Checked at 17:25:03: `raw/guard-ran.txt` did not exist, so the hook did not fire on that save. The original command was restored with `git checkout`. Its configuration (`PostFileSave`, the web/ and docs/ matcher, `check_sources`) is unchanged; we claim it only as configured.
 
 ## Story-layer checkpoint: pipeline phase (story-layer task 2)
 
@@ -187,6 +194,15 @@ Run 12: all three documents in one session, after that change and with no change
 | 12 | PASS | PASS | PASS |
 
 The lines runs 10 and 11 flagged are now OK (the faint ghost cars from copy.ts MAP_GHOSTS and the ghost-cars spec; the limits sentence from product.md Scope and honesty rules 1 and 2) or NOTE (the recording-step instruction).
+
+Runs after the Nov 24 hook test, which narrowed the hook claims in docs/devpost.md and docs/video_script.md (clip K3) to what can be shown:
+
+| Run | README.md | docs/devpost.md | docs/video_script.md |
+|---|---|---|---|
+| 13 | PASS | PASS | PASS |
+| 14 | PASS | FAIL: 1 MISMATCH | FAIL: 1 MISMATCH |
+
+Run 14 came after a wording change to this log's hook-test entry (the test sentence was described, not quoted, so check_sources passes). Its one MISMATCH in each document is real: both cite `docs/kiro-evidence/guard-hook-fail.png`, which is not in the repository yet (Emmanuel adds the screenshots in P8; docs/kiro-evidence/README.md lists it as "to add"). Run 13 did not check the file on disk. Not fixed: left for Emmanuel.
 
 Run 8 is a real catch: a judgement in the voice-over that the evidence does not support. It was rewritten as two scheduled facts.
 
