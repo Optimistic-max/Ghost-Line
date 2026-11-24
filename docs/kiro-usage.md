@@ -164,6 +164,16 @@ Then Emmanuel added the race film's source and QA in film/ (built with Claude Co
 
 Skeptic task 14 is ticked (Nov 23). The run was made by Kiro through the `skeptic` agent at Emmanuel's request; Emmanuel records it on screen for the video in P8.
 
+Later runs on docs/video_script.md alone, Nov 23:
+
+| Run | After | docs/video_script.md |
+|---|---|---|
+| 7 | The ghost counter reads 1, 2, 3, 4; film/notes.md stale v2 text corrected | PASS. Its note: the top-level "film" block of film/qa/timing.json still held the v2 take (903 frames, 30.1 s, 26.1 s of tiles). |
+| 8 | Emmanuel's film-summary step rewrote that block to v3b (981 frames, 32.7 s, 28.7 s of tiles) | FAIL: 0 MISMATCH, 1 UNSOURCED: "Ten o'clock is a bad minute for the bus." is an evaluation, not a stored value; the 10:31 row has a larger margin (36.156) than 10:00 (30.156). It had passed in runs 6 and 7. |
+| 9 | That sentence replaced with Emmanuel's wording, sourced from the 10:00 row (today's wait shown as 31 under sum-preserving rounding) and the 10:30 row (today's wait 0.458 min, a photo finish) | PASS |
+
+Run 8 is a real catch: a judgement in the voice-over that the evidence does not support. It was rewritten as two scheduled facts.
+
 ## Skeptic acceptance in the Kiro IDE (skeptic tasks 12 and 13)
 
 Run by Emmanuel in the Kiro IDE on Nov 22, 2026 and reported by him; the chat output is not in git †.
