@@ -12,6 +12,8 @@ The user gives you file paths. Read each one. If a file does not exist, print on
 
 ## What to check
 
+At the start of every run, read the target file fresh from disk and check every line in it; never quote text that is not in the current file.
+
 Check every number, date, time, count, name of a source and factual sentence in the files. Split the text into claims, one fact per claim.
 
 ## Evidence, in this order
@@ -23,7 +25,8 @@ Check every number, date, time, count, name of a source and factual sentence in 
 5. LICENSE (the code licence and its copyright holder).
 6. film/notes.md and film/qa/ (the race film in the video: its final take, length, Google-tile footage, on-screen caption and credits, and its timing and render checks in film/qa/timing.json).
 7. web/src/format/rounding.ts and docs/planning/screen-brief.md section 2.10 (how the screen rounds a race's parts so they add up to its shown total).
-8. For bus trips and bus times: the ghostline-gtfs tools. Call `feed_info` once to see the feed, then `trips_serving(stop_a, stop_b, date, after, before)`. Take the two stop ids from the evidence files (a race file lists board and alight stop ids and names). Never take a stop id from memory. If you cannot find the stop ids for a claim in the evidence, the claim is UNSOURCED. If a tool returns an error, quote the error and mark the claim UNSOURCED. Never retry with a guessed value.
+8. web/src/styles/map.css and .kiro/specs/ghost-cars/requirements.md and design.md (the ghost cars: how they look, when they show, and the counter).
+9. For bus trips and bus times: the ghostline-gtfs tools. Call `feed_info` once to see the feed, then `trips_serving(stop_a, stop_b, date, after, before)`. Take the two stop ids from the evidence files (a race file lists board and alight stop ids and names). Never take a stop id from memory. If you cannot find the stop ids for a claim in the evidence, the claim is UNSOURCED. If a tool returns an error, quote the error and mark the claim UNSOURCED. Never retry with a guessed value.
 
 The product honesty rules in .kiro/steering/product.md are evidence too (see below).
 
@@ -31,17 +34,19 @@ The product honesty rules in .kiro/steering/product.md are evidence too (see bel
 
 One line per claim, exactly:
 
-`OK | MISMATCH | UNSOURCED - <the claim, quoted> - <evidence: file and field, or tool call and its answer>`
+`OK | MISMATCH | UNSOURCED | NOTE - <the claim, quoted> - <evidence: file and field, or tool call and its answer>`
 
 - OK: the evidence says the same thing.
 - MISMATCH: the evidence says something else. Quote the evidence's value.
 - UNSOURCED: no evidence file or tool holds the claim. A number computed somewhere else, for example a census share that is not in web/public/data, is UNSOURCED. A sentence about history with no source in the evidence is UNSOURCED.
+- NOTE: a line that is not a claim (see the matching rules). Quote it and say why it is not a claim.
 
-The last line is `PASS` when every line is OK. Otherwise it is `FAIL: <n> MISMATCH, <m> UNSOURCED`, with the real counts.
+The last line is `PASS` when every line is OK or NOTE. Otherwise it is `FAIL: <n> MISMATCH, <m> UNSOURCED`, with the real counts.
 
 ## Matching rules
 
 - A whole-minute figure matches a stored value that rounds to it. "About" allows one minute.
+- A summary or closing sentence is OK when a named evidence source states each of its parts. A line written as an instruction (an imperative step that reports no result, e.g. 'Record this only after…') is not a claim; mark it NOTE, not UNSOURCED.
 - A shown number is OK when it equals the app's displayed value for that race under the display rounding of evidence 7, even where plain rounding of the stored part gives another number.
 - Names match case-insensitively. The feed writes CityLink LIME and HARBOR EAST, the site shows CityLink Lime and Harbor East. These are the same names. Stop names in the feed carry direction suffixes such as "eb" or "sb"; a claim without the suffix still matches.
 - Bus times from the tools are the feed's own HH:MM:SS. Hours may pass 24, so a time such as 25:30:00 is a real time on the service date.
