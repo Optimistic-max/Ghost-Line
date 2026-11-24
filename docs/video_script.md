@@ -9,7 +9,7 @@ Every string marked "On screen" is copied from the deployed site as it appears. 
 - The 38-vs-36 Skeptic run is a planted test. Say so.
 - Keep under 3:00. Target 2:50.
 
-**Recording settings:** the deployed site at https://optimistic-max.github.io/Ghost-Line/, desktop 1280 x 800, browser zoom 100%. The race starts by itself on the lead pair at the labelled example start, 10:00 AM.
+**Recording settings:** the deployed site at https://optimistic-max.github.io/Ghost-Line/ (deployed by .github/workflows/pages.yml; address as in docs/kiro-usage.md perf rows), desktop 1280 x 800, browser zoom 100%. The race starts by itself on the lead pair at the labelled example start, 10:00 AM.
 
 | Time | Picture | On screen (exact) | Voice-over |
 | --- | --- | --- | --- |
@@ -21,7 +21,7 @@ Every string marked "On screen" is copied from the deployed site as it appears. 
 | 1:15-1:30 | Set the slider to 10:30: a photo finish. Then press "Show a race today wins" once: it opens the first entry of `summary.json` `today_wins`, Westwood & Carey to Dolphin & Myrtle at 11:23 (`todaywin/select` in web/src/state/actions.ts starts at entry 0). | "Photo finish." "Both about 15 minutes." Then "Showing a race today wins: Westwood & Carey → Dolphin & Myrtle, starting 11:23 AM (scheduled)." and "Today wins by 2 minutes." | "Start at half past, and the bus leaves seconds after you reach the stop. Across every covered start, the trolley gets there first in 5,582 of 5,666." |
 | 1:30-1:38 | Tap "30 minutes"; the Sources sheet opens at its row. | "Where these numbers come from" | "Every number is one tap from its source. Scheduled, not live." |
 | 1:38-2:32 | **Kiro, 54 s**, screen recordings with captions (clips below). | Captions as listed. | As listed. |
-| 2:32-2:42 | Text over the trolley drawing. | "One line, one weekday, scheduled times only, no transfers." | "One line, one weekday, scheduled times only, no transfers." |
+| 2:32-2:42 | Text over the trolley drawing (product.md Scope and honesty rule 2). | "One line, one weekday, scheduled times only, no transfers." | "One line, one weekday, scheduled times only, no transfers." |
 | 2:42-2:50 | The glowing trolley under its wires, then the site address. | "Ghost Line" and "optimistic-max.github.io/Ghost-Line" | "Ghost Line." |
 
 ## The Kiro clips (1:38-2:32)
@@ -32,11 +32,11 @@ Every string marked "On screen" is copied from the deployed site as it appears. 
 | 1:47-1:56 | `.kiro/steering/product.md`, the honesty rules. Zoom on rule 3, "Never invent a number." | "Steering holds the rules that never bend." | "Steering holds the honesty rules: every time is scheduled, and no number is invented." |
 | 1:56-2:05 | In a docs file, type one of the banned words for service times and save. The `copy-and-source-guard` hook fails the save. | "A hook guards every saved word." | "Save a banned word in the docs, and the hook fails the save." |
 | 2:05-2:14 | The MCP Server view, `ghostline-gtfs`: `trips_serving` for stops 8564 and 9486 answers 36. | "An MCP server reads the real feed." | "Our MCP server reads the transit feed on its own, without the pipeline's code: thirty-six one-seat trips." |
-| 2:14-2:23 | `/skeptic-check tests/fixtures/skeptic/planted.md`: FAIL on the planted 38. Then `/skeptic-check` on README.md, docs/devpost.md and this file. Step still to record: film this part only once all three give PASS (check 3 below). | "Planted test: 38 against 36." | "A Skeptic agent checks our own words against it. This 38 is a planted test, and it fails." |
+| 2:14-2:23 | `/skeptic-check tests/fixtures/skeptic/planted.md`: FAIL on the planted 38. Then `/skeptic-check` on README.md, docs/devpost.md and this file. Record this part only after /skeptic-check gives PASS on README.md, docs/devpost.md and this file (see docs/kiro-usage.md, run 6 and later runs). | "Planted test: 38 against 36." | "A Skeptic agent checks our own words against it. This 38 is a planted test, and it fails." |
 | 2:23-2:32 | Commit 0cfcfe9: the shuffle property and the fix in `pipeline/mcp_server.py`. | "A property test caught a real bug." | "And a property test caught a real bug: the server's answer depended on row order." |
 
 ## Checks before recording
 
 1. **Google tiles in the film.** The film shows Google Photorealistic 3D Tiles for 28.7 s, under the 30 s promotional limit (film/notes.md; film/qa/timing.json). Its Google and Cesium credit strip is in both halves of every tile frame and nothing covers it (film/qa/timing.json). In the edit: never crop or cover that strip, keep "For promotional purposes only" on screen whenever tiles show, add no other Google-tile footage unless the same amount comes out of the race film, and put the film's credits text from film/notes.md in the end card and the YouTube description.
 2. Record the app after the last deploy, logged out, at 1280 x 800.
-3. The Skeptic's PASS on the real docs is recorded only after `/skeptic-check` passes on README.md, docs/devpost.md and this file.
+3. Record this part only after /skeptic-check gives PASS on README.md, docs/devpost.md and this file (see docs/kiro-usage.md, run 6 and later runs).
