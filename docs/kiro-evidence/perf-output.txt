@@ -1,0 +1,18 @@
+
+> ghost-line-web@0.0.0 perf
+> playwright test --project=perf
+
+
+Running 1 test using 1 worker
+
+PERF run 1 of 5: race-start at 4262 ms
+PERF run 2 of 5: race-start at 1555 ms
+PERF run 3 of 5: race-start at 1600 ms
+PERF run 4 of 5: race-start at 1598 ms
+PERF run 5 of 5: race-start at 1616 ms
+PERF https://optimistic-max.github.io/Ghost-Line/
+PERF runs (ms): 4262, 1555, 1600, 1598, 1616
+PERF median: 1600 ms (limit 5000 ms)
+  ok 1 [perf] › tests\e2e\perf.spec.ts:23:3 › timing › @timing the first race starts within 5000 ms on a throttled phone (median of 5) (12.5s)
+
+  1 passed (22.6s)

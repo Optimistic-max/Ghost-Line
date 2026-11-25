@@ -238,3 +238,19 @@ Run before submission, on Nov 20, 2026, each on its own, as the task requires (R
 | First race on a real phone, on mobile data | Nov 20, 2026: Emmanuel's Android phone on mobile data, on the deployed site. The race played and the real map loaded. No time was recorded, so there is no race-start number for this row; the steps are in `web/README.md`. Reported by Emmanuel †. | Emmanuel | |
 
 Note on the second row: Emmanuel's note described this measurement as a Lighthouse run. It was made with `npm run perf`, which drives the browser's own throttling through Playwright; Lighthouse was not approved for this project (requirements R16.2), so it is recorded here as the Playwright run.
+
+## Freeze checks (polish brief, Freeze section)
+
+Run by Kiro on Nov 24, 2026, one command at a time, before the `freeze-2026-11-27` tag.
+
+| Check | Result |
+|---|---|
+| `python -m pipeline check` | Build OK, pytest exited with 0. |
+| `python -m pipeline verify` | OK: web/public/data matches a fresh build. |
+| `python -m pipeline check_sources` | OK. |
+| `npm test` (web/) | 76 files, 1054 tests passed. |
+| `npm run test:e2e` (web/), full run | 121 passed, 3 skipped, 2 failed: "nothing scrolls sideways (20.2, R1.4)" in the phone and laptop projects, both on the 30 s test timeout while loading the page. |
+| The same test rerun alone (`-g "nothing scrolls sideways"`) | 2 passed, in 24.1 s and 24.5 s. The timeout was not raised. These runs are close to the 30 s limit. |
+| `npm run check:size` (web/) | 76.8 KB sent against the 100 KB budget (77%), map excluded. |
+| `npm run perf` (web/) | Median 1,600 ms against the 5,000 ms limit; runs 4,262, 1,555, 1,600, 1,598 and 1,616 ms. Raw output: docs/kiro-evidence/perf-output.txt. |
+| `python -m pipeline check --timing` | 3 passed. Raw output: docs/kiro-evidence/check-timing-output.txt. |

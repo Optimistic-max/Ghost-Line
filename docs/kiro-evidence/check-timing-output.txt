@@ -1,0 +1,4 @@
+...                                                                      [100%]
+3 passed, 901 deselected in 33.63s
+check --timing: running only the timing tests; close other programs first
+check --timing: pytest exited with 0

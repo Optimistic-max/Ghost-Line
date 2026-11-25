@@ -14,11 +14,13 @@ Screenshots and raw output that show Kiro features working. Git holds the result
 
 The `/skeptic-check` PASS on the real docs is shown in the video (docs/video_script.md, Kiro clip K5, 2:14-2:23), not as a screenshot.
 
-## Raw output to add
+## Raw output
 
-| File to add | Command |
+Saved unedited on Nov 24, 2026, one command at a time with nothing else running.
+
+| File | Command |
 |---|---|
-| `perf-output.txt` | `npm run perf` in `web/` |
+| `perf-output.txt` | `npm run perf` in `web/` (against the deployed site) |
 | `check-timing-output.txt` | `python -m pipeline check --timing` |
 
 The log of what each feature did is in [`docs/kiro-usage.md`](../kiro-usage.md).
