@@ -2,16 +2,17 @@
 
 Screenshots and raw output that show Kiro features working. Git holds the results of the Kiro sessions; these files show the editor side. Emmanuel adds them (task P8 of the polish brief).
 
-## Screenshots to add
+## Screenshots
 
-| File to add | What it shows |
+| File | What it shows |
 |---|---|
 | `hooks-panel.png` | The Agent Hooks panel listing the three hooks, all enabled. |
 | `guard-hook-fail.png` | The `rebuild-and-test-when-agent-stops` hook card after the agent stopped, failing on the banned word in docs/hook-test.md and naming the file and line. (The copy-and-source-guard hook did not fire on a manual save in the Nov 24 test; see docs/kiro-usage.md.) |
 | `mcp-trips-serving.png` | The MCP Server view with `ghostline-gtfs` running and a `trips_serving` answer. |
 | `spec-task-view.png` | The spec task view for one of the five specs. |
 | `skeptic-fail-planted.png` | `/skeptic-check tests/fixtures/skeptic/planted.md` ending in FAIL. |
-| `skeptic-pass-docs.png` | `/skeptic-check` on the real docs ending in PASS. |
+
+The `/skeptic-check` PASS on the real docs is shown in the video (docs/video_script.md, Kiro clip K5, 2:14-2:23), not as a screenshot.
 
 ## Raw output to add
 

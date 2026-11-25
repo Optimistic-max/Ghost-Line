@@ -2,7 +2,7 @@
 
 *Baltimore's 1938 trolley timetable, raced against today's scheduled bus.*
 
-At 10:00 on a weekday, Baltimore's 1938 No. 21 trackless trolley, an electric bus that ran on two overhead wires, was scheduled to get you from Preston & Caroline to Aliceanna & Bond in 15 minutes. Today's scheduled bus takes 45, walking included. The ride is about as long. The wait is not.
+At 10:00, Baltimore's 1938 No. 21 trackless trolley, an electric bus that ran on two overhead wires, was scheduled to get you from Preston & Caroline to Aliceanna & Bond in 15 minutes. Today's scheduled bus takes 45, walking included. The ride is about as long. The wait is not.
 
 Ghost Line brings back Baltimore's 1938 No. 21 trackless trolley and races its timetable, minute by minute, against today's scheduled bus between the same two corners, walking included. Today's riders at these corners have the CityLink Lime, on the weekday schedule as of Nov 4, 2026.
 
@@ -35,7 +35,7 @@ Two public datasets, joined: the **MDOT MTA local bus GTFS feed** (version 20260
 - **Row order.** A shuffle property found that the MCP server's answer depended on the order of the feed's rows when a trip repeated a stop_sequence. The server now rejects that feed as a format error (commit 0cfcfe9).
 - **A golden value in the agent.** A token test fails if a golden value appears in the Skeptic's own instructions. It caught one in the draft of the agent file, so the Skeptic has to get every number from the feed tools (commit 0a883a7).
 
-The Skeptic's 38-against-36 run in the video is a **planted test**: a fixture file says 38 one-seat buses, `trips_serving` answers 36, and the Skeptic reports FAIL.
+The Skeptic's 38-against-36 run in the video is a **planted test**: a fixture file says 38 one-seat buses, `trips_serving` answers 36, and the Skeptic reports FAIL (docs/video_script.md, Kiro clip K5, 2:14-2:23).
 
 **Specs and vibe coding.** Every feature went through a spec. Fixes found by hand in between were written into the spec and built from there: the fourteen friction fixes from the first human test are story-layer task 25 (25.1 to 25.14), and the result-visibility and desktop About-button fixes are task 24.
 
